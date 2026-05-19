@@ -1645,7 +1645,7 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   window.addEventListener('load',update);
 })();
 
-/* 9. YELLOW BLOB: fixed during hero scroll, absolute after */
+/* 9. YELLOW BLOB: fixed during hero scroll, anchored at boundary after */
 (function(){
   var hero=document.getElementById('hero');
   if(!hero)return;
@@ -1655,12 +1655,12 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
     var switchAt=hero.offsetTop+hero.offsetHeight-window.innerHeight;
     if(window.scrollY<switchAt){
       blob.style.position='fixed';
-      blob.style.bottom='0';
       blob.style.top='';
+      blob.style.bottom='0';
     }else{
       blob.style.position='absolute';
-      blob.style.bottom='0';
-      blob.style.top='';
+      blob.style.bottom='';
+      blob.style.top=(hero.offsetTop+hero.offsetHeight-blob.offsetHeight)+'px';
     }
   }
   window.addEventListener('scroll',update,{passive:true});
