@@ -298,6 +298,18 @@ img{display:block;max-width:100%}
   .scroll-reveal{transform:translateY(36px)}
   .scroll-reveal.is-visible{transform:translateY(0)}
 }
+
+/* ── ORANGE BLOB ── */
+#orange-blob{
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:2;
+  pointer-events:none;
+  width:clamp(280px,38vw,580px);
+  display:block;
+}
 </style>
 </head>
 <body>
@@ -449,6 +461,7 @@ img{display:block;max-width:100%}
       <div id="hero-text-track">
         <h1 id="hero-headline">the best time of day is&nbsp;<span class="hero-yellow">right now.</span></h1>
       </div>
+      <img id="orange-blob" src="Orange Blob.svg" alt="" aria-hidden="true">
     </div>
   </section>
 
