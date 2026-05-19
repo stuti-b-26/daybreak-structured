@@ -110,7 +110,7 @@ img{display:block;max-width:100%}
 #hero{min-height:100vh;background:transparent;position:relative}
 #hero-pin{
   position:sticky;top:0;height:100vh;background:#000;
-  overflow:hidden;display:flex;align-items:center;
+  overflow:hidden;display:flex;align-items:center;z-index:2;
 }
 #hero-text-track{
   position:absolute;top:50%;left:0;white-space:nowrap;
@@ -316,7 +316,8 @@ img{display:block;max-width:100%}
   position:fixed;
   top:0;
   right:0;
-  z-index:999;
+  transform:translateY(-35%);
+  z-index:1;
   pointer-events:none;
   width:clamp(180px,22vw,340px);
   display:block;
