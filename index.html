@@ -142,6 +142,7 @@ img{display:block;max-width:100%}
 /* ── BREAK CIRCLE LINE ── */
 
 #silly-to-mess{position:absolute;top:720px;right:130px;width:clamp(280px,40%,480px);height:auto;pointer-events:none;z-index:1;overflow:visible}
+#break-intro-top{position:absolute;top:clamp(35px,4vw,50px);left:15%;width:clamp(380px,45%,560px);height:auto;pointer-events:none;z-index:2;overflow:visible}
 #mess-btn-to-self{position:absolute;top:557px;left:-40px;width:clamp(350px,45%,550px);height:auto;pointer-events:none;z-index:1;overflow:visible}
 
 /* ── CARDS ── */
@@ -272,6 +273,7 @@ img{display:block;max-width:100%}
   .float-label--life-hard{top:-20px;left:0}
   .float-label--everyone{top:780px;left:65%;right:auto;width:auto}
   #break-bubble{top:640px;left:58%;width:22%}
+  #break-intro-top{width:60%;left:10%;top:30px}
 
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
@@ -294,6 +296,7 @@ img{display:block;max-width:100%}
   .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:24px;padding:0 var(--gutter)}
 
   #silly-to-mess{display:none}
+  #break-intro-top{display:none}
   #mess-btn-to-self{display:none}
   #break-bubble{display:none}
   .card-item{position:relative !important;width:100% !important;left:auto !important;top:auto !important;transform:none !important}
@@ -1138,6 +1141,11 @@ img{display:block;max-width:100%}
   <section id="cards" aria-label="Features">
     <div class="gc grid">
       <div class="cards-stage col-content">
+
+        <svg id="break-intro-top" aria-hidden="true" viewBox="0 0 893 598" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M167.443 47.0352C180.639 47.0352 214.807 49.0105 240.741 52.9278C269.327 57.2456 312.535 62.4301 353.428 67.4064C403.622 73.5144 450.267 90.5434 472.049 98.6754C479.619 101.501 494.688 109.397 522.001 123.001C554.925 139.4 578.582 156.68 601.459 173.512C617.401 185.241 641.505 204.301 673.984 237.178C706.464 270.056 746.427 316.393 773.538 350.931C800.648 385.469 813.695 406.802 828.358 435.089C860.53 497.154 878.064 541.717 882.616 555.434C886.756 569.918 889.287 578.98 889.876 585.497C890.161 589.11 890.417 593.344 890.68 595.648" stroke="black" stroke-width="4" stroke-linecap="round"/>
+          <path d="M2.00015 32.0079C2.9234 30.6964 6.2392 27.8646 16.7136 20.9144C31.8155 10.8937 38.2723 6.26426 45.2768 4.82674C54.9013 2.85155 83.5437 1.44701 99.4681 2.2121C116.787 3.04418 120.884 6.76879 137.144 11.7065C146.322 14.4936 156.34 19.8164 161.315 23.1519C166.242 26.4554 166.155 41.1546 161.493 57.5927C158.532 68.0311 150.842 70.9579 144.366 73.3799C137.538 75.9332 121.943 76.7461 97.9239 78.1636C67.6646 79.9494 48.9371 78.3952 45.7017 77.9021C37.9352 76.7183 29.7058 74.4326 22.602 71.4713C13.897 67.8425 10.6195 61.3653 5.28813 52.2878C2.67968 47.8465 2.9749 41.2341 6.87098 28.8936C8.15041 25.7728 9.36131 23.0267 10.449 21.3109C11.5368 19.5952 12.4647 18.9931 14.2736 17.3198" stroke="black" stroke-width="4" stroke-linecap="round"/>
+        </svg>
 
         <svg id="mess-btn-to-self" aria-hidden="true" viewBox="0 0 461 793" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M140.857 2C129.383 2 96.8801 5.18049 73.4116 13.4236C45.6908 23.1602 30.5708 47.8942 18.568 67.0463C9.71715 81.1689 5.33287 132.213 2.05051 240.605C0.260195 299.725 46.4865 370.718 70.5445 418.662C80.5858 438.673 94.7561 454.187 106.466 468.383C119.342 483.993 137.256 503.322 150.826 518.961C165.241 535.574 188.563 551.931 206.436 566.038C222.522 578.734 254.588 599.297 283.875 619.051C310.477 636.994 329.993 646.052 346.537 655.409C368.016 667.557 380.794 677.213 394.442 687.734C408.029 698.208 417.052 713.141 424.993 726.686C432.87 740.123 439.961 754.247 447.161 768.136C448.879 771.736 450.554 775.413 452.237 779.102C453.92 782.79 455.559 786.378 458.168 790.075" stroke="black" stroke-width="4" stroke-linecap="round"/>
