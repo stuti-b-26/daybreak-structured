@@ -325,11 +325,11 @@ img{display:block;max-width:100%}
 
 /* ── PINK BLOB ── */
 #pink-blob{
-  position:absolute;
+  position:fixed;
   bottom:0;
   right:0;
   transform:translateY(50%);
-  z-index:0;
+  z-index:2;
   pointer-events:none;
   width:clamp(180px,22vw,340px);
   display:block;
@@ -1630,7 +1630,7 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   }
   window.addEventListener('scroll',update,{passive:true});
   window.addEventListener('resize',update);
-  update();
+  window.addEventListener('load',update);
 })();
 </script>
 </body>
