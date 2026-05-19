@@ -1647,10 +1647,11 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 
 /* 9. YELLOW BLOB: fixed during hero scroll, absolute after */
 (function(){
-  var blob=document.getElementById('yellow-blob');
   var hero=document.getElementById('hero');
-  if(!blob||!hero)return;
+  if(!hero)return;
   function update(){
+    var blob=document.getElementById('yellow-blob');
+    if(!blob)return;
     var switchAt=hero.offsetTop+hero.offsetHeight-window.innerHeight;
     if(window.scrollY<switchAt){
       blob.style.position='fixed';
