@@ -141,6 +141,7 @@ img{display:block;max-width:100%}
 
 /* ── BREAK CIRCLE LINE ── */
 #break-circle-line{position:absolute;top:clamp(38px,4.5vw,55px);left:15%;width:clamp(300px,38%,540px);height:auto;pointer-events:none;z-index:2;overflow:visible}
+#silly-to-mess{position:absolute;top:400px;right:0;width:clamp(380px,55%,640px);height:auto;pointer-events:none;z-index:5;overflow:visible}
 
 /* ── CARDS ── */
 #cards{background:#fff;padding-top:48px;padding-bottom:160px;position:relative}
@@ -290,6 +291,7 @@ img{display:block;max-width:100%}
   .intro-text{text-align:center;font-size:clamp(28px,8vw,44px)}
   .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:24px;padding:0 var(--gutter)}
   #break-circle-line{display:none}
+  #silly-to-mess{display:none}
   .card-item{position:relative !important;width:100% !important;left:auto !important;top:auto !important;transform:none !important}
   .card--selfless .card-btn{left:16px !important;right:auto !important;top:auto !important;bottom:24px !important;transform:rotate(-2deg) !important}
   .card--silly-decisions .card-btn{right:16px !important;left:auto !important;top:auto !important;bottom:24px !important;transform:none !important}
@@ -1136,6 +1138,10 @@ img{display:block;max-width:100%}
         <svg id="break-circle-line" aria-hidden="true" viewBox="0 0 893 598" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M167.443 47.0352C180.639 47.0352 214.807 49.0105 240.741 52.9278C269.327 57.2456 312.535 62.4301 353.428 67.4064C403.622 73.5144 450.267 90.5434 472.049 98.6754C479.619 101.501 494.688 109.397 522.001 123.001C554.925 139.4 578.582 156.68 601.459 173.512C617.401 185.241 641.505 204.301 673.984 237.178C706.464 270.056 746.427 316.393 773.538 350.931C800.648 385.469 813.695 406.802 828.358 435.089C860.53 497.154 878.064 541.717 882.616 555.434C886.756 569.918 889.287 578.98 889.876 585.497C890.161 589.11 890.417 593.344 890.68 595.648" stroke="black" stroke-width="4" stroke-linecap="round"/>
           <path d="M2.00015 32.0079C2.9234 30.6964 6.2392 27.8646 16.7136 20.9144C31.8155 10.8937 38.2723 6.26426 45.2768 4.82674C54.9013 2.85155 83.5437 1.44701 99.4681 2.2121C116.787 3.04418 120.884 6.76879 137.144 11.7065C146.322 14.4936 156.34 19.8164 161.315 23.1519C166.242 26.4554 166.155 41.1546 161.493 57.5927C158.532 68.0311 150.842 70.9579 144.366 73.3799C137.538 75.9332 121.943 76.7461 97.9239 78.1636C67.6646 79.9494 48.9371 78.3952 45.7017 77.9021C37.9352 76.7183 29.7058 74.4326 22.602 71.4713C13.897 67.8425 10.6195 61.3653 5.28813 52.2878C2.67968 47.8465 2.9749 41.2341 6.87098 28.8936C8.15041 25.7728 9.36131 23.0267 10.449 21.3109C11.5368 19.5952 12.4647 18.9931 14.2736 17.3198" stroke="black" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+
+        <svg id="silly-to-mess" aria-hidden="true" viewBox="0 0 603 339" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M531.943 2C532.769 2 536.132 2.3261 541.793 3.50365C555.448 6.34407 561.792 18.5508 568.327 28.6191C574.635 38.3363 580.358 48.9464 586.482 64.993C590.841 76.4148 595.662 94.7959 598.612 116.778C601.563 138.759 601.966 163.862 598.766 185.046C595.566 206.229 588.751 222.733 582.115 236.813C562.549 278.326 545.869 291.754 530.31 301.935C506.905 317.251 460.347 324.26 423.337 329.612C400.208 332.957 367.466 335.136 337.439 336.409C280.996 338.802 237.683 333.647 205.994 326.028C173.923 318.316 150.79 307.728 126.356 294.399C109.799 285.367 87.0588 270.113 69.7979 257.905C42.0219 236.584 25.8974 221.198 16.4619 210.5C12.3173 205.799 9.47914 202.576 2 195.364" stroke="black" stroke-width="4" stroke-linecap="round"/>
         </svg>
 
         <div class="float-label float-label--life-hard scroll-bounce" style="--card-delay:.05s">
