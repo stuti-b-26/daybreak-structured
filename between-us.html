@@ -36,7 +36,7 @@ body{background:#EEE0CC}
 
 
 /* ── EXPLORE SECTION ── */
-.bw-feed{padding:0;background:#EEE0CC;margin-top:500px;position:relative}
+.bw-feed{padding:0;background:#EEE0CC;margin-top:500px;position:relative;z-index:2}
 .bw-feed-inner{max-width:1200px;margin:0 auto;padding:0 48px}
 .bw-explore-header{padding-left:calc(100vw/12);position:relative;z-index:2;margin-top:200px}
 .bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(32px,4vw,60px);color:#000;margin-bottom:12px;line-height:1}
@@ -105,15 +105,18 @@ body{background:#EEE0CC}
 .bw-lb-counter{font-family:'Nunito',sans-serif;font-size:12px;color:rgba(0,0,0,.4);text-align:center;margin-top:12px}
 .bw-empty{font-family:'Nunito',sans-serif;font-size:16px;color:rgba(0,0,0,.4);font-style:italic;padding:32px 0}
 
+/* ── INSPIRED ZONE (flower vines + write section) ── */
+.bw-inspired-zone{position:relative;margin-top:-55px;z-index:1}
+.bw-write-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.bw-write-bg img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+
 /* ── FLOWER VINES DIVIDER ── */
-.bw-flower-vines{width:100%;line-height:0;display:block;margin-top:-80px;position:relative;z-index:3}
+.bw-flower-vines{width:100%;line-height:0;position:relative;z-index:1}
 .bw-flower-vines img{width:100%;height:auto;display:block}
 
 /* ── WRITE SECTION ── */
-.bw-write{background:#EEE0CC;padding:72px 0 80px;position:relative;overflow:hidden}
-.bw-write-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.bw-write-bg img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.bw-write-inner{max-width:760px;margin:0 auto;padding:0 48px;position:relative;z-index:1}
+.bw-write{background:transparent;padding:48px 0 100px;position:relative;z-index:1}
+.bw-write-inner{max-width:640px;margin:0 auto;padding:0 48px;position:relative;z-index:1}
 .bw-write-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.5vw,52px);color:#000;line-height:1.2;margin-bottom:16px}
 .bw-write-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;margin-bottom:28px}
 .bw-textarea{width:100%;min-height:160px;border:2px solid rgba(0,0,0,.2);border-radius:12px;outline:none;font-family:'Nunito',sans-serif;font-size:17px;color:#000;resize:none;background:rgba(255,255,255,.5);line-height:1.55;display:block;padding:16px;transition:border-color .2s}
@@ -155,7 +158,8 @@ body{background:#EEE0CC}
 }
 @media(max-width:767px){
   #bw-hero-headline{font-size:clamp(80px,22vw,260px)}
-  .bw-intro-blurb,.bw-write,.bw-saved{padding:48px 0}
+  .bw-intro-blurb,.bw-saved{padding:48px 0}
+  .bw-write{padding:32px 0 80px}
   .bw-feed{padding:0}
   .bw-feed-inner,.bw-write-inner,.bw-saved-inner{padding:0 20px}
   .bw-write-actions{flex-direction:column;gap:8px}
@@ -357,27 +361,31 @@ body{background:#EEE0CC}
     <button class="bw-lb-next" id="bw-lb-next" aria-label="Next">&#8594;</button>
   </div>
 
-  <!-- VINE DIVIDER -->
-  <div class="bw-flower-vines" aria-hidden="true">
-    <img src="flower%20vines.svg" alt="">
-  </div>
-
-  <!-- WRITE -->
-  <section class="bw-write">
+  <!-- INSPIRED ZONE: flower vines + write section share the inspired bg -->
+  <div class="bw-inspired-zone">
     <div class="bw-write-bg" aria-hidden="true"><img src="inspired%20bg.svg" alt=""></div>
-    <div class="bw-write-inner">
-      <h2 class="bw-write-heading">feeling inspired?<br>write your own!</h2>
-      <p class="bw-write-desc">what's making you happy? write something down and share it. this is a space for joy, so keep it uplifting and kind.</p>
-      <textarea class="bw-textarea" id="bw-textarea" placeholder="what's on your mind today?" maxlength="280" aria-label="Write your post"></textarea>
-      <div class="bw-write-footer">
-        <span class="bw-char-count" id="bw-char-count">280</span>
-        <div class="bw-write-actions">
-          <button class="bw-btn bw-btn--save" id="bw-save-btn">save it</button>
-          <button class="bw-btn bw-btn--share" id="bw-share-btn">share anonymously</button>
+
+    <!-- VINE DIVIDER -->
+    <div class="bw-flower-vines" aria-hidden="true">
+      <img src="flower%20vines.svg" alt="">
+    </div>
+
+    <!-- WRITE -->
+    <section class="bw-write">
+      <div class="bw-write-inner">
+        <h2 class="bw-write-heading">feeling inspired?<br>write your own!</h2>
+        <p class="bw-write-desc">what's making you happy? write something down and share it. this is a space for joy, so keep it uplifting and kind.</p>
+        <textarea class="bw-textarea" id="bw-textarea" placeholder="what's on your mind today?" maxlength="280" aria-label="Write your post"></textarea>
+        <div class="bw-write-footer">
+          <span class="bw-char-count" id="bw-char-count">280</span>
+          <div class="bw-write-actions">
+            <button class="bw-btn bw-btn--save" id="bw-save-btn">save it</button>
+            <button class="bw-btn bw-btn--share" id="bw-share-btn">share anonymously</button>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <!-- SAVED POSTS -->
   <section class="bw-saved">
