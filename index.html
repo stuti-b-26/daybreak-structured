@@ -1745,7 +1745,7 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
       var svgBottom = svgTop + (rect.height || item.svg.offsetHeight);
       // Draw starts when SVG top enters viewport bottom, finishes when SVG is fully in viewport
       var drawStart = svgTop - vh;
-      var drawEnd = svgBottom - vh;
+      var drawEnd = svgBottom - vh * 0.5;
       var range = drawEnd - drawStart;
       var progress = range > 0 ? Math.max(0, Math.min(1, (scrollY - drawStart) / range)) : 0;
       item.paths.forEach(function(pd){
