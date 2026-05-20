@@ -52,8 +52,10 @@ body{background:#EEE0CC}
 .bw-posts-scroll:hover::-webkit-scrollbar{display:block}
 .bw-posts-scroll:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.35)}
 .bw-posts-scroll.is-dragging{cursor:grabbing;user-select:none}
-.bw-posts{display:grid;grid-auto-rows:6px;gap:10px;width:max-content;padding:4px 8px 8px;align-items:start}
-.bw-post-card{width:220px;border:3px solid #000;border-radius:18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative;align-self:start}
+.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
+.bw-col{display:flex;flex-direction:column;gap:10px;width:max-content}
+.bw-post-card{min-width:180px;max-width:480px}
+.bw-post-card{border:3px solid #000;border-radius:18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative;height:auto}
 .bw-post-card:hover{transform:translate(-2px,-2px)}
 .bw-post-card[data-fc="0"]{border-color:#FF6FAA;box-shadow:5px 5px 0 0 #FF6FAA}
 .bw-post-card[data-fc="1"]{border-color:#0E9E1B;box-shadow:5px 5px 0 0 #0E9E1B}
@@ -75,7 +77,7 @@ body{background:#EEE0CC}
 .bw-post-card--own:hover{box-shadow:7px 7px 0 0 #2e7d32!important}
 .bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:999px;background:#f5c842;color:#000;width:fit-content;flex-shrink:0}
 .bw-post-tag--own{background:#a5d6a7}
-.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;line-height:1.55;color:#000;overflow:hidden}
+.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;line-height:1.55;color:#000;overflow:hidden;flex:1 1 auto}
 .bw-post-media{width:100%;object-fit:cover;border-radius:10px;display:block}
 .bw-post-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-shrink:0}
 .bw-post-save-btn{background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:2px;transition:transform .15s;flex-shrink:0}
@@ -765,7 +767,7 @@ var SEED_POSTS = [
   {id:'s48', text:"stayed up a bit too late talking about nothing in particular. felt like exactly the right use of a tuesday.", time:Date.now()-3600000*408, likes:58, liked:false, saved:false},
 ];
 
-var STORE_KEY = 'bw_posts_v6';
+var STORE_KEY = 'bw_posts_v5';
 var STORE_SAVED = 'bw_saved';
 
 function loadPosts(){
@@ -1063,11 +1065,11 @@ function rearrangeGallery(posts,MAX_COL_H){
   return cols;
 }
 
-var GRID_ROW_H=6, GRID_GAP=10, GRID_CARD_W=220;
-
 function renderFeed(){
   var scrollEl=document.getElementById('bw-posts-scroll');
   if(!scrollEl)return;
+  /* ensure probe is in DOM */
+  if(!_probe.parentNode)document.body.appendChild(_probe);
   var posts=loadPosts();
   _lbPosts=posts;
 
@@ -1080,33 +1082,19 @@ function renderFeed(){
 
   if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
 
-  /* determine column count to aim for ~5 rows */
-  var wideSlots=posts.filter(function(p){return p.text.length>160;}).length;
-  var totalSlots=wideSlots*2+(posts.length-wideSlots);
-  var numCols=Math.max(5, Math.ceil(totalSlots/5));
-  container.style.gridTemplateColumns='repeat('+numCols+', '+GRID_CARD_W+'px)';
+  var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
+  var packedCols=rearrangeGallery(posts,MAX_COL_H);
 
-  posts.forEach(function(post,i){
-    var card=renderCard(post,post.own,i);
-    /* wide cards: medium+ text spans 2 columns */
-    if(post.text.length>160){
-      card.style.gridColumnEnd='span 2';
-      card.style.width=(GRID_CARD_W*2+GRID_GAP)+'px';
-    }
-    /* give a generous temp span so content renders at natural height */
-    card.style.gridRowEnd='span 80';
-    container.appendChild(card);
-  });
-
-  /* after layout: measure real height, set tight row span */
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      container.querySelectorAll('.bw-post-card').forEach(function(card){
-        card.style.gridRowEnd='';
-        var h=card.getBoundingClientRect().height||card.scrollHeight;
-        var span=Math.ceil((h+GRID_GAP)/(GRID_ROW_H+GRID_GAP));
-        card.style.gridRowEnd='span '+span;
-      });
+  packedCols.forEach(function(col){
+    var colEl=document.createElement('div');
+    colEl.className='bw-col';
+    colEl.style.height=MAX_COL_H+'px';
+    container.appendChild(colEl);
+    col.items.forEach(function(item){
+      var card=renderCard(item.post,item.post.own,item.idx);
+      card.style.width=item.cardW+'px';
+      card.style.flex='1 1 auto';
+      colEl.appendChild(card);
     });
   });
 }
