@@ -269,26 +269,31 @@ img{display:block;max-width:100%}
   #hero-headline{font-size:20em}
   .intro-text{text-align:left;font-size:clamp(30px,5.5vw,56px)}
 
-  #silly-to-mess{display:none}
-  #mess-btn-to-self{display:none}
-  #green-swish-long{display:none}
-  #orange-shape{display:none}
-  #yellow-scribble{display:none}
-  #break-bubble-middle{display:none}
-  #between-to-sticker{display:none}
-  #sticker-to-you{display:none}
+  /* Cards stage — height scaled proportionally (desktop 3900px at ~1200px wide = 325vw) */
+  .cards-stage{width:100%;height:325vw;margin-left:0}
 
-  .cards-stage{width:100%;height:1800px;margin-left:0}
-  .card--silly-decisions{width:42%;left:50%;top:30px;--card-rotate:-4deg}
-  .card--mess-hall{width:58%;left:-2%;top:210px;--card-rotate:5deg}
-  .card--selfless{width:50%;left:38%;top:510px;--card-rotate:-6deg}
-  .card--shh{width:62%;left:-4%;top:820px;--card-rotate:2deg}
-  .card--just-for-you{width:40%;left:40%;top:1110px;--card-rotate:4deg}
-  .card--sticker-maker{width:57%;left:-2%;top:1390px;--card-rotate:-5deg}
+  /* Card tops — desktop px / 12 = vw equivalent; width/left stay as desktop percentages */
+  .card--silly-decisions{top:17.75vw}
+  .card--mess-hall{top:36.17vw}
+  .card--selfless{top:83.58vw}
+  .card--shh{top:123.67vw}
+  .card--just-for-you{top:170.42vw}
+  .card--sticker-maker{top:205.25vw}
 
-  .float-label--life-hard{top:-20px;left:0}
-  .float-label--everyone{top:1090px;left:62%;right:auto;width:auto}
-  #break-intro-top{width:55%;left:12%;top:30px}
+  /* Float labels */
+  .float-label--life-hard{top:0;left:0}
+  .float-label--everyone{top:148.58vw;left:67%;right:auto;width:auto}
+
+  /* Decorative SVGs — top/left pixel values scaled the same way */
+  #break-intro-top{top:clamp(20px,2.5vw,36px);left:14%;width:clamp(200px,38%,400px)}
+  #silly-to-mess{top:60vw;right:10.83vw;width:clamp(200px,40%,380px)}
+  #mess-btn-to-self{top:46.42vw;left:-3.33vw;width:clamp(240px,45%,440px)}
+  #green-swish-long{top:29.17vw;left:-26.67vw;width:80vw}
+  #orange-shape{top:29.17vw;left:calc(91% + 1.67vw);width:clamp(80px,12%,142px)}
+  #yellow-scribble{top:85vw;left:-1.67vw;width:clamp(140px,28%,300px)}
+  #break-bubble-middle{top:123.33vw;left:calc(55% - 16.67vw);width:clamp(220px,40%,420px)}
+  #between-to-sticker{top:167.5vw;left:10.83vw;width:clamp(180px,32%,320px)}
+  #sticker-to-you{top:216.67vw}
 
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
