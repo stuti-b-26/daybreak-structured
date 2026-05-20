@@ -1714,33 +1714,54 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 /* ── SVG PATH DRAW-ON ANIMATION ── */
 (function(){
   'use strict';
-  const connectors = ['mess-btn-to-self','silly-to-mess','between-to-sticker','break-bubble-middle','break-intro-top','sticker-to-you'];
+  var ids = ['mess-btn-to-self','silly-to-mess','between-to-sticker','break-bubble-middle','break-intro-top','sticker-to-you'];
+  var items = [];
 
-  connectors.forEach(function(id){
-    var svg = document.getElementById(id);
-    if (!svg) return;
-
-    var paths = svg.querySelectorAll('path,line,polyline,circle,ellipse');
-    paths.forEach(function(p){
-      var len;
-      try { len = p.getTotalLength(); } catch(e){ return; }
-      p.style.strokeDasharray = len;
-      p.style.strokeDashoffset = len;
-      p.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(0.4,0,0.2,1)';
-    });
-
-    var obs = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if (!entry.isIntersecting) return;
-        var ps = entry.target.querySelectorAll('path,line,polyline,circle,ellipse');
-        ps.forEach(function(p){ p.style.strokeDashoffset = '0'; });
-        obs.unobserve(entry.target);
+  function init(){
+    items = [];
+    ids.forEach(function(id){
+      var svg = document.getElementById(id);
+      if (!svg) return;
+      var pathData = [];
+      svg.querySelectorAll('path,line,polyline,circle,ellipse').forEach(function(p){
+        var len;
+        try { len = p.getTotalLength(); } catch(e){ return; }
+        p.style.strokeDasharray = len;
+        p.style.strokeDashoffset = len;
+        p.style.transition = 'none';
+        pathData.push({path:p, length:len});
       });
-    }, { threshold: 0.15 });
+      if (pathData.length) items.push({svg:svg, paths:pathData});
+    });
+    update();
+  }
 
-    obs.observe(svg);
-  });
+  function update(){
+    var scrollY = window.scrollY;
+    var vh = window.innerHeight;
+    items.forEach(function(item){
+      var rect = item.svg.getBoundingClientRect();
+      var svgTop = scrollY + rect.top;
+      var svgBottom = svgTop + (rect.height || item.svg.offsetHeight);
+      // Draw starts when SVG top hits viewport bottom, ends when SVG bottom hits viewport top
+      // Extend the range so drawing is spread over more scroll distance (feels slower)
+      var margin = vh * 0.5;
+      var drawStart = svgTop - vh - margin;
+      var drawEnd = svgBottom + margin;
+      var range = drawEnd - drawStart;
+      var progress = range > 0 ? Math.max(0, Math.min(1, (scrollY - drawStart) / range)) : 0;
+      item.paths.forEach(function(pd){
+        pd.path.style.strokeDashoffset = pd.length * (1 - progress);
+      });
+    });
+  }
+
+  window.addEventListener('scroll', update, {passive:true});
+  window.addEventListener('resize', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
 </script>
-</body>
-</html>
