@@ -44,7 +44,7 @@ body{background:#EEE0CC}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
-.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 32px;position:relative;z-index:2;max-height:50vh}
+.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 32px;position:relative;z-index:2;max-height:66.67vh}
 .bw-posts-scroll::-webkit-scrollbar{height:6px;display:none}
 .bw-posts-scroll::-webkit-scrollbar-track{background:transparent}
 .bw-posts-scroll::-webkit-scrollbar-thumb{background:transparent;border-radius:3px;transition:background .2s}
@@ -53,10 +53,8 @@ body{background:#EEE0CC}
 .bw-posts-scroll:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.35)}
 .bw-posts-scroll.is-dragging{cursor:grabbing;user-select:none}
 .bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:14px;width:max-content;padding:4px}
-.bw-col{display:flex;flex-direction:column;gap:14px}
-.bw-col--sm{width:180px}
-.bw-col--md{width:230px}
-.bw-col--lg{width:290px}
+.bw-col{display:flex;flex-direction:column;gap:14px;width:max-content}
+.bw-post-card{min-width:180px;max-width:480px}
 .bw-post-card{border:3px solid #000;border-radius:18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative;height:auto}
 .bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #000}
 /* border colours cycling per nth-child within each column */
@@ -768,16 +766,21 @@ function showToast(msg){
   setTimeout(function(){t.classList.remove('bw-toast--show')},2200);
 }
 
-/* estimate rendered height for masonry packing (chars-per-line varies by col width) */
-var COL_SIZES=['bw-col--md','bw-col--sm','bw-col--lg','bw-col--md','bw-col--lg','bw-col--sm','bw-col--md','bw-col--md','bw-col--lg','bw-col--sm'];
-var COL_WIDTH_PX={sm:180,md:230,lg:290};
-function colKey(cls){return cls.replace('bw-col--','');}
-function estimateHeight(post,colCls){
-  var w=COL_WIDTH_PX[colKey(colCls)]||230;
+/* estimate rendered height for a card at a given pixel width */
+var DEFAULT_CARD_WIDTHS=[230,180,290,230,290,180,230,230,290,180];
+function estimateHeight(post,w){
   if(post.media){return 220+50;}
   var charsPerLine=Math.floor((w-28)/7.8); /* ~7.8px per char at 13px Nunito */
-  var lines=Math.ceil(post.text.length/charsPerLine);
+  var lines=Math.ceil(post.text.length/Math.max(1,charsPerLine));
   return 34+lines*20+28; /* tag + lines + footer */
+}
+/* return the card width needed so its height fits within targetH; null if impossible */
+function widthToFit(post,targetH){
+  if(post.media)return null;
+  var availLines=Math.floor((targetH-62)/20); /* 62 = tag(34)+footer(28) */
+  if(availLines<1)return null;
+  var charsPerLine=Math.ceil(post.text.length/availLines);
+  return Math.ceil(charsPerLine*7.8)+28;
 }
 
 function renderCard(post, isOwn, idx){
@@ -973,16 +976,19 @@ function renderFeed(){
 
   if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
 
-  /* build columns capped at 50vh — start a new column when the shortest would overflow */
-  var MAX_COL_H=window.innerHeight*0.5-32;
+  /* build columns capped at 2/3 viewport height.
+     if a post doesn't fit at default width, widen the card until it does.
+     only start a new column when even max width can't fit it. */
+  var MAX_COL_H=window.innerHeight*(2/3)-32;
+  var MAX_CARD_W=480;
   var cols=[],heights=[];
 
   function addCol(){
-    var colCls=COL_SIZES[cols.length%COL_SIZES.length];
+    var defaultW=DEFAULT_CARD_WIDTHS[cols.length%DEFAULT_CARD_WIDTHS.length];
     var col=document.createElement('div');
-    col.className='bw-col '+colCls;
+    col.className='bw-col';
     container.appendChild(col);
-    cols.push({el:col,cls:colCls});
+    cols.push({el:col,defaultW:defaultW});
     heights.push(0);
   }
   addCol();
@@ -990,11 +996,29 @@ function renderFeed(){
   posts.forEach(function(post,i){
     var minH=Math.min.apply(null,heights);
     var minIdx=heights.indexOf(minH);
-    var ph=estimateHeight(post,cols[minIdx].cls);
-    if(minH+ph>MAX_COL_H){addCol();minIdx=cols.length-1;}
+    var remaining=MAX_COL_H-heights[minIdx];
+    var defaultW=cols[minIdx].defaultW;
+    var ph=estimateHeight(post,defaultW);
+    var cardW=defaultW;
+
+    if(ph>remaining){
+      /* try widening the card to fit in the remaining space */
+      var needed=widthToFit(post,remaining);
+      if(needed!==null&&needed<=MAX_CARD_W){
+        cardW=needed;
+      } else {
+        /* can't fit even at max width — open a new column */
+        addCol();
+        minIdx=cols.length-1;
+        remaining=MAX_COL_H;
+        cardW=cols[minIdx].defaultW;
+      }
+    }
+
     var card=renderCard(post,post.own,i);
+    card.style.width=cardW+'px';
     cols[minIdx].el.appendChild(card);
-    heights[minIdx]+=estimateHeight(post,cols[minIdx].cls)+14;
+    heights[minIdx]+=estimateHeight(post,cardW)+14;
   });
 }
 
