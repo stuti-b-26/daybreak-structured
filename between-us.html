@@ -44,7 +44,7 @@ body{background:#EEE0CC}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
-.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 32px;position:relative;z-index:2}
+.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 32px;position:relative;z-index:2;max-height:50vh}
 .bw-posts-scroll::-webkit-scrollbar{height:6px;display:none}
 .bw-posts-scroll::-webkit-scrollbar-track{background:transparent}
 .bw-posts-scroll::-webkit-scrollbar-thumb{background:transparent;border-radius:3px;transition:background .2s}
@@ -973,21 +973,25 @@ function renderFeed(){
 
   if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
 
-  /* build N columns, greedily assign each post to the shortest column */
-  var NUM_COLS=Math.ceil(posts.length/3);
+  /* build columns capped at 50vh — start a new column when the shortest would overflow */
+  var MAX_COL_H=window.innerHeight*0.5-32;
   var cols=[],heights=[];
-  for(var c=0;c<NUM_COLS;c++){
+
+  function addCol(){
+    var colCls=COL_SIZES[cols.length%COL_SIZES.length];
     var col=document.createElement('div');
-    var colCls=COL_SIZES[c%COL_SIZES.length];
     col.className='bw-col '+colCls;
     container.appendChild(col);
     cols.push({el:col,cls:colCls});
     heights.push(0);
   }
+  addCol();
 
   posts.forEach(function(post,i){
     var minH=Math.min.apply(null,heights);
     var minIdx=heights.indexOf(minH);
+    var ph=estimateHeight(post,cols[minIdx].cls);
+    if(minH+ph>MAX_COL_H){addCol();minIdx=cols.length-1;}
     var card=renderCard(post,post.own,i);
     cols[minIdx].el.appendChild(card);
     heights[minIdx]+=estimateHeight(post,cols[minIdx].cls)+14;
