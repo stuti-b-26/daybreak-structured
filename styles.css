@@ -140,6 +140,7 @@ img{display:block;max-width:100%}
 #sticker-to-you{position:absolute;top:2600px;right:0;width:clamp(500px,92%,1040px);height:clamp(250px,32vw,440px);pointer-events:none;z-index:0;overflow:visible}
 #break-bubble-middle{position:absolute;top:1480px;left:calc(55% - 200px);width:clamp(320px,40%,520px);height:auto;pointer-events:none;z-index:0;overflow:visible}
 #teal-bw-us{position:absolute;top:1860px;left:-2%;width:clamp(320px,55%,620px);height:auto;pointer-events:none;z-index:0}
+#you-to-end{position:absolute;top:3060px;left:-2%;width:clamp(350px,50%,600px);height:auto;pointer-events:none;z-index:1}
 #green-scribble{position:absolute;top:2520px;right:0;width:clamp(260px,36%,420px);height:auto;pointer-events:none;z-index:1}
 
 /* ── CARDS ── */
