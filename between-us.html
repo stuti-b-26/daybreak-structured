@@ -765,20 +765,9 @@ function showToast(msg){
 
 /* estimate rendered height for a card at a given pixel width */
 var DEFAULT_CARD_WIDTHS=[230,180,290,230,290,180,230,230,290,180];
-function estimateHeight(post,w){
-  if(post.media){return 220+50;}
-  var charsPerLine=Math.floor((w-28)/7.8); /* ~7.8px per char at 13px Nunito */
-  var lines=Math.ceil(post.text.length/Math.max(1,charsPerLine));
-  return 34+lines*20+28; /* tag + lines + footer */
-}
-/* return the card width needed so its height fits within targetH; null if impossible */
-function widthToFit(post,targetH){
-  if(post.media)return null;
-  var availLines=Math.floor((targetH-62)/20); /* 62 = tag(34)+footer(28) */
-  if(availLines<1)return null;
-  var charsPerLine=Math.ceil(post.text.length/availLines);
-  return Math.ceil(charsPerLine*7.8)+28;
-}
+var MAX_CARD_W=480;
+var GAP=14; /* gap between cards in a column */
+var SHADOW_PAD=13; /* 5px shadow + 8px bottom padding */
 
 function renderCard(post, isOwn, idx){
   var card=document.createElement('div');
@@ -957,13 +946,94 @@ function initGalleryDrag(){
   },{passive:false});
 }
 
+/* measure the true rendered height of a card at a given width using a hidden probe */
+var _probe=(function(){
+  var el=document.createElement('div');
+  el.style.cssText='position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;z-index:-1';
+  document.addEventListener('DOMContentLoaded',function(){document.body.appendChild(el)});
+  return el;
+})();
+
+function measureCardHeight(post,isOwn,idx,w){
+  var card=renderCard(post,isOwn,idx);
+  card.style.width=w+'px';
+  _probe.appendChild(card);
+  var h=card.offsetHeight;
+  _probe.removeChild(card);
+  return h;
+}
+
+/* find the narrowest width (starting from w, stepping up) at which the card fits in targetH */
+function widenToFit(post,isOwn,idx,targetH,startW){
+  var w=startW;
+  while(w<=MAX_CARD_W){
+    if(measureCardHeight(post,isOwn,idx,w)<=targetH)return w;
+    w+=20;
+  }
+  return null; /* can't fit even at max width */
+}
+
+function rearrangeGallery(posts,MAX_COL_H){
+  /* returns array of {post, idx, cardW} in column order:
+     for each post, find the shortest column it fits in at its natural width;
+     if none, widen until it fits; if still none, open a new column. */
+  var cols=[],heights=[];
+
+  function addCol(){
+    var defaultW=DEFAULT_CARD_WIDTHS[cols.length%DEFAULT_CARD_WIDTHS.length];
+    cols.push({items:[],defaultW:defaultW});
+    heights.push(0);
+  }
+  addCol();
+
+  posts.forEach(function(post,i){
+    var placed=false;
+    /* try each existing column, shortest first */
+    var order=heights.map(function(_,ci){return ci}).sort(function(a,b){return heights[a]-heights[b]});
+    for(var oi=0;oi<order.length;oi++){
+      var ci=order[oi];
+      var remaining=MAX_COL_H-(heights[ci]>0?heights[ci]+GAP:0);
+      var dw=cols[ci].defaultW;
+      var h=measureCardHeight(post,post.own,i,dw);
+      var cardW=dw;
+      if(h>remaining){
+        /* try widening */
+        var wider=widenToFit(post,post.own,i,remaining,dw+20);
+        if(wider!==null){cardW=wider;h=measureCardHeight(post,post.own,i,cardW);}
+        else{continue;} /* doesn't fit here even at max width, try next column */
+      }
+      cols[ci].items.push({post:post,idx:i,cardW:cardW});
+      heights[ci]+=(heights[ci]>0?GAP:0)+h;
+      placed=true;
+      break;
+    }
+    if(!placed){
+      /* no existing column works — open a new one */
+      addCol();
+      var ci=cols.length-1;
+      var dw=cols[ci].defaultW;
+      var h=measureCardHeight(post,post.own,i,dw);
+      var cardW=dw;
+      /* if even a fresh column isn't tall enough, widen */
+      if(h>MAX_COL_H){
+        var wider=widenToFit(post,post.own,i,MAX_COL_H,dw+20);
+        if(wider!==null){cardW=wider;}
+      }
+      cols[ci].items.push({post:post,idx:i,cardW:cardW});
+      heights[ci]+=h;
+    }
+  });
+  return cols;
+}
+
 function renderFeed(){
   var scrollEl=document.getElementById('bw-posts-scroll');
   if(!scrollEl)return;
+  /* ensure probe is in DOM */
+  if(!_probe.parentNode)document.body.appendChild(_probe);
   var posts=loadPosts();
   _lbPosts=posts;
 
-  /* remove old list but keep scroll wrapper */
   var oldList=document.getElementById('bw-posts-list');
   if(oldList)oldList.remove();
   var container=document.createElement('div');
@@ -973,49 +1043,18 @@ function renderFeed(){
 
   if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
 
-  /* build columns capped at 2/3 viewport height.
-     if a post doesn't fit at default width, widen the card until it does.
-     only start a new column when even max width can't fit it. */
-  var MAX_COL_H=window.innerHeight*(2/3)-32-13; /* 13 = 5px shadow + 8px bottom padding */
-  var MAX_CARD_W=480;
-  var cols=[],heights=[];
+  var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
+  var packedCols=rearrangeGallery(posts,MAX_COL_H);
 
-  function addCol(){
-    var defaultW=DEFAULT_CARD_WIDTHS[cols.length%DEFAULT_CARD_WIDTHS.length];
-    var col=document.createElement('div');
-    col.className='bw-col';
-    container.appendChild(col);
-    cols.push({el:col,defaultW:defaultW});
-    heights.push(0);
-  }
-  addCol();
-
-  posts.forEach(function(post,i){
-    var minH=Math.min.apply(null,heights);
-    var minIdx=heights.indexOf(minH);
-    var remaining=MAX_COL_H-heights[minIdx];
-    var defaultW=cols[minIdx].defaultW;
-    var ph=estimateHeight(post,defaultW);
-    var cardW=defaultW;
-
-    if(ph>remaining){
-      /* try widening the card to fit in the remaining space */
-      var needed=widthToFit(post,remaining);
-      if(needed!==null&&needed<=MAX_CARD_W){
-        cardW=needed;
-      } else {
-        /* can't fit even at max width — open a new column */
-        addCol();
-        minIdx=cols.length-1;
-        remaining=MAX_COL_H;
-        cardW=cols[minIdx].defaultW;
-      }
-    }
-
-    var card=renderCard(post,post.own,i);
-    card.style.width=cardW+'px';
-    cols[minIdx].el.appendChild(card);
-    heights[minIdx]+=estimateHeight(post,cardW)+14;
+  packedCols.forEach(function(col){
+    var colEl=document.createElement('div');
+    colEl.className='bw-col';
+    container.appendChild(colEl);
+    col.items.forEach(function(item){
+      var card=renderCard(item.post,item.post.own,item.idx);
+      card.style.width=item.cardW+'px';
+      colEl.appendChild(card);
+    });
   });
 }
 
