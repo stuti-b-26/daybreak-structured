@@ -3,7 +3,7 @@
 <head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Rammetto+One&family=Nunito:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Fleur+De+Leah&family=Rammetto+One&family=Nunito:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://use.typekit.net/gdm5amj.css">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -19,13 +19,14 @@ body{background:#EEE0CC}
 .bw-sub,.bw-write-label,.bw-char-count,.bw-btn,.bw-textarea,.bw-post-text,.bw-post-time,.bw-post-btn,.bw-post-tag,.bw-empty{font-family:'Nunito',sans-serif}
 
 /* ── HERO ── */
-.bw-hero{position:relative;background:#0f1a0a;display:flex;align-items:center;justify-content:center;padding:80px 0 60px;overflow:hidden;min-height:480px}
-.bw-hero-vine{position:absolute;top:0;bottom:0;width:220px;pointer-events:none}
+#bw-hero{position:relative;background:transparent}
+#bw-hero-pin{position:sticky;top:0;height:100vh;background:#0f1a0a;overflow:hidden}
+#bw-hero-track{position:absolute;top:50%;left:0;white-space:nowrap;will-change:transform;z-index:1;transform:translateY(-50%) translateX(120px)}
+#bw-hero-headline{font-family:'Fleur De Leah',cursive;font-size:clamp(80px,16vw,280px);color:#fff;line-height:1;white-space:nowrap;display:block}
+.bw-hero-vine{position:absolute;top:0;bottom:0;width:220px;pointer-events:none;z-index:2}
 .bw-hero-vine--left{left:0}
 .bw-hero-vine--right{right:0;transform:scaleX(-1)}
 .bw-hero-vine svg{width:100%;height:100%}
-.bw-hero-center{position:relative;z-index:2;text-align:center;padding:0 260px}
-.bw-hero-title{font-family:'Rammetto One',cursive;font-size:clamp(64px,9vw,140px);color:#fff;line-height:1;letter-spacing:-0.01em;text-shadow:0 4px 24px rgba(0,0,0,.5)}
 
 /* ── INTRO BLURB ── */
 .bw-intro-blurb{background:#EEE0CC;padding:64px 0;text-align:center}
@@ -101,15 +102,12 @@ body{background:#EEE0CC}
 /* ── RESPONSIVE ── */
 @media(max-width:1023px){
   .bw-hero-vine{width:160px}
-  .bw-hero-center{padding:0 190px}
   .bw-posts{grid-template-columns:repeat(2,1fr)}
   .bw-feed-inner,.bw-write-inner,.bw-saved-inner{padding:0 32px}
 }
 @media(max-width:767px){
-  .bw-hero{min-height:320px;padding:56px 0 40px}
   .bw-hero-vine{width:90px}
-  .bw-hero-center{padding:0 110px}
-  .bw-hero-title{font-size:clamp(40px,12vw,80px)}
+  #bw-hero-headline{font-size:clamp(60px,14vw,180px)}
   .bw-intro-blurb,.bw-feed,.bw-write,.bw-saved{padding:48px 0}
   .bw-posts{grid-template-columns:1fr}
   .bw-feed-inner,.bw-write-inner,.bw-saved-inner{padding:0 20px}
@@ -259,8 +257,9 @@ body{background:#EEE0CC}
 <main id="page-main" style="padding-top:var(--hh)">
 
   <!-- HERO -->
-  <section class="bw-hero">
-    <div class="bw-hero-vine bw-hero-vine--left" aria-hidden="true"><svg viewBox="0 0 180 520" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <section id="bw-hero">
+    <div id="bw-hero-pin">
+      <div class="bw-hero-vine bw-hero-vine--left" aria-hidden="true"><svg viewBox="0 0 180 520" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
 <path d="M170,0 C176,165.0 164,330.0 170,500" stroke="#2d6e1a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
 <ellipse cx="145.0" cy="25.0" rx="5.9" ry="15.0" transform="rotate(-35,145.0,25.0)" fill="#2e7d32"/>
 <ellipse cx="195.0" cy="108.3" rx="5.9" ry="15.0" transform="rotate(35,195.0,108.3)" fill="#388e3c"/>
@@ -302,10 +301,7 @@ body{background:#EEE0CC}
 <circle cx="135.0" cy="364.4" r="9" fill="#e87ab8"/><circle cx="144.5" cy="371.3" r="9" fill="#e87ab8"/><circle cx="140.9" cy="382.5" r="9" fill="#e87ab8"/><circle cx="129.1" cy="382.5" r="9" fill="#e87ab8"/><circle cx="125.5" cy="371.3" r="9" fill="#e87ab8"/><circle cx="135.0" cy="374.4" r="5.0" fill="#fff176"/>
 <circle cx="72.0" cy="448.6" r="8" fill="#e8344a"/><circle cx="80.6" cy="454.8" r="8" fill="#e8344a"/><circle cx="77.3" cy="464.9" r="8" fill="#e8344a"/><circle cx="66.7" cy="464.9" r="8" fill="#e8344a"/><circle cx="63.4" cy="454.8" r="8" fill="#e8344a"/><circle cx="72.0" cy="457.6" r="4.4" fill="#f5c842"/>
 </svg></div>
-    <div class="bw-hero-center">
-      <h1 class="bw-hero-title">shhhhhh....</h1>
-    </div>
-    <div class="bw-hero-vine bw-hero-vine--right" aria-hidden="true"><svg viewBox="0 0 180 520" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <div class="bw-hero-vine bw-hero-vine--right" aria-hidden="true"><svg viewBox="0 0 180 520" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
 <path d="M10,0 C4,165.0 16,330.0 10,500" stroke="#2d6e1a" stroke-width="1.8" fill="none" stroke-linecap="round"/>
 <ellipse cx="35.0" cy="25.0" rx="5.9" ry="15.0" transform="rotate(35,35.0,25.0)" fill="#2e7d32"/>
 <ellipse cx="-15.0" cy="108.3" rx="5.9" ry="15.0" transform="rotate(-35,-15.0,108.3)" fill="#388e3c"/>
@@ -347,6 +343,10 @@ body{background:#EEE0CC}
 <circle cx="135.0" cy="364.4" r="9" fill="#e87ab8"/><circle cx="144.5" cy="371.3" r="9" fill="#e87ab8"/><circle cx="140.9" cy="382.5" r="9" fill="#e87ab8"/><circle cx="129.1" cy="382.5" r="9" fill="#e87ab8"/><circle cx="125.5" cy="371.3" r="9" fill="#e87ab8"/><circle cx="135.0" cy="374.4" r="5.0" fill="#fff176"/>
 <circle cx="72.0" cy="448.6" r="8" fill="#e8344a"/><circle cx="80.6" cy="454.8" r="8" fill="#e8344a"/><circle cx="77.3" cy="464.9" r="8" fill="#e8344a"/><circle cx="66.7" cy="464.9" r="8" fill="#e8344a"/><circle cx="63.4" cy="454.8" r="8" fill="#e8344a"/><circle cx="72.0" cy="457.6" r="4.4" fill="#f5c842"/>
 </svg></div>
+      <div id="bw-hero-track">
+        <h1 id="bw-hero-headline">shhhhhh....</h1>
+      </div>
+    </div>
   </section>
 
   <!-- INTRO BLURB -->
@@ -1149,6 +1149,33 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 })();
 
 /* BETWEEN US PAGE */
+/* BW HERO PARALLAX */
+(function(){
+var hero=document.getElementById('bw-hero');
+var track=document.getElementById('bw-hero-track');
+var hl=document.getElementById('bw-hero-headline');
+if(!hero||!track||!hl)return;
+var PAUSE_PX=300,gutter=0,textW=0,startX=0,endX=0,travelPx=0,heroTop=0,ticking=false;
+function getGutter(){return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter'))||120}
+function setup(){
+  gutter=getGutter();textW=hl.scrollWidth;var vw=window.innerWidth;
+  startX=gutter;endX=vw-gutter-textW;travelPx=Math.max(1,startX-endX);
+  hero.style.height=(window.innerHeight+travelPx+PAUSE_PX)+'px';
+  heroTop=hero.getBoundingClientRect().top+window.scrollY;
+  applyTransform(window.scrollY);
+}
+function applyTransform(scrollY){
+  var raw=scrollY-heroTop,progress=Math.max(0,Math.min(1,raw/travelPx));
+  var tx=startX-progress*travelPx;
+  track.style.transform='translateY(-50%) translateX('+tx+'px)';
+}
+function update(){ticking=false;applyTransform(window.scrollY)}
+function init(){setup();setTimeout(setup,400)}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(init)}else{window.addEventListener('load',init)}
+window.addEventListener('scroll',function(){if(!ticking){requestAnimationFrame(update);ticking=true}},{passive:true});
+window.addEventListener('resize',function(){heroTop=hero.getBoundingClientRect().top+window.scrollY;setup()});
+})();
+
 (function(){
 'use strict';
 
