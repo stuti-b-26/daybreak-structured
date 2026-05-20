@@ -1091,7 +1091,7 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
     for(var y=0;y<S;y++)for(var x=0;x<S;x++){
       var i=(y*S+x)*4,dx=x-CX,dy=y-CY;
       if(dx*dx+dy*dy>CR*CR){buf[i]=buf[i+1]=buf[i+2]=buf[i+3]=0;continue}
-      if(field(x,y,bs)>=THRESH){buf[i]=255;buf[i+1]=212;buf[i+2]=0;buf[i+3]=255}
+      if(field(x,y,bs)>=THRESH){buf[i]=255;buf[i+1]=111;buf[i+2]=170;buf[i+3]=255}
       else{buf[i]=buf[i+1]=buf[i+2]=0;buf[i+3]=255}
     }
     ctx.putImageData(img,0,0);
