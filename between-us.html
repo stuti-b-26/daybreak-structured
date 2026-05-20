@@ -52,19 +52,27 @@ body{background:#EEE0CC}
 .bw-posts-scroll:hover::-webkit-scrollbar{display:block}
 .bw-posts-scroll:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.35)}
 .bw-posts-scroll.is-dragging{cursor:grabbing;user-select:none}
-.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:14px;width:max-content;padding:4px 8px 8px}
-.bw-col{display:flex;flex-direction:column;gap:14px;width:max-content}
+.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
+.bw-col{display:flex;flex-direction:column;gap:10px;width:max-content}
 .bw-post-card{min-width:180px;max-width:480px}
 .bw-post-card{border:3px solid #000;border-radius:18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative;height:auto}
 .bw-post-card:hover{transform:translate(-2px,-2px)}
-.bw-post-card:nth-child(4n+1){border-color:#FF6FAA;box-shadow:5px 5px 0 0 #FF6FAA}
-.bw-post-card:nth-child(4n+2){border-color:#0E9E1B;box-shadow:5px 5px 0 0 #0E9E1B}
-.bw-post-card:nth-child(4n+3){border-color:#FD9E30;box-shadow:5px 5px 0 0 #FD9E30}
-.bw-post-card:nth-child(4n+4){border-color:#9A59C8;box-shadow:5px 5px 0 0 #9A59C8}
-.bw-post-card:nth-child(4n+1):hover{box-shadow:7px 7px 0 0 #FF6FAA}
-.bw-post-card:nth-child(4n+2):hover{box-shadow:7px 7px 0 0 #0E9E1B}
-.bw-post-card:nth-child(4n+3):hover{box-shadow:7px 7px 0 0 #FD9E30}
-.bw-post-card:nth-child(4n+4):hover{box-shadow:7px 7px 0 0 #9A59C8}
+.bw-post-card[data-fc="0"]{border-color:#FF6FAA;box-shadow:5px 5px 0 0 #FF6FAA}
+.bw-post-card[data-fc="1"]{border-color:#0E9E1B;box-shadow:5px 5px 0 0 #0E9E1B}
+.bw-post-card[data-fc="2"]{border-color:#FD9E30;box-shadow:5px 5px 0 0 #FD9E30}
+.bw-post-card[data-fc="3"]{border-color:#9A59C8;box-shadow:5px 5px 0 0 #9A59C8}
+.bw-post-card[data-fc="4"]{border-color:#00B4CC;box-shadow:5px 5px 0 0 #00B4CC}
+.bw-post-card[data-fc="5"]{border-color:#E8344A;box-shadow:5px 5px 0 0 #E8344A}
+.bw-post-card[data-fc="6"]{border-color:#3D7EFF;box-shadow:5px 5px 0 0 #3D7EFF}
+.bw-post-card[data-fc="7"]{border-color:#C8A200;box-shadow:5px 5px 0 0 #C8A200}
+.bw-post-card[data-fc="0"]:hover{box-shadow:7px 7px 0 0 #FF6FAA}
+.bw-post-card[data-fc="1"]:hover{box-shadow:7px 7px 0 0 #0E9E1B}
+.bw-post-card[data-fc="2"]:hover{box-shadow:7px 7px 0 0 #FD9E30}
+.bw-post-card[data-fc="3"]:hover{box-shadow:7px 7px 0 0 #9A59C8}
+.bw-post-card[data-fc="4"]:hover{box-shadow:7px 7px 0 0 #00B4CC}
+.bw-post-card[data-fc="5"]:hover{box-shadow:7px 7px 0 0 #E8344A}
+.bw-post-card[data-fc="6"]:hover{box-shadow:7px 7px 0 0 #3D7EFF}
+.bw-post-card[data-fc="7"]:hover{box-shadow:7px 7px 0 0 #C8A200}
 .bw-post-card--own{border-color:#2e7d32!important;box-shadow:5px 5px 0 0 #2e7d32!important}
 .bw-post-card--own:hover{box-shadow:7px 7px 0 0 #2e7d32!important}
 .bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:999px;background:#f5c842;color:#000;width:fit-content;flex-shrink:0}
@@ -766,14 +774,23 @@ function showToast(msg){
 /* estimate rendered height for a card at a given pixel width */
 var DEFAULT_CARD_WIDTHS=[230,180,290,230,290,180,230,230,290,180];
 var MAX_CARD_W=480;
-var GAP=14; /* gap between cards in a column */
+var GAP=10; /* gap between cards in a column */
 var SHADOW_PAD=13; /* 5px shadow + 8px bottom padding */
+
+var FRAME_COLORS=8;
+function postColorIndex(id){
+  /* deterministic hash of the post id string → 0..FRAME_COLORS-1 */
+  var h=0,s=String(id);
+  for(var i=0;i<s.length;i++){h=(Math.imul(31,h)+s.charCodeAt(i))|0;}
+  return Math.abs(h)%FRAME_COLORS;
+}
 
 function renderCard(post, isOwn, idx){
   var card=document.createElement('div');
   card.className='bw-post-card'+(isOwn?' bw-post-card--own':'');
   card.dataset.id=post.id;
   card.dataset.idx=idx;
+  if(!isOwn)card.dataset.fc=postColorIndex(post.id);
 
   var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>';
   var mediaEl='';
