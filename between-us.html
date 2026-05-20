@@ -36,9 +36,11 @@ body{background:#EEE0CC}
 
 
 /* ── EXPLORE SECTION ── */
-.bw-feed{padding:64px 0 72px;background:#EEE0CC}
+.bw-feed{padding:0 0 72px;background:#EEE0CC}
 .bw-feed-inner{max-width:1200px;margin:0 auto;padding:0 48px}
 .bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(32px,4vw,60px);color:#000;margin-bottom:12px;line-height:1}
+.bw-explore-trees{width:100%;display:block;line-height:0;pointer-events:none;margin-bottom:-8px}
+.bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 .bw-posts{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .bw-post-card{background:#fff;border:2.5px solid #000;border-radius:16px;padding:24px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:12px;opacity:0;transform:translateY(40px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.34,1.3,.64,1)}
@@ -269,9 +271,12 @@ body{background:#EEE0CC}
 
   <!-- EXPLORE -->
   <section class="bw-feed">
+    <div class="bw-explore-trees" aria-hidden="true">
+      <img src="explore%20trees.svg" alt="">
+    </div>
     <div class="bw-feed-inner">
       <h2 class="bw-section-title">explore</h2>
-      <p class="bw-section-desc">see what's making other people happy today. you're welcome to just read through them, or save the ones that resonate with you. click the ♡ to cheer someone on, and ☆ to keep a post in your garden below.</p>
+      <p class="bw-section-desc">see what's making other people happy today. you're welcome to just read through them, or you can click the + to save them to your profile. you can also add on to saved posts in just for you. whatever makes your happiness garden bloom.</p>
       <div class="bw-posts" id="bw-posts-list"></div>
     </div>
   </section>
