@@ -110,8 +110,10 @@ body{background:#EEE0CC}
 .bw-flower-vines img{width:100%;height:auto;display:block}
 
 /* ── WRITE SECTION ── */
-.bw-write{background:#EEE0CC;padding:72px 0 80px}
-.bw-write-inner{max-width:760px;margin:0 auto;padding:0 48px}
+.bw-write{background:#EEE0CC;padding:72px 0 80px;position:relative;overflow:hidden}
+.bw-write-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.bw-write-bg img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.bw-write-inner{max-width:760px;margin:0 auto;padding:0 48px;position:relative;z-index:1}
 .bw-write-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.5vw,52px);color:#000;line-height:1.2;margin-bottom:16px}
 .bw-write-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;margin-bottom:28px}
 .bw-textarea{width:100%;min-height:160px;border:2px solid rgba(0,0,0,.2);border-radius:12px;outline:none;font-family:'Nunito',sans-serif;font-size:17px;color:#000;resize:none;background:rgba(255,255,255,.5);line-height:1.55;display:block;padding:16px;transition:border-color .2s}
@@ -362,6 +364,7 @@ body{background:#EEE0CC}
 
   <!-- WRITE -->
   <section class="bw-write">
+    <div class="bw-write-bg" aria-hidden="true"><img src="inspired%20bg.svg" alt=""></div>
     <div class="bw-write-inner">
       <h2 class="bw-write-heading">feeling inspired?<br>write your own!</h2>
       <p class="bw-write-desc">what's making you happy? write something down and share it. this is a space for joy, so keep it uplifting and kind.</p>
