@@ -126,7 +126,104 @@
 
 
 <!-- MAIN CONTENT -->
-<main id="page-main" style="min-height:60vh;padding-top:var(--hh)"></main>
+<main id="page-main" style="min-height:60vh;padding-top:var(--hh)">
+
+<section class="posts-section">
+  <div class="posts-gallery-wrap">
+    <div class="posts-gallery" id="posts-gallery">
+      <!-- posts injected by JS -->
+    </div>
+  </div>
+</section>
+
+<style>
+.posts-section{
+  padding:48px var(--gutter) 64px;
+}
+.posts-gallery-wrap{
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+.posts-gallery{
+  /* multi-column: posts fill down then spill into new columns */
+  column-fill:auto;
+  max-height:66.67vh;
+  column-width:280px;
+  column-gap:20px;
+  /* width expands with content; min forces at least 1 column */
+  width:max-content;
+  min-width:100%;
+}
+.post-card{
+  break-inside:avoid;
+  display:inline-block; /* ensures break-inside works cross-browser */
+  width:280px;
+  margin-bottom:20px;
+  border-radius:16px;
+  border:2px solid #000;
+  overflow:hidden;
+  background:#fff;
+}
+.post-card-img{
+  width:100%;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  display:block;
+}
+.post-card-body{
+  padding:14px 16px 16px;
+}
+.post-card-author{
+  font-size:13px;
+  font-weight:600;
+  margin-bottom:6px;
+}
+.post-card-text{
+  font-size:14px;
+  line-height:1.45;
+  color:#333;
+}
+</style>
+
+<script>
+(function(){
+  var COLORS=['#FFD400','#87E5FF','#F1BAF4','#5dde60','#f5a04a','#c3a8f5'];
+  var AUTHORS=['maya','theo','priya','sam','lena','alex','jo','nadia'];
+  var MESSAGES=[
+    'had the best morning walk, feeling so good ☀️',
+    'found this little café that plays only jazz. staying forever',
+    'today i let myself do absolutely nothing and it was perfect',
+    'made soup from scratch for the first time!!',
+    'wrote three pages in my journal. brain is clearer now',
+    'saw a dog wearing a raincoat and my day is made',
+    'reminder that rest is productive too 🌿',
+    'went outside without my phone. highly recommend',
+    'baked banana bread at midnight, no regrets',
+    'called my grandma just to chat. so worth it',
+    'the sunset tonight was unreal',
+    'learning to be okay with slow days',
+  ];
+  var gallery=document.getElementById('posts-gallery');
+  if(!gallery)return;
+  for(var i=0;i<12;i++){
+    var card=document.createElement('div');
+    card.className='post-card';
+    var color=COLORS[i%COLORS.length];
+    var author=AUTHORS[i%AUTHORS.length];
+    var msg=MESSAGES[i%MESSAGES.length];
+    card.innerHTML=
+      '<div class="post-card-img" style="background:'+color+';height:160px"></div>'+
+      '<div class="post-card-body">'+
+        '<div class="post-card-author">@'+author+'</div>'+
+        '<div class="post-card-text">'+msg+'</div>'+
+      '</div>';
+    gallery.appendChild(card);
+  }
+})();
+</script>
+
+</main>
 
 <!-- FOOTER -->
 <footer id="site-footer">
