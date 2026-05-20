@@ -1710,6 +1710,37 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   window.addEventListener('resize',update);
   window.addEventListener('load',update);
 })();
+
+/* ── SVG PATH DRAW-ON ANIMATION ── */
+(function(){
+  'use strict';
+  const connectors = ['mess-btn-to-self','silly-to-mess','between-to-sticker','break-bubble-middle','break-intro-top','sticker-to-you'];
+
+  connectors.forEach(function(id){
+    var svg = document.getElementById(id);
+    if (!svg) return;
+
+    var paths = svg.querySelectorAll('path,line,polyline,circle,ellipse');
+    paths.forEach(function(p){
+      var len;
+      try { len = p.getTotalLength(); } catch(e){ return; }
+      p.style.strokeDasharray = len;
+      p.style.strokeDashoffset = len;
+      p.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(0.4,0,0.2,1)';
+    });
+
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        var ps = entry.target.querySelectorAll('path,line,polyline,circle,ellipse');
+        ps.forEach(function(p){ p.style.strokeDashoffset = '0'; });
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.15 });
+
+    obs.observe(svg);
+  });
+})();
 </script>
 </body>
 </html>
