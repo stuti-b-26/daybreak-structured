@@ -38,14 +38,19 @@ body{background:#EEE0CC}
 /* ── EXPLORE SECTION ── */
 .bw-feed{padding:0 0 72px;background:#EEE0CC;margin-top:-300px}
 .bw-feed-inner{max-width:1200px;margin:0 auto;padding:0 48px}
-.bw-explore-header{padding-left:calc(100vw/12);position:relative;z-index:2}
+.bw-explore-header{padding-left:calc(100vw/12);position:relative;z-index:2;margin-top:200px}
 .bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(32px,4vw,60px);color:#000;margin-bottom:12px;line-height:1}
 .bw-explore-trees{width:100%;display:block;line-height:0;pointer-events:none;margin-bottom:0;position:relative;z-index:1}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
 .bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 32px;position:relative;z-index:2}
-.bw-posts-scroll::-webkit-scrollbar{display:none}
+.bw-posts-scroll::-webkit-scrollbar{height:6px;display:none}
+.bw-posts-scroll::-webkit-scrollbar-track{background:transparent}
+.bw-posts-scroll::-webkit-scrollbar-thumb{background:transparent;border-radius:3px;transition:background .2s}
+.bw-posts-scroll:hover{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,0.35) transparent}
+.bw-posts-scroll:hover::-webkit-scrollbar{display:block}
+.bw-posts-scroll:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.35)}
 .bw-posts-scroll.is-dragging{cursor:grabbing;user-select:none}
 .bw-posts{display:grid;grid-template-rows:repeat(3,minmax(160px,auto));grid-auto-flow:column dense;grid-auto-columns:220px;gap:14px;width:max-content;padding:4px;align-items:stretch}
 .bw-post-card{border:3px solid #000;border-radius:18px;padding:18px 16px 12px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative}
