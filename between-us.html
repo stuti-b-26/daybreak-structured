@@ -9,6 +9,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Between Us — daybreak</title>
 <link rel="stylesheet" href="styles.css">
+<style>
+/* ── BETWEEN US PAGE ── */
+#page-main{background:#fff}
+
+/* Intro */
+.bw-intro{padding:80px 0 60px;background:#000;position:relative;overflow:hidden}
+.bw-intro-inner{grid-column:2/12;display:flex;flex-direction:column;gap:20px}
+.bw-headline{font-family:var(--font-logo);font-size:clamp(56px,8vw,120px);font-weight:900;color:#fff;line-height:1;letter-spacing:-0.02em}
+.bw-sub{font-size:clamp(16px,1.6vw,22px);color:rgba(255,255,255,.7);max-width:520px;line-height:1.5}
+.bw-intro-accent{position:absolute;right:0;top:0;width:clamp(200px,30vw,420px);height:100%;background:#77E674;clip-path:polygon(40% 0,100% 0,100% 100%,0 100%);opacity:.18;pointer-events:none}
+
+/* Section titles */
+.bw-section-title{font-family:var(--font-logo);font-size:clamp(28px,3vw,48px);font-weight:700;color:#000;line-height:1.1;margin-bottom:32px}
+
+/* Write section */
+.bw-write{padding:64px 0;background:#FFD400}
+.bw-write-inner{grid-column:2/10}
+.bw-write-card{background:#fff;border:3px solid #000;border-radius:20px;padding:32px;box-shadow:8px 8px 0 0 #000;max-width:680px}
+.bw-write-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#000;opacity:.5;display:block;margin-bottom:12px}
+.bw-textarea{width:100%;min-height:140px;border:none;outline:none;font-family:var(--font-body);font-size:18px;color:#000;resize:none;background:transparent;line-height:1.55;display:block}
+.bw-textarea::placeholder{color:rgba(0,0,0,.35)}
+.bw-write-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:16px;border-top:1.5px solid rgba(0,0,0,.12)}
+.bw-char-count{font-size:13px;color:rgba(0,0,0,.4);font-weight:500}
+.bw-char-count.bw-char-low{color:#e05c5c}
+.bw-write-actions{display:flex;gap:10px}
+.bw-btn{font-family:var(--font-body);font-size:14px;font-weight:600;padding:10px 22px;border-radius:999px;border:2.5px solid #000;cursor:pointer;transition:box-shadow .08s,transform .08s;box-shadow:4px 4px 0 0 #000}
+.bw-btn:active{box-shadow:1px 1px 0 0 #000;transform:scale(.95)}
+.bw-btn--save{background:#fff;color:#000}
+.bw-btn--share{background:#000;color:#fff}
+.bw-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#000;color:#fff;font-size:14px;font-weight:500;padding:12px 24px;border-radius:999px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:9999;white-space:nowrap}
+.bw-toast.bw-toast--show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Feed section */
+.bw-feed{padding:64px 0;background:#fff}
+.bw-feed-inner{grid-column:2/12}
+.bw-posts{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.bw-post-card{background:#fff;border:2.5px solid #000;border-radius:16px;padding:24px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:12px;opacity:0;transform:translateY(40px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .6s cubic-bezier(.34,1.3,.64,1)}
+.bw-post-card.bw-post-card--visible{opacity:1;transform:translateY(0)}
+.bw-post-card--own{border-color:#77E674;box-shadow:5px 5px 0 0 #77E674}
+.bw-post-text{font-size:16px;line-height:1.6;color:#000;flex:1}
+.bw-post-meta{display:flex;align-items:center;justify-content:space-between}
+.bw-post-time{font-size:12px;color:rgba(0,0,0,.4);font-weight:500}
+.bw-post-actions{display:flex;gap:8px;align-items:center}
+.bw-post-btn{background:none;border:none;cursor:pointer;font-size:18px;padding:4px;border-radius:8px;transition:transform .15s;line-height:1;display:flex;align-items:center;gap:4px;font-family:var(--font-body);font-size:13px;font-weight:500}
+.bw-post-btn:hover{transform:scale(1.2)}
+.bw-post-btn.bw-liked{color:#e05c5c}
+.bw-post-btn.bw-bookmarked{color:#FFD400}
+.bw-post-tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:999px;background:#FFD400;color:#000;width:fit-content}
+.bw-post-tag--own{background:#77E674}
+.bw-empty{font-size:16px;color:rgba(0,0,0,.4);font-style:italic;padding:32px 0}
+
+/* Saved section */
+.bw-saved{padding:64px 0 80px;background:#f7f5f0}
+.bw-saved-inner{grid-column:2/12}
+
+/* Responsive */
+@media(max-width:1023px){
+  .bw-intro-inner,.bw-write-inner,.bw-feed-inner,.bw-saved-inner{grid-column:1/-1}
+  .bw-posts{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:767px){
+  .bw-intro{padding:60px 0 40px}
+  .bw-write,.bw-feed,.bw-saved{padding:48px 0}
+  .bw-posts{grid-template-columns:1fr}
+  .bw-write-card{padding:24px}
+  .bw-textarea{font-size:16px}
+}
+</style>
 </head>
 <body>
 
@@ -126,7 +194,63 @@
 
 
 <!-- MAIN CONTENT -->
-<main id="page-main" style="min-height:60vh;padding-top:var(--hh)"></main>
+<main id="page-main" style="padding-top:var(--hh)">
+
+  <!-- INTRO -->
+  <section class="bw-intro">
+    <div class="bw-intro-accent" aria-hidden="true"></div>
+    <div class="gc grid">
+      <div class="bw-intro-inner">
+        <h1 class="bw-headline">between us</h1>
+        <p class="bw-sub">a secret little corner — read what others are feeling, share what's on your mind. no names, just honest moments.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WRITE -->
+  <section class="bw-write">
+    <div class="gc grid">
+      <div class="bw-write-inner">
+        <div class="bw-write-card">
+          <span class="bw-write-label">your turn</span>
+          <textarea class="bw-textarea" id="bw-textarea" placeholder="what's on your mind today?" maxlength="280" aria-label="Write your post"></textarea>
+          <div class="bw-write-footer">
+            <span class="bw-char-count" id="bw-char-count">280</span>
+            <div class="bw-write-actions">
+              <button class="bw-btn bw-btn--save" id="bw-save-btn" aria-label="Save privately">save it</button>
+              <button class="bw-btn bw-btn--share" id="bw-share-btn" aria-label="Share with community">share it</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMMUNITY FEED -->
+  <section class="bw-feed">
+    <div class="gc grid">
+      <div class="bw-feed-inner">
+        <h2 class="bw-section-title">from the community</h2>
+        <div class="bw-posts" id="bw-posts-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAVED POSTS -->
+  <section class="bw-saved">
+    <div class="gc grid">
+      <div class="bw-saved-inner">
+        <h2 class="bw-section-title">things you've saved</h2>
+        <div class="bw-posts" id="bw-saved-list">
+          <p class="bw-empty" id="bw-saved-empty">nothing saved yet — tap &#9733; on any post to keep it here.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="bw-toast" id="bw-toast"></div>
 
 <!-- FOOTER -->
 <footer id="site-footer">
@@ -409,6 +533,154 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   window.addEventListener('scroll',update,{passive:true});
   window.addEventListener('resize',update);
   window.addEventListener('load',update);
+})();
+
+/* BETWEEN US PAGE */
+(function(){
+'use strict';
+
+var SEED_POSTS = [
+  {id:'s1', text:"took a walk with no destination today. turned out to be exactly what i needed.", time: Date.now() - 3600000*2, likes:14, liked:false, saved:false},
+  {id:'s2', text:"i told my boss i needed a day off just to breathe. she said ok. i cried.", time: Date.now() - 3600000*5, likes:31, liked:false, saved:false},
+  {id:'s3', text:"been learning to be happy with small things again. today it was good coffee and a window seat.", time: Date.now() - 3600000*11, likes:22, liked:false, saved:false},
+  {id:'s4', text:"happiness is not as loud as i thought it would be. it's quieter. safer.", time: Date.now() - 3600000*18, likes:47, liked:false, saved:false},
+  {id:'s5', text:"called my mom not for any reason. she was so happy she asked if i was ok. i said yes.", time: Date.now() - 3600000*26, likes:38, liked:false, saved:false},
+  {id:'s6', text:"my dog fell asleep on my feet and somehow that fixed everything.", time: Date.now() - 3600000*33, likes:61, liked:false, saved:false},
+];
+
+var STORE_KEY = 'bw_posts';
+var STORE_SAVED = 'bw_saved';
+
+function loadPosts(){
+  try{var d=localStorage.getItem(STORE_KEY);return d?JSON.parse(d):SEED_POSTS.slice()}
+  catch(e){return SEED_POSTS.slice()}
+}
+function savePosts(posts){try{localStorage.setItem(STORE_KEY,JSON.stringify(posts))}catch(e){}}
+function loadSaved(){
+  try{var d=localStorage.getItem(STORE_SAVED);return d?JSON.parse(d):[]}
+  catch(e){return []}
+}
+function saveSaved(saved){try{localStorage.setItem(STORE_SAVED,JSON.stringify(saved))}catch(e){}}
+
+function timeAgo(ts){
+  var diff=Date.now()-ts, m=Math.floor(diff/60000), h=Math.floor(diff/3600000), d=Math.floor(diff/86400000);
+  if(m<1)return 'just now';if(m<60)return m+'m ago';if(h<24)return h+'h ago';return d+'d ago';
+}
+
+function showToast(msg){
+  var t=document.getElementById('bw-toast');
+  if(!t)return;
+  t.textContent=msg;t.classList.add('bw-toast--show');
+  setTimeout(function(){t.classList.remove('bw-toast--show')},2200);
+}
+
+function renderCard(post, isOwn){
+  var saved=loadSaved();
+  var isSaved=saved.some(function(p){return p.id===post.id});
+  var card=document.createElement('div');
+  card.className='bw-post-card'+(isOwn?' bw-post-card--own':'');
+  card.dataset.id=post.id;
+  card.innerHTML='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>'+
+    '<p class="bw-post-text">'+escHtml(post.text)+'</p>'+
+    '<div class="bw-post-meta">'+
+      '<span class="bw-post-time">'+timeAgo(post.time)+'</span>'+
+      '<div class="bw-post-actions">'+
+        '<button class="bw-post-btn bw-like-btn'+(post.liked?' bw-liked':'')+'\" data-id="'+post.id+'" aria-label="Like">'+
+          '<span class="bw-like-icon">'+(post.liked?'♥':'♡')+'</span> <span class="bw-like-count">'+post.likes+'</span>'+
+        '</button>'+
+        '<button class="bw-post-btn bw-bookmark-btn'+(isSaved?' bw-bookmarked':'')+'\" data-id="'+post.id+'" aria-label="Save">'+
+          (isSaved?'★':'☆')+
+        '</button>'+
+      '</div>'+
+    '</div>';
+
+  card.querySelector('.bw-like-btn').addEventListener('click', function(){
+    var posts=loadPosts();
+    var p=posts.find(function(x){return x.id===post.id});
+    if(!p)return;
+    p.liked=!p.liked;p.likes=p.liked?p.likes+1:p.likes-1;
+    savePosts(posts);
+    renderFeed();
+  });
+  card.querySelector('.bw-bookmark-btn').addEventListener('click', function(){
+    var saved=loadSaved();
+    var idx=saved.findIndex(function(x){return x.id===post.id});
+    if(idx>=0){saved.splice(idx,1);showToast('removed from saved')}
+    else{saved.unshift(post);showToast('saved!')}
+    saveSaved(saved);
+    renderFeed();renderSaved();
+  });
+  return card;
+}
+
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function animateCards(list){
+  list.querySelectorAll('.bw-post-card').forEach(function(card,i){
+    card.style.transitionDelay=(i*0.06)+'s';
+    requestAnimationFrame(function(){card.classList.add('bw-post-card--visible')});
+  });
+}
+
+function renderFeed(){
+  var list=document.getElementById('bw-posts-list');
+  if(!list)return;
+  var posts=loadPosts();
+  list.innerHTML='';
+  if(!posts.length){list.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
+  posts.forEach(function(post){
+    list.appendChild(renderCard(post, post.own));
+  });
+  animateCards(list);
+}
+
+function renderSaved(){
+  var list=document.getElementById('bw-saved-list');
+  var empty=document.getElementById('bw-saved-empty');
+  if(!list)return;
+  var saved=loadSaved();
+  list.querySelectorAll('.bw-post-card').forEach(function(c){c.remove()});
+  if(empty)empty.style.display=saved.length?'none':'block';
+  saved.forEach(function(post){
+    list.appendChild(renderCard(post, post.own));
+  });
+  if(saved.length)animateCards(list);
+}
+
+/* Write */
+var textarea=document.getElementById('bw-textarea');
+var counter=document.getElementById('bw-char-count');
+if(textarea&&counter){
+  textarea.addEventListener('input',function(){
+    var left=280-textarea.value.length;
+    counter.textContent=left;
+    counter.classList.toggle('bw-char-low',left<20);
+  });
+}
+
+document.getElementById('bw-save-btn')&&document.getElementById('bw-save-btn').addEventListener('click',function(){
+  var text=(textarea&&textarea.value.trim())||'';
+  if(!text){showToast('write something first :)');return;}
+  var post={id:'own'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,own:true};
+  var saved=loadSaved();
+  saved.unshift(post);saveSaved(saved);
+  if(textarea)textarea.value='';if(counter)counter.textContent='280';
+  renderSaved();showToast('saved privately!');
+});
+
+document.getElementById('bw-share-btn')&&document.getElementById('bw-share-btn').addEventListener('click',function(){
+  var text=(textarea&&textarea.value.trim())||'';
+  if(!text){showToast('write something first :)');return;}
+  var post={id:'own'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,own:true};
+  var posts=loadPosts();posts.unshift(post);savePosts(posts);
+  if(textarea)textarea.value='';if(counter)counter.textContent='280';
+  renderFeed();showToast('shared with the community!');
+});
+
+renderFeed();
+renderSaved();
 })();
 
 </script>
