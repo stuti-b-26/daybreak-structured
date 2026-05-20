@@ -137,7 +137,7 @@ body{background:#EEE0CC}
 
 /* ── SAVED POSTS ── */
 .bw-saved{padding:64px 0 80px;background:#EEE0CC;margin-top:80px}
-.bw-saved-inner{max-width:640px;margin:0 auto;padding:0 48px}
+.bw-saved-inner{max-width:1200px;margin:0 auto;padding:0 48px}
 .bw-saved-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.2vw,48px);color:#000;margin-bottom:28px}
 .bw-saved-empty-card{background:#2e7d32;border-radius:20px;padding:48px 32px;text-align:center;max-width:480px}
 .bw-saved-empty-card p{font-family:'Rammetto One',cursive;font-size:clamp(18px,2vw,26px);color:#fff;line-height:1.4}
@@ -391,6 +391,8 @@ body{background:#EEE0CC}
   <section class="bw-saved">
     <div class="bw-saved-inner">
       <h2 class="bw-saved-heading">your saved posts</h2>
+    </div>
+    <div class="bw-posts-scroll" id="bw-saved-scroll">
       <div class="bw-posts" id="bw-saved-list">
         <div class="bw-saved-empty-card" id="bw-saved-empty">
           <p>no saved posts yet, save posts to see them all here!</p>
@@ -974,18 +976,13 @@ function initLightbox(){
 }
 
 /* drag-to-scroll on the gallery */
-function initGalleryDrag(){
-  var scroll=document.getElementById('bw-posts-scroll');
+function initScrollGallery(scroll){
   if(!scroll)return;
-
-  /* drag-to-scroll */
   var isDown=false,startX=0,scrollLeft=0;
   scroll.addEventListener('mousedown',function(e){isDown=true;scroll.classList.add('is-dragging');startX=e.pageX-scroll.offsetLeft;scrollLeft=scroll.scrollLeft;});
   scroll.addEventListener('mouseleave',function(){isDown=false;scroll.classList.remove('is-dragging');});
   scroll.addEventListener('mouseup',function(){isDown=false;scroll.classList.remove('is-dragging');});
   scroll.addEventListener('mousemove',function(e){if(!isDown)return;e.preventDefault();var x=e.pageX-scroll.offsetLeft;scroll.scrollLeft=scrollLeft-(x-startX)*1.5;});
-
-  /* wheel-to-horizontal-scroll: vertical wheel over gallery scrolls horizontally */
   var target=0,raf=null;
   function ease(){
     var diff=target-scroll.scrollLeft;
@@ -997,11 +994,15 @@ function initGalleryDrag(){
     var maxScroll=scroll.scrollWidth-scroll.clientWidth;
     var atStart=scroll.scrollLeft<=0&&e.deltaY<0;
     var atEnd=scroll.scrollLeft>=maxScroll-1&&e.deltaY>0;
-    if(atStart||atEnd)return; /* let page scroll normally at edges */
+    if(atStart||atEnd)return;
     e.preventDefault();
     target=Math.max(0,Math.min(maxScroll,target+e.deltaY*1.4));
     if(!raf)raf=requestAnimationFrame(ease);
   },{passive:false});
+}
+function initGalleryDrag(){
+  initScrollGallery(document.getElementById('bw-posts-scroll'));
+  initScrollGallery(document.getElementById('bw-saved-scroll'));
 }
 
 /* measure the true rendered height of a card at a given width using a hidden probe */
@@ -1119,16 +1120,40 @@ function renderFeed(){
 }
 
 function renderSaved(){
-  var list=document.getElementById('bw-saved-list');
-  var empty=document.getElementById('bw-saved-empty');
-  if(!list)return;
+  var scrollEl=document.getElementById('bw-saved-scroll');
+  if(!scrollEl)return;
+  if(!_probe.parentNode)document.body.appendChild(_probe);
   var saved=loadSaved();
-  list.querySelectorAll('.bw-post-card').forEach(function(c){c.remove()});
-  if(empty)empty.style.display=saved.length?'none':'block';
-  saved.forEach(function(post){
-    list.appendChild(renderCard(post, post.own));
+  var empty=document.getElementById('bw-saved-empty');
+
+  var oldList=document.getElementById('bw-saved-list');
+  if(oldList)oldList.remove();
+  var container=document.createElement('div');
+  container.className='bw-posts';
+  container.id='bw-saved-list';
+  scrollEl.insertBefore(container,scrollEl.firstChild);
+
+  if(empty){
+    container.appendChild(empty);
+    empty.style.display=saved.length?'none':'block';
+  }
+  if(!saved.length)return;
+
+  var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
+  var packedCols=rearrangeGallery(saved,MAX_COL_H);
+
+  packedCols.forEach(function(col){
+    var colEl=document.createElement('div');
+    colEl.className='bw-col';
+    colEl.style.height=MAX_COL_H+'px';
+    container.appendChild(colEl);
+    col.items.forEach(function(item){
+      var card=renderCard(item.post,item.post.own,item.idx);
+      card.style.width=item.cardW+'px';
+      card.style.flex='1 1 auto';
+      colEl.appendChild(card);
+    });
   });
-  if(saved.length)animateCards(list);
 }
 
 /* Write */
