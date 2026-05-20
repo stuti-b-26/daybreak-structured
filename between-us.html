@@ -29,13 +29,15 @@ body{background:#EEE0CC}
 .bw-hero-vine svg{width:100%;height:100%}
 
 /* ── INTRO BLURB ── */
-.bw-intro-blurb{background:#EEE0CC url("Top%20Bricks.svg") center top/cover no-repeat;padding:64px 0;text-align:center}
+.bw-intro-blurb{background:#EEE0CC;padding:64px 0;text-align:center}
 .bw-intro-blurb-inner{max-width:720px;margin:0 auto;padding:0 32px}
 .bw-intro-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.5vw,52px);color:#000;margin-bottom:20px;line-height:1.15}
 .bw-intro-body{font-family:'Nunito',sans-serif;font-size:clamp(15px,1.4vw,18px);color:#333;line-height:1.7}
 
 /* ── VINE DIVIDER ── */
-.bw-vine-divider{width:100%;line-height:0;display:block;overflow:hidden}
+.bw-bricks-over-vine{position:relative;z-index:10;pointer-events:none;line-height:0}
+.bw-bricks-over-vine img{width:100%;display:block;height:auto}
+.bw-vine-divider{width:100%;line-height:0;display:block;overflow:hidden;position:relative;z-index:1}
 .bw-vine-divider svg{width:100%;height:auto;display:block}
 
 /* ── EXPLORE SECTION ── */
@@ -357,7 +359,10 @@ body{background:#EEE0CC}
     </div>
   </section>
 
-  <!-- VINE DIVIDER -->
+  <!-- BRICKS + VINE DIVIDER -->
+  <div class="bw-bricks-over-vine" aria-hidden="true">
+    <img src="Top%20Bricks.svg" alt="">
+  </div>
   <div class="bw-vine-divider" aria-hidden="true"><svg id="bw-vine-top" viewBox="0 0 1440 280" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
 <rect x="0" y="0" width="1440" height="45" fill="#1b5e20" opacity="0.9"/>
 <ellipse cx="8.0" cy="20.0" rx="8.1" ry="14.0" transform="rotate(-15,8.0,20.0)" fill="#2e7d32"/>
@@ -1159,7 +1164,7 @@ var PAUSE_PX=300,gutter=0,textW=0,startX=0,endX=0,travelPx=0,heroTop=0,ticking=f
 function getGutter(){return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gutter'))||120}
 function setup(){
   gutter=getGutter();textW=hl.scrollWidth;var vw=window.innerWidth;
-  startX=gutter;endX=vw-gutter-textW;travelPx=Math.max(1,startX-endX);
+  startX=vw-gutter;endX=vw-gutter-textW;travelPx=Math.max(1,startX-endX);
   hero.style.height=(window.innerHeight+travelPx+PAUSE_PX)+'px';
   heroTop=hero.getBoundingClientRect().top+window.scrollY;
   applyTransform(window.scrollY);
