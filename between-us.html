@@ -928,11 +928,31 @@ function initLightbox(){
 function initGalleryDrag(){
   var scroll=document.getElementById('bw-posts-scroll');
   if(!scroll)return;
+
+  /* drag-to-scroll */
   var isDown=false,startX=0,scrollLeft=0;
   scroll.addEventListener('mousedown',function(e){isDown=true;scroll.classList.add('is-dragging');startX=e.pageX-scroll.offsetLeft;scrollLeft=scroll.scrollLeft;});
   scroll.addEventListener('mouseleave',function(){isDown=false;scroll.classList.remove('is-dragging');});
   scroll.addEventListener('mouseup',function(){isDown=false;scroll.classList.remove('is-dragging');});
   scroll.addEventListener('mousemove',function(e){if(!isDown)return;e.preventDefault();var x=e.pageX-scroll.offsetLeft;scroll.scrollLeft=scrollLeft-(x-startX)*1.5;});
+
+  /* wheel-to-horizontal-scroll: vertical wheel over gallery scrolls horizontally */
+  var target=0,raf=null;
+  function ease(){
+    var diff=target-scroll.scrollLeft;
+    if(Math.abs(diff)<0.5){scroll.scrollLeft=target;raf=null;return;}
+    scroll.scrollLeft+=diff*0.12;
+    raf=requestAnimationFrame(ease);
+  }
+  scroll.addEventListener('wheel',function(e){
+    var maxScroll=scroll.scrollWidth-scroll.clientWidth;
+    var atStart=scroll.scrollLeft<=0&&e.deltaY<0;
+    var atEnd=scroll.scrollLeft>=maxScroll-1&&e.deltaY>0;
+    if(atStart||atEnd)return; /* let page scroll normally at edges */
+    e.preventDefault();
+    target=Math.max(0,Math.min(maxScroll,target+e.deltaY*1.4));
+    if(!raf)raf=requestAnimationFrame(ease);
+  },{passive:false});
 }
 
 function renderFeed(){
