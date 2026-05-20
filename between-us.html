@@ -44,7 +44,7 @@ body{background:#EEE0CC}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
-.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 10px;position:relative;z-index:2}
+.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 10px;position:relative;z-index:2;max-height:66.67vh}
 .bw-posts-scroll::-webkit-scrollbar{height:6px;display:none}
 .bw-posts-scroll::-webkit-scrollbar-track{background:transparent}
 .bw-posts-scroll::-webkit-scrollbar-thumb{background:transparent;border-radius:3px;transition:background .2s}
@@ -52,8 +52,8 @@ body{background:#EEE0CC}
 .bw-posts-scroll:hover::-webkit-scrollbar{display:block}
 .bw-posts-scroll:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.35)}
 .bw-posts-scroll.is-dragging{cursor:grabbing;user-select:none}
-.bw-posts{display:grid;grid-template-rows:repeat(3,auto);grid-auto-flow:column dense;grid-auto-columns:220px;gap:10px;width:max-content;padding:4px 8px 8px;align-items:start}
-.bw-post-card{border:3px solid #000;border-radius:18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative;align-self:start}
+.bw-posts{display:grid;grid-auto-rows:6px;gap:10px;width:max-content;padding:4px 8px 8px;align-items:start}
+.bw-post-card{width:220px;border:3px solid #000;border-radius:18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative;align-self:start}
 .bw-post-card:hover{transform:translate(-2px,-2px)}
 .bw-post-card[data-fc="0"]{border-color:#FF6FAA;box-shadow:5px 5px 0 0 #FF6FAA}
 .bw-post-card[data-fc="1"]{border-color:#0E9E1B;box-shadow:5px 5px 0 0 #0E9E1B}
@@ -765,7 +765,7 @@ var SEED_POSTS = [
   {id:'s48', text:"stayed up a bit too late talking about nothing in particular. felt like exactly the right use of a tuesday.", time:Date.now()-3600000*408, likes:58, liked:false, saved:false},
 ];
 
-var STORE_KEY = 'bw_posts_v7';
+var STORE_KEY = 'bw_posts_v6';
 var STORE_SAVED = 'bw_saved';
 
 function loadPosts(){
@@ -1063,15 +1063,7 @@ function rearrangeGallery(posts,MAX_COL_H){
   return cols;
 }
 
-/* ── row/col span thresholds ── */
-/* 3 logical rows: short=1 row, medium=2 rows, long=3 rows (fills whole column) */
-/* wide cards span 2 columns                                                      */
-function cardSpans(text){
-  var len=text.length;
-  var rows = len<90 ? 1 : len<320 ? 2 : 3;
-  var cols = len>170 ? 2 : 1;
-  return {rows:rows, cols:cols};
-}
+var GRID_ROW_H=6, GRID_GAP=10, GRID_CARD_W=220;
 
 function renderFeed(){
   var scrollEl=document.getElementById('bw-posts-scroll');
@@ -1088,12 +1080,34 @@ function renderFeed(){
 
   if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
 
+  /* determine column count to aim for ~5 rows */
+  var wideSlots=posts.filter(function(p){return p.text.length>160;}).length;
+  var totalSlots=wideSlots*2+(posts.length-wideSlots);
+  var numCols=Math.max(5, Math.ceil(totalSlots/5));
+  container.style.gridTemplateColumns='repeat('+numCols+', '+GRID_CARD_W+'px)';
+
   posts.forEach(function(post,i){
     var card=renderCard(post,post.own,i);
-    var sp=cardSpans(post.text);
-    card.style.gridRowEnd='span '+sp.rows;
-    if(sp.cols>1){card.style.gridColumnEnd='span '+sp.cols;}
+    /* wide cards: medium+ text spans 2 columns */
+    if(post.text.length>160){
+      card.style.gridColumnEnd='span 2';
+      card.style.width=(GRID_CARD_W*2+GRID_GAP)+'px';
+    }
+    /* give a generous temp span so content renders at natural height */
+    card.style.gridRowEnd='span 80';
     container.appendChild(card);
+  });
+
+  /* after layout: measure real height, set tight row span */
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      container.querySelectorAll('.bw-post-card').forEach(function(card){
+        card.style.gridRowEnd='';
+        var h=card.getBoundingClientRect().height||card.scrollHeight;
+        var span=Math.ceil((h+GRID_GAP)/(GRID_ROW_H+GRID_GAP));
+        card.style.gridRowEnd='span '+span;
+      });
+    });
   });
 }
 
