@@ -38,16 +38,16 @@ body{background:#EEE0CC}
 /* ── EXPLORE SECTION ── */
 .bw-feed{padding:0 0 72px;background:#EEE0CC;margin-top:-300px}
 .bw-feed-inner{max-width:1200px;margin:0 auto;padding:0 48px}
-.bw-explore-header{padding-left:calc(100vw/12);}
+.bw-explore-header{padding-left:calc(100vw/12);position:relative;z-index:2}
 .bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(32px,4vw,60px);color:#000;margin-bottom:12px;line-height:1}
-.bw-explore-trees{width:100%;display:block;line-height:0;pointer-events:none;margin-bottom:-8px}
+.bw-explore-trees{width:100%;display:block;line-height:0;pointer-events:none;margin-bottom:0;position:relative;z-index:1}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
-.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 32px}
+.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 32px;position:relative;z-index:2}
 .bw-posts-scroll::-webkit-scrollbar{display:none}
 .bw-posts-scroll.is-dragging{cursor:grabbing;user-select:none}
-.bw-posts{display:grid;grid-template-rows:repeat(3,160px);grid-auto-flow:column dense;grid-auto-columns:200px;gap:14px;width:max-content;padding:4px}
+.bw-posts{display:grid;grid-template-rows:repeat(3,minmax(160px,auto));grid-auto-flow:column dense;grid-auto-columns:220px;gap:14px;width:max-content;padding:4px;align-items:stretch}
 .bw-post-card{border:3px solid #000;border-radius:18px;padding:18px 16px 12px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative}
 .bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #000}
 .bw-post-card--s1{grid-row:span 1;grid-column:span 1}
@@ -70,7 +70,7 @@ body{background:#EEE0CC}
 .bw-post-card--own:hover{box-shadow:7px 7px 0 0 #2e7d32!important}
 .bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:999px;background:#f5c842;color:#000;width:fit-content;flex-shrink:0}
 .bw-post-tag--own{background:#a5d6a7}
-.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;line-height:1.5;color:#000;flex:1;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:6}
+.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;line-height:1.55;color:#000;flex:1;overflow:hidden}
 .bw-post-media{width:100%;flex:1;object-fit:cover;border-radius:10px;display:block;min-height:0}
 .bw-post-save-btn{position:absolute;bottom:10px;right:12px;background:none;border:none;cursor:pointer;font-size:20px;line-height:1;padding:2px;transition:transform .15s}
 .bw-post-save-btn:hover{transform:scale(1.3)}
@@ -308,17 +308,17 @@ body{background:#EEE0CC}
 
   <!-- EXPLORE -->
   <section class="bw-feed">
-    <div class="bw-explore-trees" aria-hidden="true">
-      <img src="explore%20trees.svg" alt="">
-    </div>
     <div class="bw-feed-inner">
       <div class="bw-explore-header">
         <h2 class="bw-section-title">explore</h2>
         <p class="bw-section-desc">see what's making other people happy today. you're welcome to just read through them, or you can click the + to save them to your profile. you can also add on to saved posts in just for you. whatever makes your happiness garden bloom.</p>
       </div>
-      <div class="bw-posts-scroll" id="bw-posts-scroll">
-        <div class="bw-posts" id="bw-posts-list"></div>
-      </div>
+    </div>
+    <div class="bw-explore-trees" aria-hidden="true">
+      <img src="explore%20trees.svg" alt="">
+    </div>
+    <div class="bw-posts-scroll" id="bw-posts-scroll">
+      <div class="bw-posts" id="bw-posts-list"></div>
     </div>
   </section>
 
@@ -699,26 +699,42 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 'use strict';
 
 var SEED_POSTS = [
-  {id:'s1',  text:"took a walk with no destination today. turned out to be exactly what i needed.", time: Date.now() - 3600000*2,  likes:14, liked:false, saved:false},
-  {id:'s2',  text:"i told my boss i needed a day off just to breathe. she said ok. i cried.", time: Date.now() - 3600000*5,  likes:31, liked:false, saved:false},
-  {id:'s3',  text:"been learning to be happy with small things again. today it was good coffee and a window seat.", time: Date.now() - 3600000*11, likes:22, liked:false, saved:false},
-  {id:'s4',  text:"happiness is not as loud as i thought it would be. it's quieter. safer.", time: Date.now() - 3600000*18, likes:47, liked:false, saved:false},
-  {id:'s5',  text:"called my mom not for any reason. she was so happy she asked if i was ok. i said yes.", time: Date.now() - 3600000*26, likes:38, liked:false, saved:false},
-  {id:'s6',  text:"my dog fell asleep on my feet and somehow that fixed everything.", time: Date.now() - 3600000*33, likes:61, liked:false, saved:false},
-  {id:'s7',  text:"i reorganised my desk and found a pen i thought i'd lost months ago. tiny victory.", time: Date.now() - 3600000*38, likes:19, liked:false, saved:false},
-  {id:'s8',  text:"saw the sky go pink for exactly three minutes before it rained. worth it.", time: Date.now() - 3600000*44, likes:33, liked:false, saved:false},
-  {id:'s9',  text:"i complimented a stranger's coat and she lit up. that was my whole day.", time: Date.now() - 3600000*51, likes:28, liked:false, saved:false},
-  {id:'s10', text:"finally watered my plants. one of them perked up so fast i felt personally forgiven.", time: Date.now() - 3600000*58, likes:52, liked:false, saved:false},
-  {id:'s11', text:"wore mismatched socks on purpose. no one noticed but i felt like i had a secret.", time: Date.now() - 3600000*66, likes:41, liked:false, saved:false},
-  {id:'s12', text:"spent an hour reading with absolutely no purpose. didn't even finish the chapter.", time: Date.now() - 3600000*73, likes:17, liked:false, saved:false},
-  {id:'s13', text:"the barista spelled my name wrong in a funny way and we both laughed about it.", time: Date.now() - 3600000*80, likes:29, liked:false, saved:false},
-  {id:'s14', text:"lay on the grass and watched clouds for fifteen minutes. felt five years old in the best way.", time: Date.now() - 3600000*90, likes:44, liked:false, saved:false},
-  {id:'s15', text:"a kid on the bus was drawing something very seriously. i hope it was important.", time: Date.now() - 3600000*98, likes:36, liked:false, saved:false},
-  {id:'s16', text:"tried a recipe and messed it up but the kitchen smelled warm and that counted.", time: Date.now() - 3600000*108, likes:23, liked:false, saved:false},
-  {id:'s17', text:"stood by the window this morning and it felt gentle on my face.", time: Date.now() - 3600000*116, likes:57, liked:false, saved:false},
-  {id:'s18', text:"texted a friend i hadn't spoken to in months. we picked up instantly.", time: Date.now() - 3600000*124, likes:49, liked:false, saved:false},
-  {id:'s19', text:"let myself lie down for ten minutes without guilt. it was perfect.", time: Date.now() - 3600000*132, likes:38, liked:false, saved:false},
-  {id:'s20', text:"today i kept trying even though the day didn't go as planned. that felt like enough.", time: Date.now() - 3600000*140, likes:66, liked:false, saved:false},
+  /* short — s1 */
+  {id:'s1',  text:"good coffee. window seat. that was enough.", time: Date.now()-3600000*2,   likes:14, liked:false, saved:false},
+  {id:'s2',  text:"napped without guilt. ten out of ten.", time: Date.now()-3600000*7,   likes:29, liked:false, saved:false},
+  {id:'s3',  text:"stood by the window this morning. it felt gentle on my face.", time: Date.now()-3600000*14,  likes:57, liked:false, saved:false},
+  {id:'s4',  text:"wore mismatched socks on purpose. no one noticed but i felt like i had a secret.", time: Date.now()-3600000*22,  likes:41, liked:false, saved:false},
+  {id:'s5',  text:"my dog fell asleep on my feet and somehow that fixed everything.", time: Date.now()-3600000*30,  likes:61, liked:false, saved:false},
+  /* medium-tall — s2 */
+  {id:'s6',  text:"i told my boss i needed a day off just to breathe. she said ok. i cried a little in the car on the way home.", time: Date.now()-3600000*38,  likes:31, liked:false, saved:false},
+  {id:'s7',  text:"called my mom for no reason. she was so happy she asked if something was wrong. i said no, just wanted to hear your voice. long pause. then she laughed.", time: Date.now()-3600000*48,  likes:53, liked:false, saved:false},
+  {id:'s8',  text:"reorganised my desk and found a pen i thought i'd lost months ago. tiny victory but my whole mood shifted.", time: Date.now()-3600000*56,  likes:19, liked:false, saved:false},
+  {id:'s9',  text:"texted a friend i hadn't spoken to in months. we picked up instantly, no awkward silence, no explanation needed. just: hi. then an hour of talking.", time: Date.now()-3600000*66,  likes:49, liked:false, saved:false},
+  {id:'s10', text:"a kid on the bus was drawing something very seriously in a tiny notebook. i didn't look at what it was. i just liked that it mattered that much.", time: Date.now()-3600000*75,  likes:36, liked:false, saved:false},
+  {id:'s11', text:"complimented a stranger's coat on the way to work. she stopped walking, looked down at it like she'd forgotten she was wearing it, and smiled. that was my whole day.", time: Date.now()-3600000*85,  likes:28, liked:false, saved:false},
+  /* wide — s3 */
+  {id:'s12', text:"been learning to be happy with small things again. today it was good coffee and a window seat and a book i'd been meaning to read. none of it was special. all of it was.", time: Date.now()-3600000*94,  likes:22, liked:false, saved:false},
+  {id:'s13', text:"took a walk with no destination. ended up by the canal. sat on a bench for a while. a heron landed nearby and we both just stayed there pretending to be busy.", time: Date.now()-3600000*104, likes:44, liked:false, saved:false},
+  {id:'s14', text:"tried a new recipe and completely messed it up, but the kitchen smelled warm and comforting the whole time. ate it anyway. decided it counted as self-care.", time: Date.now()-3600000*114, likes:23, liked:false, saved:false},
+  {id:'s15', text:"happiness is not as loud as i thought it would be. it's quieter. safer. it sits in the corner of the room and waits patiently for you to notice it.", time: Date.now()-3600000*123, likes:66, liked:false, saved:false},
+  {id:'s16', text:"saw the sky go exactly the right shade of pink for three minutes before the rain came. i stood outside for all three of them. got slightly damp. worth it completely.", time: Date.now()-3600000*133, likes:33, liked:false, saved:false},
+  /* large — s4 */
+  {id:'s17', text:"my neighbour knocked to give me a plant cutting she'd rooted for me. she said she thought i'd like it. we've lived next door to each other for two years and barely spoken. i planted it in a blue pot. it's already growing, which feels like something.", time: Date.now()-3600000*144, likes:47, liked:false, saved:false},
+  {id:'s18', text:"spent an afternoon lying on the grass with no phone and no podcast. just the sound of things growing around me. a bee landed on my arm for a second and then moved on. it was the most peaceful i've felt in months and i can't explain exactly why.", time: Date.now()-3600000*155, likes:38, liked:false, saved:false},
+  {id:'s19', text:"i've been trying to journal every morning. i keep starting the same sentence: today i am grateful for. i can never finish it cleanly. today i wrote: today i am grateful for the fact that this sentence exists and that i keep starting it. i think that counts.", time: Date.now()-3600000*167, likes:59, liked:false, saved:false},
+  {id:'s20', text:"my grandmother used to say that happiness lives in the details. she meant things like the weight of a good cup, the sound of rain when you're already inside, the way light falls through a gap in the curtains late in the afternoon. i used to think that was a small way to think about happiness. now i think it might be the only honest way.", time: Date.now()-3600000*180, likes:74, liked:false, saved:false},
+  /* long stories — s3m */
+  {id:'s21', text:"i've been walking the same route every evening for three weeks. at first it was just to get out of the flat. then it became something i looked forward to.\n\ntonight i noticed for the first time that there's a house on the corner with a light on in the upstairs window. someone always seems to be reading there. i don't know them. but i feel better knowing they're there, and i think about them now when i lace up my shoes.", time: Date.now()-3600000*195, likes:81, liked:false, saved:false},
+  {id:'s22', text:"this is a long one but i want to write it down.\n\ni had a really hard week. the kind where every day feels like wading through something thick. on thursday i sat on the bathroom floor for a while just because it was quiet. then i got up, made tea, and sat by the window.\n\nnothing changed. but i felt slightly less alone in it. that's the thing about small moments — they don't fix anything. but they remind you that the world is still soft in places.", time: Date.now()-3600000*210, likes:112, liked:false, saved:false},
+  {id:'s23', text:"there is a small coffee shop near my office that i walk past every day. last week i finally went in. the owner was talking to a plant on the windowsill and looked up without embarrassment. the coffee was the best i've had in months.\n\ni went back on tuesday. the plant had moved to a different window. the coffee was the same. i think that place is going to matter to me.", time: Date.now()-3600000*226, likes:67, liked:false, saved:false},
+  /* back to shorter for rhythm */
+  {id:'s24', text:"let myself lie down for ten minutes without guilt. it was perfect.", time: Date.now()-3600000*238, likes:38, liked:false, saved:false},
+  {id:'s25', text:"finally watered my plants. one perked up so fast i felt personally forgiven.", time: Date.now()-3600000*248, likes:52, liked:false, saved:false},
+  {id:'s26', text:"lay on the grass and watched clouds for fifteen minutes. felt five years old in the best way.", time: Date.now()-3600000*258, likes:44, liked:false, saved:false},
+  {id:'s27', text:"the barista spelled my name in a completely new way and we both laughed about it for too long.", time: Date.now()-3600000*268, likes:29, liked:false, saved:false},
+  {id:'s28', text:"spent an hour reading with no purpose. didn't even finish the chapter. that was fine.", time: Date.now()-3600000*278, likes:17, liked:false, saved:false},
+  {id:'s29', text:"today i kept trying even though the day didn't go as planned. that felt like enough. it was enough.", time: Date.now()-3600000*290, likes:66, liked:false, saved:false},
+  {id:'s30', text:"i made a list of things i like. just for myself. just because. it took longer than i expected.", time: Date.now()-3600000*302, likes:43, liked:false, saved:false},
 ];
 
 var STORE_KEY = 'bw_posts';
@@ -747,12 +763,20 @@ function showToast(msg){
   setTimeout(function(){t.classList.remove('bw-toast--show')},2200);
 }
 
-/* size classes cycling for collage effect */
-var SIZE_CLASSES=['bw-post-card--s1','bw-post-card--s2','bw-post-card--s3','bw-post-card--s1','bw-post-card--s1','bw-post-card--s3m','bw-post-card--s1','bw-post-card--s4','bw-post-card--s2','bw-post-card--s1'];
+/* size class from content length so cards fit their content */
+function getSizeClass(post){
+  if(post.media)return 'bw-post-card--s2';
+  var l=post.text.length;
+  if(l<65)return 'bw-post-card--s1';
+  if(l<160)return 'bw-post-card--s2';
+  if(l<280)return 'bw-post-card--s3';
+  if(l<480)return 'bw-post-card--s4';
+  return 'bw-post-card--s3m';
+}
 
 function renderCard(post, isOwn, idx){
   var card=document.createElement('div');
-  var sizeClass=SIZE_CLASSES[idx % SIZE_CLASSES.length];
+  var sizeClass=getSizeClass(post);
   card.className='bw-post-card '+sizeClass+(isOwn?' bw-post-card--own':'');
   card.dataset.id=post.id;
   card.dataset.idx=idx;
