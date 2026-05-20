@@ -290,6 +290,9 @@ img{display:block;max-width:100%}
 
 /* ── MOBILE ≤399px ── */
 @media(max-width:399px){
+  :root{--col-gap:10px}
+  #site-header{grid-template-columns:repeat(12,1fr);padding:0 12px}
+  .header-inner{grid-column:1/-1}
   .desktop-nav{display:none}
   .tablet-nav{display:none}
   #sun-stretch-svg{display:none}
