@@ -86,6 +86,8 @@ body{background:#EEE0CC}
 .bw-post-journal-btn{background:none;border:1.5px solid #000;border-radius:999px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;padding:3px 8px;line-height:1.4;transition:background .15s,color .15s;flex-shrink:0;white-space:nowrap}
 .bw-post-journal-btn:hover{background:#000;color:#fff}
 .bw-post-journal-btn.bw-in-journal{background:#000;color:#fff;border-color:#000}
+.bw-post-delete-btn{background:none;border:none;cursor:pointer;font-size:13px;line-height:1;padding:2px 4px;color:rgba(0,0,0,.4);transition:color .15s,transform .15s;flex-shrink:0}
+.bw-post-delete-btn:hover{color:#e8344a;transform:scale(1.2)}
 .bw-post-time{font-family:'Nunito',sans-serif;font-size:10px;color:rgba(0,0,0,.4);font-weight:500;flex-shrink:0}
 /* ── LIGHTBOX ── */
 .bw-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -879,7 +881,7 @@ function postColorIndex(id){
   return Math.abs(h)%FRAME_COLORS;
 }
 
-function renderCard(post, isOwn, idx, showJournal){
+function renderCard(post, isOwn, idx, showJournal, context){
   var card=document.createElement('div');
   card.className='bw-post-card'+(isOwn?' bw-post-card--own':'');
   card.dataset.id=post.id;
@@ -898,9 +900,13 @@ function renderCard(post, isOwn, idx, showJournal){
   var journalBtn=showJournal
     ?'<button class="bw-post-journal-btn'+(inJournal?' bw-in-journal':'')+'" data-id="'+post.id+'" aria-label="Add to journal">'+(inJournal?'in journal':'+ journal')+'</button>'
     :'';
+  var deleteBtn=isOwn
+    ?'<button class="bw-post-delete-btn" data-id="'+post.id+'" aria-label="Delete post" title="Delete">&#10005;</button>'
+    :'';
   var footerEl='<div class="bw-post-footer">'+
     '<span class="bw-post-time">'+timeAgo(post.time)+'</span>'+
     '<div class="bw-post-actions">'+
+    deleteBtn+
     journalBtn+
     '<button class="bw-post-save-btn" data-id="'+post.id+'" aria-label="Save">'+(isSaved?'&#9733;':'&#43;')+'</button>'+
     '</div>'+
@@ -917,6 +923,19 @@ function renderCard(post, isOwn, idx, showJournal){
     saveSaved(savedList);
     renderSaved();
   });
+
+  if(isOwn){
+    var dBtn=card.querySelector('.bw-post-delete-btn');
+    if(dBtn)dBtn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var posts=loadPosts();
+      savePosts(posts.filter(function(x){return x.id!==post.id}));
+      var savedList=loadSaved();
+      saveSaved(savedList.filter(function(x){return x.id!==post.id}));
+      showToast('post deleted');
+      renderFeed();renderSaved();
+    });
+  }
 
   if(showJournal){
     var jBtn=card.querySelector('.bw-post-journal-btn');
@@ -940,7 +959,8 @@ function renderCard(post, isOwn, idx, showJournal){
   card.addEventListener('click', function(e){
     if(e.target.classList.contains('bw-post-save-btn'))return;
     if(e.target.classList.contains('bw-post-journal-btn'))return;
-    openLightbox(parseInt(card.dataset.idx));
+    if(e.target.classList.contains('bw-post-delete-btn'))return;
+    openLightbox(post.id, context||'feed');
   });
 
   return card;
@@ -953,8 +973,11 @@ function escHtml(s){
 /* ── LIGHTBOX ── */
 var _lbPosts=[], _lbIdx=0;
 
-function openLightbox(idx){
-  _lbIdx=idx;
+function openLightbox(postId, context){
+  var posts=(context==='saved')?loadSaved():loadPosts();
+  var idx=posts.findIndex(function(p){return p.id===postId;});
+  if(idx<0)return;
+  _lbPosts=posts;_lbIdx=idx;
   var lb=document.getElementById('bw-lightbox');
   if(!lb)return;
   lb.classList.add('bw-lb-open');
@@ -1189,7 +1212,7 @@ function renderFeed(){
     colEl.style.height=MAX_COL_H+'px';
     container.appendChild(colEl);
     col.items.forEach(function(item){
-      var card=renderCard(item.post,item.post.own,item.idx);
+      var card=renderCard(item.post,item.post.own,item.idx,false,'feed');
       card.style.width=item.cardW+'px';
       card.style.flex='1 1 auto';
       colEl.appendChild(card);
@@ -1230,7 +1253,7 @@ function renderSaved(){/* saved gallery — journal buttons enabled */
     colEl.style.height=MAX_COL_H+'px';
     container.appendChild(colEl);
     col.items.forEach(function(item){
-      var card=renderCard(item.post,item.post.own,item.idx,true);
+      var card=renderCard(item.post,item.post.own,item.idx,true,'saved');
       card.style.width=item.cardW+'px';
       card.style.flex='1 1 auto';
       colEl.appendChild(card);
