@@ -158,9 +158,23 @@ body{background:#EEE0CC}
 #site-footer path[fill="#fdd306"],#site-footer path[fill="#FFD400"]{fill:#FF6FAA}
 
 /* ── RESPONSIVE ── */
-@media(max-width:1023px){
+@media(min-width:768px) and (max-width:1023px){
   .bw-feed-inner,.bw-write-inner,.bw-saved-inner{padding:0 32px}
   .bw-intro-blurb{margin-top:-200px}
+  /* explore: constrain header text to central 8 of 12 columns */
+  .bw-feed{margin-top:360px}
+  .bw-explore-header{
+    padding-left:calc(100vw/6);   /* 2 columns */
+    padding-right:calc(100vw/6);  /* 2 columns */
+    margin-top:140px;
+  }
+  .bw-section-desc{max-width:100%}
+  /* saved posts: constrain heading to central 8 columns */
+  .bw-saved-inner{
+    max-width:none;
+    padding-left:calc(100vw/6);
+    padding-right:calc(100vw/6);
+  }
 }
 @media(max-width:767px){
   #bw-hero-headline{font-size:clamp(80px,22vw,260px)}
