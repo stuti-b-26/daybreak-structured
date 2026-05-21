@@ -274,9 +274,13 @@ body{background:#EEE0CC;position:relative}
 <!-- MAIN CONTENT -->
 <div id="top-paper" style="position:absolute;top:0;left:0;width:100%;z-index:999;pointer-events:none">
   <img src="top paper.svg" alt="" aria-hidden="true" style="width:100%;height:auto;display:block">
+  <img src="orange top.svg" alt="" aria-hidden="true" style="width:100%;height:auto;display:block">
 </div>
 
-<main id="page-main" style="min-height:60vh;padding-top:var(--hh)"></main>
+<!-- spacer: header (64px) + top paper (532/1440 vw) + orange top (1386/1438 vw) -->
+<div aria-hidden="true" style="height:calc(var(--hh) + 36.94vw + 96.38vw)"></div>
+
+<main id="page-main" style="min-height:60vh"></main>
 
 <!-- FOOTER -->
 <footer id="site-footer">
