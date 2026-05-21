@@ -109,6 +109,8 @@ body{background:#EEE0CC}
 .bw-inspired-zone{position:relative;margin-top:-55px;z-index:1}
 .bw-write-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
 .bw-write-bg img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.bw-bushes{width:100%;line-height:0;position:relative;z-index:2;margin-bottom:-100px;pointer-events:none}
+.bw-bushes img{width:100%;height:auto;display:block}
 
 /* ── FLOWER VINES DIVIDER ── */
 .bw-flower-vines{width:100%;line-height:0;position:relative;z-index:1}
@@ -136,7 +138,7 @@ body{background:#EEE0CC}
 .bw-toast.bw-toast--show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ── SAVED POSTS ── */
-.bw-saved{padding:64px 0 80px;background:#EEE0CC;margin-top:80px;position:relative;z-index:0}
+.bw-saved{padding:64px 0 80px;background:#EEE0CC;margin-top:0;padding-top:140px;position:relative;z-index:0}
 .bw-saved-inner{max-width:1200px;margin:0 auto;padding:0 48px}
 .bw-saved-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.2vw,48px);color:#000;margin-bottom:28px}
 .bw-saved-empty-card{background:#2e7d32;border-radius:20px;padding:48px 32px;text-align:center;max-width:480px}
@@ -385,6 +387,11 @@ body{background:#EEE0CC}
         </div>
       </div>
     </section>
+
+    <!-- BUSHES -->
+    <div class="bw-bushes" aria-hidden="true">
+      <img src="bushes.svg" alt="">
+    </div>
   </div>
 
   <!-- SAVED POSTS -->
