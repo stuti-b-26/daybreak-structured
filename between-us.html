@@ -145,8 +145,8 @@ body{background:#EEE0CC}
 .bw-saved-empty-card p{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#000;line-height:1.65}
 
 /* ── BOTTOM WALL ── */
-.bw-bottom-wall{width:130vw;line-height:0;position:relative;z-index:1;left:50%;transform:translateX(-50%);overflow:hidden}
-.bw-bottom-wall img{width:130vw;height:auto;display:block}
+.bw-bottom-wall{width:145vw;line-height:0;position:relative;z-index:1;left:50%;transform:translateX(-50%);overflow:hidden}
+.bw-bottom-wall img{width:145vw;height:auto;display:block}
 
 
 /* ── HEADER / FOOTER OVERRIDES ── */
@@ -1146,11 +1146,15 @@ function renderSaved(){
   container.id='bw-saved-list';
   scrollEl.insertBefore(container,scrollEl.firstChild);
 
-  if(empty){
-    container.appendChild(empty);
-    empty.style.display=saved.length?'none':'block';
+  if(!saved.length){
+    /* empty state: bypass the flex gallery container, show centered message */
+    container.style.width='100%';
+    container.style.display='flex';
+    container.style.justifyContent='center';
+    if(empty){container.appendChild(empty);empty.style.display='block';}
+    return;
   }
-  if(!saved.length)return;
+  if(empty)empty.style.display='none';
 
   var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
   var packedCols=rearrangeGallery(saved,MAX_COL_H);
