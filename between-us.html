@@ -141,9 +141,12 @@ body{background:#EEE0CC}
 .bw-saved{padding:0 0 80px;background:transparent;position:relative;z-index:3;margin-top:30px}
 .bw-saved-inner{max-width:1200px;margin:0 auto;padding:0 48px}
 .bw-saved-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.2vw,48px);color:#000;margin-bottom:16px;padding-top:16px;text-align:center}
-.bw-saved-empty-card{background:transparent;padding:24px 32px;text-align:center;max-width:560px;margin:0 auto}
+.bw-saved-empty-card{background:transparent;padding:24px 32px;text-align:center;max-width:560px;margin:0 auto;width:100%}
 .bw-saved-empty-card p{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#000;line-height:1.65}
 
+/* ── BOTTOM WALL ── */
+.bw-bottom-wall{width:100%;line-height:0;margin-top:calc(66.67vh + 16px);position:relative;z-index:1}
+.bw-bottom-wall img{width:100%;height:auto;display:block}
 
 
 /* ── HEADER / FOOTER OVERRIDES ── */
@@ -408,7 +411,10 @@ body{background:#EEE0CC}
     </div>
   </section>
 
-  <!-- FLOWER STRIP -->
+  <!-- BOTTOM WALL -->
+  <div class="bw-bottom-wall" aria-hidden="true">
+    <img src="bottom%20wall.svg" alt="">
+  </div>
 
 </main>
 
