@@ -125,8 +125,482 @@
 <path d="M169 96.645C168.544 97.2656 165.855 99.8818 166.702 97.5555C167.627 95.079 168.928 97.4276 169 96.645Z" fill="#F1BAF4"/>
 
 
+<!-- PROFILE PAGE STYLES -->
+<style>
+/* ── PROFILE PAGE ───────────────────────────────────────────── */
+#page-main{padding-top:var(--hh);background:#fff}
+
+/* Section label */
+.prof-label{font-family:var(--font-logo);font-size:clamp(32px,5vw,72px);font-weight:400;line-height:1.1;color:#000;margin:0 0 8px}
+.prof-sublabel{font-family:var(--font-body);font-size:clamp(14px,1.3vw,17px);color:rgba(0,0,0,.55);margin:0 0 40px}
+
+/* ── GALLERY / WELCOME ─────────────────────────────────────── */
+#prof-gallery{background:#000;padding:clamp(48px,7vw,100px) 0;overflow:hidden;position:relative}
+.prof-gallery-welcome{text-align:center;margin-bottom:clamp(32px,4vw,56px);position:relative;z-index:2}
+.prof-gallery-hey{font-family:var(--font-logo);font-size:clamp(36px,6.5vw,96px);font-weight:400;color:#fff;line-height:1.05;margin:0}
+.prof-gallery-hey .hey-yellow{color:var(--yellow)}
+.prof-gallery-sub{font-family:var(--font-body);font-size:clamp(14px,1.4vw,18px);color:rgba(255,255,255,.65);margin:12px 0 0}
+
+/* Carousel */
+.prof-carousel-wrap{position:relative}
+.prof-carousel{display:flex;gap:clamp(16px,2vw,28px);padding:20px clamp(20px,8vw,140px) 32px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;cursor:grab}
+.prof-carousel::-webkit-scrollbar{height:4px}
+.prof-carousel::-webkit-scrollbar-track{background:rgba(255,255,255,.1);border-radius:999px}
+.prof-carousel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3);border-radius:999px}
+.prof-carousel.is-dragging{cursor:grabbing;user-select:none}
+
+/* Polaroid */
+.polaroid{flex:0 0 auto;width:clamp(160px,18vw,240px);background:#fff;padding:clamp(10px,1.2vw,16px) clamp(10px,1.2vw,16px) clamp(24px,3vw,40px);border:2px solid rgba(0,0,0,.12);box-shadow:6px 6px 0 0 rgba(255,255,255,.15);scroll-snap-align:start;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.polaroid:nth-child(odd){transform:rotate(-3deg)}
+.polaroid:nth-child(even){transform:rotate(2.5deg)}
+.polaroid:nth-child(3n){transform:rotate(-1.5deg)}
+.polaroid:hover{transform:rotate(0deg) scale(1.04) translateY(-6px)!important;z-index:2;position:relative}
+.polaroid-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;background:#eee}
+.polaroid-img-placeholder{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(135deg,var(--c1,#ffd400) 0%,var(--c2,#f5a04a) 100%)}
+.polaroid-caption{font-family:var(--font-body);font-size:clamp(10px,1vw,13px);color:#555;text-align:center;margin-top:8px;min-height:16px}
+
+/* ── MOOD TRACKER ──────────────────────────────────────────── */
+#prof-mood{padding:clamp(60px,8vw,120px) 0;background:#fff;position:relative;overflow:hidden}
+.mood-inner{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,5vw,80px);align-items:start}
+.mood-left{}
+.mood-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:clamp(28px,3vw,44px)}
+.mood-filter-btn{font-family:var(--font-body);font-size:13px;font-weight:600;padding:8px 18px;border:2px solid #000;border-radius:999px;background:#fff;cursor:pointer;box-shadow:4px 4px 0 0 #000;transition:box-shadow .08s ease,transform .08s ease,background .08s ease}
+.mood-filter-btn.active{background:#000;color:#fff;box-shadow:2px 2px 0 0 #000}
+.mood-filter-btn:active{box-shadow:1px 1px 0 0 #000;transform:scale(.96)}
+
+/* Bubble visualization */
+.mood-bubbles{position:relative;width:100%;aspect-ratio:1.2/1;min-height:220px}
+.mood-bubble{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-weight:700;color:#000;font-size:clamp(11px,1.1vw,14px);text-align:center;line-height:1.2;cursor:default;transition:width .5s cubic-bezier(.34,1.56,.64,1),height .5s cubic-bezier(.34,1.56,.64,1),top .5s cubic-bezier(.34,1.56,.64,1),left .5s cubic-bezier(.34,1.56,.64,1),font-size .5s ease;user-select:none}
+.mood-bubble.playful{background:#5dde60;top:25%;left:30%}
+.mood-bubble.tired{background:#7de8f5;top:18%;left:5%}
+.mood-bubble.curious{background:#e8a8f0;top:38%;left:2%}
+.mood-bubble.hopeful{background:var(--yellow);top:20%;left:55%}
+.mood-bubble.restless{background:#f5a04a;top:55%;left:35%}
+
+/* Empty mood state */
+.mood-empty{display:none;text-align:center;padding:40px 24px;border:2px dashed rgba(0,0,0,.2);border-radius:20px}
+.mood-empty.show{display:block}
+.mood-empty p{font-family:var(--font-body);font-size:15px;color:rgba(0,0,0,.55);margin:0 0 16px}
+.mood-empty a{font-family:var(--font-body);font-size:14px;font-weight:700;color:#000;text-decoration:none;padding:10px 20px;border:2px solid #000;border-radius:999px;display:inline-block;box-shadow:4px 4px 0 0 #000;transition:box-shadow .08s ease,transform .08s ease}
+.mood-empty a:active{box-shadow:1px 1px 0 0 #000;transform:scale(.96)}
+
+.mood-right{}
+.mood-remark{font-family:var(--font-body);font-size:clamp(13px,1.2vw,16px);color:rgba(0,0,0,.6);line-height:1.6;margin:0}
+.mood-remark strong{font-weight:700;color:#000}
+.mood-legend{display:flex;flex-direction:column;gap:10px;margin-top:clamp(24px,3vw,36px)}
+.mood-legend-item{display:flex;align-items:center;gap:10px;font-family:var(--font-body);font-size:13px;color:#000}
+.mood-legend-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+
+/* Mood deco scribble */
+.mood-scrib{position:absolute;pointer-events:none;right:-40px;bottom:40px;width:clamp(80px,12vw,180px);opacity:.5}
+
+/* ── SAVED POSTS ───────────────────────────────────────────── */
+#prof-saved{padding:clamp(60px,8vw,120px) 0;background:#F7F4EF;position:relative;overflow:hidden}
+.saved-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(200px,20vw,260px),1fr));gap:clamp(14px,1.6vw,22px);margin-top:40px}
+.saved-card{background:#fff;border:3px solid var(--card-color,#000);border-radius:18px;padding:clamp(14px,1.5vw,20px);box-shadow:5px 5px 0 0 var(--card-color,#000);transition:box-shadow .08s ease,transform .08s ease;cursor:pointer;position:relative}
+.saved-card:hover{box-shadow:8px 8px 0 0 var(--card-color,#000);transform:translateY(-2px)}
+.saved-card:active{box-shadow:2px 2px 0 0 var(--card-color,#000);transform:scale(.98)}
+.saved-card-user{font-family:var(--font-body);font-size:12px;font-weight:700;color:rgba(0,0,0,.4);margin:0 0 8px;letter-spacing:.04em}
+.saved-card-text{font-family:var(--font-body);font-size:clamp(12px,1.1vw,14px);color:#000;line-height:1.55;margin:0 0 12px}
+.saved-card-tag{display:inline-block;font-family:var(--font-body);font-size:11px;font-weight:700;background:#f5c842;color:#000;padding:3px 10px;border-radius:999px;border:1.5px solid #000}
+.saved-card-media{width:100%;border-radius:10px;margin-bottom:10px;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:32px;border:2px solid rgba(0,0,0,.08)}
+.saved-card-save{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:2px solid rgba(0,0,0,.2);background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:border-color .08s}
+.saved-card-save:hover{border-color:#000}
+
+/* ── JOURNAL ENTRIES ───────────────────────────────────────── */
+#prof-journal{padding:clamp(60px,8vw,120px) 0;background:#fff;position:relative;overflow:hidden}
+.journal-empty{text-align:center;padding:clamp(48px,6vw,80px) 20px;position:relative}
+.journal-empty p{font-family:var(--font-body);font-size:clamp(14px,1.3vw,17px);color:rgba(0,0,0,.5);margin:0 0 28px}
+.journal-cta-btn{font-family:var(--font-body);font-size:15px;font-weight:700;color:#000;text-decoration:none;padding:14px 28px;border:2.5px solid #000;border-radius:999px;display:inline-block;box-shadow:6px 6px 0 0 #000;transition:box-shadow .08s ease,transform .08s ease;background:#5dde60}
+.journal-cta-btn:hover{box-shadow:8px 8px 0 0 #000;transform:translateY(-1px)}
+.journal-cta-btn:active{box-shadow:2px 2px 0 0 #000;transform:scale(.96)}
+.journal-entries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(240px,24vw,320px),1fr));gap:clamp(16px,2vw,24px);margin-top:40px}
+.journal-card{background:#fff;border:3px solid #000;border-radius:20px;padding:clamp(16px,2vw,24px);box-shadow:6px 6px 0 0 #000;transition:box-shadow .08s ease,transform .08s ease;cursor:pointer}
+.journal-card:hover{box-shadow:8px 8px 0 0 #000;transform:translateY(-2px)}
+.journal-card-date{font-family:var(--font-body);font-size:12px;font-weight:600;color:rgba(0,0,0,.4);margin:0 0 10px;letter-spacing:.04em}
+.journal-card-title{font-family:var(--font-logo);font-size:clamp(18px,2vw,26px);margin:0 0 8px;line-height:1.15}
+.journal-card-preview{font-family:var(--font-body);font-size:13px;color:rgba(0,0,0,.6);line-height:1.55;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Journal deco */
+.journal-deco{position:absolute;pointer-events:none}
+.journal-deco--tr{top:40px;right:clamp(20px,6vw,80px);width:clamp(60px,8vw,120px)}
+.journal-deco--bl{bottom:40px;left:clamp(20px,5vw,60px);width:clamp(50px,7vw,100px)}
+
+/* ── MY HAPPINESS ──────────────────────────────────────────── */
+#prof-happiness{padding:clamp(60px,8vw,120px) 0;background:#F7F4EF;position:relative;overflow:hidden}
+.happiness-desc{font-family:var(--font-body);font-size:clamp(13px,1.2vw,16px);color:rgba(0,0,0,.55);margin:0 0 clamp(24px,3vw,40px);max-width:480px}
+.happiness-pills{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:clamp(24px,3vw,40px)}
+.happiness-pill{font-family:var(--font-body);font-size:clamp(12px,1.1vw,15px);font-weight:600;padding:clamp(8px,1vw,12px) clamp(14px,1.5vw,20px);border:2.5px solid #000;border-radius:999px;background:#fff;color:#000;box-shadow:4px 4px 0 0 #000;transition:box-shadow .08s ease,transform .08s ease,background .08s ease;cursor:default;display:flex;align-items:center;gap:6px}
+.happiness-pill:hover{box-shadow:6px 6px 0 0 #000;transform:translateY(-1px)}
+.happiness-pill .pill-icon{font-size:16px}
+.happiness-add-btn{font-family:var(--font-body);font-size:14px;font-weight:700;padding:12px 22px;border:2.5px solid #000;border-radius:999px;background:var(--yellow);color:#000;box-shadow:5px 5px 0 0 #000;cursor:pointer;transition:box-shadow .08s ease,transform .08s ease;margin-top:8px}
+.happiness-add-btn:hover{box-shadow:7px 7px 0 0 #000;transform:translateY(-1px)}
+.happiness-add-btn:active{box-shadow:2px 2px 0 0 #000;transform:scale(.96)}
+
+/* Happiness deco */
+.happiness-deco{position:absolute;pointer-events:none;right:clamp(10px,5vw,80px);top:50%;transform:translateY(-50%);width:clamp(100px,15vw,220px);opacity:.4}
+
+/* ── PROFILE CTA ───────────────────────────────────────────── */
+#prof-cta{background:#000;padding:clamp(80px,10vw,140px) 0;position:relative;overflow:hidden;text-align:center}
+.prof-cta-text{font-family:var(--font-body);font-size:clamp(24px,4vw,58px);font-weight:700;color:#fff;line-height:1.2;margin:0;position:relative;z-index:2}
+.prof-cta-text .cta-yellow{color:var(--yellow)}
+.prof-cta-scrib-l{position:absolute;left:clamp(10px,5vw,80px);bottom:clamp(10px,4vw,60px);width:clamp(60px,8vw,130px);pointer-events:none}
+.prof-cta-scrib-r{position:absolute;right:clamp(10px,5vw,80px);top:clamp(10px,3vw,50px);width:clamp(50px,7vw,110px);pointer-events:none}
+
+/* ── RESPONSIVE ────────────────────────────────────────────── */
+@media(max-width:900px){
+  .mood-inner{grid-template-columns:1fr}
+  .mood-bubbles{min-height:260px}
+  .mood-right{margin-top:24px}
+}
+@media(max-width:767px){
+  .saved-grid{grid-template-columns:1fr 1fr}
+  .mood-bubbles{min-height:220px}
+  .mood-bubble{font-size:10px}
+  .happiness-deco{display:none}
+  .prof-gallery-hey{font-size:clamp(28px,9vw,54px)}
+}
+@media(max-width:480px){
+  .saved-grid{grid-template-columns:1fr}
+  .journal-entries-grid{grid-template-columns:1fr}
+  .polaroid{width:clamp(140px,40vw,180px)}
+}
+/* scroll reveal */
+.prof-reveal{opacity:0;transform:translateY(50px);transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1)}
+.prof-reveal.is-visible{opacity:1;transform:translateY(0)}
+.prof-bounce{opacity:0;transform:scale(.7);transition:opacity .45s cubic-bezier(.34,1.56,.64,1),transform .45s cubic-bezier(.34,1.56,.64,1)}
+.prof-bounce.is-visible{opacity:1;transform:scale(1)}
+</style>
+
 <!-- MAIN CONTENT -->
-<main id="page-main" style="min-height:60vh;padding-top:var(--hh)"></main>
+<main id="page-main">
+
+  <!-- ── GALLERY / WELCOME ──────────────────────────────────── -->
+  <section id="prof-gallery" aria-label="Photo gallery">
+    <div class="prof-gallery-welcome">
+      <h1 class="prof-gallery-hey">how's it going, <span class="hey-yellow">john?</span></h1>
+      <p class="prof-gallery-sub">looks like it's been going pretty good! here's proof.</p>
+    </div>
+    <div class="prof-carousel-wrap">
+      <div class="prof-carousel" id="prof-carousel" role="list" aria-label="Your photos">
+
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#ffd400;--c2:#f5a04a">🌿</div>
+          <p class="polaroid-caption">jun 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#5dde60;--c2:#7de8f5">☀️</div>
+          <p class="polaroid-caption">jun 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#e8a8f0;--c2:#c3a8f5">🌸</div>
+          <p class="polaroid-caption">may 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#7de8f5;--c2:#5dde60">🎈</div>
+          <p class="polaroid-caption">may 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#f5a04a;--c2:#ffd400">🍊</div>
+          <p class="polaroid-caption">apr 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#c3a8f5;--c2:#e8a8f0">🦋</div>
+          <p class="polaroid-caption">apr 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#5dde60;--c2:#ffd400">🌻</div>
+          <p class="polaroid-caption">mar 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#7de8f5;--c2:#c3a8f5">🌊</div>
+          <p class="polaroid-caption">mar 2025</p>
+        </div>
+        <div class="polaroid" role="listitem">
+          <div class="polaroid-img-placeholder" style="--c1:#ffd400;--c2:#5dde60">⭐</div>
+          <p class="polaroid-caption">feb 2025</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MOOD TRACKER ───────────────────────────────────────── -->
+  <section id="prof-mood" aria-label="Mood tracker">
+    <div class="gc">
+      <div class="prof-reveal">
+        <h2 class="prof-label">mood tracker</h2>
+        <p class="prof-sublabel">how have you been feeling lately? you might be happier than you thought!</p>
+      </div>
+      <div class="mood-inner prof-reveal">
+        <div class="mood-left">
+          <div class="mood-filters" role="group" aria-label="Filter mood data">
+            <button class="mood-filter-btn active" data-period="7">last 7 days</button>
+            <button class="mood-filter-btn" data-period="30">last 30 days</button>
+            <button class="mood-filter-btn" data-period="90">last 3 months</button>
+          </div>
+
+          <!-- bubble chart (has data) -->
+          <div class="mood-bubbles" id="mood-bubbles" aria-label="Mood bubble visualization">
+            <div class="mood-bubble playful" data-mood="playful" style="width:130px;height:130px;left:28%;top:20%">playful</div>
+            <div class="mood-bubble tired" data-mood="tired" style="width:72px;height:72px;left:6%;top:22%">tired</div>
+            <div class="mood-bubble curious" data-mood="curious" style="width:84px;height:84px;left:3%;top:52%">curious</div>
+            <div class="mood-bubble hopeful" data-mood="hopeful" style="width:100px;height:100px;left:56%;top:18%">hopeful</div>
+            <div class="mood-bubble restless" data-mood="restless" style="width:66px;height:66px;left:52%;top:62%">restless</div>
+          </div>
+
+          <!-- empty state (no data) - hidden by default -->
+          <div class="mood-empty" id="mood-empty">
+            <p>no mood data yet! head to the sticker maker to express how you're feeling, or pick a mood to discover a curated page.</p>
+            <a href="sticker-maker.html">go to sticker maker →</a>
+          </div>
+        </div>
+        <div class="mood-right">
+          <p class="mood-remark" id="mood-remark">
+            looks like you were <strong>mostly playful</strong> this past week.<br><br>
+            good emotions came out on top.<br><br>
+            hope we were to blame :)
+          </p>
+          <div class="mood-legend" aria-label="Mood colour key">
+            <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#5dde60"></span>playful</div>
+            <div class="mood-legend-item"><span class="mood-legend-dot" style="background:var(--yellow)"></span>hopeful</div>
+            <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#7de8f5"></span>tired</div>
+            <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#e8a8f0"></span>curious</div>
+            <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#f5a04a"></span>restless</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- decorative scribble -->
+    <svg class="mood-scrib" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M8 40 Q30 10 60 40 Q90 70 112 40" stroke="#f5a04a" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M4 55 Q35 25 65 55 Q95 80 116 55" stroke="#f5a04a" stroke-width="2.5" stroke-linecap="round" fill="none" opacity=".5"/>
+    </svg>
+  </section>
+
+  <!-- ── SAVED POSTS ─────────────────────────────────────────── -->
+  <section id="prof-saved" aria-label="Saved posts">
+    <div class="gc">
+      <div class="prof-reveal">
+        <h2 class="prof-label">your saved posts</h2>
+        <p class="prof-sublabel">things that made you feel seen, or just really cracked you up.</p>
+      </div>
+
+      <div class="saved-grid">
+
+        <div class="saved-card prof-bounce" style="--card-color:#5dde60">
+          <p class="saved-card-user">User 7432</p>
+          <p class="saved-card-text">does anyone else feel completely fine and then a random song destroys them? asking for a friend.</p>
+          <span class="saved-card-tag">relatable</span>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+        <div class="saved-card prof-bounce" style="--card-color:#e8344a">
+          <div class="saved-card-media" style="background:#fff0f0">🍕</div>
+          <p class="saved-card-user">User 4986</p>
+          <p class="saved-card-text">Today I noticed the sky has been beautiful lately.</p>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+        <div class="saved-card prof-bounce" style="--card-color:#c3a8f5">
+          <p class="saved-card-user">User 2198</p>
+          <p class="saved-card-text">I found something important — you can enter a room, say something confusing, and leave. avoid thinking about it for days.</p>
+          <span class="saved-card-tag">secret strength</span>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+        <div class="saved-card prof-bounce" style="--card-color:#7de8f5">
+          <p class="saved-card-user">User 9553</p>
+          <p class="saved-card-text">Finally watched a film before anything else could spoil it. That film has made me think so much recently. Therapy who?</p>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+        <div class="saved-card prof-bounce" style="--card-color:#f5a04a">
+          <div class="saved-card-media" style="background:#fff5e0">🐱</div>
+          <p class="saved-card-user">User 8055</p>
+          <p class="saved-card-text">Having a cat makes the morning routine actually enjoyable.</p>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+        <div class="saved-card prof-bounce" style="--card-color:#0E9E1B">
+          <p class="saved-card-user">User 4053</p>
+          <p class="saved-card-text">Today I kept it together at the happiest place on earth. Not going to pat myself on the back — don't go planned.</p>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+        <div class="saved-card prof-bounce" style="--card-color:#3D7EFF">
+          <div class="saved-card-media" style="background:#e8f0ff">🍦</div>
+          <p class="saved-card-user">User 8243</p>
+          <p class="saved-card-text">I accomplished a happy chaos and decided things don't always need to go to plan.</p>
+          <span class="saved-card-tag">wholesome</span>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+        <div class="saved-card prof-bounce" style="--card-color:#e8a8f0">
+          <p class="saved-card-user">User 2498</p>
+          <p class="saved-card-text">This morning enables me the morning — and a little grace on my face. be a little gracious, be kind.</p>
+          <button class="saved-card-save" aria-label="Unsave post">♡</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── JOURNAL ENTRIES ────────────────────────────────────── -->
+  <section id="prof-journal" aria-label="Journal entries">
+    <!-- decorative svgs -->
+    <svg class="journal-deco journal-deco--tr" viewBox="0 0 100 80" fill="none" aria-hidden="true">
+      <path d="M10 70 Q50 10 90 40" stroke="#ffd400" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M5 55 Q45 5 85 30" stroke="#ffd400" stroke-width="3" stroke-linecap="round" fill="none" opacity=".5"/>
+    </svg>
+    <svg class="journal-deco journal-deco--bl" viewBox="0 0 80 80" fill="none" aria-hidden="true">
+      <path d="M70 10 Q30 40 10 70" stroke="#5dde60" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <circle cx="10" cy="70" r="6" fill="#5dde60"/>
+    </svg>
+
+    <div class="gc">
+      <div class="prof-reveal">
+        <h2 class="prof-label">your journal entries</h2>
+        <p class="prof-sublabel">little love letters you wrote to yourself.</p>
+      </div>
+
+      <!-- Empty state — shown when no entries -->
+      <div class="journal-empty prof-reveal" id="journal-empty-state">
+        <p>you haven't made any journal entries yet.</p>
+        <a href="just-for-you.html" class="journal-cta-btn">write some now in just for you!</a>
+      </div>
+
+      <!-- Entries grid — hidden when empty (add class 'has-entries' to section to show) -->
+      <div class="journal-entries-grid" id="journal-entries-grid" style="display:none">
+        <!-- entries would be populated here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MY HAPPINESS ───────────────────────────────────────── -->
+  <section id="prof-happiness" aria-label="My happiness">
+    <!-- decorative blob -->
+    <svg class="happiness-deco" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+      <path d="M160 40 Q190 80 170 130 Q150 175 100 180 Q50 185 20 145 Q-10 105 15 60 Q40 15 90 10 Q140 5 160 40Z" fill="#ffd400" opacity=".3"/>
+    </svg>
+
+    <div class="gc">
+      <div class="prof-reveal">
+        <h2 class="prof-label">my happiness</h2>
+        <p class="happiness-desc">what makes you happy? add an item here so you can come back to it if you're feeling a little lost.</p>
+      </div>
+
+      <div class="happiness-pills prof-reveal" id="happiness-pills" aria-label="Happiness activities">
+        <span class="happiness-pill"><span class="pill-icon">🦧</span>orangutans</span>
+        <span class="happiness-pill"><span class="pill-icon">🍳</span>cooking</span>
+        <span class="happiness-pill"><span class="pill-icon">👫</span>my friends</span>
+        <span class="happiness-pill"><span class="pill-icon">🧱</span>building legos</span>
+        <span class="happiness-pill"><span class="pill-icon">🎮</span>playing video games</span>
+      </div>
+
+      <button class="happiness-add-btn prof-reveal" id="add-happiness-btn" aria-label="Add to my happiness">
+        + add more to my happiness
+      </button>
+    </div>
+  </section>
+
+  <!-- ── PROFILE CTA ─────────────────────────────────────────── -->
+  <section id="prof-cta" aria-label="Call to action">
+    <!-- decorative scribbles -->
+    <svg class="prof-cta-scrib-l" viewBox="0 0 100 70" fill="none" aria-hidden="true">
+      <path d="M5 60 Q30 20 55 45 Q80 65 95 35" stroke="#ffd400" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <path d="M10 65 Q35 30 60 50" stroke="#ffd400" stroke-width="2.5" stroke-linecap="round" fill="none" opacity=".5"/>
+    </svg>
+    <svg class="prof-cta-scrib-r" viewBox="0 0 90 80" fill="none" aria-hidden="true">
+      <path d="M80 5 Q50 35 20 20 Q5 12 10 50 Q15 80 60 75" stroke="#5dde60" stroke-width="4" stroke-linecap="round" fill="none"/>
+    </svg>
+
+    <div class="gc">
+      <p class="prof-cta-text">
+        come here if you ever feel lost,<br>or need a little help<br>
+        finding your <span class="cta-yellow">happiness again.</span><br>
+        we're keeping your <span class="cta-yellow">happiness safe.</span>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ── PROFILE PAGE SCRIPTS ──────────────────────────────────── */
+
+/* scroll reveal */
+(function(){
+  var els=document.querySelectorAll('.prof-reveal,.prof-bounce');
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('is-visible')}
+    });
+  },{rootMargin:'0px 0px -60px 0px',threshold:.1});
+  els.forEach(function(el){obs.observe(el)});
+})();
+
+/* carousel drag */
+(function(){
+  var c=document.getElementById('prof-carousel');
+  if(!c)return;
+  var down=false,sx=0,sl=0;
+  c.addEventListener('mousedown',function(e){down=true;sx=e.pageX;sl=c.scrollLeft;c.classList.add('is-dragging')});
+  window.addEventListener('mouseup',function(){down=false;c.classList.remove('is-dragging')});
+  window.addEventListener('mousemove',function(e){if(!down)return;e.preventDefault();c.scrollLeft=sl-(e.pageX-sx)});
+})();
+
+/* mood filter */
+(function(){
+  var btns=document.querySelectorAll('.mood-filter-btn');
+  /* bubble sizes per period [playful,tired,curious,hopeful,restless] */
+  var periods={
+    '7':[130,72,84,100,66],
+    '30':[110,90,100,115,80],
+    '90':[150,60,70,90,55]
+  };
+  var remarks={
+    '7':'looks like you were <strong>mostly playful</strong> this past week.<br><br>good emotions came out on top.<br><br>hope we were to blame :)',
+    '30':'you\'ve been leaning <strong>hopeful</strong> this month.<br><br>something good\'s clearly been brewing.<br><br>we love that for you :)',
+    '90':'the last 3 months tell a story of someone <strong>mostly playful and hopeful.</strong><br><br>growth looks good on you.'
+  };
+  var moods=['playful','tired','curious','hopeful','restless'];
+  btns.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      btns.forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      var p=btn.dataset.period;
+      var sizes=periods[p];
+      moods.forEach(function(m,i){
+        var el=document.querySelector('.mood-bubble.'+m);
+        if(!el)return;
+        var s=sizes[i];
+        el.style.width=s+'px';
+        el.style.height=s+'px';
+      });
+      var remark=document.getElementById('mood-remark');
+      if(remark)remark.innerHTML=remarks[p];
+    });
+  });
+})();
+
+/* add happiness pill */
+(function(){
+  var btn=document.getElementById('add-happiness-btn');
+  var pills=document.getElementById('happiness-pills');
+  if(!btn||!pills)return;
+  btn.addEventListener('click',function(){
+    var text=prompt('what makes you happy?');
+    if(!text||!text.trim())return;
+    var pill=document.createElement('span');
+    pill.className='happiness-pill prof-bounce is-visible';
+    pill.textContent=text.trim();
+    pills.appendChild(pill);
+  });
+})();
+
+</script>
 
 <!-- FOOTER -->
 <footer id="site-footer">
