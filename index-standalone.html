@@ -445,7 +445,7 @@ img{display:block;max-width:100%}
     </div>
     <div class="nav-item" data-nav="about">
       <span class="nav-sun" aria-hidden="true"></span>
-      <button class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
+      <a href="about.html" class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</a>
       <div class="dropdown" id="dropdown-about" role="menu">
         <a class="dropdown-link" href="about.html#our-mission" role="menuitem">our mission</a>
         <a class="dropdown-link" href="about.html#our-approach" role="menuitem">our approach</a>
@@ -476,7 +476,7 @@ img{display:block;max-width:100%}
     </div>
     <div class="nav-item" data-nav="about">
       <span class="nav-sun" aria-hidden="true"></span>
-      <button class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
+      <a href="about.html" class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</a>
       <div class="dropdown" id="dropdown-about-t" role="menu">
         <a class="dropdown-link" href="about.html#our-mission" role="menuitem">our mission</a>
         <a class="dropdown-link" href="about.html#our-approach" role="menuitem">our approach</a>
@@ -1837,7 +1837,7 @@ img{display:block;max-width:100%}
             </ul>
           </div>
           <div class="footer-col">
-            <h4>about</h4>
+            <h4><a href="about.html">about</a></h4>
             <ul>
               <li><a href="about.html#our-mission">our mission</a></li>
               <li><a href="about.html#our-approach">our approach</a></li>
@@ -1871,7 +1871,7 @@ img{display:block;max-width:100%}
     <div class="ft-nav">
       <div class="footer-col"><h4>wander</h4><ul><li><a href="mess-hall.html">mess hall</a></li><li><a href="silly-decisions.html">silly decisions</a></li><li><a href="sticker-maker.html">sticker maker</a></li></ul></div>
       <div class="footer-col"><h4>seek</h4><ul><li><a href="just-for-you.html">just for you</a></li><li><a href="between-us.html">between us</a></li><li><a href="selfless-less.html">selfless-less</a></li></ul></div>
-      <div class="footer-col"><h4>about</h4><ul><li><a href="about.html#our-mission">our mission</a></li><li><a href="about.html#our-approach">our approach</a></li><li><a href="about.html#meet-the-team">meet the team</a></li></ul></div>
+      <div class="footer-col"><h4><a href="about.html">about</a></h4><ul><li><a href="about.html#our-mission">our mission</a></li><li><a href="about.html#our-approach">our approach</a></li><li><a href="about.html#meet-the-team">meet the team</a></li></ul></div>
       <div class="footer-col"><h4>profile</h4><ul><li><a href="#">my happiness</a></li><li><a href="#">gallery</a></li><li><a href="#">mood tracker</a></li><li><a href="#">journal</a></li></ul></div>
     </div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(0,0,0,.12)">
@@ -1954,7 +1954,7 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
     var btn=item.querySelector('.nav-btn'),drop=item.querySelector('.dropdown');
     if(!btn||!drop)return;
     var sun=item.querySelector('.nav-sun');
-    btn.addEventListener('click',function(e){e.stopPropagation();var open=drop.classList.contains('open');closeAll(item);drop.classList.toggle('open',!open);btn.setAttribute('aria-expanded',String(!open));if(sun)sun.classList.toggle('visible',!open)});
+    if(btn.tagName==='A'){item.addEventListener('mouseenter',function(){closeAll(item);drop.classList.add('open');btn.setAttribute('aria-expanded','true');if(sun)sun.classList.add('visible')});item.addEventListener('mouseleave',function(){drop.classList.remove('open');btn.setAttribute('aria-expanded','false');if(sun)sun.classList.remove('visible')})}else{btn.addEventListener('click',function(e){e.stopPropagation();var open=drop.classList.contains('open');closeAll(item);drop.classList.toggle('open',!open);btn.setAttribute('aria-expanded',String(!open));if(sun)sun.classList.toggle('visible',!open)})}
     drop.querySelectorAll('.dropdown-link').forEach(function(link){link.addEventListener('click',function(){document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.toggle('active',b.dataset.key===btn.dataset.key)});drop.querySelectorAll('.dropdown-link').forEach(function(l){l.classList.remove('active')});link.classList.add('active');drop.classList.remove('open');btn.setAttribute('aria-expanded','false');pbtns.forEach(function(pb){pb.classList.remove('active')})})});
   });
   pbtns.forEach(function(btn){btn.addEventListener('click',function(){var isA=btn.classList.contains('active');document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});pbtns.forEach(function(pb){pb.classList.remove('active')});hideSuns(false);closeAll(null);if(!isA)pbtns.forEach(function(pb){pb.classList.add('active')})})});

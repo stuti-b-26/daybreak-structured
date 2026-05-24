@@ -360,7 +360,7 @@
     </div>
     <div class="nav-item" data-nav="about">
       <span class="nav-sun visible" aria-hidden="true"></span>
-      <button class="nav-btn active" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
+      <a href="about.html" class="nav-btn active" data-key="about" aria-haspopup="true" aria-expanded="false">about</a>
       <div class="dropdown" id="dropdown-about" role="menu">
         <a class="dropdown-link" href="#our-mission" role="menuitem">our mission</a>
         <a class="dropdown-link" href="#our-approach" role="menuitem">our approach</a>
@@ -391,7 +391,7 @@
     </div>
     <div class="nav-item" data-nav="about">
       <span class="nav-sun visible" aria-hidden="true"></span>
-      <button class="nav-btn active" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
+      <a href="about.html" class="nav-btn active" data-key="about" aria-haspopup="true" aria-expanded="false">about</a>
       <div class="dropdown" id="dropdown-about-t" role="menu">
         <a class="dropdown-link" href="#our-mission" role="menuitem">our mission</a>
         <a class="dropdown-link" href="#our-approach" role="menuitem">our approach</a>
@@ -888,7 +888,7 @@
     var btn=item.querySelector('.nav-btn'),drop=item.querySelector('.dropdown');
     if(!btn||!drop)return;
     var sun=item.querySelector('.nav-sun');
-    btn.addEventListener('click',function(e){e.stopPropagation();var open=drop.classList.contains('open');closeAll(item);drop.classList.toggle('open',!open);btn.setAttribute('aria-expanded',String(!open));if(sun)sun.classList.toggle('visible',!open)});
+    if(btn.tagName==='A'){item.addEventListener('mouseenter',function(){closeAll(item);drop.classList.add('open');btn.setAttribute('aria-expanded','true');if(sun)sun.classList.add('visible')});item.addEventListener('mouseleave',function(){drop.classList.remove('open');btn.setAttribute('aria-expanded','false');if(sun)sun.classList.remove('visible')})}else{btn.addEventListener('click',function(e){e.stopPropagation();var open=drop.classList.contains('open');closeAll(item);drop.classList.toggle('open',!open);btn.setAttribute('aria-expanded',String(!open));if(sun)sun.classList.toggle('visible',!open)})}
     drop.querySelectorAll('.dropdown-link').forEach(function(link){link.addEventListener('click',function(){document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.toggle('active',b.dataset.key===btn.dataset.key)});drop.querySelectorAll('.dropdown-link').forEach(function(l){l.classList.remove('active')});link.classList.add('active');drop.classList.remove('open');btn.setAttribute('aria-expanded','false');pbtns.forEach(function(pb){pb.classList.remove('active')})})});
   });
   pbtns.forEach(function(btn){btn.addEventListener('click',function(){var isA=btn.classList.contains('active');document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});pbtns.forEach(function(pb){pb.classList.remove('active')});hideSuns(false);closeAll(null);if(!isA)pbtns.forEach(function(pb){pb.classList.add('active')})})});
