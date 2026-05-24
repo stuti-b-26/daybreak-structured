@@ -47,20 +47,99 @@
 .mission-col-1{grid-column:2/span 5}
 .mission-col-2{grid-column:7/span 5}
 
-/* ── OUR APPROACH (placeholder) ── */
+/* ── OUR APPROACH ── */
 #our-approach{
-  background:#fff;padding:80px 0;border-top:1px solid rgba(0,0,0,.08);
+  background:#fff;padding:80px 0 100px;border-top:1px solid rgba(0,0,0,.08);
   position:relative;
 }
 .approach-label{
   font-family:var(--font-logo);font-size:clamp(36px,5vw,72px);font-weight:700;
   color:#000;line-height:1.1;
-  grid-column:2/12;margin-bottom:56px;
+  grid-column:2/12;margin-bottom:40px;
 }
-.approach-placeholder{
-  grid-column:2/12;
-  font-family:var(--font-logo);font-size:clamp(28px,4vw,56px);
-  font-weight:700;color:#000;line-height:1.2;
+.approach-intro-p{
+  grid-column:2/9;
+  font-family:var(--font-body);font-size:clamp(14px,1.3vw,17px);
+  line-height:1.7;color:#000;margin-bottom:72px;
+}
+
+/* wander / seek subsection block */
+.approach-sub{grid-column:2/12;margin-bottom:72px}
+.approach-sub+.approach-sub{
+  padding-top:72px;border-top:1px solid rgba(0,0,0,.08);
+}
+.approach-sub-hd{margin-bottom:40px}
+
+/* pill circle behind heading */
+.approach-pill-wrap{
+  display:inline-flex;align-items:center;
+  position:relative;margin-bottom:16px;
+}
+.approach-pill{
+  position:absolute;left:-0.04em;top:50%;transform:translateY(-50%);
+  width:1.08em;height:1.08em;border-radius:50%;
+  border:2.5px solid #000;z-index:0;
+}
+.approach-pill--green{background:#5dde60}
+.approach-pill--orange{background:#f5a04a}
+.approach-sub-title{
+  font-family:var(--font-logo);font-size:clamp(28px,3.8vw,52px);
+  font-weight:700;color:#000;position:relative;z-index:1;padding-left:2px;
+}
+.approach-sub-intro{
+  font-family:var(--font-body);font-size:clamp(13px,1.2vw,16px);
+  line-height:1.7;color:#000;max-width:560px;
+}
+
+/* individual page items */
+.approach-page{
+  display:flex;align-items:flex-start;
+  gap:clamp(24px,4vw,64px);
+  margin-top:clamp(36px,4.5vw,60px);
+}
+.approach-page--flip{flex-direction:row-reverse}
+.approach-page-info{flex:1;min-width:0}
+.approach-page-name{
+  font-family:var(--font-body);font-size:clamp(17px,1.7vw,22px);
+  font-weight:700;margin-bottom:10px;
+}
+.approach-page-desc{
+  font-family:var(--font-body);font-size:clamp(13px,1.2vw,16px);
+  line-height:1.7;color:#000;
+}
+.approach-page-cta{
+  flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  padding-top:4px;
+}
+
+/* approach CTA buttons — own style so position:relative is safe */
+.approach-cta-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-body);font-size:16px;font-weight:600;color:#000;
+  border:3px solid #000;cursor:pointer;text-decoration:none;text-align:center;
+  position:relative;box-shadow:8px 8px 0 0 #000;
+  transition:box-shadow .08s ease,transform .08s ease;
+  line-height:1.2;
+}
+.approach-cta-btn:active{box-shadow:3px 3px 0 0 #000!important;transform:scale(.93)!important}
+.approach-cta-pill{border-radius:999px;padding:14px 28px}
+.approach-cta-rect{border-radius:16px;padding:16px 28px;max-width:220px}
+.approach-cta-circle{
+  border-radius:50%;width:160px;height:160px;padding:16px;font-size:15px;
+}
+.approach-cta--green{background:#5dde60}
+.approach-cta--orange{background:#f5a04a}
+.approach-cta--pink{background:#e8a8f0}
+.approach-cta--yellow{background:#FFD400}
+.approach-cta--blue{background:#7de8f5}
+.approach-cta--purple{background:#c3a8f5}
+
+/* selfless-less: CTA stacks below text */
+.approach-page--cta-btm{flex-wrap:wrap}
+.approach-page--cta-btm .approach-page-info{flex:0 0 55%;order:0}
+.approach-page--cta-btm .approach-page-cta{
+  flex:0 0 auto;order:1;align-self:flex-end;
 }
 
 /* ── MEET THE TEAM (placeholder) ── */
@@ -98,9 +177,18 @@
   }
   .mission-col-2{display:none}
   .mission-col-1{font-size:clamp(14px,4.2vw,18px)}
-  #our-approach{padding:48px 0}
-  .approach-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
-  .approach-placeholder{grid-column:2/span 8}
+  #our-approach{padding:48px 0 64px}
+  .approach-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px);margin-bottom:24px}
+  .approach-intro-p{grid-column:2/span 8;margin-bottom:48px}
+  .approach-sub{grid-column:2/span 8}
+  .approach-sub+.approach-sub{padding-top:48px}
+  .approach-sub-title{font-size:clamp(24px,6vw,36px)}
+  .approach-page,.approach-page--flip{flex-direction:column}
+  .approach-page--flip{flex-direction:column}
+  .approach-page-cta{width:100%;justify-content:flex-start;margin-top:16px;padding-top:0}
+  .approach-cta-circle{width:130px;height:130px;font-size:13px}
+  .approach-page--cta-btm .approach-page-info{flex:0 0 100%}
+  .approach-page--cta-btm .approach-page-cta{align-self:flex-start}
   #meet-the-team{padding:48px 0 80px}
   .team-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
   .team-placeholder{grid-column:2/span 8}
@@ -306,9 +394,95 @@
     <div class="gc">
       <div class="grid">
         <p class="approach-label" id="approach-heading">our approach</p>
-        <div class="approach-placeholder">
-          coming soon.
-        </div>
+        <p class="approach-intro-p">sometimes you'll want direction, and other times you won't. daybreak meets you where you are with our two sections.</p>
+
+        <!-- ── WANDER ── -->
+        <div class="approach-sub">
+          <div class="approach-sub-hd">
+            <div class="approach-pill-wrap">
+              <span class="approach-pill approach-pill--green" aria-hidden="true"></span>
+              <span class="approach-sub-title">wander</span>
+            </div>
+            <p class="approach-sub-intro">explore through fun and playful activities. wander pages contain small interactions that allow you to bring a little more joy into your day.</p>
+          </div>
+
+          <!-- mess hall -->
+          <div class="approach-page">
+            <div class="approach-page-info">
+              <h4 class="approach-page-name">mess hall</h4>
+              <p class="approach-page-desc">explore a feast of small, funny, tactile, and creative activities designed so that something here puts a smile on your face, no matter where you're starting from. no rules, no wrong answers, no skill required. just play.</p>
+            </div>
+            <div class="approach-page-cta">
+              <a href="mess-hall.html" class="approach-cta-btn approach-cta-rect approach-cta--pink" style="transform:rotate(-2deg)">start the madness</a>
+            </div>
+          </div>
+
+          <!-- silly decisions -->
+          <div class="approach-page approach-page--flip">
+            <div class="approach-page-info">
+              <h4 class="approach-page-name">silly decisions</h4>
+              <p class="approach-page-desc">at its core, the page celebrates the idea that happiness can come from not taking yourself too seriously. using exaggerated and silly choices to temporarily disconnect from reality. encourages users to engage without the pressure of making the "right" decision.</p>
+            </div>
+            <div class="approach-page-cta">
+              <a href="silly-decisions.html" class="approach-cta-btn approach-cta-circle approach-cta--green">make Silly Decisions</a>
+            </div>
+          </div>
+
+          <!-- sticker maker -->
+          <div class="approach-page">
+            <div class="approach-page-info">
+              <h4 class="approach-page-name">sticker maker</h4>
+              <p class="approach-page-desc">this is the fun part where the user gets to layer in personality with a little emoji, a doodle or a phrase. the stickers here are designed by the creator of the site, so every option already has a consistent look and feel. picking one should feel like choosing a mood, not making a decision.</p>
+            </div>
+            <div class="approach-page-cta">
+              <a href="sticker-maker.html" class="approach-cta-btn approach-cta-pill approach-cta--blue" style="transform:rotate(2deg)">upload any photo</a>
+            </div>
+          </div>
+        </div><!-- /wander -->
+
+        <!-- ── SEEK ── -->
+        <div class="approach-sub">
+          <div class="approach-sub-hd">
+            <div class="approach-pill-wrap">
+              <span class="approach-pill approach-pill--orange" aria-hidden="true"></span>
+              <span class="approach-sub-title">seek</span>
+            </div>
+            <p class="approach-sub-intro">connect with others, yourself, and learn more about the journey to happiness. seek pages are spaces to reconnect, reset, and guide you back to where you want to be with intentional interactions.</p>
+          </div>
+
+          <!-- between us -->
+          <div class="approach-page">
+            <div class="approach-page-info">
+              <h4 class="approach-page-name">between us</h4>
+              <p class="approach-page-desc">between us invites users to share short stories that capture little pockets of happiness in their lives, or moments they're still hoping to reach. each post becomes a tiny snapshot of a lived experience, shaped by the voice and identity the user chooses to share with.</p>
+            </div>
+            <div class="approach-page-cta">
+              <a href="between-us.html" class="approach-cta-btn approach-cta-rect approach-cta--yellow" style="transform:rotate(3deg)">confess to the screen</a>
+            </div>
+          </div>
+
+          <!-- just for you -->
+          <div class="approach-page approach-page--flip">
+            <div class="approach-page-info">
+              <h4 class="approach-page-name">just for you</h4>
+              <p class="approach-page-desc">holding on is where the human experiences settle into something personal, protected, and intentionally kept. it is a place where the user can create their own world by choosing what they want to keep, create, and design.</p>
+            </div>
+            <div class="approach-page-cta">
+              <a href="just-for-you.html" class="approach-cta-btn approach-cta-circle approach-cta--purple">design your world</a>
+            </div>
+          </div>
+
+          <!-- selfless less -->
+          <div class="approach-page approach-page--cta-btm">
+            <div class="approach-page-info">
+              <h4 class="approach-page-name">selfless less</h4>
+              <p class="approach-page-desc">this page explores how people pleasing habits can quietly distance us from our own happiness. instead of presenting "happiness" as a big concept, the experience focuses on a small, relatable shift by recognizing when we say "i'm fine" when we're not.</p>
+            </div>
+            <div class="approach-page-cta">
+              <a href="selfless-less.html" class="approach-cta-btn approach-cta-pill approach-cta--orange">learn to be a little selfless less</a>
+            </div>
+          </div>
+        </div><!-- /seek -->
       </div>
     </div>
   </section>
