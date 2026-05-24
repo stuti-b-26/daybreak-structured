@@ -17,7 +17,7 @@
 }
 #about-hero-track{
   display:flex;align-items:center;white-space:nowrap;
-  animation:about-marquee 18s linear infinite;
+  animation:about-marquee 12s linear infinite;
   will-change:transform;
 }
 @keyframes about-marquee{
@@ -25,9 +25,9 @@
   100%{transform:translateX(-50%)}
 }
 .about-hero-phrase{
-  font-family:var(--font-logo);font-size:clamp(64px,12vw,180px);
+  font-family:var(--font-logo);font-size:clamp(80px,16vw,220px);
   font-weight:900;line-height:1;letter-spacing:-0.02em;
-  color:#fff;white-space:nowrap;padding-right:clamp(32px,5vw,80px);
+  color:#fff;white-space:nowrap;padding-right:clamp(40px,6vw,100px);
 }
 .about-hero-yellow{color:var(--yellow)}
 
@@ -273,8 +273,8 @@
 
 /* ── MOBILE overrides for mission ── */
 @media(max-width:767px){
-  #about-hero-track{animation-duration:12s}
-  .about-hero-phrase{font-size:clamp(48px,16vw,88px)}
+  #about-hero-track{animation-duration:9s}
+  .about-hero-phrase{font-size:clamp(64px,20vw,110px)}
   #our-mission{padding:56px 0 64px}
   .mission-section-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
   .mission-col-1,.mission-col-2{display:none}
@@ -302,6 +302,10 @@
   .team-card-a{-webkit-line-clamp:unset;display:block;overflow:visible}
   .team-footer-area{padding:56px 0 72px}
 }
+
+/* ── ABOUT CTA ── */
+#about-cta{background:#000;position:relative;padding:120px 0;overflow:visible}
+@media(max-width:767px){#about-cta{padding:80px 0}}
 </style>
 </head>
 <body>
@@ -726,6 +730,19 @@
       </div>
     </div>
 
+  </section>
+
+  <!-- CTA -->
+  <section id="about-cta" aria-label="Call to action">
+    <div class="gc">
+      <p class="cta-text">
+        <span class="cta-yellow">daybreak</span> will be&nbsp; here for you,<br>
+        whenever you need.
+      </p>
+    </div>
+    <img id="orange-scrib" src="Orange%20scrib.svg" alt="" aria-hidden="true">
+    <img id="teal-scrib" src="teal%20scrib.svg" alt="" aria-hidden="true">
+    <img id="yellow-footer-svg" src="yellow%20footer.svg" alt="" aria-hidden="true">
   </section>
 
 </main>
