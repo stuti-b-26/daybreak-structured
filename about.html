@@ -166,14 +166,16 @@
 .team-deck{
   position:relative;
   width:clamp(480px,60vw,720px);
-  height:clamp(260px,34vh,360px);
+  height:clamp(280px,36vh,380px);
 }
 
 /* cards */
 .team-card{
-  position:absolute;inset:0;border-radius:20px;border:2.5px solid #000;
-  display:flex;align-items:stretch;overflow:hidden;
+  position:absolute;inset:0;border-radius:24px;
+  display:flex;flex-direction:column;
+  padding:clamp(16px,2vw,24px);
   will-change:transform;
+  overflow:hidden;
 }
 .team-card:nth-child(1){z-index:5}
 .team-card:nth-child(2){z-index:4}
@@ -186,49 +188,52 @@
 .team-card--green   {background:#5dde60}
 .team-card--lavender{background:#e8a8f0}
 
-/* photo */
-.team-card-photo{
-  flex:0 0 36%;border-right:2.5px solid #000;
-  background:rgba(0,0,0,.07);
-  position:relative;overflow:hidden;
-}
-.team-card-photo picture,
-.team-card-photo img{
-  position:absolute;
-  /* inset from all edges so photo doesn't touch card border */
-  top:10px;left:10px;right:10px;bottom:0;
-  width:calc(100% - 20px);height:calc(100% - 10px);
-  object-fit:contain;object-position:bottom center;
-  display:block;
-}
-
-/* content */
-.team-card-content{
-  flex:1;min-width:0;padding:clamp(14px,2vw,22px);
-  display:flex;flex-direction:column;gap:6px;overflow:hidden;
-}
-.team-card-header{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  gap:8px;margin-bottom:4px;
+/* top row: name + badge */
+.team-card-top{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:12px;flex-shrink:0;margin-bottom:clamp(10px,1.4vw,16px);
 }
 .team-card-name{
-  font-family:var(--font-logo);font-size:clamp(18px,2.2vw,28px);
+  font-family:var(--font-logo);font-size:clamp(22px,2.6vw,36px);
   font-weight:700;color:#000;line-height:1;
 }
 .team-card-badge{
-  font-family:var(--font-body);font-size:clamp(11px,.9vw,13px);
-  font-weight:600;color:#000;border:2px solid #000;border-radius:999px;
-  padding:4px 14px;white-space:nowrap;flex-shrink:0;
-  background:transparent;
+  font-family:var(--font-body);font-size:clamp(22px,2.6vw,36px);
+  font-weight:400;color:#000;white-space:nowrap;
+}
+
+/* body row: photo + text */
+.team-card-body{
+  display:flex;flex:1;min-height:0;gap:clamp(12px,1.6vw,20px);
+}
+
+/* photo */
+.team-card-photo{
+  flex:0 0 38%;border-radius:16px;overflow:hidden;
+  background:rgba(0,0,0,.07);position:relative;
+}
+.team-card-photo picture{
+  position:absolute;inset:0;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.team-card-photo img{
+  width:100%;height:100%;object-fit:contain;object-position:bottom center;
+  display:block;
+}
+
+/* text */
+.team-card-text{
+  flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;
+  overflow:hidden;
 }
 .team-card-q{
-  font-family:var(--font-body);font-size:clamp(13px,1.3vw,17px);
-  font-weight:700;color:#000;margin-top:6px;
+  font-family:var(--font-body);font-size:clamp(12px,1.2vw,16px);
+  font-weight:700;color:#000;
 }
 .team-card-a{
   font-family:var(--font-body);font-size:clamp(11px,1vw,14px);
   line-height:1.65;color:#000;overflow:hidden;
-  display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;
+  display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;
 }
 
 /* footer tagline */
@@ -250,8 +255,8 @@
 
 /* tablet */
 @media(max-width:1023px) and (min-width:768px){
-  .team-deck{width:clamp(360px,82vw,620px);height:clamp(240px,32vh,320px)}
-  .team-card-name{font-size:clamp(15px,2.5vw,20px)}
+  .team-deck{width:clamp(360px,82vw,620px);height:clamp(260px,34vh,340px)}
+  .team-card-name,.team-card-badge{font-size:clamp(18px,3.2vw,28px)}
   .team-intro-p{grid-column:2/span 8}
 }
 
@@ -290,10 +295,10 @@
   .team-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
   .team-intro-p{grid-column:2/span 8}
   .team-scroll-stage{margin-top:40px}
-  .team-deck{width:clamp(260px,88vw,340px);height:clamp(400px,68vh,540px)}
-  .team-card{flex-direction:column}
-  .team-card-photo{flex:0 0 44%;border-right:none;border-bottom:2.5px solid #000}
-  .team-card-photo picture,.team-card-photo img{top:10px;left:10px;right:10px;bottom:0;width:calc(100% - 20px);height:calc(100% - 10px)}
+  .team-deck{width:clamp(260px,88vw,340px);height:clamp(440px,72vh,580px)}
+  .team-card-name,.team-card-badge{font-size:clamp(20px,5.5vw,28px)}
+  .team-card-body{flex-direction:column}
+  .team-card-photo{flex:0 0 42%;border-radius:12px}
   .team-card-a{-webkit-line-clamp:4}
   .team-footer-area{padding:56px 0 72px}
 }
@@ -609,91 +614,101 @@
 
           <!-- card 1: Shraddha — orange, wanderer (peels 1st) -->
           <div class="team-card team-card--orange">
-            <div class="team-card-photo">
-              <picture>
-                <source media="(max-width:767px)" srcset="Shraddha mob.png">
-                <img src="Shraddha desk tab.png" alt="Shraddha">
-              </picture>
+            <div class="team-card-top">
+              <span class="team-card-name">shraddha</span>
+              <span class="team-card-badge">wanderer</span>
             </div>
-            <div class="team-card-content">
-              <div class="team-card-header">
-                <span class="team-card-name">shraddha</span>
-                <span class="team-card-badge">wanderer</span>
+            <div class="team-card-body">
+              <div class="team-card-photo">
+                <picture>
+                  <source media="(max-width:767px)" srcset="Shraddha mob.png">
+                  <img src="Shraddha desk tab.png" alt="Shraddha">
+                </picture>
               </div>
-              <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">i feel happiest when i'm dissociating on a sunday afternoon, cooking something yummy, singing loudly to my favourite songs when nobody is watching.<br><br>i feel free and happy.</p>
+              <div class="team-card-text">
+                <p class="team-card-q">what makes me happy?</p>
+                <p class="team-card-a">i feel happiest when i'm dissociating on a sunday afternoon, cooking something yummy, singing loudly to my favourite songs when nobody is watching.<br><br>i feel free and happy.</p>
+              </div>
             </div>
           </div>
 
           <!-- card 2: Mengjie — teal, wanderer (peels 2nd) -->
           <div class="team-card team-card--teal">
-            <div class="team-card-photo">
-              <picture>
-                <source media="(max-width:767px)" srcset="Mengjie mob.png">
-                <img src="Mengjie desk tab.png" alt="Mengjie">
-              </picture>
+            <div class="team-card-top">
+              <span class="team-card-name">mengjie</span>
+              <span class="team-card-badge">wanderer</span>
             </div>
-            <div class="team-card-content">
-              <div class="team-card-header">
-                <span class="team-card-name">mengjie</span>
-                <span class="team-card-badge">wanderer</span>
+            <div class="team-card-body">
+              <div class="team-card-photo">
+                <picture>
+                  <source media="(max-width:767px)" srcset="Mengjie mob.png">
+                  <img src="Mengjie desk tab.png" alt="Mengjie">
+                </picture>
               </div>
-              <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">cooking together with friends: going to the supermarket to buy ingredients, bustling around the kitchen side by side, and then, once the meal is ready, sitting down to eat and chat together.</p>
+              <div class="team-card-text">
+                <p class="team-card-q">what makes me happy?</p>
+                <p class="team-card-a">cooking together with friends: going to the supermarket to buy ingredients, bustling around the kitchen side by side, and then, once the meal is ready, sitting down to eat and chat together.</p>
+              </div>
             </div>
           </div>
 
           <!-- card 3: Paige — yellow, seeker (peels 3rd) -->
           <div class="team-card team-card--yellow">
-            <div class="team-card-photo">
-              <picture>
-                <source media="(max-width:767px)" srcset="Paige mob.png">
-                <img src="Paige desk tab.png" alt="Paige">
-              </picture>
+            <div class="team-card-top">
+              <span class="team-card-name">paige</span>
+              <span class="team-card-badge">seeker</span>
             </div>
-            <div class="team-card-content">
-              <div class="team-card-header">
-                <span class="team-card-name">paige</span>
-                <span class="team-card-badge">seeker</span>
+            <div class="team-card-body">
+              <div class="team-card-photo">
+                <picture>
+                  <source media="(max-width:767px)" srcset="Paige mob.png">
+                  <img src="Paige desk tab.png" alt="Paige">
+                </picture>
               </div>
-              <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">monkeys and apes have always been a source of happiness for me. i get so excited whenever i see monkey-themed items in stores or watch documentaries about orangutans!</p>
+              <div class="team-card-text">
+                <p class="team-card-q">what makes me happy?</p>
+                <p class="team-card-a">monkeys and apes have always been a source of happiness for me. i get so excited whenever i see monkey-themed items in stores or watch documentaries about orangutans!</p>
+              </div>
             </div>
           </div>
 
           <!-- card 4: Spencer — green, wanderer (peels 4th) -->
           <div class="team-card team-card--green">
-            <div class="team-card-photo">
-              <picture>
-                <source media="(max-width:767px)" srcset="Spencer mob.png">
-                <img src="Spencer desk tab.png" alt="Spencer">
-              </picture>
+            <div class="team-card-top">
+              <span class="team-card-name">spencer</span>
+              <span class="team-card-badge">wanderer</span>
             </div>
-            <div class="team-card-content">
-              <div class="team-card-header">
-                <span class="team-card-name">spencer</span>
-                <span class="team-card-badge">wanderer</span>
+            <div class="team-card-body">
+              <div class="team-card-photo">
+                <picture>
+                  <source media="(max-width:767px)" srcset="Spencer mob.png">
+                  <img src="Spencer desk tab.png" alt="Spencer">
+                </picture>
               </div>
-              <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">i'm happiest when i can enjoy the things i love without pressure or judgement. enjoying them with like-minded people is what makes life so great.<br><br>for reference, i'm a huge nerd; i love lego, pokemon, star wars, etc... if i liked it when i was a child, i like it to this day.</p>
+              <div class="team-card-text">
+                <p class="team-card-q">what makes me happy?</p>
+                <p class="team-card-a">i'm happiest when i can enjoy the things i love without pressure or judgement. enjoying them with like-minded people is what makes life so great.<br><br>for reference, i'm a huge nerd; i love lego, pokemon, star wars, etc... if i liked it when i was a child, i like it to this day.</p>
+              </div>
             </div>
           </div>
 
           <!-- card 5: Stuti — lavender, seeker (stays / revealed last) -->
           <div class="team-card team-card--lavender">
-            <div class="team-card-photo">
-              <picture>
-                <source media="(max-width:767px)" srcset="Stuti mob.png">
-                <img src="Stuti desk tab.png" alt="Stuti">
-              </picture>
+            <div class="team-card-top">
+              <span class="team-card-name">stuti</span>
+              <span class="team-card-badge">seeker</span>
             </div>
-            <div class="team-card-content">
-              <div class="team-card-header">
-                <span class="team-card-name">stuti</span>
-                <span class="team-card-badge">seeker</span>
+            <div class="team-card-body">
+              <div class="team-card-photo">
+                <picture>
+                  <source media="(max-width:767px)" srcset="Stuti mob.png">
+                  <img src="Stuti desk tab.png" alt="Stuti">
+                </picture>
               </div>
-              <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">i feel really happy when i see other people's faces light up with joy. i love seeing how excited they get talking about their passions.<br><br>recently, i went to a concert of my favourite singer and i've been on a happiness high since then.</p>
+              <div class="team-card-text">
+                <p class="team-card-q">what makes me happy?</p>
+                <p class="team-card-a">i feel really happy when i see other people's faces light up with joy. i love seeing how excited they get talking about their passions.<br><br>recently, i went to a concert of my favourite singer and i've been on a happiness high since then.</p>
+              </div>
             </div>
           </div>
 
