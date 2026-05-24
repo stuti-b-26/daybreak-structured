@@ -49,7 +49,7 @@
 
 /* ── OUR APPROACH ── */
 #our-approach{
-  background:#fff;padding:80px 0 100px;border-top:1px solid rgba(0,0,0,.08);
+  background:#fff;padding:80px 0 100px;
   position:relative;
 }
 .approach-label{
@@ -66,7 +66,7 @@
 /* wander / seek subsection block */
 .approach-sub{grid-column:2/12;margin-bottom:72px}
 .approach-sub+.approach-sub{
-  padding-top:72px;border-top:1px solid rgba(0,0,0,.08);
+  padding-top:0;margin-top:80px;
 }
 .approach-sub-hd{margin-bottom:40px}
 
@@ -142,20 +142,112 @@
   flex:0 0 auto;order:1;align-self:flex-end;
 }
 
-/* ── MEET THE TEAM (placeholder) ── */
-#meet-the-team{
-  background:#fff;padding:80px 0 120px;border-top:1px solid rgba(0,0,0,.08);
-  position:relative;
-}
+/* ── MEET THE TEAM ── */
+#meet-the-team{background:#fff;padding-top:80px;padding-bottom:0}
 .team-label{
   font-family:var(--font-logo);font-size:clamp(36px,5vw,72px);font-weight:700;
-  color:#000;line-height:1.1;
-  grid-column:2/12;margin-bottom:56px;
+  color:#000;line-height:1.1;grid-column:2/12;margin-bottom:20px;
+  text-decoration:underline;text-decoration-color:#87E5FF;
+  text-decoration-thickness:5px;text-underline-offset:8px;
 }
-.team-placeholder{
-  grid-column:2/12;
-  font-family:var(--font-logo);font-size:clamp(28px,4vw,56px);
-  font-weight:700;color:#000;line-height:1.2;
+.team-intro-p{
+  grid-column:2/9;font-family:var(--font-body);
+  font-size:clamp(13px,1.2vw,16px);line-height:1.7;color:#000;
+}
+
+/* sticky scroll stage */
+.team-scroll-stage{position:relative;height:380vh;margin-top:56px}
+.team-sticky{
+  position:sticky;top:var(--hh);
+  height:calc(100vh - var(--hh));
+  display:flex;align-items:center;justify-content:center;
+  overflow:visible;
+}
+.team-deck{
+  position:relative;
+  width:clamp(480px,74vw,860px);
+  height:clamp(220px,27vh,300px);
+}
+
+/* cards */
+.team-card{
+  position:absolute;inset:0;border-radius:20px;border:2.5px solid #000;
+  display:flex;align-items:stretch;overflow:hidden;
+  box-shadow:4px 4px 0 0 #000;will-change:transform;
+}
+.team-card:nth-child(1){z-index:5}
+.team-card:nth-child(2){z-index:4}
+.team-card:nth-child(3){z-index:3}
+.team-card:nth-child(4){z-index:2}
+.team-card:nth-child(5){z-index:1}
+.team-card--orange  {background:#f5a04a}
+.team-card--teal    {background:#7de8f5}
+.team-card--yellow  {background:#FFD400}
+.team-card--green   {background:#5dde60}
+.team-card--lavender{background:#e8a8f0}
+
+/* photo */
+.team-card-photo{
+  flex:0 0 36%;border-right:2.5px solid #000;overflow:hidden;
+  background:rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;
+}
+.team-card-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.team-card-initial{
+  font-family:var(--font-logo);font-size:clamp(40px,5vw,72px);
+  font-weight:700;color:rgba(0,0,0,.15);line-height:1;
+}
+
+/* content */
+.team-card-content{
+  flex:1;min-width:0;padding:clamp(14px,2vw,22px);
+  display:flex;flex-direction:column;gap:6px;overflow:hidden;
+}
+.team-card-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:8px;margin-bottom:4px;
+}
+.team-card-name{
+  font-family:var(--font-body);font-size:clamp(16px,2vw,24px);
+  font-weight:700;color:#000;line-height:1;
+}
+.team-card-badge{
+  font-family:var(--font-body);font-size:clamp(11px,.9vw,13px);
+  font-weight:600;color:#000;border:2px solid #000;border-radius:999px;
+  padding:3px 12px;white-space:nowrap;flex-shrink:0;
+  background:rgba(255,255,255,.4);
+}
+.team-card-q{
+  font-family:var(--font-body);font-size:clamp(13px,1.4vw,18px);
+  font-weight:700;color:#000;
+}
+.team-card-a{
+  font-family:var(--font-body);font-size:clamp(11px,1vw,14px);
+  line-height:1.65;color:#000;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;
+}
+
+/* footer tagline */
+.team-footer-area{
+  padding:72px 0 96px;
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+  grid-column:1/-1;
+}
+.team-green-dot{
+  width:clamp(28px,3.5vw,48px);height:clamp(28px,3.5vw,48px);
+  border-radius:50%;background:#5dde60;border:2.5px solid #000;
+  box-shadow:3px 3px 0 0 #000;
+}
+.team-footer-text{
+  font-family:var(--font-logo);font-size:clamp(20px,2.8vw,40px);
+  font-weight:700;color:#000;line-height:1.3;text-align:center;
+  max-width:560px;
+}
+
+/* tablet */
+@media(max-width:1023px) and (min-width:768px){
+  .team-deck{width:clamp(360px,82vw,620px);height:clamp(200px,27vh,260px)}
+  .team-card-name{font-size:clamp(15px,2.5vw,20px)}
+  .team-intro-p{grid-column:2/span 8}
 }
 
 /* ── TABLET overrides for mission ── */
@@ -189,9 +281,16 @@
   .approach-cta-circle{width:130px;height:130px;font-size:13px}
   .approach-page--cta-btm .approach-page-info{flex:0 0 100%}
   .approach-page--cta-btm .approach-page-cta{align-self:flex-start}
-  #meet-the-team{padding:48px 0 80px}
+  #meet-the-team{padding-top:48px}
   .team-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
-  .team-placeholder{grid-column:2/span 8}
+  .team-intro-p{grid-column:2/span 8}
+  .team-scroll-stage{margin-top:40px}
+  .team-deck{width:clamp(260px,88vw,340px);height:clamp(360px,65vh,500px)}
+  .team-card{flex-direction:column}
+  .team-card-photo{flex:0 0 44%;border-right:none;border-bottom:2.5px solid #000}
+  .team-card-initial{font-size:clamp(48px,12vw,80px)}
+  .team-card-a{-webkit-line-clamp:4}
+  .team-footer-area{padding:56px 0 72px}
 }
 </style>
 </head>
@@ -489,14 +588,109 @@
 
   <!-- MEET THE TEAM -->
   <section id="meet-the-team" aria-labelledby="team-heading">
+
+    <!-- heading + intro -->
     <div class="gc">
       <div class="grid">
-        <p class="team-label" id="team-heading">meet the team</p>
-        <div class="team-placeholder">
-          coming soon.
+        <p class="team-label" id="team-heading">meet our team</p>
+        <p class="team-intro-p">happiness looks different for everyone on our team.<br>some of us love chaos, some love calm, and somehow all of it belongs here.</p>
+      </div>
+    </div>
+
+    <!-- sticky card deck scroll stage -->
+    <div class="team-scroll-stage" id="team-stage">
+      <div class="team-sticky">
+        <div class="team-deck" id="team-deck">
+
+          <!-- card 1: Shraddha — orange, wanderer (peels 1st) -->
+          <div class="team-card team-card--orange">
+            <div class="team-card-photo" aria-hidden="true">
+              <span class="team-card-initial">S</span>
+            </div>
+            <div class="team-card-content">
+              <div class="team-card-header">
+                <span class="team-card-name">shraddha</span>
+                <span class="team-card-badge">wanderer</span>
+              </div>
+              <p class="team-card-q">what makes me happy?</p>
+              <p class="team-card-a">i love going on little adventures — doesn't have to be anywhere far, just somewhere new. finding a good snack i've never tried before is basically a whole event for me.</p>
+            </div>
+          </div>
+
+          <!-- card 2: Mengjie — teal, wanderer (peels 2nd) -->
+          <div class="team-card team-card--teal">
+            <div class="team-card-photo" aria-hidden="true">
+              <span class="team-card-initial">M</span>
+            </div>
+            <div class="team-card-content">
+              <div class="team-card-header">
+                <span class="team-card-name">mengjie</span>
+                <span class="team-card-badge">wanderer</span>
+              </div>
+              <p class="team-card-q">what makes me happy?</p>
+              <p class="team-card-a">creating things with my hands makes me feel most alive. when i get lost in a project and look up and it's somehow been three hours — that's the sweet spot.</p>
+            </div>
+          </div>
+
+          <!-- card 3: Paige — yellow, seeker (peels 3rd) -->
+          <div class="team-card team-card--yellow">
+            <div class="team-card-photo" aria-hidden="true">
+              <span class="team-card-initial">P</span>
+            </div>
+            <div class="team-card-content">
+              <div class="team-card-header">
+                <span class="team-card-name">paige</span>
+                <span class="team-card-badge">seeker</span>
+              </div>
+              <p class="team-card-q">what makes me happy?</p>
+              <p class="team-card-a">i'm happiest when i'm around people who get excited about the things they love. that energy is so contagious and i want to find ways to bottle it.</p>
+            </div>
+          </div>
+
+          <!-- card 4: Spencer — green, wanderer (peels 4th) -->
+          <div class="team-card team-card--green">
+            <div class="team-card-photo" aria-hidden="true">
+              <span class="team-card-initial">S</span>
+            </div>
+            <div class="team-card-content">
+              <div class="team-card-header">
+                <span class="team-card-name">spencer</span>
+                <span class="team-card-badge">wanderer</span>
+              </div>
+              <p class="team-card-q">what makes me happy?</p>
+              <p class="team-card-a">honestly? finding a really good movie i haven't seen. and then watching it with someone who hasn't seen it either — getting to see their reaction in real time is everything.</p>
+            </div>
+          </div>
+
+          <!-- card 5: Stuti — lavender, seeker (stays / revealed last) -->
+          <div class="team-card team-card--lavender">
+            <div class="team-card-photo" aria-hidden="true">
+              <span class="team-card-initial">S</span>
+            </div>
+            <div class="team-card-content">
+              <div class="team-card-header">
+                <span class="team-card-name">stuti</span>
+                <span class="team-card-badge">seeker</span>
+              </div>
+              <p class="team-card-q">what makes me happy?</p>
+              <p class="team-card-a">i feel really happy when i see other people's faces light up with joy. i love seeing how excited they get talking about their passions.<br><br>recently, i went to a concert of my favorite singer and i've been on a happiness high since then.</p>
+            </div>
+          </div>
+
+        </div><!-- /team-deck -->
+      </div><!-- /team-sticky -->
+    </div><!-- /team-stage -->
+
+    <!-- footer tagline -->
+    <div class="gc">
+      <div class="grid">
+        <div class="team-footer-area">
+          <div class="team-green-dot" aria-hidden="true"></div>
+          <p class="team-footer-text">we left some of our happiness here for you to find</p>
         </div>
       </div>
     </div>
+
   </section>
 
 </main>
@@ -711,6 +905,58 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   }
   function animate(ts){if(!last)last=ts;var dt=ts-last;last=ts;phaseT+=dt/DUR[phase];if(phaseT>=1){phaseT=0;phase=(phase+1)%5}render(blobs(phase,phaseT));requestAnimationFrame(animate)}
   requestAnimationFrame(animate);
+})();
+(function(){
+  var stage=document.getElementById('team-stage');
+  if(!stage)return;
+  var cards=Array.from(document.querySelectorAll('.team-card'));
+  var N=cards.length;
+  var INIT=[
+    {x:6,y:-9,r:-6},
+    {x:3,y:-5,r:-2},
+    {x:-3,y:-1,r:4},
+    {x:5,y:3,r:-3},
+    {x:0,y:7,r:1}
+  ];
+  var PEEL_DIR=[1,-1,1,-1];
+  var STOP_H=0;
+  function resize(){
+    STOP_H=Math.max(300,window.innerHeight*0.7);
+    stage.style.height=(STOP_H*4+window.innerHeight*0.9)+'px';
+  }
+  resize();
+  function easeOut3(t){return 1-Math.pow(1-t,3)}
+  function update(){
+    var top=stage.getBoundingClientRect().top;
+    var scrolled=Math.max(0,-top);
+    for(var i=0;i<N;i++){
+      var card=cards[i];
+      var init=INIT[i];
+      if(i===N-1){
+        card.style.transform='translate('+init.x+'px,'+init.y+'px) rotate('+init.r+'deg)';
+        card.style.opacity='1';
+        continue;
+      }
+      var peelStart=i*STOP_H;
+      if(scrolled<=peelStart){
+        card.style.transform='translate('+init.x+'px,'+init.y+'px) rotate('+init.r+'deg)';
+        card.style.opacity='1';
+      }else{
+        var p=Math.min(1,(scrolled-peelStart)/STOP_H);
+        var e=easeOut3(p);
+        var dir=PEEL_DIR[i];
+        var tx=init.x+e*dir*window.innerWidth*0.55;
+        var ty=init.y-e*window.innerHeight*0.35;
+        var rot=init.r+e*dir*22;
+        var alpha=p>0.5?1-(p-0.5)*2:1;
+        card.style.transform='translate('+tx+'px,'+ty+'px) rotate('+rot+'deg)';
+        card.style.opacity=Math.max(0,alpha);
+      }
+    }
+  }
+  window.addEventListener('scroll',function(){requestAnimationFrame(update)},{passive:true});
+  window.addEventListener('resize',function(){resize();update()});
+  update();
 })();
 </script>
 </body>
