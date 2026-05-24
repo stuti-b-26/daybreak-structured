@@ -260,11 +260,14 @@
   .mood-bubbles{min-height:260px}
   .mood-right{margin-top:24px}
 }
+/* keep center 10 columns on tablet + mobile — overrides styles.css reset */
 @media(max-width:1023px){
+  #page-main .col-content{grid-column:2/12}
   .carousel-arrow--prev{left:8px}
   .carousel-arrow--next{right:8px}
 }
 @media(max-width:767px){
+  #page-main .col-content{grid-column:2/12}
   .saved-grid{grid-template-columns:1fr 1fr}
   .mood-bubbles{min-height:220px}
   .mood-bubble{font-size:10px}
