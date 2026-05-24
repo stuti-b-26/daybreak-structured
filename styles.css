@@ -227,6 +227,7 @@ img{display:block;max-width:100%}
 /* ── FOOTER ── */
 #yellow-footer-svg{position:absolute;bottom:-4.28vw;left:0;width:100%;height:auto;z-index:0;pointer-events:none}
 #site-footer{background:#fff;padding:48px 120px 0;position:relative;z-index:1}
+.footer-desktop{display:flex;flex-direction:column}
 .footer-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:48px}
 .footer-top-right{display:flex;align-items:flex-start;gap:48px}
 .footer-tagline{font-family:var(--font-body);font-size:14px;font-weight:400;color:#000;line-height:1.5}
@@ -239,7 +240,7 @@ img{display:block;max-width:100%}
 .footer-back-top-desktop:hover{opacity:.6}
 .footer-logo-full{width:100%;margin-top:48px;overflow:hidden}
 .footer-logo-full a{display:block}
-.footer-logo-svg--full{height:1000px;width:auto;display:block}
+.footer-logo-svg--full{width:100%;height:auto;display:block}
 .footer-logo-wrap{display:inline-flex}
 .footer-logo-svg{height:72px;width:auto;display:block}
 .footer-logo-svg--mobile{height:48px}
