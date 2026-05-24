@@ -165,8 +165,8 @@
 }
 .team-deck{
   position:relative;
-  width:clamp(480px,74vw,860px);
-  height:clamp(220px,27vh,300px);
+  width:clamp(480px,60vw,720px);
+  height:clamp(260px,34vh,360px);
 }
 
 /* cards */
@@ -207,23 +207,23 @@
   gap:8px;margin-bottom:4px;
 }
 .team-card-name{
-  font-family:var(--font-body);font-size:clamp(16px,2vw,24px);
+  font-family:var(--font-logo);font-size:clamp(18px,2.2vw,28px);
   font-weight:700;color:#000;line-height:1;
 }
 .team-card-badge{
   font-family:var(--font-body);font-size:clamp(11px,.9vw,13px);
   font-weight:600;color:#000;border:2px solid #000;border-radius:999px;
-  padding:3px 12px;white-space:nowrap;flex-shrink:0;
-  background:rgba(255,255,255,.4);
+  padding:4px 14px;white-space:nowrap;flex-shrink:0;
+  background:transparent;
 }
 .team-card-q{
-  font-family:var(--font-body);font-size:clamp(13px,1.4vw,18px);
-  font-weight:700;color:#000;
+  font-family:var(--font-body);font-size:clamp(13px,1.3vw,17px);
+  font-weight:700;color:#000;margin-top:6px;
 }
 .team-card-a{
   font-family:var(--font-body);font-size:clamp(11px,1vw,14px);
   line-height:1.65;color:#000;overflow:hidden;
-  display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;
+  display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;
 }
 
 /* footer tagline */
@@ -245,7 +245,7 @@
 
 /* tablet */
 @media(max-width:1023px) and (min-width:768px){
-  .team-deck{width:clamp(360px,82vw,620px);height:clamp(200px,27vh,260px)}
+  .team-deck{width:clamp(360px,82vw,620px);height:clamp(240px,32vh,320px)}
   .team-card-name{font-size:clamp(15px,2.5vw,20px)}
   .team-intro-p{grid-column:2/span 8}
 }
@@ -285,7 +285,7 @@
   .team-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
   .team-intro-p{grid-column:2/span 8}
   .team-scroll-stage{margin-top:40px}
-  .team-deck{width:clamp(260px,88vw,340px);height:clamp(360px,65vh,500px)}
+  .team-deck{width:clamp(260px,88vw,340px);height:clamp(400px,68vh,540px)}
   .team-card{flex-direction:column}
   .team-card-photo{flex:0 0 44%;border-right:none;border-bottom:2.5px solid #000}
   .team-card-initial{font-size:clamp(48px,12vw,80px)}
@@ -613,7 +613,7 @@
                 <span class="team-card-badge">wanderer</span>
               </div>
               <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">i love going on little adventures — doesn't have to be anywhere far, just somewhere new. finding a good snack i've never tried before is basically a whole event for me.</p>
+              <p class="team-card-a">i feel happiest when i'm dissociating on a sunday afternoon, cooking something yummy, singing loudly to my favourite songs when nobody is watching.<br><br>i feel free and happy.</p>
             </div>
           </div>
 
@@ -628,7 +628,7 @@
                 <span class="team-card-badge">wanderer</span>
               </div>
               <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">creating things with my hands makes me feel most alive. when i get lost in a project and look up and it's somehow been three hours — that's the sweet spot.</p>
+              <p class="team-card-a">cooking together with friends: going to the supermarket to buy ingredients, bustling around the kitchen side by side, and then, once the meal is ready, sitting down to eat and chat together.</p>
             </div>
           </div>
 
@@ -643,7 +643,7 @@
                 <span class="team-card-badge">seeker</span>
               </div>
               <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">i'm happiest when i'm around people who get excited about the things they love. that energy is so contagious and i want to find ways to bottle it.</p>
+              <p class="team-card-a">monkeys and apes have always been a source of happiness for me. i get so excited whenever i see monkey-themed items in stores or watch documentaries about orangutans!</p>
             </div>
           </div>
 
@@ -658,7 +658,7 @@
                 <span class="team-card-badge">wanderer</span>
               </div>
               <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">honestly? finding a really good movie i haven't seen. and then watching it with someone who hasn't seen it either — getting to see their reaction in real time is everything.</p>
+              <p class="team-card-a">i'm happiest when i can enjoy the things i love without pressure or judgement. enjoying them with like-minded people is what makes life so great.<br><br>for reference, i'm a huge nerd; i love lego, pokemon, star wars, etc... if i liked it when i was a child, i like it to this day.</p>
             </div>
           </div>
 
@@ -673,7 +673,7 @@
                 <span class="team-card-badge">seeker</span>
               </div>
               <p class="team-card-q">what makes me happy?</p>
-              <p class="team-card-a">i feel really happy when i see other people's faces light up with joy. i love seeing how excited they get talking about their passions.<br><br>recently, i went to a concert of my favorite singer and i've been on a happiness high since then.</p>
+              <p class="team-card-a">i feel really happy when i see other people's faces light up with joy. i love seeing how excited they get talking about their passions.<br><br>recently, i went to a concert of my favourite singer and i've been on a happiness high since then.</p>
             </div>
           </div>
 
@@ -909,51 +909,73 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
 (function(){
   var stage=document.getElementById('team-stage');
   if(!stage)return;
+  var deck=document.getElementById('team-deck');
   var cards=Array.from(document.querySelectorAll('.team-card'));
-  var N=cards.length;
-  var INIT=[
-    {x:6,y:-9,r:-6},
-    {x:3,y:-5,r:-2},
-    {x:-3,y:-1,r:4},
-    {x:5,y:3,r:-3},
-    {x:0,y:7,r:1}
+  var N=cards.length; // 5
+
+  // slight random-looking offsets for the stacked look
+  var OFFSETS=[
+    {x:5,y:-8,r:-5},
+    {x:-4,y:-4,r:3},
+    {x:6,y:2,r:-3},
+    {x:-3,y:6,r:4},
+    {x:1,y:10,r:-1}
   ];
-  var PEEL_DIR=[1,-1,1,-1];
+
   var STOP_H=0;
   function resize(){
-    STOP_H=Math.max(300,window.innerHeight*0.7);
-    stage.style.height=(STOP_H*4+window.innerHeight*0.9)+'px';
+    STOP_H=Math.max(300,window.innerHeight*0.75);
+    stage.style.height=(STOP_H*(N-1)+window.innerHeight*0.9)+'px';
   }
   resize();
-  function easeOut3(t){return 1-Math.pow(1-t,3)}
+
+  function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+
   function update(){
     var top=stage.getBoundingClientRect().top;
     var scrolled=Math.max(0,-top);
+
+    // active slot = which card is currently "on top"
+    var slot=Math.min(N-1,Math.floor(scrolled/STOP_H));
+    var p=Math.min(1,(scrolled-slot*STOP_H)/STOP_H);
+    var e=easeInOut(p);
+
     for(var i=0;i<N;i++){
       var card=cards[i];
-      var init=INIT[i];
-      if(i===N-1){
-        card.style.transform='translate('+init.x+'px,'+init.y+'px) rotate('+init.r+'deg)';
-        card.style.opacity='1';
-        continue;
-      }
-      var peelStart=i*STOP_H;
-      if(scrolled<=peelStart){
-        card.style.transform='translate('+init.x+'px,'+init.y+'px) rotate('+init.r+'deg)';
-        card.style.opacity='1';
-      }else{
-        var p=Math.min(1,(scrolled-peelStart)/STOP_H);
-        var e=easeOut3(p);
-        var dir=PEEL_DIR[i];
-        var tx=init.x+e*dir*window.innerWidth*0.55;
-        var ty=init.y-e*window.innerHeight*0.35;
-        var rot=init.r+e*dir*22;
-        var alpha=p>0.5?1-(p-0.5)*2:1;
-        card.style.transform='translate('+tx+'px,'+ty+'px) rotate('+rot+'deg)';
-        card.style.opacity=Math.max(0,alpha);
+      var off=OFFSETS[i];
+
+      // position of this card in the visible stack
+      // cards behind the active card stack up with small scale/offset
+      var depth=i-slot; // <0 = sent to back, 0 = active, >0 = waiting beneath
+
+      if(depth<0){
+        // already cycled to back — hide it far below with low z
+        card.style.zIndex=String(i+1);
+        card.style.transform='translate('+off.x+'px,'+
+          (off.y+120)+'px) rotate('+off.r+'deg) scale(0.88)';
+        card.style.opacity='0';
+      } else if(depth===0){
+        // this is the card currently exiting (sliding down behind)
+        var ty=off.y+e*140;
+        var sc=1-e*0.12;
+        var al=p>0.55?1-(p-0.55)/0.45:1;
+        card.style.zIndex=String(N+1);
+        card.style.transform='translate('+off.x+'px,'+ty+'px) rotate('+off.r+'deg) scale('+sc+')';
+        card.style.opacity=String(Math.max(0,al));
+      } else {
+        // cards waiting in the stack beneath
+        // they scale up and lift slightly as active card exits
+        var lift=depth===1?e:0;
+        var sc2=0.94-depth*0.04+lift*0.04;
+        var ty2=off.y+depth*8-lift*8;
+        var op=depth<=3?1:0;
+        card.style.zIndex=String(N-depth);
+        card.style.transform='translate('+off.x+'px,'+ty2+'px) rotate('+off.r+'deg) scale('+sc2+')';
+        card.style.opacity=String(op);
       }
     }
   }
+
   window.addEventListener('scroll',function(){requestAnimationFrame(update)},{passive:true});
   window.addEventListener('resize',function(){resize();update()});
   update();
