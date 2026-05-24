@@ -165,8 +165,8 @@
 }
 .team-deck{
   position:relative;
-  width:clamp(480px,60vw,720px);
-  height:clamp(280px,36vh,380px);
+  width:clamp(560px,70vw,840px);
+  height:clamp(320px,42vh,440px);
 }
 
 /* cards */
@@ -209,15 +209,14 @@
 
 /* photo */
 .team-card-photo{
-  flex:0 0 38%;border-radius:16px;overflow:hidden;
-  background:rgba(0,0,0,.07);position:relative;
+  flex:0 0 36%;border-radius:16px;overflow:hidden;
+  position:relative;
 }
 .team-card-photo picture{
   position:absolute;inset:0;
-  display:flex;align-items:flex-end;justify-content:center;
 }
 .team-card-photo img{
-  width:100%;height:100%;object-fit:contain;object-position:bottom center;
+  width:100%;height:100%;object-fit:cover;object-position:top center;
   display:block;
 }
 
@@ -255,7 +254,7 @@
 
 /* tablet */
 @media(max-width:1023px) and (min-width:768px){
-  .team-deck{width:clamp(360px,82vw,620px);height:clamp(260px,34vh,340px)}
+  .team-deck{width:clamp(420px,86vw,680px);height:clamp(280px,38vh,380px)}
   .team-card-name,.team-card-badge{font-size:clamp(18px,3.2vw,28px)}
   .team-intro-p{grid-column:2/span 8}
 }
@@ -944,69 +943,74 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
 (function(){
   var stage=document.getElementById('team-stage');
   if(!stage)return;
-  var deck=document.getElementById('team-deck');
+  var deckEl=document.getElementById('team-deck');
   var cards=Array.from(document.querySelectorAll('.team-card'));
   var N=cards.length; // 5
 
-  // slight random-looking offsets for the stacked look
-  var OFFSETS=[
-    {x:5,y:-8,r:-5},
-    {x:-4,y:-4,r:3},
-    {x:6,y:2,r:-3},
-    {x:-3,y:6,r:4},
-    {x:1,y:10,r:-1}
-  ];
+  // per-card slight rotation/x offsets for natural stacked feel
+  var ROT=[-4, 2, -2, 3, -1];
+  var XOF=[-6, 8, -4, 6, 0];
 
+  // PEEK_H: how many px of each buried card show above the one in front.
+  // This is roughly the height of .team-card-top (name row) + card padding.
+  var PEEK_H=64;
   var STOP_H=0;
+
   function resize(){
+    // measure the actual name-row height if possible
+    var top=cards[0]&&cards[0].querySelector('.team-card-top');
+    if(top) PEEK_H=top.offsetHeight+parseInt(getComputedStyle(cards[0]).paddingTop||0)+8;
+    PEEK_H=Math.max(52,PEEK_H);
     STOP_H=Math.max(300,window.innerHeight*0.75);
     stage.style.height=(STOP_H*(N-1)+window.innerHeight*0.9)+'px';
   }
   resize();
 
+  function easeOut(t){return 1-Math.pow(1-t,3)}
   function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
 
-  function update(){
-    var top=stage.getBoundingClientRect().top;
-    var scrolled=Math.max(0,-top);
+  // resting translateY for a card at stack position `pos` (0=front/top, N-1=back/bottom)
+  // front card sits at y=0; each card behind it peeks by PEEK_H downward
+  function restY(pos){ return pos*PEEK_H; }
 
-    // active slot = which card is currently "on top"
-    var slot=Math.min(N-1,Math.floor(scrolled/STOP_H));
-    var p=Math.min(1,(scrolled-slot*STOP_H)/STOP_H);
+  function update(){
+    var stageTop=stage.getBoundingClientRect().top;
+    var scrolled=Math.max(0,-stageTop);
+
+    var activeIdx=Math.min(N-2,Math.floor(scrolled/STOP_H)); // 0..N-2
+    var p=Math.min(1,(scrolled-activeIdx*STOP_H)/STOP_H);
     var e=easeInOut(p);
 
     for(var i=0;i<N;i++){
       var card=cards[i];
-      var off=OFFSETS[i];
+      var rot=ROT[i];
+      var xof=XOF[i];
 
-      // position of this card in the visible stack
-      // cards behind the active card stack up with small scale/offset
-      var depth=i-slot; // <0 = sent to back, 0 = active, >0 = waiting beneath
+      // stack position BEFORE this transition: card i is at pos = i - activeIdx
+      var posBefore=i-activeIdx;
+      // stack position AFTER: pos - 1
+      var posAfter=posBefore-1;
 
-      if(depth<0){
-        // already cycled to back — hide it far below with low z
-        card.style.zIndex=String(i+1);
-        card.style.transform='translate('+off.x+'px,'+
-          (off.y+120)+'px) rotate('+off.r+'deg) scale(0.88)';
+      if(posBefore<0){
+        // already left the stack — hide it
+        card.style.zIndex='0';
         card.style.opacity='0';
-      } else if(depth===0){
-        // this is the card currently exiting (sliding down behind)
-        var ty=off.y+e*140;
-        var sc=1-e*0.12;
-        var al=p>0.55?1-(p-0.55)/0.45:1;
+        card.style.transform='translate('+(xof+320)+'px,-60px) rotate('+(rot+18)+'deg)';
+      } else if(posBefore===0){
+        // this card is currently flying off to the right
+        var tx=easeOut(p)*window.innerWidth*0.52;
+        var ty=restY(0)-easeOut(p)*50;
+        var r=rot+easeOut(p)*20;
+        var alpha=p>0.5?1-(p-0.5)*2:1;
         card.style.zIndex=String(N+1);
-        card.style.transform='translate('+off.x+'px,'+ty+'px) rotate('+off.r+'deg) scale('+sc+')';
-        card.style.opacity=String(Math.max(0,al));
+        card.style.opacity=String(Math.max(0,alpha));
+        card.style.transform='translate('+(xof+tx)+'px,'+ty+'px) rotate('+r+'deg)';
       } else {
-        // cards waiting in the stack beneath
-        // they scale up and lift slightly as active card exits
-        var lift=depth===1?e:0;
-        var sc2=0.94-depth*0.04+lift*0.04;
-        var ty2=off.y+depth*8-lift*8;
-        var op=depth<=3?1:0;
-        card.style.zIndex=String(N-depth);
-        card.style.transform='translate('+off.x+'px,'+ty2+'px) rotate('+off.r+'deg) scale('+sc2+')';
-        card.style.opacity=String(op);
+        // card is in the waiting stack — shifts from restY(posBefore) toward restY(posAfter)
+        var ty2=restY(posBefore)+e*(restY(posAfter)-restY(posBefore));
+        card.style.zIndex=String(N-posBefore);
+        card.style.opacity='1';
+        card.style.transform='translate('+xof+'px,'+ty2+'px) rotate('+rot+'deg)';
       }
     }
   }
