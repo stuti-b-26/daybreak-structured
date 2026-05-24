@@ -329,54 +329,38 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   document.querySelectorAll('.scroll-reveal,.scroll-bounce').forEach(function(el){obs.observe(el)});
 })();
 
-/* 6. FAB SMOOTH BLOB */
+/* 6. FAB LAVA LAMP */
 (function(){
   var canvas=document.getElementById('fab-canvas');
   if(!canvas)return;
   var ctx=canvas.getContext('2d');
   var S=120;canvas.width=canvas.height=S;
-  var CX=S/2,CY=S/2;
-  var N=8;
-  var seeds=[];
-  for(var i=0;i<N;i++)seeds.push(Math.random()*Math.PI*2);
-  var speeds=[];
-  for(var i=0;i<N;i++)speeds.push(0.0003+Math.random()*0.0004);
-  var amps=[];
-  for(var i=0;i<N;i++)amps.push(6+Math.random()*7);
-  var BASE=28;
-  function getPoints(ts){
-    var pts=[];
-    for(var i=0;i<N;i++){
-      var angle=(i/N)*Math.PI*2;
-      var r=BASE+Math.sin(ts*speeds[i]+seeds[i])*amps[i];
-      pts.push({x:CX+Math.cos(angle)*r,y:CY+Math.sin(angle)*r});
+  var CX=S/2,CY=S/2,CR=S/2-1;
+  var DUR={0:2200,1:900,2:4200,3:1800,4:1600};
+  var phase=0,phaseT=0,last=null;
+  function blobs(ph,t){
+    switch(ph){
+      case 0:{var e=easeIO(t),bY=CY+10,aY=bY-e*18;return [{x:CX,y:aY,r:20-e*4},{x:CX,y:bY,r:20-e*3}]}
+      case 1:{var e=easeOut(t);return [{x:CX+Math.sin(t*Math.PI)*3,y:CY-8-e*20,r:14+e*4},{x:CX-Math.sin(t*Math.PI)*2,y:CY+10+e*4,r:16+e*3}]}
+      case 2:{var a=t*Math.PI*2,r2=16,rb=14+Math.sin(t*Math.PI*4)*2;return [{x:CX+Math.cos(a)*r2,y:CY-2+Math.sin(a)*r2*.7,r:rb},{x:CX+Math.cos(a+Math.PI)*r2,y:CY-2+Math.sin(a+Math.PI)*r2*.7,r:rb}]}
+      case 3:{var e=easeIO(t),r2=16*(1-e),rb=14+(1-e)*4;return [{x:CX+Math.cos(0)*r2,y:CY-2+Math.sin(0)*r2*.7,r:rb},{x:CX+Math.cos(Math.PI)*r2,y:CY-2+Math.sin(Math.PI)*r2*.7,r:rb}]}
+      case 4:{var p=Math.sin(t*Math.PI)*3,r=20+p,y=CY+2-Math.sin(t*Math.PI)*4;return [{x:CX,y:y,r:r},{x:CX,y:y,r:r}]}
     }
-    return pts;
   }
-  function drawBlob(pts){
-    ctx.beginPath();
-    var n=pts.length;
-    for(var i=0;i<n;i++){
-      var p0=pts[(i-1+n)%n],p1=pts[i],p2=pts[(i+1)%n],p3=pts[(i+2)%n];
-      var cp1x=p1.x+(p2.x-p0.x)/6,cp1y=p1.y+(p2.y-p0.y)/6;
-      var cp2x=p2.x-(p3.x-p1.x)/6,cp2y=p2.y-(p3.y-p1.y)/6;
-      if(i===0)ctx.moveTo(p1.x,p1.y);
-      ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,p2.x,p2.y);
+  function field(px,py,bs){var f=0;for(var i=0;i<bs.length;i++){var d2=(px-bs[i].x)*(px-bs[i].x)+(py-bs[i].y)*(py-bs[i].y)||.0001;f+=bs[i].r*bs[i].r/d2}return f}
+  var img=ctx.createImageData(S,S);var buf=img.data;
+  function render(bs){
+    var THRESH=phase===1?1.05:1.0;
+    for(var y=0;y<S;y++)for(var x=0;x<S;x++){
+      var i=(y*S+x)*4,dx=x-CX,dy=y-CY;
+      if(dx*dx+dy*dy>CR*CR){buf[i]=buf[i+1]=buf[i+2]=buf[i+3]=0;continue}
+      if(field(x,y,bs)>=THRESH){buf[i]=255;buf[i+1]=212;buf[i+2]=0;buf[i+3]=255}
+      else{buf[i]=buf[i+1]=buf[i+2]=0;buf[i+3]=255}
     }
-    ctx.closePath();
+    ctx.putImageData(img,0,0);
   }
-  function frame(ts){
-    ctx.clearRect(0,0,S,S);
-    ctx.save();
-    ctx.beginPath();ctx.arc(CX,CY,S/2,0,Math.PI*2);ctx.clip();
-    ctx.fillStyle='#000';ctx.fillRect(0,0,S,S);
-    var pts=getPoints(ts);
-    drawBlob(pts);
-    ctx.fillStyle='#FFD400';ctx.fill();
-    ctx.restore();
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
+  function animate(ts){if(!last)last=ts;var dt=ts-last;last=ts;phaseT+=dt/DUR[phase];if(phaseT>=1){phaseT=0;phase=(phase+1)%5}render(blobs(phase,phaseT));requestAnimationFrame(animate)}
+  requestAnimationFrame(animate);
 })();
 
 /* 7. SCROLL TO TOP */
