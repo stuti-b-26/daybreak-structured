@@ -286,6 +286,27 @@
 .happiness-add-btn:hover{box-shadow:7px 7px 0 0 #000;transform:translateY(-1px)}
 .happiness-add-btn:active{box-shadow:2px 2px 0 0 #000;transform:scale(.96)}
 
+/* ── HAPPINESS MODAL ───────────────────────────────────────── */
+#happiness-modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:20px}
+#happiness-modal.open{display:flex}
+.hm-card{background:#fff;border:3px solid #000;border-radius:24px;box-shadow:8px 8px 0 0 #000;padding:clamp(28px,4vw,48px);width:100%;max-width:480px;position:relative;animation:hm-pop .35s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes hm-pop{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.hm-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:2px solid #000;background:#fff;box-shadow:3px 3px 0 0 #000;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;line-height:1;transition:box-shadow .08s,transform .08s}
+.hm-close:hover{box-shadow:5px 5px 0 0 #000;transform:scale(1.05)}
+.hm-close:active{box-shadow:1px 1px 0 0 #000;transform:scale(.95)}
+.hm-title{font-family:var(--font-logo);font-size:clamp(22px,3vw,36px);margin:0 0 6px;line-height:1.1}
+.hm-sub{font-family:var(--font-body);font-size:14px;color:rgba(0,0,0,.5);margin:0 0 24px}
+.hm-input-wrap{position:relative;margin-bottom:20px}
+.hm-input{width:100%;font-family:var(--font-body);font-size:16px;padding:14px 18px;border:2.5px solid #000;border-radius:999px;outline:none;box-shadow:4px 4px 0 0 #000;transition:box-shadow .08s ease;box-sizing:border-box;background:#fff}
+.hm-input:focus{box-shadow:6px 6px 0 0 #000}
+.hm-input::placeholder{color:rgba(0,0,0,.35)}
+.hm-actions{display:flex;gap:10px;flex-wrap:wrap}
+.hm-submit{font-family:var(--font-body);font-size:14px;font-weight:700;padding:12px 24px;border:2.5px solid #000;border-radius:999px;background:var(--yellow);color:#000;box-shadow:5px 5px 0 0 #000;cursor:pointer;transition:box-shadow .08s,transform .08s;flex:1}
+.hm-submit:hover{box-shadow:7px 7px 0 0 #000;transform:translateY(-1px)}
+.hm-submit:active{box-shadow:2px 2px 0 0 #000;transform:scale(.96)}
+.hm-cancel{font-family:var(--font-body);font-size:14px;font-weight:600;padding:12px 20px;border:2.5px solid rgba(0,0,0,.25);border-radius:999px;background:transparent;color:rgba(0,0,0,.5);cursor:pointer;transition:border-color .08s,color .08s}
+.hm-cancel:hover{border-color:#000;color:#000}
+
 /* Happiness deco */
 .happiness-deco{position:absolute;pointer-events:none;right:clamp(10px,5vw,80px);top:50%;transform:translateY(-50%);width:clamp(100px,15vw,220px);opacity:.4}
 
@@ -600,6 +621,24 @@
     </div>
   </section>
 
+  <!-- HAPPINESS MODAL -->
+  <div id="happiness-modal" role="dialog" aria-modal="true" aria-labelledby="hm-title-text">
+    <div class="hm-card">
+      <button class="hm-close" id="hm-close" aria-label="Close">&#10005;</button>
+      <h2 class="hm-title" id="hm-title-text">what makes you happy?</h2>
+      <p class="hm-sub">add it to your list so you can find it again when you need it.</p>
+      <form id="hm-form" autocomplete="off">
+        <div class="hm-input-wrap">
+          <input class="hm-input" id="hm-input" type="text" placeholder="e.g. long walks, my cat, making pasta…" maxlength="60" aria-label="Happiness item">
+        </div>
+        <div class="hm-actions">
+          <button type="submit" class="hm-submit">add it ✦</button>
+          <button type="button" class="hm-cancel" id="hm-cancel">never mind</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ── PROFILE CTA ─────────────────────────────────────────── -->
   <section id="prof-cta" aria-label="Call to action">
     <svg class="prof-cta-scrib-l" viewBox="0 0 100 70" fill="none" aria-hidden="true">
@@ -763,18 +802,54 @@
   });
 })();
 
-/* add happiness pill */
+/* ── happiness modal ── */
 (function(){
-  var btn=document.getElementById('add-happiness-btn');
+  var openBtn=document.getElementById('add-happiness-btn');
+  var modal=document.getElementById('happiness-modal');
+  var closeBtn=document.getElementById('hm-close');
+  var cancelBtn=document.getElementById('hm-cancel');
+  var form=document.getElementById('hm-form');
+  var input=document.getElementById('hm-input');
   var pills=document.getElementById('happiness-pills');
-  if(!btn||!pills)return;
-  btn.addEventListener('click',function(){
-    var text=prompt('what makes you happy?');
-    if(!text||!text.trim())return;
+  if(!openBtn||!modal||!form||!input||!pills)return;
+
+  function openModal(){
+    modal.classList.add('open');
+    document.body.style.overflow='hidden';
+    input.value='';
+    setTimeout(function(){input.focus();},80);
+  }
+  function closeModal(){
+    modal.classList.remove('open');
+    document.body.style.overflow='';
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener('click',openModal);
+  closeBtn.addEventListener('click',closeModal);
+  cancelBtn.addEventListener('click',closeModal);
+  modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var text=input.value.trim();
+    if(!text)return;
     var pill=document.createElement('span');
-    pill.className='happiness-pill prof-bounce is-visible';
-    pill.textContent=text.trim();
+    pill.className='happiness-pill';
+    pill.style.opacity='0';
+    pill.style.transform='scale(.7)';
+    pill.textContent=text;
     pills.appendChild(pill);
+    /* animate in */
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        pill.style.transition='opacity .4s cubic-bezier(.34,1.56,.64,1),transform .4s cubic-bezier(.34,1.56,.64,1)';
+        pill.style.opacity='1';
+        pill.style.transform='scale(1)';
+      });
+    });
+    closeModal();
   });
 })();
 
