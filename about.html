@@ -46,6 +46,7 @@
 }
 .mission-col-1{grid-column:2/span 5}
 .mission-col-2{grid-column:7/span 5}
+.mission-col-mobile{display:none}
 
 /* ── OUR APPROACH ── */
 #our-approach{
@@ -276,11 +277,8 @@
   .about-hero-phrase{font-size:clamp(48px,16vw,88px)}
   #our-mission{padding:56px 0 64px}
   .mission-section-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
-  .mission-col-1,.mission-col-2{
-    grid-column:2/span 8;
-  }
-  .mission-col-2{display:none}
-  .mission-col-1{font-size:clamp(14px,4.2vw,18px)}
+  .mission-col-1,.mission-col-2{display:none}
+  .mission-col-mobile{display:block;grid-column:2/span 8;font-size:clamp(14px,4.2vw,18px)}
   #our-approach{padding:48px 0 64px}
   .approach-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px);margin-bottom:24px}
   .approach-intro-p{grid-column:2/span 8;margin-bottom:48px}
@@ -297,7 +295,7 @@
   .team-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
   .team-intro-p{grid-column:2/span 8}
   .team-scroll-stage{margin-top:40px}
-  .team-deck{width:clamp(260px,88vw,340px);height:clamp(480px,76vh,620px)}
+  .team-deck{width:clamp(260px,88vw,340px);height:clamp(360px,60vh,460px)}
   .team-card-name,.team-card-badge{font-size:clamp(20px,5.5vw,28px)}
   .team-card-body{flex-direction:column}
   .team-card-photo{flex:0 0 42%;border-radius:12px}
@@ -489,7 +487,7 @@
           <p>by helping users collect the small moments that matter, we hope to make happiness accessible, comforting, and naturally woven into daily life, becoming a lived experience rather than a distant ideal.</p>
         </div>
         <!-- mobile-only copy (8-col, shorter text) -->
-        <div class="mission-col mission-col-mobile" style="grid-column:2/span 8;display:none">
+        <div class="mission-col mission-col-mobile">
           <p>we exist to create a soft, welcoming space where anyone can explore what happiness means to them.</p>
           <br>
           <p>daybreak is a world where people feel safe to try, reflect, connect, and grow.</p>
@@ -826,21 +824,6 @@
 
 <script>
 'use strict';
-
-/* mobile: swap which mission column is visible */
-(function(){
-  var mq=window.matchMedia('(max-width:767px)');
-  function apply(e){
-    var d=document.querySelector('.mission-col-mobile');
-    var c1=document.querySelector('.mission-col-1');
-    var c2=document.querySelector('.mission-col-2');
-    if(!d||!c1||!c2)return;
-    if(e.matches){d.style.display='block';c1.style.display='none';c2.style.display='none'}
-    else{d.style.display='none';c1.style.display='block';c2.style.display='block'}
-  }
-  mq.addEventListener('change',apply);
-  apply(mq);
-})();
 
 /* 1. SUN-STRETCH HOVER */
 (function(){
