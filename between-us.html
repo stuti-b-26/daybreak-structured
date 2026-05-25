@@ -50,10 +50,10 @@ body{background:#EEE0CC}
 .bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
 .bw-col{display:flex;flex-direction:column;gap:10px;width:max-content}
 /* ── SCROLL ARROW BUTTONS ── */
-.bw-scroll-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:#3b2a1a;border:3px solid #1a1008;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c8d8a0;box-shadow:4px 4px 0 0 #1a1008,0 2px 8px rgba(0,0,0,.35);transition:background .15s,box-shadow .1s,transform .1s}
+.bw-scroll-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:20;background:#3b2a1a;border:3px solid #1a1008;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c8d8a0;box-shadow:4px 4px 0 0 #1a1008,0 2px 8px rgba(0,0,0,.35);transition:background .15s,box-shadow .1s,transform .1s;opacity:1;pointer-events:all}
 .bw-scroll-btn:hover{background:#4e3820;box-shadow:6px 6px 0 0 #1a1008,0 4px 12px rgba(0,0,0,.4)}
 .bw-scroll-btn:active{box-shadow:2px 2px 0 0 #1a1008;transform:translateY(-50%) scale(.94)}
-.bw-scroll-btn:disabled{opacity:.3;cursor:default;box-shadow:2px 2px 0 0 #1a1008}
+.bw-scroll-btn:disabled{opacity:.5;cursor:default;box-shadow:2px 2px 0 0 #1a1008;pointer-events:none}
 .bw-scroll-btn--left{left:8px}
 .bw-scroll-btn--right{right:8px}
 /* ── POST CARDS: MOSS-COVERED ROCKS ── */
@@ -1112,8 +1112,12 @@ function initScrollGallery(scrollEl, prevBtn, nextBtn){
     scrollEl.scrollLeft=target;
     setTimeout(updateButtons,500);
   }
-  prevBtn.addEventListener('click',function(){scrollBy(-colStep());});
-  nextBtn.addEventListener('click',function(){scrollBy(colStep());});
+  [prevBtn,nextBtn].forEach(function(btn){
+    btn.addEventListener('mousedown',function(e){e.stopPropagation();});
+    btn.addEventListener('touchstart',function(e){e.stopPropagation();},{passive:true});
+  });
+  prevBtn.addEventListener('click',function(e){e.stopPropagation();scrollBy(-colStep());});
+  nextBtn.addEventListener('click',function(e){e.stopPropagation();scrollBy(colStep());});
   scrollEl.addEventListener('scroll',updateButtons,{passive:true});
   updateButtons();
   window.addEventListener('resize',function(){STEP=Math.round(window.innerWidth*0.6);updateButtons();},{passive:true});
