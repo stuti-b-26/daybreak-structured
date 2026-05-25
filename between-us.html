@@ -47,9 +47,9 @@ body{background:#EEE0CC}
 .bw-gallery-wrap{position:relative}
 .bw-posts-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 48px 16px;position:relative;height:66.67vh}
 .bw-posts-scroll::-webkit-scrollbar{display:none}
-/* masonry: CSS columns fill top-to-bottom then start a new column */
-.bw-posts{display:block;column-width:240px;column-fill:auto;column-gap:10px;height:calc(66.67vh - 16px);width:max-content;padding:4px 8px 8px}
-.bw-col{display:none} /* unused — kept for safety */
+.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
+/* each column stacks cards naturally — no fixed height, no stretch */
+.bw-col{display:flex;flex-direction:column;gap:10px;width:240px;align-items:stretch}
 /* ── SCROLL ARROW BUTTONS ── */
 /* overlay sits after scroll container in DOM so it always paints on top;
    pointer-events:none lets clicks pass through to cards everywhere except the buttons */
@@ -61,7 +61,7 @@ body{background:#EEE0CC}
 .bw-scroll-btn--left{left:8px}
 .bw-scroll-btn--right{right:8px}
 /* ── POST CARDS: MOSS-COVERED ROCKS ── */
-.bw-post-card{min-width:180px;max-width:480px;break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:10px}
+.bw-post-card{width:100%;box-sizing:border-box}
 .bw-post-card{border:3px solid #4a4a4a;border-radius:22px 16px 20px 18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #2a2a2a;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;position:relative;height:auto;
   background:linear-gradient(148deg,#787878 0%,#5a5a5a 40%,#6e6e6e 70%,#4a4a4a 100%)}
 /* mossy texture: ::before = grey rock sheen, ::after = green moss patches */
@@ -1175,43 +1175,67 @@ function initGalleryDrag(){
 }
 
 
+/* estimate card height from text length — avoids expensive DOM probing.
+   at 240px col width, Nunito 13px/1.55 fits ~38 chars per line (~20px/line).
+   base = tag(22) + footer(36) + padding(26) = 84px */
+function estimateCardH(post){
+  return 84 + Math.ceil(post.text.length / 38) * 20;
+}
+
+function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
+  var oldList=document.getElementById(listId);
+  if(oldList)oldList.remove();
+  var container=document.createElement('div');
+  container.className='bw-posts';
+  container.id=listId;
+  scrollEl.insertBefore(container,scrollEl.firstChild);
+
+  if(!posts.length){
+    if(emptyEl){container.style.cssText='width:100%;display:flex;justify-content:center';container.appendChild(emptyEl);emptyEl.style.display='block';}
+    return;
+  }
+  if(emptyEl)emptyEl.style.display='none';
+
+  var GAP=10;
+  var maxH=(scrollEl.clientHeight||window.innerHeight*(2/3))-GAP;
+  var cols=[], heights=[];
+
+  posts.forEach(function(post,i){
+    var h=estimateCardH(post);
+    /* find the shortest column that still has room */
+    var best=-1, bestH=Infinity;
+    for(var j=0;j<cols.length;j++){
+      var nh=heights[j]+(heights[j]>0?GAP:0)+h;
+      if(nh<=maxH&&heights[j]<bestH){bestH=heights[j];best=j;}
+    }
+    if(best===-1){best=cols.length;cols.push([]);heights.push(0);}
+    cols[best].push({post:post,idx:i});
+    heights[best]+=(heights[best]>0?GAP:0)+h;
+  });
+
+  cols.forEach(function(items){
+    var colEl=document.createElement('div');
+    colEl.className='bw-col';
+    items.forEach(function(item){
+      colEl.appendChild(renderCard(item.post,item.post.own,item.idx,showJournal,context));
+    });
+    container.appendChild(colEl);
+  });
+}
+
 function renderFeed(){
   var scrollEl=document.getElementById('bw-posts-scroll');
   if(!scrollEl)return;
   var posts=loadPosts();
   _lbPosts=posts;
-  var oldList=document.getElementById('bw-posts-list');
-  if(oldList)oldList.remove();
-  var container=document.createElement('div');
-  container.className='bw-posts';
-  container.id='bw-posts-list';
-  scrollEl.insertBefore(container,scrollEl.firstChild);
-  if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
-  posts.forEach(function(post,i){
-    container.appendChild(renderCard(post,post.own,i,false,'feed'));
-  });
+  buildMasonry(scrollEl,posts,'bw-posts-list',false,'feed',null);
 }
 
 function renderSaved(){
   var scrollEl=document.getElementById('bw-saved-scroll');
   if(!scrollEl)return;
   var saved=loadSaved();
-  var empty=document.getElementById('bw-saved-empty');
-  var oldList=document.getElementById('bw-saved-list');
-  if(oldList)oldList.remove();
-  var container=document.createElement('div');
-  container.className='bw-posts';
-  container.id='bw-saved-list';
-  scrollEl.insertBefore(container,scrollEl.firstChild);
-  if(!saved.length){
-    container.style.cssText='width:100%;display:flex;justify-content:center';
-    if(empty){container.appendChild(empty);empty.style.display='block';}
-    return;
-  }
-  if(empty)empty.style.display='none';
-  saved.forEach(function(post,i){
-    container.appendChild(renderCard(post,post.own,i,true,'saved'));
-  });
+  buildMasonry(scrollEl,saved,'bw-saved-list',true,'saved',document.getElementById('bw-saved-empty'));
 }
 
 /* Write */
