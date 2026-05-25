@@ -45,10 +45,11 @@ body{background:#EEE0CC}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
 .bw-gallery-wrap{position:relative}
-.bw-posts-scroll{overflow-x:hidden;overflow-y:hidden;scrollbar-width:none;padding:0 48px 10px;position:relative;max-height:66.67vh}
+.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 48px 16px;position:relative;height:66.67vh}
 .bw-posts-scroll::-webkit-scrollbar{display:none}
-.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
-.bw-col{display:flex;flex-direction:column;gap:10px;width:max-content}
+/* masonry: CSS columns fill top-to-bottom then start a new column */
+.bw-posts{display:block;column-width:240px;column-fill:auto;column-gap:10px;height:calc(66.67vh - 16px);width:max-content;padding:4px 8px 8px}
+.bw-col{display:none} /* unused — kept for safety */
 /* ── SCROLL ARROW BUTTONS ── */
 /* overlay sits after scroll container in DOM so it always paints on top;
    pointer-events:none lets clicks pass through to cards everywhere except the buttons */
@@ -60,7 +61,7 @@ body{background:#EEE0CC}
 .bw-scroll-btn--left{left:8px}
 .bw-scroll-btn--right{right:8px}
 /* ── POST CARDS: MOSS-COVERED ROCKS ── */
-.bw-post-card{min-width:180px;max-width:480px}
+.bw-post-card{min-width:180px;max-width:480px;break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:10px}
 .bw-post-card{border:3px solid #4a4a4a;border-radius:22px 16px 20px 18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #2a2a2a;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;position:relative;height:auto;
   background:linear-gradient(148deg,#787878 0%,#5a5a5a 40%,#6e6e6e 70%,#4a4a4a 100%)}
 /* mossy texture: ::before = grey rock sheen, ::after = green moss patches */
@@ -914,10 +915,6 @@ function showToast(msg){
 }
 
 /* estimate rendered height for a card at a given pixel width */
-var DEFAULT_CARD_WIDTHS=[230,180,290,230,290,180,230,230,290,180];
-var MAX_CARD_W=480;
-var GAP=10; /* gap between cards in a column */
-var SHADOW_PAD=13; /* 5px shadow + 8px bottom padding */
 
 var FRAME_COLORS=8;
 function postColorIndex(id){
@@ -1177,158 +1174,43 @@ function initGalleryDrag(){
   );
 }
 
-/* measure the true rendered height of a card at a given width using a hidden probe */
-var _probe=(function(){
-  var el=document.createElement('div');
-  el.style.cssText='position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;z-index:-1';
-  document.addEventListener('DOMContentLoaded',function(){document.body.appendChild(el)});
-  return el;
-})();
-
-function measureCardHeight(post,isOwn,idx,w){
-  var card=renderCard(post,isOwn,idx);
-  card.style.width=w+'px';
-  _probe.appendChild(card);
-  var h=card.offsetHeight;
-  _probe.removeChild(card);
-  return h;
-}
-
-/* find the narrowest width (starting from w, stepping up) at which the card fits in targetH */
-function widenToFit(post,isOwn,idx,targetH,startW){
-  var w=startW;
-  while(w<=MAX_CARD_W){
-    if(measureCardHeight(post,isOwn,idx,w)<=targetH)return w;
-    w+=20;
-  }
-  return null; /* can't fit even at max width */
-}
-
-function rearrangeGallery(posts,MAX_COL_H){
-  /* returns array of {post, idx, cardW} in column order:
-     for each post, find the shortest column it fits in at its natural width;
-     if none, widen until it fits; if still none, open a new column. */
-  var cols=[],heights=[];
-
-  function addCol(){
-    var defaultW=DEFAULT_CARD_WIDTHS[cols.length%DEFAULT_CARD_WIDTHS.length];
-    cols.push({items:[],defaultW:defaultW});
-    heights.push(0);
-  }
-  addCol();
-
-  posts.forEach(function(post,i){
-    var placed=false;
-    /* try each existing column, shortest first */
-    var order=heights.map(function(_,ci){return ci}).sort(function(a,b){return heights[a]-heights[b]});
-    for(var oi=0;oi<order.length;oi++){
-      var ci=order[oi];
-      var remaining=MAX_COL_H-(heights[ci]>0?heights[ci]+GAP:0);
-      var dw=cols[ci].defaultW;
-      var h=measureCardHeight(post,post.own,i,dw);
-      var cardW=dw;
-      if(h>remaining){
-        /* try widening */
-        var wider=widenToFit(post,post.own,i,remaining,dw+20);
-        if(wider!==null){cardW=wider;h=measureCardHeight(post,post.own,i,cardW);}
-        else{continue;} /* doesn't fit here even at max width, try next column */
-      }
-      cols[ci].items.push({post:post,idx:i,cardW:cardW});
-      heights[ci]+=(heights[ci]>0?GAP:0)+h;
-      placed=true;
-      break;
-    }
-    if(!placed){
-      /* no existing column works — open a new one */
-      addCol();
-      var ci=cols.length-1;
-      var dw=cols[ci].defaultW;
-      var h=measureCardHeight(post,post.own,i,dw);
-      var cardW=dw;
-      /* if even a fresh column isn't tall enough, widen */
-      if(h>MAX_COL_H){
-        var wider=widenToFit(post,post.own,i,MAX_COL_H,dw+20);
-        if(wider!==null){cardW=wider;}
-      }
-      cols[ci].items.push({post:post,idx:i,cardW:cardW});
-      heights[ci]+=h;
-    }
-  });
-  return cols;
-}
 
 function renderFeed(){
   var scrollEl=document.getElementById('bw-posts-scroll');
   if(!scrollEl)return;
-  /* ensure probe is in DOM */
-  if(!_probe.parentNode)document.body.appendChild(_probe);
   var posts=loadPosts();
   _lbPosts=posts;
-
   var oldList=document.getElementById('bw-posts-list');
   if(oldList)oldList.remove();
   var container=document.createElement('div');
   container.className='bw-posts';
   container.id='bw-posts-list';
   scrollEl.insertBefore(container,scrollEl.firstChild);
-
   if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
-
-  var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
-  var packedCols=rearrangeGallery(posts,MAX_COL_H);
-
-  packedCols.forEach(function(col){
-    var colEl=document.createElement('div');
-    colEl.className='bw-col';
-    colEl.style.height=MAX_COL_H+'px';
-    container.appendChild(colEl);
-    col.items.forEach(function(item){
-      var card=renderCard(item.post,item.post.own,item.idx,false,'feed');
-      card.style.width=item.cardW+'px';
-      card.style.flex='1 1 auto';
-      colEl.appendChild(card);
-    });
+  posts.forEach(function(post,i){
+    container.appendChild(renderCard(post,post.own,i,false,'feed'));
   });
 }
 
-function renderSaved(){/* saved gallery — journal buttons enabled */
+function renderSaved(){
   var scrollEl=document.getElementById('bw-saved-scroll');
   if(!scrollEl)return;
-  if(!_probe.parentNode)document.body.appendChild(_probe);
   var saved=loadSaved();
   var empty=document.getElementById('bw-saved-empty');
-
   var oldList=document.getElementById('bw-saved-list');
   if(oldList)oldList.remove();
   var container=document.createElement('div');
   container.className='bw-posts';
   container.id='bw-saved-list';
   scrollEl.insertBefore(container,scrollEl.firstChild);
-
   if(!saved.length){
-    /* empty state: bypass the flex gallery container, show centered message */
-    container.style.width='100%';
-    container.style.display='flex';
-    container.style.justifyContent='center';
+    container.style.cssText='width:100%;display:flex;justify-content:center';
     if(empty){container.appendChild(empty);empty.style.display='block';}
     return;
   }
   if(empty)empty.style.display='none';
-
-  var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
-  var packedCols=rearrangeGallery(saved,MAX_COL_H);
-
-  packedCols.forEach(function(col){
-    var colEl=document.createElement('div');
-    colEl.className='bw-col';
-    colEl.style.height=MAX_COL_H+'px';
-    container.appendChild(colEl);
-    col.items.forEach(function(item){
-      var card=renderCard(item.post,item.post.own,item.idx,true,'saved');
-      card.style.width=item.cardW+'px';
-      card.style.flex='1 1 auto';
-      colEl.appendChild(card);
-    });
+  saved.forEach(function(post,i){
+    container.appendChild(renderCard(post,post.own,i,true,'saved'));
   });
 }
 
