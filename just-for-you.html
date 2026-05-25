@@ -148,1108 +148,2389 @@
 </div>
 
 <!-- MAIN CONTENT -->
-<main id="page-main" style="padding-top:var(--hh)">
-
+<main id="page-main" style="padding-top:var(--hh)" id="jfy-root">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Spectral:ital,wght@0,300;0,400;1,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Spectral:ital,wght@0,300;0,400;1,300&display=swap');
 
-  :root {
-    --desk: #c8a87a;
-    --paper: #fdf6e3;
-    --paper-aged: #f0e6c8;
-    --ink: #2c2415;
-    --ink-muted: #6b5c40;
-    --tape-blue: #a8c8e8;
-    --tape-pink: #f0b8c8;
-    --tape-green: #a8d4b8;
-    --tape-yellow: #f0d878;
-    --tape-purple: #c8b0e0;
-  }
+:root {
+  --desk: #c8a87a;
+  --desk-dark: #a8865a;
+  --nb-bg: #fdf6e3;
+  --nb-line: rgba(0,0,100,.08);
+  --nb-margin: rgba(220,60,60,.25);
+  --tape-blue: #a8c8e8;
+  --tape-pink: #f0b8c8;
+  --tape-green: #a8d4b8;
+  --tape-yellow: #f0d878;
+  --tape-purple: #c8b8e8;
+  --ink: #2c2c3a;
+  --subbar-h: 52px;
+}
 
-  #jfy-root {
-    background: var(--desk);
-    min-height: calc(100vh - 64px);
-    position: relative;
-    overflow-x: hidden;
-  }
-  #jfy-root::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      repeating-linear-gradient(85deg, transparent 0, transparent 40px, rgba(0,0,0,0.015) 40px, rgba(0,0,0,0.015) 42px),
-      repeating-linear-gradient(90deg, transparent 0, transparent 80px, rgba(0,0,0,0.01) 80px, rgba(0,0,0,0.01) 82px);
-    pointer-events: none;
-  }
+/* ── reset helpers ── */
+#jfy-root *, #jfy-root *::before, #jfy-root *::after { box-sizing: border-box; }
+#jfy-root { font-family: 'Spectral', Georgia, serif; }
 
-  .jfy-subbar {
-    position: sticky;
-    top: 64px;
-    z-index: 400;
-    background: rgba(40,28,12,0.9);
-    backdrop-filter: blur(6px);
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .jfy-subbar-left { display: flex; align-items: center; gap: 16px; }
-  .jfy-subbar-title { font-family: 'Caveat', cursive; font-size: 18px; color: #fdf6e3; opacity: 0.9; letter-spacing: 0.04em; }
-  .jfy-pill {
-    font-family: 'Spectral', serif; font-size: 12px; color: rgba(253,246,227,0.6);
-    padding: 3px 11px; border-radius: 20px; border: 1px solid transparent;
-    cursor: pointer; letter-spacing: 0.04em; transition: all 0.2s;
-  }
-  .jfy-pill:hover, .jfy-pill.active { color: #fdf6e3; border-color: rgba(253,246,227,0.25); background: rgba(253,246,227,0.08); }
-  .jfy-write-btn {
-    font-family: 'Caveat', cursive; font-size: 14px; background: #f0d878; color: #2c2415;
-    border: none; padding: 5px 14px; border-radius: 4px; cursor: pointer;
-    transform: rotate(-1deg); box-shadow: 2px 2px 6px rgba(0,0,0,0.2); transition: transform 0.2s;
-  }
-  .jfy-write-btn:hover { transform: rotate(0deg) scale(1.04); }
+/* ── DESK BACKGROUND ── */
+#jfy-root {
+  background-color: var(--desk);
+  background-image:
+    repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(0,0,0,.04) 28px,rgba(0,0,0,.04) 29px),
+    repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(0,0,0,.04) 28px,rgba(0,0,0,.04) 29px),
+    linear-gradient(160deg,#d4b48a 0%,#c8a87a 40%,#b8945e 100%);
+  min-height: 100vh;
+}
 
-  .jfy-workspace {
-    position: relative; padding: 36px 0 80px;
-    display: flex; align-items: flex-start; justify-content: center; z-index: 1;
-  }
-  .jfy-tray {
-    position: sticky; top: 110px; width: 120px; flex-shrink: 0;
-    display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 16px 8px;
-  }
-  .jfy-tray-label { font-family: 'Caveat', cursive; font-size: 12px; color: rgba(44,36,21,0.5); letter-spacing: 0.05em; margin-bottom: -12px; }
-  .jfy-tape-roll { width: 48px; height: 48px; cursor: grab; transition: transform 0.15s; user-select: none; }
-  .jfy-tape-roll:hover { transform: scale(1.1) rotate(-4deg); }
-  .jfy-tape-roll:active { cursor: grabbing; }
-  .jfy-tape-roll svg { width: 100%; height: 100%; }
-  .jfy-tape-row { display: flex; gap: 6px; }
-  .jfy-tape-group { display: flex; flex-direction: column; gap: 6px; align-items: center; }
-  .jfy-polaroid-stack { position: relative; width: 74px; height: 90px; cursor: grab; transition: transform 0.15s; }
-  .jfy-polaroid-stack:hover { transform: scale(1.06); }
-  .jfy-polaroid-card { position: absolute; background: white; border-radius: 2px; box-shadow: 1px 2px 8px rgba(0,0,0,0.18); }
-  .jfy-pencil-cup {
-    width: 36px; height: 54px; background: linear-gradient(to bottom, #d4956a, #b87040);
-    border-radius: 4px 4px 6px 6px; display: flex; align-items: flex-end; justify-content: center;
-    padding-bottom: 4px; box-shadow: inset -2px 0 4px rgba(0,0,0,0.1), 1px 2px 6px rgba(0,0,0,0.2);
-  }
-  .jfy-stamp {
-    width: 50px; height: 50px; background: #f0e6c8; border: 2.5px solid #2c2415; border-radius: 3px;
-    display: flex; align-items: center; justify-content: center; font-family: 'Caveat', cursive;
-    font-size: 9px; color: #2c2415; text-align: center; cursor: grab; letter-spacing: 0.06em;
-    transition: transform 0.15s; position: relative; box-shadow: 1px 2px 6px rgba(0,0,0,0.15);
-  }
-  .jfy-stamp::before { content: ''; position: absolute; inset: 3px; border: 1px solid #2c2415; border-radius: 1px; }
-  .jfy-stamp:hover { transform: scale(1.1) rotate(3deg); }
-  .jfy-sticker-sheet { width: 84px; background: #fdf6e3; border-radius: 3px; padding: 8px 6px; box-shadow: 1px 2px 8px rgba(0,0,0,0.12); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-  .jfy-sticker { font-size: 15px; cursor: grab; text-align: center; transition: transform 0.15s; }
-  .jfy-sticker:hover { transform: scale(1.3); }
-  .jfy-paperclip { width: 18px; height: 44px; cursor: grab; transition: transform 0.15s; }
-  .jfy-paperclip:hover { transform: rotate(-10deg); }
+/* ── STICKY SUB-NAV ── */
+#jfy-subbar {
+  position: sticky;
+  top: var(--hh, 60px);
+  z-index: 200;
+  background: rgba(200,168,122,.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0,0,0,.12);
+  height: var(--subbar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+#jfy-subbar .jfy-title {
+  font-family: 'Caveat', cursive;
+  font-size: 20px;
+  font-weight: 700;
+  color: #3a2a10;
+  letter-spacing: .5px;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.jfy-pills {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.jfy-pill {
+  background: transparent;
+  border: 1.5px solid transparent;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-family: 'Spectral', serif;
+  font-size: 13px;
+  color: #3a2a10;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.jfy-pill:hover, .jfy-pill.active {
+  background: rgba(255,255,255,.5);
+  border-color: rgba(58,42,16,.4);
+}
+.jfy-subbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+#jfy-start-btn {
+  background: #f0d878;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: 'Caveat', cursive;
+  font-size: 15px;
+  font-weight: 700;
+  color: #3a2a10;
+  cursor: pointer;
+  transform: rotate(-2deg);
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 1px 2px 4px rgba(0,0,0,.2);
+}
+#jfy-start-btn:hover { transform: rotate(0deg) scale(1.04); box-shadow: 2px 4px 8px rgba(0,0,0,.25); }
+#jfy-export-btn, #jfy-share-btn {
+  background: rgba(255,255,255,.35);
+  border: 1px solid rgba(58,42,16,.3);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #3a2a10;
+  cursor: pointer;
+  transition: background .15s;
+}
+#jfy-export-btn:hover, #jfy-share-btn:hover { background: rgba(255,255,255,.6); }
 
-  .jfy-notebook-wrap { position: relative; flex: 1; max-width: 800px; display: flex; flex-direction: column; align-items: center; gap: 48px; }
-  .jfy-page-nav { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-  .jfy-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(44,36,21,0.22); cursor: pointer; transition: all 0.3s; }
-  .jfy-dot.active { background: #2c2415; width: 22px; border-radius: 4px; }
-  .jfy-page-counter { font-family: 'Caveat', cursive; font-size: 12px; color: rgba(44,36,21,0.35); text-align: center; margin-top: 4px; letter-spacing: 0.06em; }
+/* ── WORKSPACE ── */
+.jfy-workspace {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 16px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-  .jfy-notebook {
-    position: relative; width: 100%; max-width: 760px; background: #fdf6e3; border-radius: 4px;
-    box-shadow: 0 4px 40px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(0,0,0,0.05);
-    display: grid; grid-template-columns: 1fr 2px 1fr; min-height: 520px; overflow: hidden;
-  }
-  .jfy-spine {
-    background: linear-gradient(to right, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.04) 40%, rgba(0,0,0,0.12) 100%);
-    position: relative;
-  }
-  .jfy-spine::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, transparent 0, transparent 18px, rgba(0,0,0,0.04) 18px, rgba(0,0,0,0.04) 19px); }
-  .jfy-page { padding: 36px 32px; position: relative; background: #fdf6e3; min-height: 520px; }
-  .jfy-page.right { background: #faf3e0; }
-  .jfy-page::after {
-    content: ''; position: absolute; inset: 52px 18px 18px;
-    background: repeating-linear-gradient(to bottom, transparent 0, transparent 27px, rgba(160,140,100,0.15) 27px, rgba(160,140,100,0.15) 28px);
-    pointer-events: none;
-  }
-  .jfy-page:first-child::before { content: ''; position: absolute; left: 68px; top: 36px; bottom: 18px; width: 1px; background: rgba(200,80,60,0.16); pointer-events: none; }
+/* ── TOOL TRAYS ── */
+.jfy-tray {
+  width: 120px;
+  flex-shrink: 0;
+  position: sticky;
+  top: calc(var(--hh, 60px) + var(--subbar-h));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.jfy-tray-section {
+  background: rgba(255,255,255,.18);
+  border-radius: 10px;
+  padding: 10px 8px;
+  border: 1px solid rgba(255,255,255,.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+.jfy-tray-label {
+  font-family: 'Caveat', cursive;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(58,42,16,.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+/* Tape rolls */
+.jfy-tape-rolls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.jfy-tape-roll {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  border: 3px solid rgba(255,255,255,.6);
+  box-shadow: 0 1px 4px rgba(0,0,0,.2), inset 0 0 0 5px rgba(0,0,0,.1);
+  transition: transform .15s;
+}
+.jfy-tape-roll:hover { transform: scale(1.1) rotate(-4deg); }
+.jfy-tape-roll::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.35);
+}
+/* Polaroid stack */
+.jfy-polaroid-stack {
+  position: relative;
+  height: 80px;
+  margin: 4px auto;
+  width: 70px;
+  cursor: grab;
+}
+.jfy-polaroid-stack:active { cursor: grabbing; }
+.jfy-polaroid-card {
+  position: absolute;
+  width: 58px;
+  background: white;
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  padding: 4px 4px 14px;
+}
+.jfy-polaroid-card:nth-child(1) { left:6px; top:4px; transform: rotate(-6deg); }
+.jfy-polaroid-card:nth-child(2) { left:3px; top:2px; transform: rotate(-2deg); }
+.jfy-polaroid-card:nth-child(3) { left:0;   top:0;   transform: rotate(2deg); }
+.jfy-polaroid-card .photo-area {
+  width: 100%;
+  height: 42px;
+  background: #e0e8f0;
+  border-radius: 2px;
+}
+.jfy-drag-label {
+  font-family: 'Caveat', cursive;
+  font-size: 10px;
+  color: #888;
+  text-align: center;
+  margin-top: 6px;
+}
+/* Sticky pad icon */
+.jfy-sticky-pad {
+  width: 52px;
+  height: 52px;
+  background: #f0d878;
+  border-radius: 4px;
+  margin: 0 auto;
+  cursor: grab;
+  box-shadow: 2px 2px 6px rgba(0,0,0,.15), inset 0 -4px 0 rgba(0,0,0,.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: transform .15s;
+  position: relative;
+}
+.jfy-sticky-pad:active { cursor: grabbing; }
+.jfy-sticky-pad:hover { transform: scale(1.05); }
+.jfy-sticky-pad::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 8px;
+  background: rgba(0,0,0,.06);
+  border-radius: 4px 4px 0 0;
+}
+/* Pencil cup */
+.jfy-pencil-cup {
+  width: 52px;
+  margin: 0 auto;
+}
 
-  .jfy-polaroid { position: absolute; background: white; padding: 9px 9px 26px; box-shadow: 2px 4px 12px rgba(0,0,0,0.16); cursor: grab; transition: transform 0.2s, box-shadow 0.2s; z-index: 10; }
-  .jfy-polaroid:hover { transform: scale(1.05) !important; box-shadow: 4px 8px 24px rgba(0,0,0,0.22); z-index: 20; }
-  .jfy-polaroid-img { display: flex; align-items: center; justify-content: center; font-family: 'Caveat', cursive; font-size: 10px; color: #aaa; }
-  .jfy-polaroid-caption { position: absolute; bottom: 5px; left: 0; right: 0; text-align: center; font-family: 'Caveat', cursive; font-size: 12px; color: #6b5c40; }
-  .jfy-sticky { position: absolute; background: #f0d878; padding: 10px 12px; font-family: 'Caveat', cursive; font-size: 14px; color: #2c2415; box-shadow: 3px 4px 12px rgba(0,0,0,0.14); cursor: grab; z-index: 12; line-height: 1.5; }
-  .jfy-heading { font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700; color: #2c2415; letter-spacing: 0.02em; margin-bottom: 6px; position: relative; z-index: 5; }
-  .jfy-subhead { font-family: 'Spectral', serif; font-size: 12px; font-style: italic; color: #6b5c40; margin-bottom: 20px; position: relative; z-index: 5; }
-  .jfy-body { font-family: 'Spectral', serif; font-size: 13px; line-height: 27px; color: #6b5c40; position: relative; z-index: 5; max-width: 260px; }
-  .jfy-corner-label { position: absolute; bottom: 14px; right: 18px; font-family: 'Caveat', cursive; font-size: 11px; color: rgba(44,36,21,0.22); letter-spacing: 0.1em; text-transform: uppercase; z-index: 5; }
-  .jfy-write-prompt { font-family: 'Caveat', cursive; font-size: 15px; color: rgba(44,36,21,0.3); margin-bottom: 6px; position: relative; z-index: 5; }
-  .jfy-cursor { display: inline-block; width: 2px; height: 17px; background: #2c2415; opacity: 0.5; animation: jfy-blink 1.1s steps(1) infinite; vertical-align: text-bottom; margin-left: 2px; }
-  @keyframes jfy-blink { 0%,49%{opacity:0.5} 50%,100%{opacity:0} }
+/* Right tray: stamps */
+.jfy-stamps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jfy-stamp {
+  background: #e8e0d4;
+  border: 2px solid #a89880;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a3820;
+  cursor: pointer;
+  text-align: center;
+  transition: transform .15s, background .15s;
+  box-shadow: 0 2px 0 #a89880, 0 3px 4px rgba(0,0,0,.15);
+  user-select: none;
+}
+.jfy-stamp:hover { transform: scale(1.1) rotate(3deg); background: #f0e8dc; }
+.jfy-stamp.active-tool { background: #f0d878; border-color: #d4a800; }
 
-  .jfy-flip-right, .jfy-flip-left { position: absolute; bottom: -18px; width: 44px; height: 44px; background: #f0e6c8; cursor: pointer; z-index: 20; transition: background 0.2s; border: none; display: flex; align-items: flex-end; padding: 5px; }
-  .jfy-flip-right { right: -10px; border-radius: 50% 0 0 0; box-shadow: -2px -2px 8px rgba(0,0,0,0.12); justify-content: flex-end; }
-  .jfy-flip-right:hover, .jfy-flip-left:hover { background: #e8dcc0; }
-  .jfy-flip-right::before { content: '›'; font-size: 17px; color: #6b5c40; line-height: 1; }
-  .jfy-flip-left { left: -10px; border-radius: 0 50% 0 0; box-shadow: 2px -2px 8px rgba(0,0,0,0.12); justify-content: flex-start; }
-  .jfy-flip-left::before { content: '‹'; font-size: 17px; color: #6b5c40; line-height: 1; }
+/* Stickers grid */
+.jfy-stickers-grid {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 4px;
+}
+.jfy-sticker {
+  font-size: 18px;
+  text-align: center;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  transition: transform .15s, background .1s;
+  user-select: none;
+  line-height: 1.2;
+}
+.jfy-sticker:hover { transform: scale(1.2); background: rgba(255,255,255,.4); }
+.jfy-sticker.active-tool { background: rgba(240,216,120,.6); }
 
-  .jfy-drag-indicator { position: absolute; inset: 0; background: rgba(168,200,232,0.1); border: 2px dashed rgba(168,200,232,0.5); border-radius: 4px; display: none; align-items: center; justify-content: center; z-index: 50; font-family: 'Caveat', cursive; font-size: 18px; color: rgba(44,36,21,0.28); pointer-events: none; }
-  .jfy-drag-indicator.visible { display: flex; }
+/* Paper clips */
+.jfy-clips { display: flex; gap: 8px; justify-content: center; }
 
-  .jfy-spread { position: relative; width: 100%; display: none; animation: jfy-flipIn 0.45s ease-out; }
-  .jfy-spread.active { display: block; }
-  @keyframes jfy-flipIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+/* ── NOTEBOOK ── */
+.jfy-notebook-wrap {
+  flex: 1;
+  min-width: 0;
+  max-width: 820px;
+  margin: 0 auto;
+}
+.jfy-nav-dots {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.jfy-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.4);
+  border: 2px solid rgba(255,255,255,.6);
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.jfy-dot.active {
+  background: white;
+  transform: scale(1.2);
+}
+.jfy-page-counter {
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  color: rgba(255,255,255,.7);
+  margin-bottom: 8px;
+}
 
-  .jfy-scroll-cue { display: flex; align-items: center; justify-content: center; padding: 20px 0 0; }
-  .jfy-scroll-cue span { background: #f0e6c8; border: 1px solid rgba(44,36,21,0.12); border-radius: 20px; padding: 5px 14px; font-family: 'Caveat', cursive; font-size: 13px; color: #6b5c40; }
+/* ── SPREAD ── */
+.jfy-spread {
+  display: none;
+  gap: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0,0,0,.35);
+}
+.jfy-spread.active {
+  display: flex;
+  animation: jfy-flipIn .35s ease both;
+}
+@keyframes jfy-flipIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 
-  .jfy-picker {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(140px);
-    background: rgba(253,246,227,0.97); border: 1px solid rgba(0,0,0,0.1); border-radius: 12px;
-    padding: 14px 18px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); z-index: 1000;
-    display: flex; flex-direction: column; gap: 10px; min-width: 300px;
-    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); backdrop-filter: blur(8px);
-  }
-  .jfy-picker.open { transform: translateX(-50%) translateY(0); }
-  .jfy-picker-title { font-family: 'Caveat', cursive; font-size: 16px; color: #2c2415; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
-  .jfy-picker-close { width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.1); border: none; cursor: pointer; font-size: 12px; color: #6b5c40; }
-  .jfy-picker-close:hover { background: rgba(0,0,0,0.18); }
-  .jfy-picker-label { font-family: monospace; font-size: 9px; color: rgba(44,36,21,0.4); letter-spacing: 0.1em; margin-bottom: 5px; }
-  .jfy-swatch-row { display: flex; gap: 8px; }
-  .jfy-swatch { width: 52px; height: 26px; border-radius: 3px; cursor: pointer; border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s; overflow: hidden; flex-shrink: 0; position: relative; }
-  .jfy-swatch:hover { transform: scale(1.08); border-color: #2c2415; }
-  .jfy-swatch.selected { border-color: #2c2415; }
-  .jfy-picker-hint { font-family: 'Spectral', serif; font-style: italic; font-size: 11px; color: #6b5c40; }
+/* ── PAGE ── */
+.jfy-page {
+  flex: 1;
+  min-height: 520px;
+  background: var(--nb-bg);
+  position: relative;
+  padding: 24px 20px 20px;
+  overflow: hidden;
+}
+/* ruled lines */
+.jfy-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent, transparent 27px,
+    var(--nb-line) 27px, var(--nb-line) 28px
+  );
+  background-position: 0 40px;
+  z-index: 0;
+}
+/* left margin line */
+.jfy-page.left-page::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 52px;
+  width: 1.5px;
+  background: var(--nb-margin);
+  pointer-events: none;
+  z-index: 1;
+}
+/* spine shadow between pages */
+.jfy-page.left-page {
+  border-right: 2px solid rgba(0,0,0,.08);
+  box-shadow: inset -4px 0 8px rgba(0,0,0,.05);
+}
+.jfy-page.right-page {
+  box-shadow: inset 4px 0 8px rgba(0,0,0,.05);
+}
+/* page content sits above lines */
+.jfy-page > * { position: relative; z-index: 2; }
 
-  .tp-dots { background-image: radial-gradient(circle, rgba(0,0,0,0.2) 1px, transparent 1px); background-size: 6px 6px; }
-  .tp-stripes { background-image: repeating-linear-gradient(45deg, transparent 0, transparent 3px, rgba(255,255,255,0.35) 3px, rgba(255,255,255,0.35) 5px); }
-  .tp-zigzag { background-image: repeating-linear-gradient(90deg, transparent 0 6px, rgba(255,255,255,0.3) 6px 8px); }
-  .tp-floral { background-image: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.3) 2px, transparent 4px); background-size: 10px 10px; }
+/* ── TAPE OVERLAY (SVG) ── */
+.tape-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  overflow: visible;
+}
+.tape-overlay.tape-active {
+  pointer-events: all;
+  cursor: crosshair;
+}
 
-  .jfy-tape-strip { position: absolute; height: 20px; opacity: 0.82; border-radius: 1px; z-index: 15; }
+/* ── CORNER LABELS ── */
+.jfy-corner {
+  position: absolute;
+  font-family: 'Caveat', cursive;
+  font-size: 11px;
+  color: rgba(0,0,0,.3);
+  z-index: 5;
+}
+.jfy-corner.bl { bottom: 8px; left: 10px; }
+.jfy-corner.br { bottom: 8px; right: 10px; }
+.jfy-corner.tl { top: 8px; left: 10px; }
+.jfy-corner.tr { top: 8px; right: 10px; }
 
-  .jfy-format-bar { position: absolute; bottom: 80px; left: 20px; right: 20px; background: rgba(44,36,21,0.06); border: 1px solid rgba(44,36,21,0.1); border-radius: 8px; padding: 8px 12px; display: flex; gap: 10px; align-items: center; z-index: 10; }
-  .jfy-format-label { font-family: 'Caveat', cursive; font-size: 11px; color: rgba(44,36,21,0.4); letter-spacing: 0.06em; }
-  .jfy-format-btn { font-family: 'Caveat', cursive; font-size: 13px; color: rgba(44,36,21,0.5); background: none; border: none; cursor: pointer; padding: 2px 4px; border-radius: 3px; transition: background 0.15s; }
-  .jfy-format-btn:hover { background: rgba(44,36,21,0.08); color: #2c2415; }
+/* ── PAGE FLIP BUTTONS ── */
+.jfy-flip {
+  position: absolute;
+  bottom: 14px;
+  background: rgba(200,168,122,.4);
+  border: 1px solid rgba(200,168,122,.6);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 14px;
+  color: #5a3a10;
+  cursor: pointer;
+  transition: background .15s;
+  z-index: 10;
+}
+.jfy-flip:hover { background: rgba(200,168,122,.7); }
+.jfy-flip.prev { left: 14px; }
+.jfy-flip.next { right: 14px; }
 
-  .jfy-drop-target { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; z-index: 5; }
-  .jfy-drop-circle { width: 56px; height: 56px; border-radius: 50%; border: 1.5px dashed rgba(44,36,21,0.15); display: flex; align-items: center; justify-content: center; font-size: 22px; color: rgba(44,36,21,0.15); }
-  .jfy-drop-label { font-family: 'Caveat', cursive; font-size: 13px; color: rgba(44,36,21,0.25); letter-spacing: 0.04em; }
+/* ── RED PIN ── */
+.jfy-pin {
+  width: 16px;
+  height: 26px;
+  margin-bottom: 8px;
+}
 
-  @media (max-width: 900px) { .jfy-tray { width: 80px; } }
-  @media (max-width: 640px) {
-    .jfy-tray { display: none; }
-    .jfy-workspace { padding: 20px 12px 60px; }
-    .jfy-page { padding: 24px 18px; }
-    .jfy-picker { min-width: 90vw; left: 5vw; transform: translateX(0) translateY(140px); }
-    .jfy-picker.open { transform: translateX(0) translateY(0); }
-    .jfy-subbar-left .jfy-pill { display: none; }
-  }
+/* ── TAPE STRIP (pre-placed) ── */
+.jfy-tape-strip {
+  position: absolute;
+  height: 20px;
+  left: 0; right: 0;
+  top: 16px;
+  z-index: 14;
+  opacity: .75;
+}
+
+/* ── WELCOME PAGE CONTENT ── */
+.jfy-page h2 {
+  font-family: 'Caveat', cursive;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 4px 0 6px;
+  line-height: 1.1;
+}
+.jfy-page h3 {
+  font-family: 'Caveat', cursive;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 12px 0 6px;
+}
+.jfy-page p {
+  font-size: 13px;
+  line-height: 1.9;
+  color: #3a3040;
+  margin: 0 0 8px;
+}
+.jfy-italic-sub {
+  font-style: italic;
+  font-size: 13px;
+  color: #6a5a70;
+  margin-bottom: 10px;
+  display: block;
+}
+.jfy-numbered-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.jfy-numbered-list li {
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  color: var(--ink);
+  line-height: 2;
+  padding-left: 4px;
+}
+
+/* ── PRE-PLACED POLAROID ── */
+.pre-polaroid {
+  position: absolute;
+  bottom: 40px;
+  left: 20px;
+  width: 90px;
+  background: white;
+  border-radius: 3px;
+  padding: 6px 6px 22px;
+  box-shadow: 2px 3px 8px rgba(0,0,0,.2);
+  transform: rotate(-5deg);
+  z-index: 8;
+}
+.pre-polaroid .photo-area {
+  width: 100%;
+  height: 68px;
+  background: linear-gradient(135deg,#d0e8f8,#e8d0f0);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.pre-polaroid-tape {
+  position: absolute;
+  width: 50px;
+  height: 14px;
+  background: rgba(168,200,232,.7);
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  border-radius: 2px;
+}
+
+/* ── PRE-PLACED STICKY ── */
+.pre-sticky {
+  position: absolute;
+  bottom: 40px;
+  right: 18px;
+  width: 88px;
+  background: #f0d878;
+  border-radius: 2px;
+  padding: 8px;
+  box-shadow: 2px 3px 8px rgba(0,0,0,.15);
+  transform: rotate(3deg);
+  z-index: 8;
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  color: #3a2a10;
+}
+.pre-sticky-tape {
+  position: absolute;
+  width: 40px;
+  height: 12px;
+  background: rgba(168,200,232,.7);
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+/* ── SVG PAGE DIAGRAM ── */
+.jfy-page-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 16px 0;
+  gap: -4px;
+}
+.jfy-page-diagram .diag-page {
+  width: 80px;
+  height: 18px;
+  background: #fdf6e3;
+  border: 1px solid #c8b89a;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  margin-top: -4px;
+  position: relative;
+}
+.jfy-page-diagram .diag-page:last-child {
+  animation: jfy-pagecurl 2s ease-in-out infinite;
+}
+@keyframes jfy-pagecurl {
+  0%,100% { transform: perspective(200px) rotateX(0deg); }
+  50% { transform: perspective(200px) rotateX(8deg); }
+}
+
+/* ── SPREAD 2 WRITE ── */
+.jfy-write-prompt {
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  color: #6a5a80;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+.jfy-typewriter {
+  font-family: 'Spectral', serif;
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.9;
+  min-height: 60px;
+}
+.jfy-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: #4a3a60;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: jfy-blink .9s step-end infinite;
+}
+@keyframes jfy-blink { 50% { opacity: 0; } }
+.jfy-format-bar {
+  position: absolute;
+  bottom: 36px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+.jfy-fmt-btn {
+  background: rgba(200,168,122,.3);
+  border: 1px solid rgba(200,168,122,.5);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 12px;
+  color: #3a2a10;
+  cursor: pointer;
+  transition: background .15s;
+}
+.jfy-fmt-btn:hover { background: rgba(200,168,122,.6); }
+
+/* ── DROP TARGET ── */
+.jfy-drop-target {
+  width: 140px;
+  height: 140px;
+  border: 2.5px dashed rgba(0,0,0,.2);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 40px auto;
+  color: rgba(0,0,0,.3);
+  font-family: 'Caveat', cursive;
+  font-size: 14px;
+  transition: border-color .2s, background .2s;
+  position: relative;
+  z-index: 5;
+}
+.jfy-drop-target .drop-plus {
+  font-size: 32px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.jfy-drop-target.dragover {
+  border-color: rgba(168,200,232,.8);
+  background: rgba(168,200,232,.15);
+  color: rgba(0,80,160,.5);
+}
+.jfy-drag-indicator {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(168,200,232,.08);
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.jfy-drop-target.dragover .jfy-drag-indicator { display: block; }
+
+/* ── PLACED ELEMENTS ── */
+.placed-polaroid {
+  position: absolute;
+  width: 100px;
+  background: white;
+  border-radius: 3px;
+  padding: 7px 7px 26px;
+  box-shadow: 2px 3px 10px rgba(0,0,0,.2);
+  cursor: move;
+  z-index: 20;
+  transition: transform .15s, box-shadow .15s;
+}
+.placed-polaroid:hover { transform: scale(1.04) !important; box-shadow: 4px 6px 16px rgba(0,0,0,.25); z-index: 25; }
+.placed-polaroid .photo-area {
+  width: 100%;
+  height: 76px;
+  background: #d8e8f0;
+  border-radius: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #888;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  position: relative;
+}
+.placed-polaroid .photo-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #888;
+  pointer-events: none;
+}
+.placed-polaroid .caption {
+  font-family: 'Caveat', cursive;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin-top: 4px;
+  outline: none;
+  min-height: 14px;
+  word-break: break-word;
+}
+.placed-polaroid .del-btn,
+.placed-sticky .del-btn,
+.placed-stamp .del-btn,
+.placed-sticker .del-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e84040;
+  color: white;
+  border: none;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  display: none;
+  z-index: 30;
+  padding: 0;
+}
+.placed-polaroid:hover .del-btn,
+.placed-sticky:hover .del-btn,
+.placed-stamp:hover .del-btn,
+.placed-sticker:hover .del-btn { display: block; }
+
+.placed-sticky {
+  position: absolute;
+  width: 90px;
+  min-height: 80px;
+  border-radius: 2px;
+  padding: 8px;
+  cursor: move;
+  z-index: 20;
+  box-shadow: 2px 3px 8px rgba(0,0,0,.15);
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  color: #3a2a10;
+}
+.placed-sticky .sticky-text {
+  outline: none;
+  width: 100%;
+  min-height: 60px;
+  word-break: break-word;
+  background: transparent;
+  border: none;
+  resize: none;
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  color: #3a2a10;
+}
+
+.placed-stamp {
+  position: absolute;
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2244aa;
+  border: 2px solid #2244aa;
+  padding: 3px 8px;
+  border-radius: 3px;
+  cursor: move;
+  z-index: 20;
+  opacity: .7;
+  transform: rotate(-5deg);
+  user-select: none;
+}
+.placed-sticker {
+  position: absolute;
+  font-size: 26px;
+  cursor: move;
+  z-index: 20;
+  user-select: none;
+  line-height: 1;
+}
+
+/* ── TAPE PICKER PANEL ── */
+.jfy-picker {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(160px);
+  z-index: 500;
+  width: 360px;
+  background: #fdf6e3;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.2);
+  padding: 16px 20px 24px;
+  transition: transform .3s ease;
+}
+.jfy-picker.open {
+  transform: translateX(-50%) translateY(0);
+}
+.jfy-picker-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.jfy-picker-title-row span {
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  font-weight: 700;
+  color: #3a2a10;
+}
+.jfy-picker-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #888;
+  padding: 2px 6px;
+}
+.jfy-picker-row-label {
+  font-family: 'Caveat', cursive;
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 8px 0 4px;
+}
+.jfy-color-swatches, .jfy-pattern-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.jfy-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2.5px solid transparent;
+  transition: transform .15s, border-color .15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.jfy-color-swatch.selected {
+  border-color: #3a2a10;
+  transform: scale(1.15);
+}
+.jfy-pattern-swatch {
+  width: 38px;
+  height: 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color .15s;
+  background-color: var(--tape-blue);
+  position: relative;
+  overflow: hidden;
+}
+.jfy-pattern-swatch.selected { border-color: #3a2a10; }
+.jfy-picker-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+.jfy-picker-slider-row label {
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  color: #555;
+  width: 70px;
+}
+.jfy-picker-slider-row input[type=range] {
+  flex: 1;
+  accent-color: #c8a87a;
+}
+.jfy-picker-slider-row .slider-val {
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  color: #555;
+  width: 34px;
+  text-align: right;
+}
+#jfy-apply-tape {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: #f0d878;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3a2a10;
+  cursor: pointer;
+  transition: background .15s;
+}
+#jfy-apply-tape:hover { background: #e8c840; }
+
+/* ── MODAL ── */
+.jfy-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,.5);
+  backdrop-filter: blur(3px);
+  align-items: center;
+  justify-content: center;
+}
+.jfy-modal.open { display: flex; }
+.jfy-modal-card {
+  background: #fdf6e3;
+  border-radius: 16px;
+  padding: 28px 32px;
+  width: 380px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+  position: relative;
+}
+.jfy-modal h3 {
+  font-family: 'Caveat', cursive;
+  font-size: 24px;
+  font-weight: 700;
+  color: #3a2a10;
+  margin: 0 0 16px;
+}
+.jfy-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #888;
+}
+.jfy-radio-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.jfy-radio-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid #d4c4a4;
+  background: white;
+  font-family: 'Caveat', cursive;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  text-align: center;
+  color: #3a2a10;
+}
+.jfy-radio-btn.selected {
+  border-color: #c8a87a;
+  background: #fdf0d4;
+}
+.jfy-tags-input {
+  width: 100%;
+  border: 1.5px solid #d4c4a4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Spectral', serif;
+  font-size: 13px;
+  color: #3a2a10;
+  background: white;
+  margin-bottom: 14px;
+  outline: none;
+}
+.jfy-tags-input:focus { border-color: #c8a87a; }
+.jfy-modal-btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: opacity .15s;
+}
+.jfy-modal-btn:hover { opacity: .85; }
+.jfy-modal-btn.primary { background: #c8a87a; color: white; }
+.jfy-modal-btn.secondary { background: #e8e0d4; color: #3a2a10; }
+
+/* Export modal cards */
+.jfy-export-cards {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.jfy-export-card {
+  flex: 1;
+  border: 2px solid #d4c4a4;
+  border-radius: 10px;
+  padding: 14px 10px;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.jfy-export-card:hover { border-color: #c8a87a; }
+.jfy-export-card .ec-icon { font-size: 28px; margin-bottom: 6px; }
+.jfy-export-card .ec-title {
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3a2a10;
+}
+.jfy-export-card .ec-desc {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+.jfy-export-card button {
+  margin-top: 10px;
+  background: #c8a87a;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: 'Caveat', cursive;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+}
+
+/* ── TOAST ── */
+#jfy-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #3a2a10;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-family: 'Caveat', cursive;
+  font-size: 15px;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity .25s, transform .25s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#jfy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── SAVED INDICATOR ── */
+#jfy-saved {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: rgba(80,160,80,.9);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-family: 'Caveat', cursive;
+  font-size: 14px;
+  z-index: 300;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+#jfy-saved.show { opacity: 1; }
+
+/* ── GHOST DRAG ── */
+.jfy-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 3000;
+  opacity: .8;
+  transform: rotate(-6deg) scale(.9);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 767px) {
+  .jfy-tray { display: none; }
+  .jfy-notebook-wrap { max-width: 100%; }
+  .jfy-workspace { padding: 12px 8px 30px; }
+  .jfy-picker { width: 90vw; }
+  .jfy-spread { flex-direction: column; }
+  .jfy-page.left-page { border-right: none; border-bottom: 2px solid rgba(0,0,0,.08); }
+  #jfy-subbar .jfy-title { font-size: 16px; }
+}
+@media (min-width: 768px) and (max-width: 1024px) {
+  .jfy-tray { width: 80px; }
+  .jfy-tape-roll { width: 28px; height: 28px; }
+  .jfy-stamp { font-size: 11px; padding: 3px 4px; }
+}
+
+/* ── PRINT STYLES ── */
+@media print {
+  .jfy-tray, #jfy-subbar, .jfy-picker, .jfy-modal,
+  #jfy-toast, #jfy-saved, #site-header, #site-footer { display: none !important; }
+  .jfy-workspace { padding: 0; }
+  .jfy-spread { display: flex !important; box-shadow: none; }
+  .jfy-notebook-wrap { max-width: 100%; }
+}
+
+/* ── GUIDE TEXT ── */
+.jfy-guide-line {
+  font-family: 'Caveat', cursive;
+  font-size: 15px;
+  color: #4a3a50;
+  line-height: 2;
+  display: block;
+}
+.jfy-arrow { color: #c8a87a; font-weight: 700; }
 </style>
 
-<div id="jfy-root">
-
-  <div class="jfy-subbar">
-    <div class="jfy-subbar-left">
-      <span class="jfy-subbar-title">just for you</span>
-      <span class="jfy-pill active" onclick="jfyNavPill(this,'intro')">intro</span>
-      <span class="jfy-pill" onclick="jfyNavPill(this,'entries')">my entries</span>
-      <span class="jfy-pill" onclick="jfyNavPill(this,'explore')">explore</span>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button id="jfy-skip-btn" style="display:none;padding:4px 12px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:#fdf6e3;font-family:Caveat,cursive;font-size:14px;cursor:pointer;" onclick="jfySetPage(3)">skip intro →</button>
-      <button onclick="jfyOpenShare()" style="padding:4px 12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#fdf6e3;font-family:Caveat,cursive;font-size:14px;cursor:pointer;">share ✦</button>
-      <button onclick="jfyOpenExport()" style="padding:4px 12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#fdf6e3;font-family:Caveat,cursive;font-size:14px;cursor:pointer;">export ↓</button>
-      <button class="jfy-write-btn" onclick="jfySetPage(3)">&#9999; start writing &rarr;</button>
-    </div>
+<!-- STICKY SUB-NAV -->
+<div id="jfy-subbar">
+  <span class="jfy-title">just for you</span>
+  <div class="jfy-pills">
+    <button class="jfy-pill active" data-pill="intro">intro</button>
+    <button class="jfy-pill" data-pill="entries">my entries</button>
+    <button class="jfy-pill" data-pill="explore">explore</button>
   </div>
+  <div class="jfy-subbar-actions">
+    <button id="jfy-share-btn">share ↗</button>
+    <button id="jfy-export-btn">export ↓</button>
+    <button id="jfy-start-btn">start writing →</button>
+  </div>
+</div>
 
-  <div class="jfy-workspace">
+<div class="jfy-workspace" id="jfy-workspace">
 
-    <!-- LEFT TRAY -->
-    <div class="jfy-tray">
-      <span class="jfy-tray-label">tape</span>
-      <div class="jfy-tape-group">
-        <div class="jfy-tape-row">
-          <div class="jfy-tape-roll" onclick="jfyOpenPicker('tape-blue')" title="blue tape">
-            <svg viewBox="0 0 54 54" fill="none"><circle cx="27" cy="27" r="23" fill="#a8c8e8" opacity="0.92"/><circle cx="27" cy="27" r="15" fill="none" stroke="white" stroke-width="1" opacity="0.45"/><circle cx="27" cy="27" r="7" fill="white" opacity="0.35"/></svg>
-          </div>
-          <div class="jfy-tape-roll" onclick="jfyOpenPicker('tape-pink')" title="pink tape">
-            <svg viewBox="0 0 54 54" fill="none"><circle cx="27" cy="27" r="23" fill="#f0b8c8" opacity="0.92"/><circle cx="27" cy="27" r="15" fill="none" stroke="white" stroke-width="1" opacity="0.45"/><circle cx="27" cy="27" r="7" fill="white" opacity="0.35"/></svg>
-          </div>
+  <!-- LEFT TRAY -->
+  <aside class="jfy-tray" id="jfy-left-tray" aria-label="Left tool tray">
+
+    <div class="jfy-tray-section">
+      <div class="jfy-tray-label">tape</div>
+      <div class="jfy-tape-rolls">
+        <div class="jfy-tape-roll" style="background:var(--tape-blue);"   data-color="blue"   title="Blue tape"   tabindex="0"></div>
+        <div class="jfy-tape-roll" style="background:var(--tape-pink);"   data-color="pink"   title="Pink tape"   tabindex="0"></div>
+        <div class="jfy-tape-roll" style="background:var(--tape-green);"  data-color="green"  title="Green tape"  tabindex="0"></div>
+        <div class="jfy-tape-roll" style="background:var(--tape-yellow);" data-color="yellow" title="Yellow tape" tabindex="0"></div>
+      </div>
+    </div>
+
+    <div class="jfy-tray-section">
+      <div class="jfy-tray-label">photos</div>
+      <div class="jfy-polaroid-stack" id="jfy-polaroid-drag" title="Drag to page">
+        <div class="jfy-polaroid-card"><div class="photo-area"></div></div>
+        <div class="jfy-polaroid-card"><div class="photo-area"></div></div>
+        <div class="jfy-polaroid-card"><div class="photo-area"></div></div>
+      </div>
+      <div class="jfy-drag-label">drag me</div>
+    </div>
+
+    <div class="jfy-tray-section">
+      <div class="jfy-tray-label">sticky</div>
+      <div class="jfy-sticky-pad" id="jfy-sticky-drag" title="Drag to page">📝</div>
+      <div class="jfy-drag-label">drag me</div>
+    </div>
+
+    <div class="jfy-tray-section">
+      <div class="jfy-tray-label">pen</div>
+      <!-- Pencil cup SVG -->
+      <svg class="jfy-pencil-cup" viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- cup -->
+        <rect x="10" y="30" width="40" height="35" rx="4" fill="#d4b88a" stroke="#a88860" stroke-width="1.5"/>
+        <ellipse cx="30" cy="30" rx="20" ry="5" fill="#e8cca0" stroke="#a88860" stroke-width="1.5"/>
+        <!-- pencil 1 (yellow) -->
+        <rect x="16" y="5" width="7" height="30" rx="1.5" fill="#f0d040" stroke="#c8a820" stroke-width="1"/>
+        <polygon points="16,5 23,5 19.5,0" fill="#f4c040"/>
+        <rect x="16" y="29" width="7" height="4" rx="1" fill="#e89090"/>
+        <!-- pencil 2 (blue) -->
+        <rect x="26" y="3" width="7" height="30" rx="1.5" fill="#80b0e0" stroke="#5080c0" stroke-width="1"/>
+        <polygon points="26,3 33,3 29.5,-2" fill="#90c0f0"/>
+        <rect x="26" y="29" width="7" height="4" rx="1" fill="#e89090"/>
+        <!-- pencil 3 (red) -->
+        <rect x="36" y="6" width="7" height="30" rx="1.5" fill="#e08080" stroke="#c05050" stroke-width="1"/>
+        <polygon points="36,6 43,6 39.5,1" fill="#f09090"/>
+        <rect x="36" y="29" width="7" height="4" rx="1" fill="#e89090"/>
+      </svg>
+    </div>
+
+  </aside>
+
+  <!-- CENTER NOTEBOOK -->
+  <div class="jfy-notebook-wrap" id="jfy-notebook-wrap">
+    <div class="jfy-nav-dots" id="jfy-nav-dots">
+      <div class="jfy-dot active" data-spread="0" title="Spread 1"></div>
+      <div class="jfy-dot" data-spread="1" title="Spread 2"></div>
+      <div class="jfy-dot" data-spread="2" title="Spread 3"></div>
+    </div>
+    <div class="jfy-page-counter" id="jfy-page-counter">spread 1 of 3</div>
+
+    <!-- SPREAD 0: Welcome -->
+    <div class="jfy-spread active" id="spread-0" data-spread="0">
+
+      <div class="jfy-page left-page" data-page-id="spread0-left">
+        <!-- Red pin -->
+        <svg class="jfy-pin" viewBox="0 0 16 26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="8" cy="8" r="7" fill="#e04040" stroke="#c02020" stroke-width="1"/>
+          <circle cx="6" cy="6" r="2" fill="rgba(255,255,255,.4)"/>
+          <line x1="8" y1="14" x2="8" y2="26" stroke="#888" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <h2>welcome.</h2>
+        <span class="jfy-italic-sub">your journal, your way — no rules here.</span>
+        <p>This is a space just for you. Write what's heavy, what's light, what you're afraid to say out loud. Stick things down, tear them up, start again.</p>
+        <p>There's no wrong way to use a journal. The only rule is that you show up — and you already did that just by opening this page.</p>
+
+        <!-- Pre-placed polaroid bottom-left -->
+        <div class="pre-polaroid">
+          <div class="pre-polaroid-tape"></div>
+          <div class="photo-area">🌿</div>
         </div>
-        <div class="jfy-tape-row">
-          <div class="jfy-tape-roll" onclick="jfyOpenPicker('tape-green')" title="green tape">
-            <svg viewBox="0 0 54 54" fill="none"><circle cx="27" cy="27" r="23" fill="#a8d4b8" opacity="0.92"/><circle cx="27" cy="27" r="15" fill="none" stroke="white" stroke-width="1" opacity="0.45"/><circle cx="27" cy="27" r="7" fill="white" opacity="0.35"/></svg>
-          </div>
-          <div class="jfy-tape-roll" onclick="jfyOpenPicker('tape-yellow')" title="yellow tape">
-            <svg viewBox="0 0 54 54" fill="none"><circle cx="27" cy="27" r="23" fill="#f0d878" opacity="0.92"/><circle cx="27" cy="27" r="15" fill="none" stroke="white" stroke-width="1" opacity="0.45"/><circle cx="27" cy="27" r="7" fill="white" opacity="0.35"/></svg>
-          </div>
-        </div>
+        <!-- Tape strip across top -->
+        <div class="jfy-tape-strip" style="background:rgba(168,200,232,.7); top:12px;"></div>
+
+        <div class="jfy-corner bl">intro · 01</div>
+        <svg class="tape-overlay" data-page-id="spread0-left" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
 
-      <span class="jfy-tray-label" style="margin-top:6px">photos</span>
-      <div class="jfy-polaroid-stack" title="drag to page">
-        <div class="jfy-polaroid-card" style="width:64px;height:78px;top:7px;left:4px;transform:rotate(6deg)"></div>
-        <div class="jfy-polaroid-card" style="width:64px;height:78px;top:3px;left:2px;transform:rotate(3deg)"></div>
-        <div class="jfy-polaroid-card" style="width:64px;height:78px;top:0;left:0;transform:rotate(-1deg);background:#f9f9f9;display:flex;align-items:center;justify-content:center;">
-          <span style="font-family:Caveat,cursive;font-size:9px;color:#bbb">drag me</span>
+      <div class="jfy-page right-page" data-page-id="spread0-right">
+        <h3>getting started</h3>
+        <ol class="jfy-numbered-list">
+          <li>① Pick up a tool from the trays on either side.</li>
+          <li>② Tear off some washi tape — click any roll.</li>
+          <li>③ Drag a photo or sticky note onto the page.</li>
+          <li>④ Stamp or sticker — then move things around.</li>
+          <li>⑤ Write freely. It saves automatically.</li>
+        </ol>
+
+        <!-- Pre-placed sticky bottom-right -->
+        <div class="pre-sticky">
+          <div class="pre-sticky-tape"></div>
+          remember: you are enough ♡
         </div>
+
+        <button class="jfy-flip next" data-dir="1" aria-label="Next spread">the desk →</button>
+        <div class="jfy-corner br">start · 02</div>
+        <svg class="tape-overlay" data-page-id="spread0-right" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <!-- SPREAD 1: The Desk -->
+    <div class="jfy-spread" id="spread-1" data-spread="1">
+
+      <div class="jfy-page left-page" data-page-id="spread1-left">
+        <!-- Pink tape strip top -->
+        <div class="jfy-tape-strip" style="background:rgba(240,184,200,.75); top:8px;"></div>
+        <h2 style="margin-top:18px;">the desk.</h2>
+        <span class="jfy-guide-line"><span class="jfy-arrow">←</span> tape — click a colored roll to pick tape style, then drag across the page</span>
+        <span class="jfy-guide-line"><span class="jfy-arrow">←</span> photos — drag the polaroid stack onto any page</span>
+        <span class="jfy-guide-line"><span class="jfy-arrow">←</span> sticky — drag the yellow pad to drop a note anywhere</span>
+        <span class="jfy-guide-line"><span class="jfy-arrow">←</span> pen — just for show (for now 🙂)</span>
+        <span class="jfy-guide-line"><span class="jfy-arrow">→</span> stamps — click DATE, MOOD, or ★ then click the page</span>
+        <span class="jfy-guide-line"><span class="jfy-arrow">→</span> stickers — click an emoji, then click to place it</span>
+        <span class="jfy-guide-line"><span class="jfy-arrow">→</span> clips — decorative for now</span>
+
+        <button class="jfy-flip prev" data-dir="-1" aria-label="Previous spread">← welcome</button>
+        <button class="jfy-flip next" data-dir="1"  aria-label="Next spread">the pages →</button>
+        <div class="jfy-corner bl">guide · 03</div>
+        <svg class="tape-overlay" data-page-id="spread1-left" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
 
-      <span class="jfy-tray-label" style="margin-top:6px">sticky</span>
-      <div class="jfy-sticky-pad" title="drag to page" style="width:54px;height:54px;background:#f0d878;box-shadow:2px 2px 6px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;cursor:grab;border-radius:2px;position:relative;">
-        <div style="position:absolute;top:0;left:0;right:0;height:7px;background:#f0c848;border-radius:2px 2px 0 0;"></div>
-        <span style="font-family:Caveat,cursive;font-size:9px;color:#6b5c40;margin-top:4px;">drag me</span>
+      <div class="jfy-page right-page" data-page-id="spread1-right">
+        <h2>the pages.</h2>
+        <p>Spreads flip like a real notebook. Use the dots at the top, the arrow buttons in each corner, or just scroll.</p>
+        <p>Each page is a canvas. Tape strips stay where you put them. Photos, stickies, stamps and stickers all move freely once placed.</p>
+
+        <!-- SVG diagram of stacking pages -->
+        <div class="jfy-page-diagram">
+          <div class="diag-page" style="z-index:3"></div>
+          <div class="diag-page" style="z-index:2; opacity:.8"></div>
+          <div class="diag-page" style="z-index:1; opacity:.6"></div>
+          <div class="diag-page" style="z-index:0; opacity:.4"></div>
+        </div>
+        <p style="text-align:center; font-family:'Caveat',cursive; font-size:13px; color:#888; margin-top:8px;">pages stack beneath each other</p>
+
+        <button class="jfy-flip prev" data-dir="-1" aria-label="Previous spread">← the desk</button>
+        <button class="jfy-flip next" data-dir="1"  aria-label="Next spread">write →</button>
+        <div class="jfy-corner br">guide · 04</div>
+        <svg class="tape-overlay" data-page-id="spread1-right" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <!-- SPREAD 2: Write -->
+    <div class="jfy-spread" id="spread-2" data-spread="2">
+
+      <div class="jfy-page left-page" data-page-id="spread2-left">
+        <!-- Blue tape strip top -->
+        <div class="jfy-tape-strip" style="background:rgba(168,200,232,.75); top:8px;"></div>
+        <div style="margin-top:18px;" class="jfy-write-prompt">today, i'm thinking about...</div>
+        <div class="jfy-typewriter" id="jfy-typewriter">
+          <span id="jfy-typed-text"></span><span class="jfy-cursor"></span>
+        </div>
+        <div
+          id="jfy-main-editor"
+          contenteditable="true"
+          style="position:relative;z-index:6;min-height:200px;outline:none;font-family:'Spectral',serif;font-size:13.5px;line-height:1.9;color:#2c2c3a;margin-top:12px;word-break:break-word;"
+          aria-label="Journal entry"
+          data-placeholder="start writing here..."></div>
+
+        <div class="jfy-format-bar">
+          <button class="jfy-fmt-btn" data-fmt="fontsize" title="Font size">Aa</button>
+          <button class="jfy-fmt-btn" data-fmt="bold"   title="Bold"><b>B</b></button>
+          <button class="jfy-fmt-btn" data-fmt="italic" title="Italic"><i>I</i></button>
+          <button class="jfy-fmt-btn" data-fmt="underline" title="Underline"><u>U</u></button>
+        </div>
+
+        <button class="jfy-flip prev" data-dir="-1" aria-label="Previous spread">← the pages</button>
+        <div class="jfy-corner bl">write · 05</div>
+        <svg class="tape-overlay" data-page-id="spread2-left" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
 
-      <span class="jfy-tray-label" style="margin-top:6px">pen</span>
-      <div class="jfy-pencil-cup">
-        <svg width="28" height="44" viewBox="0 0 32 48" fill="none">
-          <rect x="4" y="4" width="6" height="34" rx="1" fill="#f4d06a"/>
-          <rect x="4" y="2" width="6" height="4" rx="0.5" fill="#e88060"/>
-          <polygon points="7,40 4,46 10,46" fill="#f4d06a"/>
-          <rect x="13" y="0" width="6" height="34" rx="1" fill="#a8c4e0"/>
-          <polygon points="16,37 13,46 19,46" fill="#a8c4e0"/>
-          <rect x="22" y="6" width="5" height="30" rx="1" fill="#c8d4a0"/>
-          <rect x="22" y="4" width="5" height="4" rx="0.5" fill="#a0b080"/>
-          <polygon points="24.5,38 22,46 27,46" fill="#c8d4a0"/>
+      <div class="jfy-page right-page" data-page-id="spread2-right">
+        <div class="jfy-drop-target" id="jfy-drop-target">
+          <div class="jfy-drag-indicator"></div>
+          <div class="drop-plus">+</div>
+          <span>drop something here</span>
+        </div>
+        <button class="jfy-flip prev" data-dir="-1" aria-label="Previous spread">← write</button>
+        <div class="jfy-corner br">canvas · 06</div>
+        <svg class="tape-overlay" data-page-id="spread2-right" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+  </div><!-- /notebook-wrap -->
+
+  <!-- RIGHT TRAY -->
+  <aside class="jfy-tray" id="jfy-right-tray" aria-label="Right tool tray">
+
+    <div class="jfy-tray-section">
+      <div class="jfy-tray-label">stamps</div>
+      <div class="jfy-stamps">
+        <div class="jfy-stamp" data-stamp="DATE" tabindex="0">DATE</div>
+        <div class="jfy-stamp" data-stamp="MOOD" tabindex="0">MOOD</div>
+        <div class="jfy-stamp" data-stamp="★"    tabindex="0">★</div>
+      </div>
+    </div>
+
+    <div class="jfy-tray-section">
+      <div class="jfy-tray-label">stickers</div>
+      <div class="jfy-stickers-grid">
+        <span class="jfy-sticker" data-emoji="🌿" tabindex="0">🌿</span>
+        <span class="jfy-sticker" data-emoji="✦"  tabindex="0">✦</span>
+        <span class="jfy-sticker" data-emoji="◇"  tabindex="0">◇</span>
+        <span class="jfy-sticker" data-emoji="☁"  tabindex="0">☁</span>
+        <span class="jfy-sticker" data-emoji="♡"  tabindex="0">♡</span>
+        <span class="jfy-sticker" data-emoji="✿"  tabindex="0">✿</span>
+        <span class="jfy-sticker" data-emoji="🌸" tabindex="0">🌸</span>
+        <span class="jfy-sticker" data-emoji="⭐" tabindex="0">⭐</span>
+        <span class="jfy-sticker" data-emoji="🎀" tabindex="0">🎀</span>
+      </div>
+    </div>
+
+    <div class="jfy-tray-section">
+      <div class="jfy-tray-label">clips</div>
+      <div class="jfy-clips">
+        <!-- Paper clip SVG 1 -->
+        <svg width="22" height="44" viewBox="0 0 22 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M11 2 C5 2 2 6 2 11 L2 36 C2 40 5 42 9 42 C13 42 16 40 16 36 L16 14 C16 11 14 9 11 9 C8 9 6 11 6 14 L6 34" fill="none" stroke="#b8a888" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <!-- Paper clip SVG 2 -->
+        <svg width="22" height="44" viewBox="0 0 22 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M11 2 C5 2 2 6 2 11 L2 36 C2 40 5 42 9 42 C13 42 16 40 16 36 L16 14 C16 11 14 9 11 9 C8 9 6 11 6 14 L6 34" fill="none" stroke="#c8a878" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
       </div>
     </div>
 
-    <!-- NOTEBOOK -->
-    <div class="jfy-notebook-wrap">
-      <div class="jfy-page-nav">
-        <div class="jfy-dot active" id="jfy-dot-0" onclick="jfySetPage(0)"></div>
-        <div class="jfy-dot" id="jfy-dot-1" onclick="jfySetPage(1)"></div>
-        <div class="jfy-dot" id="jfy-dot-2" onclick="jfySetPage(2)"></div>
-        <div class="jfy-dot" id="jfy-dot-3" onclick="jfySetPage(3)"></div>
-      </div>
-      <div class="jfy-page-counter" id="jfy-counter">page 1 of 4</div>
+  </aside>
 
-      <!-- SPREAD 0: WELCOME -->
-      <div class="jfy-spread active" id="jfy-spread-0">
-        <div class="jfy-notebook">
-          <div style="position:absolute;top:-4px;left:28%;width:44%;height:16px;background:#f0d878;opacity:0.75;z-index:30;transform:rotate(-0.5deg);border-radius:1px;" class="tp-dots"></div>
-          <div class="jfy-page">
-            <div style="position:absolute;top:0;left:0;right:0;height:5px;background:#a8c8e8;opacity:0.6;" class="tp-stripes"></div>
-            <div style="position:relative;z-index:10;margin-top:18px;">
-              <div style="position:absolute;top:-12px;left:46%;width:11px;height:11px;border-radius:50%;background:#e84040;box-shadow:0 2px 4px rgba(0,0,0,0.3);z-index:20;"></div>
-              <div class="jfy-heading" style="margin-top:16px;">welcome.</div>
-              <div class="jfy-subhead">a space just for you</div>
-              <div class="jfy-body">
-                this journal was made for the quiet moments — for thoughts that deserve more than a note app, for memories that want to breathe.<br><br>
-                pull something from the desk. tape a memory to the page. let it be messy.
-              </div>
-            </div>
-            <div class="jfy-polaroid" style="width:100px;bottom:36px;left:20px;transform:rotate(-4deg);">
-              <div class="jfy-polaroid-img" style="width:82px;height:70px;background:#e0d4c0;"><span>image</span></div>
-              <span class="jfy-polaroid-caption">a first memory</span>
-            </div>
-            <div class="jfy-tape-strip tp-dots" style="width:48px;bottom:102px;left:16px;transform:rotate(-8deg);background:#f0d878;"></div>
-            <div class="jfy-corner-label">intro &middot; 01</div>
-          </div>
-          <div class="jfy-spine"></div>
-          <div class="jfy-page right">
-            <div class="jfy-heading" style="font-size:19px;">getting started</div>
-            <div style="font-family:'Caveat',cursive;font-size:15px;color:#6b5c40;line-height:34px;position:relative;z-index:5;margin-top:6px;">
-              <div>&#9312; pick a tape roll from the left &rarr;</div>
-              <div>&#9313; choose colour &amp; pattern</div>
-              <div>&#9314; drag &amp; stick it to the page</div>
-              <div>&#9315; add a polaroid or sticky note</div>
-              <div>&#9316; start writing whenever &#10024;</div>
-            </div>
-            <div class="jfy-sticky" style="width:130px;bottom:56px;right:18px;transform:rotate(2deg);">
-              you don't have to read all of this! just start &#10024;
-            </div>
-            <div style="position:absolute;bottom:140px;right:62px;width:36px;height:14px;background:#a8c8e8;opacity:0.7;transform:rotate(-2deg);z-index:20;" class="tp-zigzag"></div>
-            <div class="jfy-corner-label">intro &middot; 01</div>
-            <button class="jfy-flip-right" onclick="jfySetPage(1)" aria-label="Next page"></button>
-          </div>
-          <div class="jfy-drag-indicator" id="jfy-di-0">drop here</div>
-        </div>
-      </div>
+</div><!-- /workspace -->
 
-      <!-- SPREAD 1: THE DESK -->
-      <div class="jfy-spread" id="jfy-spread-1">
-        <div class="jfy-notebook">
-          <div class="jfy-page">
-            <div style="position:absolute;top:0;left:8%;width:84%;height:14px;background:#f0b8c8;opacity:0.65;z-index:30;" class="tp-floral"></div>
-            <div class="jfy-heading" style="margin-top:12px;">the desk.</div>
-            <div class="jfy-subhead">everything lives somewhere</div>
-            <div style="position:relative;z-index:5;margin-top:10px;font-family:'Caveat',cursive;font-size:13px;color:#6b5c40;line-height:26px;">
-              <div>&larr; tape rolls: pick a roll, choose</div>
-              <div>&nbsp;&nbsp;&nbsp;&nbsp;a pattern, drag to your page</div>
-              <br>
-              <div>&larr; photos: your polaroid stack sits</div>
-              <div>&nbsp;&nbsp;&nbsp;&nbsp;on the left &mdash; drag onto pages</div>
-              <br>
-              <div>&rarr; stamps: for dates, moods, marks</div>
-              <br>
-              <div>&rarr; stickers: peel and place anywhere</div>
-            </div>
-            <div class="jfy-corner-label">guide &middot; 02</div>
-            <button class="jfy-flip-left" onclick="jfySetPage(0)" aria-label="Previous page"></button>
-          </div>
-          <div class="jfy-spine"></div>
-          <div class="jfy-page right">
-            <div class="jfy-heading" style="font-size:19px;">the pages.</div>
-            <div style="font-family:'Spectral',serif;font-size:12px;color:#6b5c40;line-height:22px;position:relative;z-index:5;margin-top:6px;">
-              scroll to flip through.<br>each spread is a blank canvas.
-            </div>
-            <div style="position:relative;z-index:5;margin-top:20px;">
-              <svg width="220" height="130" viewBox="0 0 240 140">
-                <rect x="10" y="20" width="100" height="110" rx="3" fill="#f5edd8" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
-                <rect x="14" y="16" width="100" height="110" rx="3" fill="#faf3e0" stroke="rgba(0,0,0,0.08)" stroke-width="1"/>
-                <rect x="18" y="12" width="100" height="110" rx="3" fill="#fdf6e3" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
-                <path d="M118 12 Q170 30 210 70 Q170 110 118 122" fill="#efe4c8" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
-                <path d="M118 12 Q140 60 118 122" fill="rgba(0,0,0,0.04)"/>
-                <text x="40" y="72" font-family="Caveat, cursive" font-size="13" fill="rgba(44,36,21,0.35)">current</text>
-                <text x="150" y="72" font-family="Caveat, cursive" font-size="13" fill="rgba(44,36,21,0.5)">next &rarr;</text>
-                <line x1="224" y1="20" x2="224" y2="120" stroke="rgba(44,36,21,0.15)" stroke-width="1" stroke-dasharray="3 3"/>
-                <polygon points="224,14 220,22 228,22" fill="rgba(44,36,21,0.2)"/>
-              </svg>
-            </div>
-            <div class="jfy-corner-label">guide &middot; 02</div>
-            <button class="jfy-flip-right" onclick="jfySetPage(2)" aria-label="Next page"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- SPREAD 2: MAKE IT YOURS -->
-      <div class="jfy-spread" id="jfy-spread-2">
-        <div class="jfy-notebook">
-          <div class="jfy-page">
-            <div style="position:absolute;top:-2px;left:18%;width:32%;height:13px;background:#a8d4b8;opacity:0.72;z-index:30;transform:rotate(1deg);" class="tp-dots"></div>
-            <div style="position:absolute;top:-2px;right:10%;width:26%;height:13px;background:#c8b0e0;opacity:0.65;z-index:30;transform:rotate(-1.5deg);"></div>
-            <div class="jfy-heading" style="margin-top:12px;">make it yours.</div>
-            <div class="jfy-subhead">everything is choosable</div>
-            <div style="font-family:'Spectral',serif;font-size:12px;color:#6b5c40;line-height:22px;position:relative;z-index:5;margin-top:6px;max-width:230px;">
-              tap a tape roll and a picker slides up &mdash; choose the colour, pattern, even the opacity. then drag it across the page exactly where you want it.
-            </div>
-            <div style="position:relative;z-index:10;margin-top:18px;display:flex;flex-direction:column;gap:8px;">
-              <div style="width:150px;height:16px;background:#a8c8e8;opacity:0.75;border-radius:1px;" class="tp-dots"></div>
-              <div style="width:130px;height:16px;background:#f0b8c8;opacity:0.75;border-radius:1px;margin-left:18px;" class="tp-stripes"></div>
-              <div style="width:110px;height:16px;background:#a8d4b8;opacity:0.75;border-radius:1px;margin-left:10px;" class="tp-zigzag"></div>
-              <div style="width:90px;height:16px;background:#f0d878;opacity:0.75;border-radius:1px;margin-left:28px;" class="tp-floral"></div>
-              <div style="width:70px;height:16px;background:#c8b0e0;opacity:0.75;border-radius:1px;margin-left:14px;"></div>
-            </div>
-            <div class="jfy-corner-label">tools &middot; 03</div>
-            <button class="jfy-flip-left" onclick="jfySetPage(1)" aria-label="Previous page"></button>
-          </div>
-          <div class="jfy-spine"></div>
-          <div class="jfy-page right">
-            <div class="jfy-heading" style="font-size:19px;">polaroids.</div>
-            <div style="font-family:'Spectral',serif;font-size:12px;color:#6b5c40;line-height:22px;position:relative;z-index:5;margin-top:6px;max-width:210px;">
-              drag a frame from the tray, drop it on the page. upload a photo or leave the frame empty.
-            </div>
-            <div style="position:relative;z-index:5;margin-top:18px;height:148px;">
-              <div class="jfy-polaroid" style="width:84px;top:8px;left:8px;transform:rotate(-5deg);">
-                <div class="jfy-polaroid-img" style="width:66px;height:56px;background:#d8e8f0;"><span style="font-size:8px">photo</span></div>
-                <span class="jfy-polaroid-caption">caption here</span>
-              </div>
-              <div class="jfy-polaroid" style="width:84px;top:26px;left:74px;transform:rotate(3deg);">
-                <div class="jfy-polaroid-img" style="width:66px;height:56px;background:#f0e0d0;"><span style="font-size:8px">photo</span></div>
-                <span class="jfy-polaroid-caption">another one</span>
-              </div>
-              <div class="jfy-polaroid" style="width:84px;top:6px;left:140px;transform:rotate(-1deg);">
-                <div class="jfy-polaroid-img" style="width:66px;height:56px;background:#d8f0e0;"><span style="font-size:8px">+ photo</span></div>
-                <span class="jfy-polaroid-caption">your photo</span>
-              </div>
-            </div>
-            <div style="position:absolute;bottom:168px;left:40px;width:32px;height:13px;background:#f0d878;opacity:0.7;transform:rotate(-8deg);z-index:25;" class="tp-dots"></div>
-            <div style="position:absolute;bottom:140px;left:102px;width:32px;height:13px;background:#a8c8e8;opacity:0.7;transform:rotate(4deg);z-index:25;" class="tp-stripes"></div>
-            <div class="jfy-corner-label">tools &middot; 03</div>
-            <button class="jfy-flip-right" onclick="jfySetPage(3)" aria-label="Next page"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- SPREAD 3: WRITE -->
-      <div class="jfy-spread" id="jfy-spread-3">
-        <div class="jfy-notebook">
-          <div class="jfy-page">
-            <div style="position:absolute;top:0;left:0;right:0;height:9px;background:#a8c8e8;opacity:0.55;z-index:30;" class="tp-stripes"></div>
-            <div style="position:relative;z-index:5;margin-top:14px;">
-              <div class="jfy-write-prompt">today, i'm thinking about...</div>
-              <div style="font-family:'Caveat',cursive;font-size:16px;color:#2c2415;line-height:34px;margin-top:6px;">
-                <span id="jfy-typed">it started when I noticed</span><span class="jfy-cursor"></span>
-              </div>
-            </div>
-            <div class="jfy-format-bar">
-              <span class="jfy-format-label">FORMAT &middot;</span>
-              <button class="jfy-format-btn">Aa</button>
-              <button class="jfy-format-btn"><b>B</b></button>
-              <button class="jfy-format-btn"><i>I</i></button>
-              <button class="jfy-format-btn"><u>U</u></button>
-              <span style="margin-left:auto;font-size:13px;color:rgba(44,36,21,0.35);">&#10022;</span>
-            </div>
-            <div class="jfy-corner-label">entry &middot; today</div>
-            <button class="jfy-flip-left" onclick="jfySetPage(2)" aria-label="Previous page"></button>
-          </div>
-          <div class="jfy-spine"></div>
-          <div class="jfy-page right">
-            <div class="jfy-drop-target">
-              <div class="jfy-drop-circle">+</div>
-              <span class="jfy-drop-label">drop something here</span>
-            </div>
-            <div class="jfy-drag-indicator" id="jfy-di-3">&#10022; drop here</div>
-            <div class="jfy-corner-label">entry &middot; today</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="jfy-scroll-cue">
-        <span>&darr; scroll to flip pages &middot; or tap the corners &darr;</span>
-      </div>
-    </div>
-
-    <!-- RIGHT TRAY -->
-    <div class="jfy-tray">
-      <span class="jfy-tray-label">stamps</span>
-      <div class="jfy-stamp">DATE<br>&rarr;</div>
-      <div class="jfy-stamp" style="transform:rotate(3deg)">MOOD<br>&rarr;</div>
-      <div class="jfy-stamp" style="transform:rotate(-2deg)">&#9733;</div>
-      <span class="jfy-tray-label" style="margin-top:6px">stickers</span>
-      <div class="jfy-sticker-sheet">
-        <span class="jfy-sticker">&#127807;</span>
-        <span class="jfy-sticker">&#10022;</span>
-        <span class="jfy-sticker">&#9671;</span>
-        <span class="jfy-sticker">&#9729;</span>
-        <span class="jfy-sticker">&#9825;</span>
-        <span class="jfy-sticker">&#10047;</span>
-      </div>
-      <span class="jfy-tray-label" style="margin-top:6px">clips</span>
-      <svg class="jfy-paperclip" viewBox="0 0 20 50" fill="none">
-        <path d="M10 5 Q16 5 16 14 L16 36 Q16 44 8 44 Q0 44 0 36 L0 12 Q0 2 10 2 Q20 2 20 12 L20 36" stroke="#c0b090" stroke-width="2" fill="none" stroke-linecap="round"/>
-      </svg>
-      <svg class="jfy-paperclip" style="transform:rotate(15deg);opacity:0.7" viewBox="0 0 20 50" fill="none">
-        <path d="M10 5 Q16 5 16 14 L16 36 Q16 44 8 44 Q0 44 0 36 L0 12 Q0 2 10 2 Q20 2 20 12 L20 36" stroke="#a0c0d0" stroke-width="2" fill="none" stroke-linecap="round"/>
-      </svg>
-    </div>
-
+<!-- TAPE PICKER PANEL -->
+<div class="jfy-picker" id="jfy-picker" role="dialog" aria-label="Tape picker">
+  <div class="jfy-picker-title-row">
+    <span id="jfy-picker-title">blue tape</span>
+    <button class="jfy-picker-close" id="jfy-picker-close" aria-label="Close picker">✕</button>
   </div>
-</div>
-
-<!-- TAPE PICKER -->
-<div class="jfy-picker" id="jfy-picker">
-  <div class="jfy-picker-title">
-    <span id="jfy-picker-title">choose a tape style</span>
-    <button class="jfy-picker-close" onclick="jfyClosePicker()">&#x2715;</button>
+  <div class="jfy-picker-row-label">COLOR</div>
+  <div class="jfy-color-swatches">
+    <div class="jfy-color-swatch selected" style="background:var(--tape-blue);"   data-color="blue"   title="Blue"></div>
+    <div class="jfy-color-swatch"          style="background:var(--tape-pink);"   data-color="pink"   title="Pink"></div>
+    <div class="jfy-color-swatch"          style="background:var(--tape-green);"  data-color="green"  title="Green"></div>
+    <div class="jfy-color-swatch"          style="background:var(--tape-yellow);" data-color="yellow" title="Yellow"></div>
+    <div class="jfy-color-swatch"          style="background:var(--tape-purple);" data-color="purple" title="Purple"></div>
   </div>
-  <div>
-    <div class="jfy-picker-label">COLOR</div>
-    <div class="jfy-swatch-row">
-      <div class="jfy-swatch selected" style="background:#a8c8e8;" onclick="jfySelectColor(this,'#a8c8e8')"></div>
-      <div class="jfy-swatch" style="background:#f0b8c8;" onclick="jfySelectColor(this,'#f0b8c8')"></div>
-      <div class="jfy-swatch" style="background:#a8d4b8;" onclick="jfySelectColor(this,'#a8d4b8')"></div>
-      <div class="jfy-swatch" style="background:#f0d878;" onclick="jfySelectColor(this,'#f0d878')"></div>
-      <div class="jfy-swatch" style="background:#c8b0e0;" onclick="jfySelectColor(this,'#c8b0e0')"></div>
-    </div>
+  <div class="jfy-picker-row-label">PATTERN</div>
+  <div class="jfy-pattern-swatches">
+    <div class="jfy-pattern-swatch selected" data-pattern="plain"   title="Plain"></div>
+    <div class="jfy-pattern-swatch"          data-pattern="dots"    title="Dots"></div>
+    <div class="jfy-pattern-swatch"          data-pattern="stripes" title="Stripes"></div>
+    <div class="jfy-pattern-swatch"          data-pattern="zigzag"  title="Zigzag"></div>
+    <div class="jfy-pattern-swatch"          data-pattern="floral"  title="Floral"></div>
+    <div class="jfy-pattern-swatch"          data-pattern="hearts"  title="Hearts"></div>
   </div>
-  <div>
-    <div class="jfy-picker-label">PATTERN</div>
-    <div class="jfy-swatch-row">
-      <div class="jfy-swatch selected" id="jfy-pat-plain" onclick="jfySelectPattern('plain')" style="background:#a8c8e8;"><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:8px;font-family:monospace;color:rgba(44,36,21,0.45);">plain</span></div>
-      <div class="jfy-swatch" id="jfy-pat-dots" onclick="jfySelectPattern('dots')" style="background:#a8c8e8;"><div style="width:100%;height:100%;background-image:radial-gradient(circle,rgba(0,0,0,0.25) 1.5px,transparent 1.5px);background-size:6px 6px;"></div></div>
-      <div class="jfy-swatch" id="jfy-pat-stripes" onclick="jfySelectPattern('stripes')" style="background:#a8c8e8;"><div style="width:100%;height:100%;background-image:repeating-linear-gradient(45deg,transparent 0,transparent 3px,rgba(255,255,255,0.4) 3px,rgba(255,255,255,0.4) 5px);"></div></div>
-      <div class="jfy-swatch" id="jfy-pat-zigzag" onclick="jfySelectPattern('zigzag')" style="background:#a8c8e8;"><div style="width:100%;height:100%;background-image:repeating-linear-gradient(90deg,transparent 0 6px,rgba(255,255,255,0.35) 6px 8px);"></div></div>
-      <div class="jfy-swatch" id="jfy-pat-floral" onclick="jfySelectPattern('floral')" style="background:#a8c8e8;"><div style="width:100%;height:100%;background-image:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.35) 2px,transparent 4px);background-size:10px 10px;"></div></div>
-    </div>
+  <div class="jfy-picker-slider-row">
+    <label for="jfy-width-slider">Width</label>
+    <input type="range" id="jfy-width-slider" min="10" max="40" value="22" aria-label="Tape width">
+    <span class="slider-val" id="jfy-width-val">22px</span>
   </div>
-  <div>
-    <div class="jfy-picker-label">OPACITY &mdash; <span id="jfy-opacity-val">75%</span></div>
-    <input type="range" min="20" max="100" value="75" style="width:100%;" oninput="document.getElementById('jfy-opacity-val').textContent=this.value+'%'">
+  <div class="jfy-picker-slider-row">
+    <label for="jfy-opacity-slider">Opacity</label>
+    <input type="range" id="jfy-opacity-slider" min="20" max="100" value="80" aria-label="Tape opacity">
+    <span class="slider-val" id="jfy-opacity-val">80%</span>
   </div>
-  <div class="jfy-picker-hint">&rarr; drag tape across the page once you've chosen a style</div>
-  <button onclick="jfyApplyTape()" style="margin-top:10px;width:100%;padding:8px;background:#2c2415;color:#fdf6e3;border:none;border-radius:6px;font-family:Caveat,cursive;font-size:16px;cursor:pointer;">apply tape ✓</button>
+  <button id="jfy-apply-tape">Apply Tape → drag on page</button>
 </div>
 
 <!-- SHARE MODAL -->
-<div id="jfy-share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:8000;align-items:center;justify-content:center;">
-  <div style="background:#fdf6e3;border-radius:12px;padding:28px 32px;max-width:360px;width:90%;font-family:Caveat,cursive;color:#2c2415;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
-    <button onclick="jfyCloseShare()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#6b5c40;">×</button>
-    <div style="font-size:22px;font-weight:700;margin-bottom:8px;">share to community ✦</div>
-    <p style="font-size:16px;color:#6b5c40;margin:0 0 16px;">your scrapbook page will be shared to the community explore section. others can see your layout and remix it.</p>
-    <input type="text" placeholder="add a caption..." style="width:100%;padding:8px 12px;border:1px solid #c8a87a;border-radius:6px;font-family:Caveat,cursive;font-size:16px;color:#2c2415;background:#fff;box-sizing:border-box;margin-bottom:14px;">
-    <div style="display:flex;gap:10px;">
-      <button onclick="jfyShareConfirm()" style="flex:1;padding:10px;background:#2c2415;color:#fdf6e3;border:none;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;">share it →</button>
-      <button onclick="jfyCloseShare()" style="padding:10px 16px;background:transparent;border:1px solid #c8a87a;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;color:#6b5c40;">cancel</button>
+<div class="jfy-modal" id="jfy-share-modal" role="dialog" aria-modal="true" aria-label="Share dialog">
+  <div class="jfy-modal-card">
+    <button class="jfy-modal-close" id="jfy-share-close" aria-label="Close">✕</button>
+    <h3>share this page</h3>
+    <div class="jfy-radio-row">
+      <button class="jfy-radio-btn selected" data-vis="public">public</button>
+      <button class="jfy-radio-btn" data-vis="unlisted">unlisted</button>
     </div>
+    <input class="jfy-tags-input" id="jfy-tags-input" type="text" placeholder="add tags (comma separated)">
+    <button class="jfy-modal-btn primary" id="jfy-publish-btn">Publish to community</button>
+    <button class="jfy-modal-btn secondary" id="jfy-copy-link-btn">Copy link</button>
   </div>
 </div>
 
 <!-- EXPORT MODAL -->
-<div id="jfy-export-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:8000;align-items:center;justify-content:center;">
-  <div style="background:#fdf6e3;border-radius:12px;padding:28px 32px;max-width:340px;width:90%;font-family:Caveat,cursive;color:#2c2415;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
-    <button onclick="jfyCloseExport()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#6b5c40;">×</button>
-    <div style="font-size:22px;font-weight:700;margin-bottom:8px;">export page ✦</div>
-    <p style="font-size:16px;color:#6b5c40;margin:0 0 18px;">save your current scrapbook spread as an image or PDF.</p>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button onclick="jfyExportImage()" style="padding:12px;background:#c8a87a;color:#2c2415;border:none;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;">download as image (PNG)</button>
-      <button onclick="jfyExportPDF()" style="padding:12px;background:#2c2415;color:#fdf6e3;border:none;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;">export as PDF</button>
-      <button onclick="jfyCloseExport()" style="padding:8px;background:transparent;border:1px solid #c8a87a;border-radius:8px;font-family:Caveat,cursive;font-size:16px;cursor:pointer;color:#6b5c40;">cancel</button>
+<div class="jfy-modal" id="jfy-export-modal" role="dialog" aria-modal="true" aria-label="Export dialog">
+  <div class="jfy-modal-card">
+    <button class="jfy-modal-close" id="jfy-export-close" aria-label="Close">✕</button>
+    <h3>export</h3>
+    <div class="jfy-export-cards">
+      <div class="jfy-export-card">
+        <div class="ec-icon">🖼</div>
+        <div class="ec-title">PNG / JPG</div>
+        <div class="ec-desc">Uses html2canvas to capture your notebook spread as a high-res image.</div>
+        <button id="jfy-png-btn">Download PNG</button>
+      </div>
+      <div class="jfy-export-card">
+        <div class="ec-icon">📄</div>
+        <div class="ec-title">PDF</div>
+        <div class="ec-desc">Opens the browser print dialog. Save as PDF for best results.</div>
+        <button id="jfy-pdf-btn">Print / PDF</button>
+      </div>
     </div>
   </div>
 </div>
 
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<!-- TOAST -->
+<div id="jfy-toast" role="status" aria-live="polite"></div>
+<!-- SAVED INDICATOR -->
+<div id="jfy-saved">saved ✓</div>
+
 <script>
 (function() {
-  /* ── state ── */
-  var jfyPage = 0;
-  var activeTool = null;   // 'tape' | 'stamp' | 'sticker' | null
-  var activeStamp = null;
-  var activeSticker = null;
-  var tapeCfg = { color: '#a8c8e8', pattern: 'plain', opacity: 0.75 };
-  var tapeDraw = { on: false, startX: 0, startY: 0, el: null, page: null };
-  var isMobile = ('ontouchstart' in window) || window.matchMedia('(pointer:coarse)').matches;
-  var autoSaveTimer = null;
-  var dragSource = null; // 'polaroid' | 'sticky'
+'use strict';
 
-  /* ── page navigation ── */
-  window.jfySetPage = function(n) {
-    n = Math.max(0, Math.min(3, n));
-    document.querySelectorAll('.jfy-spread').forEach(function(s,i){ s.classList.toggle('active', i===n); });
-    document.querySelectorAll('.jfy-dot').forEach(function(d,i){ d.classList.toggle('active', i===n); });
-    var labels = ['page 1 of 4','page 2 of 4','page 3 of 4','page 4 of 4'];
-    var counter = document.getElementById('jfy-counter');
-    if (counter) counter.textContent = labels[n];
-    jfyPage = n;
-  };
+// ─── COLOR MAP ───
+const COLOR_MAP = {
+  blue:   '#a8c8e8',
+  pink:   '#f0b8c8',
+  green:  '#a8d4b8',
+  yellow: '#f0d878',
+  purple: '#c8b8e8'
+};
 
-  window.jfyNavPill = function(el, section) {
-    document.querySelectorAll('.jfy-pill').forEach(function(p){ p.classList.remove('active'); });
-    el.classList.add('active');
-    jfySetPage(section === 'entries' ? 3 : section === 'explore' ? 3 : 0);
-  };
+// ─── STATE ───
+const state = {
+  currentSpread: 0,
+  totalSpreads: 3,
+  activeTool: null,   // 'tape' | 'stamp' | 'sticker'
+  stampText: '',
+  stickerEmoji: '',
+  tapeConfig: {
+    color: 'blue',
+    pattern: 'plain',
+    height: 22,
+    opacity: 0.8
+  },
+  tapeDrawing: false,
+  tapeStart: null,
+  tapePreviewEl: null,
+  changeCount: 0,
+  hasAccount: false
+};
 
-  /* scroll to flip pages */
-  var lastY = 0, scrollCooldown = false;
-  window.addEventListener('scroll', function() {
-    var dy = window.scrollY - lastY;
-    lastY = window.scrollY;
-    if (!scrollCooldown && Math.abs(dy) > 80) {
-      scrollCooldown = true;
-      if (dy > 0 && jfyPage < 3) jfySetPage(jfyPage + 1);
-      else if (dy < 0 && jfyPage > 0) jfySetPage(jfyPage - 1);
-      setTimeout(function(){ scrollCooldown = false; }, 600);
+// ─── ELEMENTS ───
+const spreads    = Array.from(document.querySelectorAll('.jfy-spread'));
+const dots       = Array.from(document.querySelectorAll('.jfy-dot'));
+const counter    = document.getElementById('jfy-page-counter');
+const picker     = document.getElementById('jfy-picker');
+const toast      = document.getElementById('jfy-toast');
+const savedInd   = document.getElementById('jfy-saved');
+const shareModal = document.getElementById('jfy-share-modal');
+const exportModal= document.getElementById('jfy-export-modal');
+
+// ─── TOAST ───
+let toastTimer;
+function showToast(msg, duration = 2500) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// ─── SAVED INDICATOR ───
+let savedTimer;
+function flashSaved() {
+  savedInd.classList.add('show');
+  clearTimeout(savedTimer);
+  savedTimer = setTimeout(() => savedInd.classList.remove('show'), 1800);
+}
+
+// ─── SPREAD NAVIGATION ───
+function goToSpread(n) {
+  n = Math.max(0, Math.min(state.totalSpreads - 1, n));
+  spreads.forEach((s, i) => s.classList.toggle('active', i === n));
+  dots.forEach((d, i) => d.classList.toggle('active', i === n));
+  counter.textContent = 'spread ' + (n + 1) + ' of ' + state.totalSpreads;
+  state.currentSpread = n;
+  // update pill highlight
+  const pills = document.querySelectorAll('.jfy-pill');
+  pills.forEach(p => p.classList.remove('active'));
+  const pillKeys = ['intro','entries','explore'];
+  const pill = document.querySelector('.jfy-pill[data-pill="' + (pillKeys[n] || 'intro') + '"]');
+  if (pill) pill.classList.add('active');
+}
+
+// dots
+dots.forEach(d => d.addEventListener('click', () => goToSpread(+d.dataset.spread)));
+
+// flip buttons (delegated)
+document.getElementById('jfy-workspace').addEventListener('click', function(e) {
+  const btn = e.target.closest('.jfy-flip');
+  if (btn) goToSpread(state.currentSpread + (+btn.dataset.dir));
+});
+
+// scroll flip
+let scrollCooldown = false;
+let scrollAccum = 0;
+document.getElementById('jfy-notebook-wrap').addEventListener('wheel', function(e) {
+  if (scrollCooldown) return;
+  scrollAccum += e.deltaY;
+  if (Math.abs(scrollAccum) > 80) {
+    const dir = scrollAccum > 0 ? 1 : -1;
+    scrollAccum = 0;
+    scrollCooldown = true;
+    goToSpread(state.currentSpread + dir);
+    setTimeout(() => { scrollCooldown = false; }, 600);
+  }
+}, { passive: true });
+
+// ─── TAPE OVERLAY SIZING ───
+function updateTapeOverlayViewBoxes() {
+  document.querySelectorAll('.tape-overlay').forEach(svg => {
+    const page = svg.parentElement;
+    const r = page.getBoundingClientRect();
+    svg.setAttribute('viewBox', '0 0 ' + r.width + ' ' + r.height);
+    svg.style.width  = r.width + 'px';
+    svg.style.height = r.height + 'px';
+  });
+}
+document.addEventListener('DOMContentLoaded', () => setTimeout(updateTapeOverlayViewBoxes, 100));
+window.addEventListener('resize', updateTapeOverlayViewBoxes);
+setTimeout(updateTapeOverlayViewBoxes, 200);
+
+// ─── TAPE STRIP SVG ───
+function createTapeStrip(svgEl, x1, y1, x2, y2, color, pattern, opacity, height) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  if (len < 4) return;
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+  const h = height;
+  const hexColor = COLOR_MAP[color] || color;
+
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('transform', `translate(${x1},${y1}) rotate(${angle})`);
+  g.style.opacity = opacity;
+  g.setAttribute('data-tape', '1');
+
+  // Base rect
+  const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  rect.setAttribute('x', '0');
+  rect.setAttribute('y', String(-h/2));
+  rect.setAttribute('width', String(len));
+  rect.setAttribute('height', String(h));
+  rect.setAttribute('rx', '2');
+  rect.setAttribute('fill', hexColor);
+  g.appendChild(rect);
+
+  // Pattern overlay
+  if (pattern !== 'plain') {
+    const pid = 'tp-' + Math.random().toString(36).slice(2);
+    const defs = svgEl.querySelector('defs') || svgEl.insertBefore(
+      document.createElementNS('http://www.w3.org/2000/svg','defs'), svgEl.firstChild);
+    const patEl = document.createElementNS('http://www.w3.org/2000/svg','pattern');
+    patEl.setAttribute('id', pid);
+    patEl.setAttribute('patternUnits','userSpaceOnUse');
+
+    if (pattern === 'dots') {
+      patEl.setAttribute('width','10'); patEl.setAttribute('height','10');
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx','5'); c.setAttribute('cy','5'); c.setAttribute('r','1.5');
+      c.setAttribute('fill','rgba(255,255,255,.5)');
+      patEl.appendChild(c);
+    } else if (pattern === 'stripes') {
+      patEl.setAttribute('width','8'); patEl.setAttribute('height','8');
+      const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+      l.setAttribute('x1','0'); l.setAttribute('y1','0'); l.setAttribute('x2','8'); l.setAttribute('y2','8');
+      l.setAttribute('stroke','rgba(255,255,255,.4)'); l.setAttribute('stroke-width','2');
+      patEl.appendChild(l);
+    } else if (pattern === 'zigzag') {
+      patEl.setAttribute('width','12'); patEl.setAttribute('height','8');
+      const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+      p.setAttribute('d','M0,4 L3,0 L6,4 L9,0 L12,4');
+      p.setAttribute('stroke','rgba(255,255,255,.4)'); p.setAttribute('stroke-width','1.5');
+      p.setAttribute('fill','none');
+      patEl.appendChild(p);
+    } else if (pattern === 'floral') {
+      patEl.setAttribute('width','12'); patEl.setAttribute('height','12');
+      [0,3,6].forEach(r => {
+        const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('cx','6'); c.setAttribute('cy','6'); c.setAttribute('r', String(r));
+        c.setAttribute('fill','none'); c.setAttribute('stroke','rgba(255,255,255,.3)'); c.setAttribute('stroke-width','1');
+        patEl.appendChild(c);
+      });
+    } else if (pattern === 'hearts') {
+      patEl.setAttribute('width','14'); patEl.setAttribute('height','10');
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x','2'); t.setAttribute('y','9');
+      t.setAttribute('font-size','8'); t.setAttribute('fill','rgba(255,255,255,.5)');
+      t.textContent = '♥';
+      patEl.appendChild(t);
     }
-  }, { passive: true });
+    defs.appendChild(patEl);
 
-  /* ── toast ── */
-  function showToast(msg, dur) {
-    var t = document.getElementById('jfy-toast');
-    if (!t) {
-      t = document.createElement('div');
-      t.id = 'jfy-toast';
-      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(44,36,21,0.92);color:#fdf6e3;font-family:Caveat,cursive;font-size:16px;padding:9px 22px;border-radius:24px;z-index:9999;opacity:0;transition:opacity 0.22s,transform 0.22s;pointer-events:none;';
-      document.body.appendChild(t);
-    }
-    t.textContent = msg;
-    t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(12px)'; }, dur || 2200);
+    const patRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    patRect.setAttribute('x','0'); patRect.setAttribute('y', String(-h/2));
+    patRect.setAttribute('width', String(len)); patRect.setAttribute('height', String(h));
+    patRect.setAttribute('fill', 'url(#'+pid+')');
+    g.appendChild(patRect);
   }
 
-  /* ── tape picker ── */
-  window.jfyOpenPicker = function(colorVar) {
-    var names = {'tape-blue':'blue washi','tape-pink':'pink washi','tape-green':'green washi','tape-yellow':'yellow washi','tape-purple':'purple washi'};
-    var hexMap = {'tape-blue':'#a8c8e8','tape-pink':'#f0b8c8','tape-green':'#a8d4b8','tape-yellow':'#f0d878','tape-purple':'#c8b0e0'};
-    var c = hexMap[colorVar] || '#a8c8e8';
-    tapeCfg.color = c;
-    var title = document.getElementById('jfy-picker-title');
-    if (title) title.textContent = names[colorVar] || 'choose a tape style';
-    ['plain','dots','stripes','zigzag','floral'].forEach(function(p){
-      var el = document.getElementById('jfy-pat-'+p);
-      if (el) el.style.background = c;
-    });
-    document.querySelectorAll('.jfy-swatch-row .jfy-swatch').forEach(function(s){
-      s.classList.toggle('selected', s.style.background === c || s.style.backgroundColor === c);
-    });
-    document.getElementById('jfy-picker').classList.add('open');
-    activeTool = 'tape';
-    showToast('tape ready — draw across a page');
-  };
+  // Torn left edge
+  const torn1 = document.createElementNS('http://www.w3.org/2000/svg','path');
+  const tx = 6;
+  torn1.setAttribute('d', `M0,${-h/2} C${tx/2},${-h/4} ${-tx/2},${h/4} 0,${h/2}`);
+  torn1.setAttribute('stroke', 'rgba(0,0,0,.1)'); torn1.setAttribute('stroke-width','1'); torn1.setAttribute('fill','none');
+  g.appendChild(torn1);
 
-  window.jfyClosePicker = function() {
-    document.getElementById('jfy-picker').classList.remove('open');
-    activeTool = null;
-  };
+  // Torn right edge
+  const torn2 = document.createElementNS('http://www.w3.org/2000/svg','path');
+  torn2.setAttribute('d', `M${len},${-h/2} C${len+tx/2},${-h/4} ${len-tx/2},${h/4} ${len},${h/2}`);
+  torn2.setAttribute('stroke','rgba(0,0,0,.1)'); torn2.setAttribute('stroke-width','1'); torn2.setAttribute('fill','none');
+  g.appendChild(torn2);
 
-  window.jfySelectColor = function(el, hex) {
-    tapeCfg.color = hex;
-    el.closest('.jfy-swatch-row').querySelectorAll('.jfy-swatch').forEach(function(s){ s.classList.remove('selected'); });
-    el.classList.add('selected');
-    ['plain','dots','stripes','zigzag','floral'].forEach(function(p){
-      var pe = document.getElementById('jfy-pat-'+p);
-      if (pe) pe.style.background = hex;
-    });
-  };
+  svgEl.appendChild(g);
 
-  window.jfySelectPattern = function(pat) {
-    tapeCfg.pattern = pat;
-    ['plain','dots','stripes','zigzag','floral'].forEach(function(p){
-      var el = document.getElementById('jfy-pat-'+p);
-      if (el) el.classList.remove('selected');
-    });
-    var t = document.getElementById('jfy-pat-'+pat);
-    if (t) t.classList.add('selected');
-  };
+  // Right-click / long-press to remove
+  let longPress;
+  g.addEventListener('contextmenu', e => { e.preventDefault(); g.remove(); scheduleSave(); });
+  g.addEventListener('touchstart', () => { longPress = setTimeout(() => { g.remove(); scheduleSave(); }, 600); }, { passive: true });
+  g.addEventListener('touchend', () => clearTimeout(longPress));
+  g.addEventListener('touchmove', () => clearTimeout(longPress));
 
-  window.jfyApplyTape = function() {
-    document.getElementById('jfy-picker').classList.remove('open');
-    activeTool = 'tape';
-    showToast('now draw across a page to place tape');
-  };
+  return g;
+}
 
-  /* ── tape pattern CSS ── */
-  function tapePatternStyle(pattern, color) {
-    var base = 'background:' + color + ';';
-    if (pattern === 'dots') return base + 'background-image:radial-gradient(circle,rgba(0,0,0,0.22) 1.5px,transparent 1.5px);background-size:7px 7px;';
-    if (pattern === 'stripes') return base + 'background-image:repeating-linear-gradient(45deg,transparent 0,transparent 3px,rgba(255,255,255,0.38) 3px,rgba(255,255,255,0.38) 5px);';
-    if (pattern === 'zigzag') return base + 'background-image:repeating-linear-gradient(90deg,transparent 0 5px,rgba(255,255,255,0.3) 5px 7px);';
-    if (pattern === 'floral') return base + 'background-image:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.32) 2px,transparent 5px);background-size:11px 11px;';
-    if (pattern === 'hearts') return base + 'background-image:radial-gradient(circle at 3px 3px,rgba(255,255,255,0.3) 2px,transparent 3px);background-size:8px 8px;';
-    return base;
-  }
+// ─── TAPE TOOL ACTIVATE ───
+function activateTapeTool() {
+  state.activeTool = 'tape';
+  document.querySelectorAll('.tape-overlay').forEach(o => o.classList.add('tape-active'));
+  showToast('Drag on any page to apply tape. Press ESC to cancel.', 3000);
+}
+function deactivateTapeTool() {
+  state.activeTool = null;
+  document.querySelectorAll('.tape-overlay').forEach(o => o.classList.remove('tape-active'));
+  if (state.tapePreviewEl) { state.tapePreviewEl.remove(); state.tapePreviewEl = null; }
+  state.tapeDrawing = false;
+  state.tapeStart = null;
+}
 
-  /* ── tape drawing ── */
-  function getPageFromEvent(e) {
-    var touch = e.touches ? e.touches[0] : e;
-    var el = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (!el) return null;
-    return el.classList.contains('jfy-page') ? el : el.closest('.jfy-page');
-  }
+function getSVGCoords(svg, clientX, clientY) {
+  const r = svg.getBoundingClientRect();
+  return { x: clientX - r.left, y: clientY - r.top };
+}
 
-  function getPageXY(e, page) {
-    var touch = e.touches ? e.touches[0] : e;
-    var r = page.getBoundingClientRect();
-    return { x: touch.clientX - r.left, y: touch.clientY - r.top };
-  }
-
-  function onTapeStart(e) {
-    if (activeTool !== 'tape') return;
-    var page = getPageFromEvent(e);
-    if (!page) return;
+function setupTapeOverlay(svg) {
+  // Mouse
+  svg.addEventListener('mousedown', function(e) {
+    if (state.activeTool !== 'tape') return;
     e.preventDefault();
-    var pos = getPageXY(e, page);
-    tapeDraw.on = true;
-    tapeDraw.startX = pos.x;
-    tapeDraw.startY = pos.y;
-    tapeDraw.page = page;
-    var strip = document.createElement('div');
-    strip.className = 'jfy-tape-strip-live';
-    var opacityEl = document.querySelector('#jfy-picker input[type=range]');
-    var op = opacityEl ? (parseInt(opacityEl.value) / 100) : 0.75;
-    strip.style.cssText = 'position:absolute;height:22px;border-radius:2px;z-index:30;pointer-events:none;opacity:' + op + ';' + tapePatternStyle(tapeCfg.pattern, tapeCfg.color);
-    strip.style.left = pos.x + 'px';
-    strip.style.top = (pos.y - 11) + 'px';
-    strip.style.width = '0px';
-    page.appendChild(strip);
-    tapeDraw.el = strip;
-    tapeDraw.startClient = { x: e.touches ? e.touches[0].clientX : e.clientX, y: e.touches ? e.touches[0].clientY : e.clientY };
-  }
-
-  function onTapeMove(e) {
-    if (!tapeDraw.on || !tapeDraw.el) return;
+    const p = getSVGCoords(svg, e.clientX, e.clientY);
+    state.tapeDrawing = true;
+    state.tapeStart = p;
+    state.tapePreviewEl = null;
+  });
+  svg.addEventListener('mousemove', function(e) {
+    if (!state.tapeDrawing || state.activeTool !== 'tape') return;
+    const p = getSVGCoords(svg, e.clientX, e.clientY);
+    if (state.tapePreviewEl) state.tapePreviewEl.remove();
+    const g = createTapeStrip(svg, state.tapeStart.x, state.tapeStart.y, p.x, p.y,
+      state.tapeConfig.color, state.tapeConfig.pattern, state.tapeConfig.opacity * 0.6, state.tapeConfig.height);
+    if (g) { g.setAttribute('data-preview','1'); state.tapePreviewEl = g; }
+  });
+  svg.addEventListener('mouseup', function(e) {
+    if (!state.tapeDrawing || state.activeTool !== 'tape') return;
+    const p = getSVGCoords(svg, e.clientX, e.clientY);
+    if (state.tapePreviewEl) { state.tapePreviewEl.remove(); state.tapePreviewEl = null; }
+    createTapeStrip(svg, state.tapeStart.x, state.tapeStart.y, p.x, p.y,
+      state.tapeConfig.color, state.tapeConfig.pattern, state.tapeConfig.opacity, state.tapeConfig.height);
+    state.tapeDrawing = false;
+    state.tapeStart = null;
+    scheduleSave();
+    trackChange();
+  });
+  svg.addEventListener('mouseleave', function() {
+    if (state.tapeDrawing) {
+      if (state.tapePreviewEl) { state.tapePreviewEl.remove(); state.tapePreviewEl = null; }
+      state.tapeDrawing = false;
+    }
+  });
+  // Touch
+  svg.addEventListener('touchstart', function(e) {
+    if (state.activeTool !== 'tape') return;
     e.preventDefault();
-    var cx = e.touches ? e.touches[0].clientX : e.clientX;
-    var cy = e.touches ? e.touches[0].clientY : e.clientY;
-    var dx = cx - tapeDraw.startClient.x;
-    var dy = cy - tapeDraw.startClient.y;
-    var len = Math.sqrt(dx*dx + dy*dy);
-    var angle = Math.atan2(dy, dx) * 180 / Math.PI;
-    tapeDraw.el.style.width = len + 'px';
-    tapeDraw.el.style.transform = 'rotate(' + angle + 'deg)';
-    tapeDraw.el.style.transformOrigin = '0 50%';
+    const t = e.touches[0];
+    const p = getSVGCoords(svg, t.clientX, t.clientY);
+    state.tapeDrawing = true;
+    state.tapeStart = p;
+  }, { passive: false });
+  svg.addEventListener('touchmove', function(e) {
+    if (!state.tapeDrawing || state.activeTool !== 'tape') return;
+    e.preventDefault();
+    const t = e.touches[0];
+    const p = getSVGCoords(svg, t.clientX, t.clientY);
+    if (state.tapePreviewEl) state.tapePreviewEl.remove();
+    const g = createTapeStrip(svg, state.tapeStart.x, state.tapeStart.y, p.x, p.y,
+      state.tapeConfig.color, state.tapeConfig.pattern, state.tapeConfig.opacity * 0.6, state.tapeConfig.height);
+    if (g) { g.setAttribute('data-preview','1'); state.tapePreviewEl = g; }
+  }, { passive: false });
+  svg.addEventListener('touchend', function(e) {
+    if (!state.tapeDrawing || state.activeTool !== 'tape') return;
+    const t = e.changedTouches[0];
+    const p = getSVGCoords(svg, t.clientX, t.clientY);
+    if (state.tapePreviewEl) { state.tapePreviewEl.remove(); state.tapePreviewEl = null; }
+    createTapeStrip(svg, state.tapeStart.x, state.tapeStart.y, p.x, p.y,
+      state.tapeConfig.color, state.tapeConfig.pattern, state.tapeConfig.opacity, state.tapeConfig.height);
+    state.tapeDrawing = false;
+    state.tapeStart = null;
+    scheduleSave();
+    trackChange();
+  }, { passive: false });
+}
+
+document.querySelectorAll('.tape-overlay').forEach(setupTapeOverlay);
+
+// ─── MAKE MOVABLE ───
+function makeMovable(el, container) {
+  let dragging = false, ox = 0, oy = 0;
+
+  function onDown(e) {
+    if (e.target.tagName === 'BUTTON' || e.target.closest('[contenteditable]')) return;
+    if (e.target.tagName === 'TEXTAREA') return;
+    dragging = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const r = el.getBoundingClientRect();
+    ox = clientX - r.left;
+    oy = clientY - r.top;
+    el.style.zIndex = 25;
+    e.preventDefault();
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const cr = container.getBoundingClientRect();
+    let x = clientX - cr.left - ox;
+    let y = clientY - cr.top - oy;
+    x = Math.max(0, Math.min(cr.width - el.offsetWidth, x));
+    y = Math.max(0, Math.min(cr.height - el.offsetHeight, y));
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    e.preventDefault();
+  }
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    el.style.zIndex = 20;
+    scheduleSave();
   }
 
-  function onTapeEnd(e) {
-    if (!tapeDraw.on) return;
-    tapeDraw.on = false;
-    if (tapeDraw.el) {
-      tapeDraw.el.style.pointerEvents = 'auto';
-      tapeDraw.el.style.cursor = 'move';
-      makeMovable(tapeDraw.el, tapeDraw.page);
-      var del = document.createElement('span');
-      del.textContent = '×';
-      del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
-      tapeDraw.el.appendChild(del);
-      tapeDraw.el.addEventListener('mouseenter', function(){ del.style.display='block'; });
-      tapeDraw.el.addEventListener('mouseleave', function(){ del.style.display='none'; });
-      del.addEventListener('click', function(e){ e.stopPropagation(); tapeDraw.el.remove(); schedSave(); });
-      tapeDraw.el = null;
-      schedSave();
+  el.addEventListener('mousedown',  onDown, { passive: false });
+  el.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('mousemove', onMove, { passive: false });
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup',  onUp);
+  document.addEventListener('touchend', onUp);
+}
+
+// ─── PHOTO UPLOAD ───
+let fileInput;
+function getFileInput() {
+  if (!fileInput) {
+    fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+  }
+  return fileInput;
+}
+function triggerPhotoUpload(photoAreaEl) {
+  const inp = getFileInput();
+  // mobile: add capture
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  if (isMobile) inp.setAttribute('capture','environment');
+  else inp.removeAttribute('capture');
+  inp.onchange = function() {
+    const file = inp.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    photoAreaEl.style.backgroundImage = 'url(' + url + ')';
+    const hint = photoAreaEl.querySelector('.photo-hint');
+    if (hint) hint.style.display = 'none';
+    scheduleSave();
+    trackChange();
+    inp.value = '';
+  };
+  inp.click();
+}
+
+// ─── PLACE POLAROID ───
+function placePolaroid(x, y, pageEl) {
+  const rot = (Math.random() * 10 - 5).toFixed(1);
+  const div = document.createElement('div');
+  div.className = 'placed-polaroid';
+  div.style.left = x + 'px';
+  div.style.top  = y + 'px';
+  div.style.transform = 'rotate(' + rot + 'deg)';
+
+  const photoArea = document.createElement('div');
+  photoArea.className = 'photo-area';
+  const hint = document.createElement('div');
+  hint.className = 'photo-hint';
+  hint.textContent = 'tap to add photo';
+  photoArea.appendChild(hint);
+  photoArea.addEventListener('click', () => triggerPhotoUpload(photoArea));
+
+  const caption = document.createElement('div');
+  caption.className = 'caption';
+  caption.contentEditable = 'true';
+  caption.textContent = 'caption...';
+  caption.addEventListener('focus', () => { if (caption.textContent === 'caption...') caption.textContent = ''; });
+  caption.addEventListener('input', scheduleSave);
+
+  const del = document.createElement('button');
+  del.className = 'del-btn';
+  del.textContent = '×';
+  del.title = 'Remove';
+  del.addEventListener('click', () => { div.remove(); scheduleSave(); });
+
+  div.appendChild(del);
+  div.appendChild(photoArea);
+  div.appendChild(caption);
+  pageEl.appendChild(div);
+  makeMovable(div, pageEl);
+  trackChange();
+  scheduleSave();
+}
+
+// ─── PLACE STICKY ───
+const STICKY_COLORS = ['#f0d878','#b8e8b8','#f0b8c8','#a8c8e8','#f8c4a0'];
+function placeSticky(x, y, pageEl) {
+  const rot = (Math.random() * 12 - 6).toFixed(1);
+  const color = STICKY_COLORS[Math.floor(Math.random() * STICKY_COLORS.length)];
+  const div = document.createElement('div');
+  div.className = 'placed-sticky';
+  div.style.left = x + 'px';
+  div.style.top  = y + 'px';
+  div.style.transform = 'rotate(' + rot + 'deg)';
+  div.style.background = color;
+
+  const ta = document.createElement('textarea');
+  ta.className = 'sticky-text';
+  ta.placeholder = 'write here...';
+  ta.rows = 4;
+  ta.style.cssText = 'width:100%;background:transparent;border:none;resize:none;font-family:Caveat,cursive;font-size:13px;color:#3a2a10;outline:none;';
+  ta.addEventListener('input', scheduleSave);
+
+  const del = document.createElement('button');
+  del.className = 'del-btn';
+  del.textContent = '×';
+  del.addEventListener('click', () => { div.remove(); scheduleSave(); });
+
+  div.appendChild(del);
+  div.appendChild(ta);
+  pageEl.appendChild(div);
+  makeMovable(div, pageEl);
+  ta.focus();
+  trackChange();
+  scheduleSave();
+}
+
+// ─── TRAY DRAG ───
+function startTrayDrag(e, type) {
+  e.preventDefault();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+  const ghost = document.createElement('div');
+  ghost.className = 'jfy-ghost';
+  if (type === 'polaroid') {
+    ghost.style.cssText = 'width:70px;height:90px;background:white;border-radius:3px;padding:5px 5px 18px;box-shadow:2px 3px 8px rgba(0,0,0,.2);';
+    ghost.innerHTML = '<div style="width:100%;height:60px;background:#d8e8f0;border-radius:2px;"></div>';
+  } else {
+    ghost.style.cssText = 'width:56px;height:56px;background:#f0d878;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:2px 2px 8px rgba(0,0,0,.2);';
+    ghost.textContent = '📝';
+  }
+  ghost.style.left = (clientX - 30) + 'px';
+  ghost.style.top  = (clientY - 30) + 'px';
+  document.body.appendChild(ghost);
+
+  function move(ev) {
+    const cx = ev.touches ? ev.touches[0].clientX : ev.clientX;
+    const cy = ev.touches ? ev.touches[0].clientY : ev.clientY;
+    ghost.style.left = (cx - 30) + 'px';
+    ghost.style.top  = (cy - 30) + 'px';
+  }
+  function up(ev) {
+    const cx = ev.changedTouches ? ev.changedTouches[0].clientX : ev.clientX;
+    const cy = ev.changedTouches ? ev.changedTouches[0].clientY : ev.clientY;
+    ghost.remove();
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('mouseup', up);
+    document.removeEventListener('touchend', up);
+
+    const el = document.elementFromPoint(cx, cy);
+    if (!el) return;
+    const pageEl = el.closest('.jfy-page');
+    if (!pageEl) { showToast('Drop onto a notebook page!'); return; }
+    const pr = pageEl.getBoundingClientRect();
+    const relX = cx - pr.left - 30;
+    const relY = cy - pr.top - 30;
+    if (type === 'polaroid') placePolaroid(relX, relY, pageEl);
+    else placeSticky(relX, relY, pageEl);
+  }
+  document.addEventListener('mousemove', move);
+  document.addEventListener('touchmove', move, { passive: false });
+  document.addEventListener('mouseup', up);
+  document.addEventListener('touchend', up);
+}
+
+document.getElementById('jfy-polaroid-drag').addEventListener('mousedown',  e => startTrayDrag(e, 'polaroid'));
+document.getElementById('jfy-polaroid-drag').addEventListener('touchstart', e => startTrayDrag(e, 'polaroid'), { passive: false });
+document.getElementById('jfy-sticky-drag').addEventListener('mousedown',    e => startTrayDrag(e, 'sticky'));
+document.getElementById('jfy-sticky-drag').addEventListener('touchstart',   e => startTrayDrag(e, 'sticky'), { passive: false });
+
+// ─── STAMP TOOL ───
+function placeStamp(x, y, pageEl, text) {
+  const rot = (Math.random() * 10 - 5).toFixed(1);
+  const div = document.createElement('div');
+  div.className = 'placed-stamp';
+  div.style.left = x + 'px';
+  div.style.top  = y + 'px';
+  div.style.transform = 'rotate(' + rot + 'deg)';
+  if (text === 'DATE') {
+    div.textContent = new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
+  } else {
+    div.textContent = text;
+  }
+  const del = document.createElement('button');
+  del.className = 'del-btn';
+  del.textContent = '×';
+  del.addEventListener('click', () => { div.remove(); scheduleSave(); });
+  div.appendChild(del);
+  pageEl.appendChild(div);
+  makeMovable(div, pageEl);
+  trackChange();
+  scheduleSave();
+}
+
+document.querySelectorAll('.jfy-stamp').forEach(stamp => {
+  function activateStamp() {
+    document.querySelectorAll('.jfy-stamp').forEach(s => s.classList.remove('active-tool'));
+    stamp.classList.add('active-tool');
+    state.activeTool = 'stamp';
+    state.stampText = stamp.dataset.stamp;
+    showToast('Click on the page to stamp. Shift+click for multiple.');
+  }
+  stamp.addEventListener('click', activateStamp);
+  stamp.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') activateStamp(); });
+});
+
+// ─── STICKER TOOL ───
+function placeSticker(x, y, pageEl, emoji) {
+  const rot = (Math.random() * 16 - 8).toFixed(1);
+  const div = document.createElement('div');
+  div.className = 'placed-sticker';
+  div.style.left = x + 'px';
+  div.style.top  = y + 'px';
+  div.style.transform = 'rotate(' + rot + 'deg)';
+  div.textContent = emoji;
+  const del = document.createElement('button');
+  del.className = 'del-btn';
+  del.style.cssText = 'top:-10px;right:-10px;';
+  del.textContent = '×';
+  del.addEventListener('click', () => { div.remove(); scheduleSave(); });
+  div.appendChild(del);
+  pageEl.appendChild(div);
+  makeMovable(div, pageEl);
+  trackChange();
+  scheduleSave();
+}
+
+document.querySelectorAll('.jfy-sticker').forEach(sticker => {
+  function activateSticker() {
+    document.querySelectorAll('.jfy-sticker').forEach(s => s.classList.remove('active-tool'));
+    sticker.classList.add('active-tool');
+    state.activeTool = 'sticker';
+    state.stickerEmoji = sticker.dataset.emoji;
+    showToast('Click on the page to place sticker. Shift+click for multiple.');
+  }
+  sticker.addEventListener('click', activateSticker);
+  sticker.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') activateSticker(); });
+});
+
+// ─── PAGE CLICK (stamp / sticker placement) ───
+document.querySelectorAll('.jfy-page').forEach(page => {
+  page.addEventListener('click', function(e) {
+    if (e.target.closest('.tape-overlay') && state.activeTool === 'tape') return;
+    if (e.target.closest('.jfy-flip') || e.target.closest('.del-btn')) return;
+    if (state.activeTool === 'stamp') {
+      const pr = page.getBoundingClientRect();
+      placeStamp(e.clientX - pr.left - 20, e.clientY - pr.top - 12, page, state.stampText);
+      if (!e.shiftKey) {
+        state.activeTool = null;
+        document.querySelectorAll('.jfy-stamp').forEach(s => s.classList.remove('active-tool'));
+      }
+    } else if (state.activeTool === 'sticker') {
+      const pr = page.getBoundingClientRect();
+      placeSticker(e.clientX - pr.left - 15, e.clientY - pr.top - 15, page, state.stickerEmoji);
+      if (!e.shiftKey) {
+        state.activeTool = null;
+        document.querySelectorAll('.jfy-sticker').forEach(s => s.classList.remove('active-tool'));
+      }
     }
+  });
+});
+
+// ─── ESC KEY ───
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    state.activeTool = null;
+    state.stampText = '';
+    state.stickerEmoji = '';
+    deactivateTapeTool();
+    document.querySelectorAll('.jfy-stamp').forEach(s => s.classList.remove('active-tool'));
+    document.querySelectorAll('.jfy-sticker').forEach(s => s.classList.remove('active-tool'));
+    closePicker();
+    closeModal(shareModal);
+    closeModal(exportModal);
   }
+});
 
-  document.addEventListener('mousedown', onTapeStart);
-  document.addEventListener('mousemove', onTapeMove);
-  document.addEventListener('mouseup', onTapeEnd);
-  document.addEventListener('touchstart', onTapeStart, { passive: false });
-  document.addEventListener('touchmove', onTapeMove, { passive: false });
-  document.addEventListener('touchend', onTapeEnd);
-
-  /* ── make elements movable ── */
-  function makeMovable(el, container) {
-    var ox=0, oy=0, sx=0, sy=0, dragging=false;
-    function start(e) {
-      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.hasAttribute('contenteditable')) return;
-      e.preventDefault();
-      var touch = e.touches ? e.touches[0] : e;
-      sx = touch.clientX; sy = touch.clientY;
-      ox = parseInt(el.style.left||0); oy = parseInt(el.style.top||0);
-      dragging = true;
-      el.style.zIndex = 50;
-    }
-    function move(e) {
-      if (!dragging) return;
-      e.preventDefault();
-      var touch = e.touches ? e.touches[0] : e;
-      var dx = touch.clientX - sx, dy = touch.clientY - sy;
-      el.style.left = (ox+dx) + 'px'; el.style.top = (oy+dy) + 'px';
-    }
-    function end() {
-      if (!dragging) return;
-      dragging = false;
-      el.style.zIndex = 10;
-      schedSave();
-    }
-    el.addEventListener('mousedown', start);
-    el.addEventListener('touchstart', start, { passive: false });
-    document.addEventListener('mousemove', move);
-    document.addEventListener('touchmove', move, { passive: false });
-    document.addEventListener('mouseup', end);
-    document.addEventListener('touchend', end);
-  }
-
-  /* ── polaroid placement ── */
-  function placePolaroid(x, y, page) {
-    var wrap = document.createElement('div');
-    wrap.className = 'jfy-polaroid';
-    wrap.style.cssText = 'position:absolute;left:' + (x-50) + 'px;top:' + (y-60) + 'px;width:100px;padding:8px 8px 24px;background:#fff;box-shadow:2px 4px 14px rgba(0,0,0,0.18);transform:rotate(' + (Math.random()*8-4).toFixed(1) + 'deg);cursor:grab;z-index:10;';
-    var imgArea = document.createElement('div');
-    imgArea.style.cssText = 'width:84px;height:70px;background:#e8e0d4;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;';
-    imgArea.innerHTML = '<span style="font-family:Caveat,cursive;font-size:10px;color:#aaa;">tap to add photo</span>';
-    var caption = document.createElement('div');
-    caption.contentEditable = 'true';
-    caption.style.cssText = 'position:absolute;bottom:4px;left:0;right:0;text-align:center;font-family:Caveat,cursive;font-size:12px;color:#6b5c40;outline:none;';
-    caption.textContent = 'a memory';
-    var del = document.createElement('span');
-    del.textContent = '×';
-    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
-    wrap.addEventListener('mouseenter', function(){ del.style.display='block'; });
-    wrap.addEventListener('mouseleave', function(){ del.style.display='none'; });
-    del.addEventListener('click', function(e){ e.stopPropagation(); wrap.remove(); schedSave(); });
-
-    /* photo upload */
-    var inp = document.createElement('input');
-    inp.type = 'file';
-    inp.accept = 'image/*';
-    if (isMobile) inp.setAttribute('capture', 'environment');
-    inp.style.display = 'none';
-    inp.addEventListener('change', function() {
-      if (!inp.files || !inp.files[0]) return;
-      var url = URL.createObjectURL(inp.files[0]);
-      imgArea.innerHTML = '';
-      var img = new Image();
-      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-      img.src = url;
-      imgArea.appendChild(img);
-      schedSave();
-    });
-    imgArea.addEventListener('click', function(){ inp.click(); });
-
-    wrap.appendChild(imgArea);
-    wrap.appendChild(caption);
-    wrap.appendChild(del);
-    wrap.appendChild(inp);
-    page.appendChild(wrap);
-    makeMovable(wrap, page);
-    schedSave();
-  }
-
-  /* ── sticky note placement ── */
-  function placeSticky(x, y, page) {
-    var colors = ['#f0d878','#f0b8c8','#a8d4b8','#a8c8e8','#c8b0e0'];
-    var col = colors[Math.floor(Math.random()*colors.length)];
-    var el = document.createElement('div');
-    el.style.cssText = 'position:absolute;left:' + (x-45) + 'px;top:' + (y-45) + 'px;width:90px;min-height:90px;background:' + col + ';padding:10px;font-family:Caveat,cursive;font-size:14px;color:#2c2415;transform:rotate(' + (Math.random()*8-4).toFixed(1) + 'deg);cursor:grab;z-index:10;box-shadow:2px 3px 10px rgba(0,0,0,0.14);';
-    el.contentEditable = 'true';
-    el.textContent = 'write here...';
-    el.addEventListener('focus', function(){ if (el.textContent === 'write here...') el.textContent = ''; });
-    var del = document.createElement('span');
-    del.textContent = '×';
-    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
-    el.addEventListener('mouseenter', function(){ del.style.display='block'; });
-    el.addEventListener('mouseleave', function(){ del.style.display='none'; });
-    del.addEventListener('click', function(e){ e.stopPropagation(); el.remove(); schedSave(); });
-    el.appendChild(del);
-    page.appendChild(el);
-    makeMovable(el, page);
-    schedSave();
-  }
-
-  /* ── stamp placement ── */
-  function placeStamp(x, y, page, label) {
-    var el = document.createElement('div');
-    el.style.cssText = 'position:absolute;left:' + (x-28) + 'px;top:' + (y-20) + 'px;padding:5px 10px;border:2px solid rgba(44,36,21,0.55);border-radius:3px;font-family:Caveat,cursive;font-size:15px;color:rgba(44,36,21,0.7);transform:rotate(' + (Math.random()*10-5).toFixed(1) + 'deg);cursor:grab;z-index:10;background:rgba(253,246,227,0.4);';
-    if (label === '★') {
-      el.textContent = '★ featured';
-    } else if (label === 'DATE') {
-      var now = new Date();
-      el.textContent = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+// ─── TAPE PICKER ───
+function openPicker(colorName) {
+  document.getElementById('jfy-picker-title').textContent = colorName + ' tape';
+  state.tapeConfig.color = colorName;
+  // highlight color swatch
+  document.querySelectorAll('.jfy-color-swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.color === colorName);
+  });
+  updatePatternSwatchColors();
+  picker.classList.add('open');
+}
+function closePicker() {
+  picker.classList.remove('open');
+}
+function updatePatternSwatchColors() {
+  const hex = COLOR_MAP[state.tapeConfig.color] || '#a8c8e8';
+  document.querySelectorAll('.jfy-pattern-swatch').forEach(s => {
+    s.style.backgroundColor = hex;
+    const pat = s.dataset.pattern;
+    if (pat === 'dots') {
+      s.style.backgroundImage = 'radial-gradient(circle, rgba(255,255,255,.5) 1.5px, transparent 1.5px)';
+      s.style.backgroundSize = '6px 6px';
+    } else if (pat === 'stripes') {
+      s.style.backgroundImage = 'repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,.4) 3px,rgba(255,255,255,.4) 5px)';
+      s.style.backgroundSize = '';
+    } else if (pat === 'zigzag') {
+      s.style.backgroundImage = 'none';
+    } else if (pat === 'floral') {
+      s.style.backgroundImage = 'radial-gradient(circle at center,rgba(255,255,255,.3) 2px,transparent 4px,rgba(255,255,255,.2) 6px,transparent 8px)';
+      s.style.backgroundSize = '12px 12px';
+    } else if (pat === 'hearts') {
+      s.style.backgroundImage = 'none';
     } else {
-      el.textContent = label + ' ✓';
+      s.style.backgroundImage = 'none';
+      s.style.backgroundSize = '';
     }
-    var del = document.createElement('span');
-    del.textContent = '×';
-    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
-    el.addEventListener('mouseenter', function(){ del.style.display='block'; });
-    el.addEventListener('mouseleave', function(){ del.style.display='none'; });
-    del.addEventListener('click', function(e){ e.stopPropagation(); el.remove(); schedSave(); });
-    el.appendChild(del);
-    page.appendChild(el);
-    makeMovable(el, page);
-    schedSave();
-  }
-
-  /* ── sticker placement ── */
-  function placeSticker(x, y, page, emoji) {
-    var el = document.createElement('div');
-    el.style.cssText = 'position:absolute;left:' + (x-16) + 'px;top:' + (y-16) + 'px;font-size:28px;cursor:grab;z-index:10;user-select:none;transform:rotate(' + (Math.random()*14-7).toFixed(1) + 'deg);';
-    el.textContent = emoji;
-    var del = document.createElement('span');
-    del.textContent = '×';
-    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;font-style:normal;';
-    el.addEventListener('mouseenter', function(){ del.style.display='block'; });
-    el.addEventListener('mouseleave', function(){ del.style.display='none'; });
-    del.addEventListener('click', function(e){ e.stopPropagation(); el.remove(); schedSave(); });
-    el.appendChild(del);
-    page.appendChild(el);
-    makeMovable(el, page);
-    schedSave();
-  }
-
-  /* ── active page helper ── */
-  function getActivePage() {
-    var spread = document.querySelector('.jfy-spread.active');
-    if (!spread) return null;
-    var pages = spread.querySelectorAll('.jfy-page');
-    return pages[pages.length - 1] || pages[0];
-  }
-
-  /* ── stamp tool ── */
-  document.querySelectorAll('.jfy-stamp').forEach(function(el) {
-    var label = el.textContent.trim().replace('→','').trim();
-    el.addEventListener('click', function() {
-      if (activeTool === 'stamp' && activeStamp === label) {
-        activeTool = null; activeStamp = null;
-        document.querySelectorAll('.jfy-stamp').forEach(function(s){ s.style.outline=''; });
-        showToast('stamp deselected');
-      } else {
-        activeTool = 'stamp'; activeStamp = label;
-        document.querySelectorAll('.jfy-stamp').forEach(function(s){ s.style.outline=''; });
-        el.style.outline = '2px solid rgba(44,36,21,0.55)';
-        showToast(label + ' stamp active — click a page to place');
-      }
-    });
   });
+}
 
-  /* ── sticker tool ── */
-  document.querySelectorAll('.jfy-sticker').forEach(function(el) {
-    el.style.cursor = 'pointer';
-    var emoji = el.textContent.trim();
-    el.addEventListener('click', function() {
-      if (activeTool === 'sticker' && activeSticker === emoji) {
-        activeTool = null; activeSticker = null;
-        showToast('sticker deselected');
-      } else {
-        activeTool = 'sticker'; activeSticker = emoji;
-        showToast(emoji + ' sticker active — click a page to place');
-      }
-    });
+// Tape roll clicks
+document.querySelectorAll('.jfy-tape-roll').forEach(roll => {
+  roll.addEventListener('click', () => openPicker(roll.dataset.color));
+  roll.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') openPicker(roll.dataset.color); });
+});
+
+document.getElementById('jfy-picker-close').addEventListener('click', closePicker);
+
+// Color swatches in picker
+document.querySelectorAll('.jfy-color-swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    state.tapeConfig.color = s.dataset.color;
+    document.querySelectorAll('.jfy-color-swatch').forEach(sw => sw.classList.remove('selected'));
+    s.classList.add('selected');
+    document.getElementById('jfy-picker-title').textContent = s.dataset.color + ' tape';
+    updatePatternSwatchColors();
   });
+});
 
-  /* ── page click → place tool ── */
-  document.querySelectorAll('.jfy-page').forEach(function(page) {
-    page.addEventListener('click', function(e) {
-      if (activeTool === 'stamp') {
-        var r = page.getBoundingClientRect();
-        placeStamp(e.clientX - r.left, e.clientY - r.top, page, activeStamp);
-        activeTool = null; activeStamp = null;
-        document.querySelectorAll('.jfy-stamp').forEach(function(s){ s.style.outline=''; });
-      } else if (activeTool === 'sticker') {
-        var r2 = page.getBoundingClientRect();
-        placeSticker(e.clientX - r2.left, e.clientY - r2.top, page, activeSticker);
-        activeTool = null; activeSticker = null;
-      }
-    });
+// Pattern swatches
+document.querySelectorAll('.jfy-pattern-swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    state.tapeConfig.pattern = s.dataset.pattern;
+    document.querySelectorAll('.jfy-pattern-swatch').forEach(sw => sw.classList.remove('selected'));
+    s.classList.add('selected');
   });
+});
 
-  /* ── polaroid drag from tray ── */
-  var polaroidStack = document.querySelector('.jfy-polaroid-stack');
-  var stickyPad = document.querySelector('.jfy-sticky-note-pad,.jfy-tray-item');
+// Sliders
+const widthSlider   = document.getElementById('jfy-width-slider');
+const opacitySlider = document.getElementById('jfy-opacity-slider');
+const widthVal      = document.getElementById('jfy-width-val');
+const opacityVal    = document.getElementById('jfy-opacity-val');
+widthSlider.addEventListener('input', () => {
+  state.tapeConfig.height = +widthSlider.value;
+  widthVal.textContent = widthSlider.value + 'px';
+});
+opacitySlider.addEventListener('input', () => {
+  state.tapeConfig.opacity = +opacitySlider.value / 100;
+  opacityVal.textContent = opacitySlider.value + '%';
+});
 
-  function setupTrayDrag(trayEl, type) {
-    if (!trayEl) return;
-    trayEl.setAttribute('draggable','true');
-    trayEl.addEventListener('dragstart', function(e) {
-      dragSource = type;
-      e.dataTransfer.effectAllowed = 'copy';
-    });
+// Apply tape
+document.getElementById('jfy-apply-tape').addEventListener('click', () => {
+  activateTapeTool();
+  closePicker();
+});
 
-    /* touch drag */
-    var ghost = null;
-    trayEl.addEventListener('touchstart', function(e) {
-      dragSource = type;
-      ghost = trayEl.cloneNode(true);
-      ghost.style.cssText = 'position:fixed;opacity:0.7;pointer-events:none;z-index:9999;transform:scale(0.9);';
-      document.body.appendChild(ghost);
-    }, { passive: true });
-    trayEl.addEventListener('touchmove', function(e) {
-      if (!ghost) return;
-      var t = e.touches[0];
-      ghost.style.left = (t.clientX - 40) + 'px';
-      ghost.style.top = (t.clientY - 50) + 'px';
-    }, { passive: true });
-    trayEl.addEventListener('touchend', function(e) {
-      if (ghost) { ghost.remove(); ghost = null; }
-      var t = e.changedTouches[0];
-      var el = document.elementFromPoint(t.clientX, t.clientY);
-      var page = el && (el.classList.contains('jfy-page') ? el : el.closest('.jfy-page'));
-      if (page) {
-        var r = page.getBoundingClientRect();
-        if (type === 'polaroid') placePolaroid(t.clientX - r.left, t.clientY - r.top, page);
-        else if (type === 'sticky') placeSticky(t.clientX - r.left, t.clientY - r.top, page);
-      }
-      dragSource = null;
-    });
+// Close picker on outside click
+document.addEventListener('click', function(e) {
+  if (!picker.contains(e.target) && !e.target.closest('.jfy-tape-roll')) {
+    if (picker.classList.contains('open')) closePicker();
   }
+});
 
-  if (polaroidStack) setupTrayDrag(polaroidStack, 'polaroid');
-
-  var stickyPadEl = document.querySelector('.jfy-sticky-pad');
-  if (stickyPadEl) setupTrayDrag(stickyPadEl, 'sticky');
-
-  /* dragover / drop on pages */
-  document.querySelectorAll('.jfy-page').forEach(function(page) {
-    page.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-      var ind = page.closest('.jfy-spread') && page.closest('.jfy-spread').querySelector('.jfy-drag-indicator');
-      if (ind) ind.classList.add('visible');
-    });
-    page.addEventListener('dragleave', function() {
-      var ind = page.closest('.jfy-spread') && page.closest('.jfy-spread').querySelector('.jfy-drag-indicator');
-      if (ind) ind.classList.remove('visible');
-    });
-    page.addEventListener('drop', function(e) {
-      e.preventDefault();
-      var ind = page.closest('.jfy-spread') && page.closest('.jfy-spread').querySelector('.jfy-drag-indicator');
-      if (ind) ind.classList.remove('visible');
-      var r = page.getBoundingClientRect();
-      var x = e.clientX - r.left, y = e.clientY - r.top;
-      if (dragSource === 'polaroid') placePolaroid(x, y, page);
-      else if (dragSource === 'sticky') placeSticky(x, y, page);
-      dragSource = null;
-    });
+// ─── DROP TARGET (spread 2 right page) ───
+const dropTarget = document.getElementById('jfy-drop-target');
+if (dropTarget) {
+  dropTarget.addEventListener('dragover', e => { e.preventDefault(); dropTarget.classList.add('dragover'); });
+  dropTarget.addEventListener('dragleave', () => dropTarget.classList.remove('dragover'));
+  dropTarget.addEventListener('drop', e => {
+    e.preventDefault();
+    dropTarget.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files && files[0] && files[0].type.startsWith('image/')) {
+      const url = URL.createObjectURL(files[0]);
+      dropTarget.style.backgroundImage = 'url('+url+')';
+      dropTarget.style.backgroundSize = 'cover';
+      dropTarget.style.backgroundPosition = 'center';
+      dropTarget.innerHTML = '';
+      trackChange();
+      scheduleSave();
+    }
   });
+}
 
-  /* ── share modal ── */
-  var shareModal = document.getElementById('jfy-share-modal');
-  var exportModal = document.getElementById('jfy-export-modal');
+// ─── FORMAT BAR ───
+document.querySelectorAll('.jfy-fmt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const fmt = btn.dataset.fmt;
+    if (fmt === 'bold')      document.execCommand('bold');
+    else if (fmt === 'italic')    document.execCommand('italic');
+    else if (fmt === 'underline') document.execCommand('underline');
+    else if (fmt === 'fontsize') {
+      const sizes = ['14px','16px','18px','13.5px'];
+      const editor = document.getElementById('jfy-main-editor');
+      const cur = editor.style.fontSize || '13.5px';
+      const idx = sizes.indexOf(cur);
+      editor.style.fontSize = sizes[(idx + 1) % sizes.length];
+    }
+    scheduleSave();
+  });
+});
 
-  window.jfyOpenShare = function() {
-    if (!shareModal) { showToast('share feature coming soon!'); return; }
-    shareModal.style.display = 'flex';
-  };
-  window.jfyCloseShare = function() {
-    if (shareModal) shareModal.style.display = 'none';
-  };
-  window.jfyShareConfirm = function() {
-    jfyCloseShare();
-    showToast('shared to the community page ✓', 3000);
-  };
+// ─── MAIN EDITOR ───
+const mainEditor = document.getElementById('jfy-main-editor');
+if (mainEditor) {
+  mainEditor.addEventListener('input', () => { scheduleSave(); trackChange(); });
+  // placeholder via CSS-ish approach
+  mainEditor.addEventListener('focus', () => {
+    if (mainEditor.textContent === '') mainEditor.classList.add('empty');
+    else mainEditor.classList.remove('empty');
+  });
+}
 
-  window.jfyOpenExport = function() {
-    if (!exportModal) { showToast('export feature coming soon!'); return; }
-    exportModal.style.display = 'flex';
-  };
-  window.jfyCloseExport = function() {
-    if (exportModal) exportModal.style.display = 'none';
-  };
+// ─── TYPEWRITER ANIMATION ───
+const TYPEWRITER_TEXT = 'it started when I noticed...';
+let twIdx = 0;
+let twEl = document.getElementById('jfy-typed-text');
+function typewriterStep() {
+  if (!twEl) return;
+  if (twIdx < TYPEWRITER_TEXT.length) {
+    twEl.textContent += TYPEWRITER_TEXT[twIdx++];
+    setTimeout(typewriterStep, 80 + Math.random() * 60);
+  }
+}
+setTimeout(typewriterStep, 1200);
 
-  window.jfyExportImage = function() {
-    jfyCloseExport();
-    var spread = document.querySelector('.jfy-spread.active .jfy-notebook');
-    if (!spread) { showToast('nothing to export'); return; }
-    showToast('capturing page…');
-    html2canvas(spread, { useCORS: true, scale: 2, backgroundColor: '#fdf6e3' }).then(function(canvas) {
-      var link = document.createElement('a');
-      link.download = 'scrapbook-page.png';
+// ─── MODALS ───
+function openModal(modal) { modal.classList.add('open'); }
+function closeModal(modal) { modal.classList.remove('open'); }
+
+document.getElementById('jfy-share-btn').addEventListener('click', () => openModal(shareModal));
+document.getElementById('jfy-export-btn').addEventListener('click', () => openModal(exportModal));
+document.getElementById('jfy-share-close').addEventListener('click', () => closeModal(shareModal));
+document.getElementById('jfy-export-close').addEventListener('click', () => closeModal(exportModal));
+
+// close modals on backdrop click
+[shareModal, exportModal].forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(m); });
+});
+
+// share radio buttons
+document.querySelectorAll('.jfy-radio-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.jfy-radio-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  });
+});
+
+document.getElementById('jfy-publish-btn').addEventListener('click', () => {
+  closeModal(shareModal);
+  showToast('Shared to community! 🎉');
+});
+document.getElementById('jfy-copy-link-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    showToast('Link copied!');
+  }).catch(() => showToast('Copy failed — try manually.'));
+});
+
+// ─── START WRITING BUTTON ───
+document.getElementById('jfy-start-btn').addEventListener('click', () => {
+  goToSpread(2);
+  setTimeout(() => {
+    const ed = document.getElementById('jfy-main-editor');
+    if (ed) ed.focus();
+  }, 400);
+});
+
+// ─── PILLS ───
+document.querySelectorAll('.jfy-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    const map = { intro: 0, entries: 1, explore: 2 };
+    const n = map[pill.dataset.pill];
+    if (n !== undefined) goToSpread(n);
+  });
+});
+
+// ─── EXPORT ───
+document.getElementById('jfy-pdf-btn').addEventListener('click', () => {
+  closeModal(exportModal);
+  window.print();
+});
+
+document.getElementById('jfy-png-btn').addEventListener('click', function() {
+  closeModal(exportModal);
+  showToast('Preparing image…', 4000);
+  const script = document.createElement('script');
+  script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
+  script.onload = function() {
+    const activeSpread = document.querySelector('.jfy-spread.active');
+    if (!activeSpread) { showToast('No active spread found.'); return; }
+    window.html2canvas(activeSpread, { scale: 2, useCORS: true, backgroundColor: '#fdf6e3' }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'daybreak-journal.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
-      showToast('image saved!', 3000);
-    }).catch(function(){ showToast('could not capture — try again'); });
+      showToast('Image downloaded!');
+    }).catch(() => showToast('Export failed. Try again.'));
   };
+  script.onerror = () => showToast('Could not load html2canvas.');
+  document.head.appendChild(script);
+});
 
-  window.jfyExportPDF = function() {
-    jfyCloseExport();
-    var spread = document.querySelector('.jfy-spread.active .jfy-notebook');
-    if (!spread) { showToast('nothing to export'); return; }
-    showToast('preparing print…');
-    html2canvas(spread, { useCORS: true, scale: 2 }).then(function(canvas) {
-      var win = window.open('', '_blank');
-      win.document.write('<html><head><title>scrapbook</title><style>body{margin:0;}img{max-width:100%;display:block;}</style></head><body><img src="' + canvas.toDataURL() + '"></body></html>');
-      win.document.close();
-      win.print();
-    }).catch(function(){ window.print(); });
-  };
+// ─── LOCAL STORAGE & AUTOSAVE ───
+let saveTimer;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 500);
+}
 
-  /* ── auto-save ── */
-  function schedSave() {
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = setTimeout(saveState, 500);
-  }
+function doSave() {
+  try {
+    const data = {};
+    // save spread
+    data.spread = state.currentSpread;
+    // save editor content
+    const ed = document.getElementById('jfy-main-editor');
+    if (ed) data.editorHTML = ed.innerHTML;
+    // save tape SVGs
+    data.tapes = {};
+    document.querySelectorAll('.tape-overlay').forEach(svg => {
+      const pid = svg.dataset.pageId;
+      const strips = Array.from(svg.querySelectorAll('g[data-tape]')).map(g => g.outerHTML);
+      if (strips.length) data.tapes[pid] = strips;
+    });
+    localStorage.setItem('jfy-journal', JSON.stringify(data));
+    flashSaved();
+  } catch(e) { /* storage might be full */ }
+}
 
-  function saveState() {
-    try {
-      var data = { page: jfyPage, elements: [] };
-      document.querySelectorAll('.jfy-spread').forEach(function(spread, si) {
-        spread.querySelectorAll('.jfy-page').forEach(function(page, pi) {
-          page.querySelectorAll('[style*="position:absolute"]').forEach(function(el) {
-            if (el.classList.contains('jfy-drag-indicator') || el.classList.contains('jfy-drop-target') || el.classList.contains('jfy-corner-label') || el.classList.contains('jfy-format-bar')) return;
-            data.elements.push({
-              spread: si, page: pi,
-              left: el.style.left, top: el.style.top,
-              transform: el.style.transform,
-              classes: el.className,
-              html: el.outerHTML.substring(0, 600)
-            });
-          });
+function doLoad() {
+  try {
+    const raw = localStorage.getItem('jfy-journal');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.editorHTML) {
+      const ed = document.getElementById('jfy-main-editor');
+      if (ed) ed.innerHTML = data.editorHTML;
+    }
+    if (data.tapes) {
+      Object.entries(data.tapes).forEach(([pid, strips]) => {
+        const svg = document.querySelector('.tape-overlay[data-page-id="' + pid + '"]');
+        if (!svg) return;
+        strips.forEach(html => {
+          const tmp = document.createElementNS('http://www.w3.org/2000/svg','g');
+          // safe approach: parse via innerHTML trick with a wrapper
+          const wrapper = document.createElementNS('http://www.w3.org/2000/svg','svg');
+          wrapper.innerHTML = html;
+          const g = wrapper.firstElementChild;
+          if (g) {
+            // re-attach context menu
+            g.addEventListener('contextmenu', e => { e.preventDefault(); g.remove(); scheduleSave(); });
+            svg.appendChild(g);
+          }
         });
       });
-      localStorage.setItem('jfy-state', JSON.stringify(data));
-      localStorage.setItem('jfy-has-visited', '1');
-    } catch(e) {}
-  }
-
-  /* ── returning user: skip intro ── */
-  var isReturning = !!localStorage.getItem('jfy-has-visited');
-  if (isReturning) {
-    var skipBtn = document.getElementById('jfy-skip-btn');
-    if (skipBtn) {
-      skipBtn.style.display = 'inline-block';
-      skipBtn.addEventListener('click', function(){ jfySetPage(3); });
     }
-  }
+    if (typeof data.spread === 'number') {
+      goToSpread(data.spread);
+    }
+  } catch(e) {}
+}
 
-  /* ── init ── */
-  jfySetPage(0);
-  showToast('welcome to your scrapbook desk ✦', 3000);
+// ─── NEW VS RETURNING ───
+function trackChange() {
+  state.changeCount++;
+  if (!state.hasAccount && state.changeCount === 3) {
+    showToast('Create an account to save your journal permanently 🔒', 4000);
+  }
+}
+
+const isNew = !localStorage.getItem('jfy-has-visited');
+if (isNew) {
+  localStorage.setItem('jfy-has-visited', '1');
+  goToSpread(0);
+} else {
+  // returning user: show "continue writing" button style on start btn
+  const startBtn = document.getElementById('jfy-start-btn');
+  startBtn.textContent = 'continue writing →';
+  startBtn.style.background = '#f0a050';
+  doLoad();
+  // auto-jump to write spread after 800ms
+  setTimeout(() => goToSpread(2), 800);
+}
+
+// init viewboxes after load
+setTimeout(updateTapeOverlayViewBoxes, 300);
+
+// ─── INIT PATTERN SWATCH COLORS ───
+updatePatternSwatchColors();
 
 })();
 </script>
