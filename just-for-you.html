@@ -356,7 +356,12 @@
       <span class="jfy-pill" onclick="jfyNavPill(this,'entries')">my entries</span>
       <span class="jfy-pill" onclick="jfyNavPill(this,'explore')">explore</span>
     </div>
-    <button class="jfy-write-btn" onclick="jfySetPage(3)">&#9999; start writing &rarr;</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button id="jfy-skip-btn" style="display:none;padding:4px 12px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:#fdf6e3;font-family:Caveat,cursive;font-size:14px;cursor:pointer;" onclick="jfySetPage(3)">skip intro →</button>
+      <button onclick="jfyOpenShare()" style="padding:4px 12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#fdf6e3;font-family:Caveat,cursive;font-size:14px;cursor:pointer;">share ✦</button>
+      <button onclick="jfyOpenExport()" style="padding:4px 12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#fdf6e3;font-family:Caveat,cursive;font-size:14px;cursor:pointer;">export ↓</button>
+      <button class="jfy-write-btn" onclick="jfySetPage(3)">&#9999; start writing &rarr;</button>
+    </div>
   </div>
 
   <div class="jfy-workspace">
@@ -390,6 +395,12 @@
         <div class="jfy-polaroid-card" style="width:64px;height:78px;top:0;left:0;transform:rotate(-1deg);background:#f9f9f9;display:flex;align-items:center;justify-content:center;">
           <span style="font-family:Caveat,cursive;font-size:9px;color:#bbb">drag me</span>
         </div>
+      </div>
+
+      <span class="jfy-tray-label" style="margin-top:6px">sticky</span>
+      <div class="jfy-sticky-pad" title="drag to page" style="width:54px;height:54px;background:#f0d878;box-shadow:2px 2px 6px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;cursor:grab;border-radius:2px;position:relative;">
+        <div style="position:absolute;top:0;left:0;right:0;height:7px;background:#f0c848;border-radius:2px 2px 0 0;"></div>
+        <span style="font-family:Caveat,cursive;font-size:9px;color:#6b5c40;margin-top:4px;">drag me</span>
       </div>
 
       <span class="jfy-tray-label" style="margin-top:6px">pen</span>
@@ -652,43 +663,123 @@
     <input type="range" min="20" max="100" value="75" style="width:100%;" oninput="document.getElementById('jfy-opacity-val').textContent=this.value+'%'">
   </div>
   <div class="jfy-picker-hint">&rarr; drag tape across the page once you've chosen a style</div>
+  <button onclick="jfyApplyTape()" style="margin-top:10px;width:100%;padding:8px;background:#2c2415;color:#fdf6e3;border:none;border-radius:6px;font-family:Caveat,cursive;font-size:16px;cursor:pointer;">apply tape ✓</button>
 </div>
 
+<!-- SHARE MODAL -->
+<div id="jfy-share-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:8000;align-items:center;justify-content:center;">
+  <div style="background:#fdf6e3;border-radius:12px;padding:28px 32px;max-width:360px;width:90%;font-family:Caveat,cursive;color:#2c2415;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+    <button onclick="jfyCloseShare()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#6b5c40;">×</button>
+    <div style="font-size:22px;font-weight:700;margin-bottom:8px;">share to community ✦</div>
+    <p style="font-size:16px;color:#6b5c40;margin:0 0 16px;">your scrapbook page will be shared to the community explore section. others can see your layout and remix it.</p>
+    <input type="text" placeholder="add a caption..." style="width:100%;padding:8px 12px;border:1px solid #c8a87a;border-radius:6px;font-family:Caveat,cursive;font-size:16px;color:#2c2415;background:#fff;box-sizing:border-box;margin-bottom:14px;">
+    <div style="display:flex;gap:10px;">
+      <button onclick="jfyShareConfirm()" style="flex:1;padding:10px;background:#2c2415;color:#fdf6e3;border:none;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;">share it →</button>
+      <button onclick="jfyCloseShare()" style="padding:10px 16px;background:transparent;border:1px solid #c8a87a;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;color:#6b5c40;">cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div id="jfy-export-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:8000;align-items:center;justify-content:center;">
+  <div style="background:#fdf6e3;border-radius:12px;padding:28px 32px;max-width:340px;width:90%;font-family:Caveat,cursive;color:#2c2415;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+    <button onclick="jfyCloseExport()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#6b5c40;">×</button>
+    <div style="font-size:22px;font-weight:700;margin-bottom:8px;">export page ✦</div>
+    <p style="font-size:16px;color:#6b5c40;margin:0 0 18px;">save your current scrapbook spread as an image or PDF.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="jfyExportImage()" style="padding:12px;background:#c8a87a;color:#2c2415;border:none;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;">download as image (PNG)</button>
+      <button onclick="jfyExportPDF()" style="padding:12px;background:#2c2415;color:#fdf6e3;border:none;border-radius:8px;font-family:Caveat,cursive;font-size:17px;cursor:pointer;">export as PDF</button>
+      <button onclick="jfyCloseExport()" style="padding:8px;background:transparent;border:1px solid #c8a87a;border-radius:8px;font-family:Caveat,cursive;font-size:16px;cursor:pointer;color:#6b5c40;">cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
 (function() {
+  /* ── state ── */
   var jfyPage = 0;
+  var activeTool = null;   // 'tape' | 'stamp' | 'sticker' | null
+  var activeStamp = null;
+  var activeSticker = null;
+  var tapeCfg = { color: '#a8c8e8', pattern: 'plain', opacity: 0.75 };
+  var tapeDraw = { on: false, startX: 0, startY: 0, el: null, page: null };
+  var isMobile = ('ontouchstart' in window) || window.matchMedia('(pointer:coarse)').matches;
+  var autoSaveTimer = null;
+  var dragSource = null; // 'polaroid' | 'sticky'
 
+  /* ── page navigation ── */
   window.jfySetPage = function(n) {
+    n = Math.max(0, Math.min(3, n));
     document.querySelectorAll('.jfy-spread').forEach(function(s,i){ s.classList.toggle('active', i===n); });
     document.querySelectorAll('.jfy-dot').forEach(function(d,i){ d.classList.toggle('active', i===n); });
     var labels = ['page 1 of 4','page 2 of 4','page 3 of 4','page 4 of 4'];
-    document.getElementById('jfy-counter').textContent = labels[n];
+    var counter = document.getElementById('jfy-counter');
+    if (counter) counter.textContent = labels[n];
     jfyPage = n;
   };
 
   window.jfyNavPill = function(el, section) {
     document.querySelectorAll('.jfy-pill').forEach(function(p){ p.classList.remove('active'); });
     el.classList.add('active');
-    jfySetPage(section === 'entries' || section === 'explore' ? 3 : 0);
+    jfySetPage(section === 'entries' ? 3 : section === 'explore' ? 3 : 0);
   };
 
+  /* scroll to flip pages */
+  var lastY = 0, scrollCooldown = false;
+  window.addEventListener('scroll', function() {
+    var dy = window.scrollY - lastY;
+    lastY = window.scrollY;
+    if (!scrollCooldown && Math.abs(dy) > 80) {
+      scrollCooldown = true;
+      if (dy > 0 && jfyPage < 3) jfySetPage(jfyPage + 1);
+      else if (dy < 0 && jfyPage > 0) jfySetPage(jfyPage - 1);
+      setTimeout(function(){ scrollCooldown = false; }, 600);
+    }
+  }, { passive: true });
+
+  /* ── toast ── */
+  function showToast(msg, dur) {
+    var t = document.getElementById('jfy-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'jfy-toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(12px);background:rgba(44,36,21,0.92);color:#fdf6e3;font-family:Caveat,cursive;font-size:16px;padding:9px 22px;border-radius:24px;z-index:9999;opacity:0;transition:opacity 0.22s,transform 0.22s;pointer-events:none;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(12px)'; }, dur || 2200);
+  }
+
+  /* ── tape picker ── */
   window.jfyOpenPicker = function(colorVar) {
     var names = {'tape-blue':'blue washi','tape-pink':'pink washi','tape-green':'green washi','tape-yellow':'yellow washi','tape-purple':'purple washi'};
     var hexMap = {'tape-blue':'#a8c8e8','tape-pink':'#f0b8c8','tape-green':'#a8d4b8','tape-yellow':'#f0d878','tape-purple':'#c8b0e0'};
-    document.getElementById('jfy-picker-title').textContent = names[colorVar] || 'choose a tape style';
     var c = hexMap[colorVar] || '#a8c8e8';
+    tapeCfg.color = c;
+    var title = document.getElementById('jfy-picker-title');
+    if (title) title.textContent = names[colorVar] || 'choose a tape style';
     ['plain','dots','stripes','zigzag','floral'].forEach(function(p){
       var el = document.getElementById('jfy-pat-'+p);
       if (el) el.style.background = c;
     });
+    document.querySelectorAll('.jfy-swatch-row .jfy-swatch').forEach(function(s){
+      s.classList.toggle('selected', s.style.background === c || s.style.backgroundColor === c);
+    });
     document.getElementById('jfy-picker').classList.add('open');
+    activeTool = 'tape';
+    showToast('tape ready — draw across a page');
   };
 
   window.jfyClosePicker = function() {
     document.getElementById('jfy-picker').classList.remove('open');
+    activeTool = null;
   };
 
   window.jfySelectColor = function(el, hex) {
+    tapeCfg.color = hex;
     el.closest('.jfy-swatch-row').querySelectorAll('.jfy-swatch').forEach(function(s){ s.classList.remove('selected'); });
     el.classList.add('selected');
     ['plain','dots','stripes','zigzag','floral'].forEach(function(p){
@@ -698,6 +789,7 @@
   };
 
   window.jfySelectPattern = function(pat) {
+    tapeCfg.pattern = pat;
     ['plain','dots','stripes','zigzag','floral'].forEach(function(p){
       var el = document.getElementById('jfy-pat-'+p);
       if (el) el.classList.remove('selected');
@@ -706,35 +798,459 @@
     if (t) t.classList.add('selected');
   };
 
-  var lastY = 0;
-  window.addEventListener('scroll', function() {
-    var dy = window.scrollY - lastY;
-    lastY = window.scrollY;
-    if (Math.abs(dy) > 100) {
-      if (dy > 0 && jfyPage < 3) jfySetPage(jfyPage + 1);
-      else if (dy < 0 && jfyPage > 0) jfySetPage(jfyPage - 1);
-    }
-  }, { passive: true });
+  window.jfyApplyTape = function() {
+    document.getElementById('jfy-picker').classList.remove('open');
+    activeTool = 'tape';
+    showToast('now draw across a page to place tape');
+  };
 
+  /* ── tape pattern CSS ── */
+  function tapePatternStyle(pattern, color) {
+    var base = 'background:' + color + ';';
+    if (pattern === 'dots') return base + 'background-image:radial-gradient(circle,rgba(0,0,0,0.22) 1.5px,transparent 1.5px);background-size:7px 7px;';
+    if (pattern === 'stripes') return base + 'background-image:repeating-linear-gradient(45deg,transparent 0,transparent 3px,rgba(255,255,255,0.38) 3px,rgba(255,255,255,0.38) 5px);';
+    if (pattern === 'zigzag') return base + 'background-image:repeating-linear-gradient(90deg,transparent 0 5px,rgba(255,255,255,0.3) 5px 7px);';
+    if (pattern === 'floral') return base + 'background-image:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,0.32) 2px,transparent 5px);background-size:11px 11px;';
+    if (pattern === 'hearts') return base + 'background-image:radial-gradient(circle at 3px 3px,rgba(255,255,255,0.3) 2px,transparent 3px);background-size:8px 8px;';
+    return base;
+  }
+
+  /* ── tape drawing ── */
+  function getPageFromEvent(e) {
+    var touch = e.touches ? e.touches[0] : e;
+    var el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (!el) return null;
+    return el.classList.contains('jfy-page') ? el : el.closest('.jfy-page');
+  }
+
+  function getPageXY(e, page) {
+    var touch = e.touches ? e.touches[0] : e;
+    var r = page.getBoundingClientRect();
+    return { x: touch.clientX - r.left, y: touch.clientY - r.top };
+  }
+
+  function onTapeStart(e) {
+    if (activeTool !== 'tape') return;
+    var page = getPageFromEvent(e);
+    if (!page) return;
+    e.preventDefault();
+    var pos = getPageXY(e, page);
+    tapeDraw.on = true;
+    tapeDraw.startX = pos.x;
+    tapeDraw.startY = pos.y;
+    tapeDraw.page = page;
+    var strip = document.createElement('div');
+    strip.className = 'jfy-tape-strip-live';
+    var opacityEl = document.querySelector('#jfy-picker input[type=range]');
+    var op = opacityEl ? (parseInt(opacityEl.value) / 100) : 0.75;
+    strip.style.cssText = 'position:absolute;height:22px;border-radius:2px;z-index:30;pointer-events:none;opacity:' + op + ';' + tapePatternStyle(tapeCfg.pattern, tapeCfg.color);
+    strip.style.left = pos.x + 'px';
+    strip.style.top = (pos.y - 11) + 'px';
+    strip.style.width = '0px';
+    page.appendChild(strip);
+    tapeDraw.el = strip;
+    tapeDraw.startClient = { x: e.touches ? e.touches[0].clientX : e.clientX, y: e.touches ? e.touches[0].clientY : e.clientY };
+  }
+
+  function onTapeMove(e) {
+    if (!tapeDraw.on || !tapeDraw.el) return;
+    e.preventDefault();
+    var cx = e.touches ? e.touches[0].clientX : e.clientX;
+    var cy = e.touches ? e.touches[0].clientY : e.clientY;
+    var dx = cx - tapeDraw.startClient.x;
+    var dy = cy - tapeDraw.startClient.y;
+    var len = Math.sqrt(dx*dx + dy*dy);
+    var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    tapeDraw.el.style.width = len + 'px';
+    tapeDraw.el.style.transform = 'rotate(' + angle + 'deg)';
+    tapeDraw.el.style.transformOrigin = '0 50%';
+  }
+
+  function onTapeEnd(e) {
+    if (!tapeDraw.on) return;
+    tapeDraw.on = false;
+    if (tapeDraw.el) {
+      tapeDraw.el.style.pointerEvents = 'auto';
+      tapeDraw.el.style.cursor = 'move';
+      makeMovable(tapeDraw.el, tapeDraw.page);
+      var del = document.createElement('span');
+      del.textContent = '×';
+      del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
+      tapeDraw.el.appendChild(del);
+      tapeDraw.el.addEventListener('mouseenter', function(){ del.style.display='block'; });
+      tapeDraw.el.addEventListener('mouseleave', function(){ del.style.display='none'; });
+      del.addEventListener('click', function(e){ e.stopPropagation(); tapeDraw.el.remove(); schedSave(); });
+      tapeDraw.el = null;
+      schedSave();
+    }
+  }
+
+  document.addEventListener('mousedown', onTapeStart);
+  document.addEventListener('mousemove', onTapeMove);
+  document.addEventListener('mouseup', onTapeEnd);
+  document.addEventListener('touchstart', onTapeStart, { passive: false });
+  document.addEventListener('touchmove', onTapeMove, { passive: false });
+  document.addEventListener('touchend', onTapeEnd);
+
+  /* ── make elements movable ── */
+  function makeMovable(el, container) {
+    var ox=0, oy=0, sx=0, sy=0, dragging=false;
+    function start(e) {
+      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.hasAttribute('contenteditable')) return;
+      e.preventDefault();
+      var touch = e.touches ? e.touches[0] : e;
+      sx = touch.clientX; sy = touch.clientY;
+      ox = parseInt(el.style.left||0); oy = parseInt(el.style.top||0);
+      dragging = true;
+      el.style.zIndex = 50;
+    }
+    function move(e) {
+      if (!dragging) return;
+      e.preventDefault();
+      var touch = e.touches ? e.touches[0] : e;
+      var dx = touch.clientX - sx, dy = touch.clientY - sy;
+      el.style.left = (ox+dx) + 'px'; el.style.top = (oy+dy) + 'px';
+    }
+    function end() {
+      if (!dragging) return;
+      dragging = false;
+      el.style.zIndex = 10;
+      schedSave();
+    }
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, { passive: false });
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', move, { passive: false });
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchend', end);
+  }
+
+  /* ── polaroid placement ── */
+  function placePolaroid(x, y, page) {
+    var wrap = document.createElement('div');
+    wrap.className = 'jfy-polaroid';
+    wrap.style.cssText = 'position:absolute;left:' + (x-50) + 'px;top:' + (y-60) + 'px;width:100px;padding:8px 8px 24px;background:#fff;box-shadow:2px 4px 14px rgba(0,0,0,0.18);transform:rotate(' + (Math.random()*8-4).toFixed(1) + 'deg);cursor:grab;z-index:10;';
+    var imgArea = document.createElement('div');
+    imgArea.style.cssText = 'width:84px;height:70px;background:#e8e0d4;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;';
+    imgArea.innerHTML = '<span style="font-family:Caveat,cursive;font-size:10px;color:#aaa;">tap to add photo</span>';
+    var caption = document.createElement('div');
+    caption.contentEditable = 'true';
+    caption.style.cssText = 'position:absolute;bottom:4px;left:0;right:0;text-align:center;font-family:Caveat,cursive;font-size:12px;color:#6b5c40;outline:none;';
+    caption.textContent = 'a memory';
+    var del = document.createElement('span');
+    del.textContent = '×';
+    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
+    wrap.addEventListener('mouseenter', function(){ del.style.display='block'; });
+    wrap.addEventListener('mouseleave', function(){ del.style.display='none'; });
+    del.addEventListener('click', function(e){ e.stopPropagation(); wrap.remove(); schedSave(); });
+
+    /* photo upload */
+    var inp = document.createElement('input');
+    inp.type = 'file';
+    inp.accept = 'image/*';
+    if (isMobile) inp.setAttribute('capture', 'environment');
+    inp.style.display = 'none';
+    inp.addEventListener('change', function() {
+      if (!inp.files || !inp.files[0]) return;
+      var url = URL.createObjectURL(inp.files[0]);
+      imgArea.innerHTML = '';
+      var img = new Image();
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      img.src = url;
+      imgArea.appendChild(img);
+      schedSave();
+    });
+    imgArea.addEventListener('click', function(){ inp.click(); });
+
+    wrap.appendChild(imgArea);
+    wrap.appendChild(caption);
+    wrap.appendChild(del);
+    wrap.appendChild(inp);
+    page.appendChild(wrap);
+    makeMovable(wrap, page);
+    schedSave();
+  }
+
+  /* ── sticky note placement ── */
+  function placeSticky(x, y, page) {
+    var colors = ['#f0d878','#f0b8c8','#a8d4b8','#a8c8e8','#c8b0e0'];
+    var col = colors[Math.floor(Math.random()*colors.length)];
+    var el = document.createElement('div');
+    el.style.cssText = 'position:absolute;left:' + (x-45) + 'px;top:' + (y-45) + 'px;width:90px;min-height:90px;background:' + col + ';padding:10px;font-family:Caveat,cursive;font-size:14px;color:#2c2415;transform:rotate(' + (Math.random()*8-4).toFixed(1) + 'deg);cursor:grab;z-index:10;box-shadow:2px 3px 10px rgba(0,0,0,0.14);';
+    el.contentEditable = 'true';
+    el.textContent = 'write here...';
+    el.addEventListener('focus', function(){ if (el.textContent === 'write here...') el.textContent = ''; });
+    var del = document.createElement('span');
+    del.textContent = '×';
+    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
+    el.addEventListener('mouseenter', function(){ del.style.display='block'; });
+    el.addEventListener('mouseleave', function(){ del.style.display='none'; });
+    del.addEventListener('click', function(e){ e.stopPropagation(); el.remove(); schedSave(); });
+    el.appendChild(del);
+    page.appendChild(el);
+    makeMovable(el, page);
+    schedSave();
+  }
+
+  /* ── stamp placement ── */
+  function placeStamp(x, y, page, label) {
+    var el = document.createElement('div');
+    el.style.cssText = 'position:absolute;left:' + (x-28) + 'px;top:' + (y-20) + 'px;padding:5px 10px;border:2px solid rgba(44,36,21,0.55);border-radius:3px;font-family:Caveat,cursive;font-size:15px;color:rgba(44,36,21,0.7);transform:rotate(' + (Math.random()*10-5).toFixed(1) + 'deg);cursor:grab;z-index:10;background:rgba(253,246,227,0.4);';
+    if (label === '★') {
+      el.textContent = '★ featured';
+    } else if (label === 'DATE') {
+      var now = new Date();
+      el.textContent = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    } else {
+      el.textContent = label + ' ✓';
+    }
+    var del = document.createElement('span');
+    del.textContent = '×';
+    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;';
+    el.addEventListener('mouseenter', function(){ del.style.display='block'; });
+    el.addEventListener('mouseleave', function(){ del.style.display='none'; });
+    del.addEventListener('click', function(e){ e.stopPropagation(); el.remove(); schedSave(); });
+    el.appendChild(del);
+    page.appendChild(el);
+    makeMovable(el, page);
+    schedSave();
+  }
+
+  /* ── sticker placement ── */
+  function placeSticker(x, y, page, emoji) {
+    var el = document.createElement('div');
+    el.style.cssText = 'position:absolute;left:' + (x-16) + 'px;top:' + (y-16) + 'px;font-size:28px;cursor:grab;z-index:10;user-select:none;transform:rotate(' + (Math.random()*14-7).toFixed(1) + 'deg);';
+    el.textContent = emoji;
+    var del = document.createElement('span');
+    del.textContent = '×';
+    del.style.cssText = 'position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:rgba(44,36,21,0.7);color:#fdf6e3;border-radius:50%;font-size:11px;line-height:16px;text-align:center;cursor:pointer;z-index:50;display:none;font-style:normal;';
+    el.addEventListener('mouseenter', function(){ del.style.display='block'; });
+    el.addEventListener('mouseleave', function(){ del.style.display='none'; });
+    del.addEventListener('click', function(e){ e.stopPropagation(); el.remove(); schedSave(); });
+    el.appendChild(del);
+    page.appendChild(el);
+    makeMovable(el, page);
+    schedSave();
+  }
+
+  /* ── active page helper ── */
+  function getActivePage() {
+    var spread = document.querySelector('.jfy-spread.active');
+    if (!spread) return null;
+    var pages = spread.querySelectorAll('.jfy-page');
+    return pages[pages.length - 1] || pages[0];
+  }
+
+  /* ── stamp tool ── */
+  document.querySelectorAll('.jfy-stamp').forEach(function(el) {
+    var label = el.textContent.trim().replace('→','').trim();
+    el.addEventListener('click', function() {
+      if (activeTool === 'stamp' && activeStamp === label) {
+        activeTool = null; activeStamp = null;
+        document.querySelectorAll('.jfy-stamp').forEach(function(s){ s.style.outline=''; });
+        showToast('stamp deselected');
+      } else {
+        activeTool = 'stamp'; activeStamp = label;
+        document.querySelectorAll('.jfy-stamp').forEach(function(s){ s.style.outline=''; });
+        el.style.outline = '2px solid rgba(44,36,21,0.55)';
+        showToast(label + ' stamp active — click a page to place');
+      }
+    });
+  });
+
+  /* ── sticker tool ── */
+  document.querySelectorAll('.jfy-sticker').forEach(function(el) {
+    el.style.cursor = 'pointer';
+    var emoji = el.textContent.trim();
+    el.addEventListener('click', function() {
+      if (activeTool === 'sticker' && activeSticker === emoji) {
+        activeTool = null; activeSticker = null;
+        showToast('sticker deselected');
+      } else {
+        activeTool = 'sticker'; activeSticker = emoji;
+        showToast(emoji + ' sticker active — click a page to place');
+      }
+    });
+  });
+
+  /* ── page click → place tool ── */
+  document.querySelectorAll('.jfy-page').forEach(function(page) {
+    page.addEventListener('click', function(e) {
+      if (activeTool === 'stamp') {
+        var r = page.getBoundingClientRect();
+        placeStamp(e.clientX - r.left, e.clientY - r.top, page, activeStamp);
+        activeTool = null; activeStamp = null;
+        document.querySelectorAll('.jfy-stamp').forEach(function(s){ s.style.outline=''; });
+      } else if (activeTool === 'sticker') {
+        var r2 = page.getBoundingClientRect();
+        placeSticker(e.clientX - r2.left, e.clientY - r2.top, page, activeSticker);
+        activeTool = null; activeSticker = null;
+      }
+    });
+  });
+
+  /* ── polaroid drag from tray ── */
+  var polaroidStack = document.querySelector('.jfy-polaroid-stack');
+  var stickyPad = document.querySelector('.jfy-sticky-note-pad,.jfy-tray-item');
+
+  function setupTrayDrag(trayEl, type) {
+    if (!trayEl) return;
+    trayEl.setAttribute('draggable','true');
+    trayEl.addEventListener('dragstart', function(e) {
+      dragSource = type;
+      e.dataTransfer.effectAllowed = 'copy';
+    });
+
+    /* touch drag */
+    var ghost = null;
+    trayEl.addEventListener('touchstart', function(e) {
+      dragSource = type;
+      ghost = trayEl.cloneNode(true);
+      ghost.style.cssText = 'position:fixed;opacity:0.7;pointer-events:none;z-index:9999;transform:scale(0.9);';
+      document.body.appendChild(ghost);
+    }, { passive: true });
+    trayEl.addEventListener('touchmove', function(e) {
+      if (!ghost) return;
+      var t = e.touches[0];
+      ghost.style.left = (t.clientX - 40) + 'px';
+      ghost.style.top = (t.clientY - 50) + 'px';
+    }, { passive: true });
+    trayEl.addEventListener('touchend', function(e) {
+      if (ghost) { ghost.remove(); ghost = null; }
+      var t = e.changedTouches[0];
+      var el = document.elementFromPoint(t.clientX, t.clientY);
+      var page = el && (el.classList.contains('jfy-page') ? el : el.closest('.jfy-page'));
+      if (page) {
+        var r = page.getBoundingClientRect();
+        if (type === 'polaroid') placePolaroid(t.clientX - r.left, t.clientY - r.top, page);
+        else if (type === 'sticky') placeSticky(t.clientX - r.left, t.clientY - r.top, page);
+      }
+      dragSource = null;
+    });
+  }
+
+  if (polaroidStack) setupTrayDrag(polaroidStack, 'polaroid');
+
+  var stickyPadEl = document.querySelector('.jfy-sticky-pad');
+  if (stickyPadEl) setupTrayDrag(stickyPadEl, 'sticky');
+
+  /* dragover / drop on pages */
   document.querySelectorAll('.jfy-page').forEach(function(page) {
     page.addEventListener('dragover', function(e) {
       e.preventDefault();
-      var spread = page.closest('.jfy-spread');
-      if (spread) { var ind = spread.querySelector('.jfy-drag-indicator'); if (ind) ind.classList.add('visible'); }
+      e.dataTransfer.dropEffect = 'copy';
+      var ind = page.closest('.jfy-spread') && page.closest('.jfy-spread').querySelector('.jfy-drag-indicator');
+      if (ind) ind.classList.add('visible');
     });
     page.addEventListener('dragleave', function() {
-      var spread = page.closest('.jfy-spread');
-      if (spread) { var ind = spread.querySelector('.jfy-drag-indicator'); if (ind) ind.classList.remove('visible'); }
+      var ind = page.closest('.jfy-spread') && page.closest('.jfy-spread').querySelector('.jfy-drag-indicator');
+      if (ind) ind.classList.remove('visible');
     });
-    page.addEventListener('drop', function() {
-      var spread = page.closest('.jfy-spread');
-      if (spread) { var ind = spread.querySelector('.jfy-drag-indicator'); if (ind) ind.classList.remove('visible'); }
+    page.addEventListener('drop', function(e) {
+      e.preventDefault();
+      var ind = page.closest('.jfy-spread') && page.closest('.jfy-spread').querySelector('.jfy-drag-indicator');
+      if (ind) ind.classList.remove('visible');
+      var r = page.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      if (dragSource === 'polaroid') placePolaroid(x, y, page);
+      else if (dragSource === 'sticky') placeSticky(x, y, page);
+      dragSource = null;
     });
   });
 
-  document.querySelectorAll('.jfy-tape-roll,.jfy-polaroid-stack,.jfy-stamp,.jfy-sticker').forEach(function(el) {
-    el.setAttribute('draggable','true');
-  });
+  /* ── share modal ── */
+  var shareModal = document.getElementById('jfy-share-modal');
+  var exportModal = document.getElementById('jfy-export-modal');
+
+  window.jfyOpenShare = function() {
+    if (!shareModal) { showToast('share feature coming soon!'); return; }
+    shareModal.style.display = 'flex';
+  };
+  window.jfyCloseShare = function() {
+    if (shareModal) shareModal.style.display = 'none';
+  };
+  window.jfyShareConfirm = function() {
+    jfyCloseShare();
+    showToast('shared to the community page ✓', 3000);
+  };
+
+  window.jfyOpenExport = function() {
+    if (!exportModal) { showToast('export feature coming soon!'); return; }
+    exportModal.style.display = 'flex';
+  };
+  window.jfyCloseExport = function() {
+    if (exportModal) exportModal.style.display = 'none';
+  };
+
+  window.jfyExportImage = function() {
+    jfyCloseExport();
+    var spread = document.querySelector('.jfy-spread.active .jfy-notebook');
+    if (!spread) { showToast('nothing to export'); return; }
+    showToast('capturing page…');
+    html2canvas(spread, { useCORS: true, scale: 2, backgroundColor: '#fdf6e3' }).then(function(canvas) {
+      var link = document.createElement('a');
+      link.download = 'scrapbook-page.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('image saved!', 3000);
+    }).catch(function(){ showToast('could not capture — try again'); });
+  };
+
+  window.jfyExportPDF = function() {
+    jfyCloseExport();
+    var spread = document.querySelector('.jfy-spread.active .jfy-notebook');
+    if (!spread) { showToast('nothing to export'); return; }
+    showToast('preparing print…');
+    html2canvas(spread, { useCORS: true, scale: 2 }).then(function(canvas) {
+      var win = window.open('', '_blank');
+      win.document.write('<html><head><title>scrapbook</title><style>body{margin:0;}img{max-width:100%;display:block;}</style></head><body><img src="' + canvas.toDataURL() + '"></body></html>');
+      win.document.close();
+      win.print();
+    }).catch(function(){ window.print(); });
+  };
+
+  /* ── auto-save ── */
+  function schedSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(saveState, 500);
+  }
+
+  function saveState() {
+    try {
+      var data = { page: jfyPage, elements: [] };
+      document.querySelectorAll('.jfy-spread').forEach(function(spread, si) {
+        spread.querySelectorAll('.jfy-page').forEach(function(page, pi) {
+          page.querySelectorAll('[style*="position:absolute"]').forEach(function(el) {
+            if (el.classList.contains('jfy-drag-indicator') || el.classList.contains('jfy-drop-target') || el.classList.contains('jfy-corner-label') || el.classList.contains('jfy-format-bar')) return;
+            data.elements.push({
+              spread: si, page: pi,
+              left: el.style.left, top: el.style.top,
+              transform: el.style.transform,
+              classes: el.className,
+              html: el.outerHTML.substring(0, 600)
+            });
+          });
+        });
+      });
+      localStorage.setItem('jfy-state', JSON.stringify(data));
+      localStorage.setItem('jfy-has-visited', '1');
+    } catch(e) {}
+  }
+
+  /* ── returning user: skip intro ── */
+  var isReturning = !!localStorage.getItem('jfy-has-visited');
+  if (isReturning) {
+    var skipBtn = document.getElementById('jfy-skip-btn');
+    if (skipBtn) {
+      skipBtn.style.display = 'inline-block';
+      skipBtn.addEventListener('click', function(){ jfySetPage(3); });
+    }
+  }
+
+  /* ── init ── */
+  jfySetPage(0);
+  showToast('welcome to your scrapbook desk ✦', 3000);
+
 })();
 </script>
 
