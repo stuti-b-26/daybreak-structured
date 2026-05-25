@@ -1095,7 +1095,11 @@ function initLightbox(){
 /* left/right button navigation for galleries */
 function initScrollGallery(scrollEl, prevBtn, nextBtn){
   if(!scrollEl||!prevBtn||!nextBtn)return;
-  var STEP=Math.round(window.innerWidth*0.6);
+  function colStep(){
+    /* use the width of the first column + gap (10px) as the scroll unit */
+    var col=scrollEl.querySelector('.bw-col');
+    return col ? col.offsetWidth+10 : 260;
+  }
   function updateButtons(){
     var max=scrollEl.scrollWidth-scrollEl.clientWidth;
     prevBtn.disabled=scrollEl.scrollLeft<=1;
@@ -1108,8 +1112,8 @@ function initScrollGallery(scrollEl, prevBtn, nextBtn){
     scrollEl.scrollLeft=target;
     setTimeout(updateButtons,500);
   }
-  prevBtn.addEventListener('click',function(){scrollBy(-STEP);});
-  nextBtn.addEventListener('click',function(){scrollBy(STEP);});
+  prevBtn.addEventListener('click',function(){scrollBy(-colStep());});
+  nextBtn.addEventListener('click',function(){scrollBy(colStep());});
   scrollEl.addEventListener('scroll',updateButtons,{passive:true});
   updateButtons();
   window.addEventListener('resize',function(){STEP=Math.round(window.innerWidth*0.6);updateButtons();},{passive:true});
