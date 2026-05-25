@@ -44,16 +44,19 @@ body{background:#EEE0CC}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
-.bw-gallery-wrap{position:relative;z-index:2}
-.bw-posts-scroll{overflow-x:hidden;overflow-y:hidden;scrollbar-width:none;padding:0 48px 10px;position:relative;z-index:2;max-height:66.67vh}
+.bw-gallery-wrap{position:relative}
+.bw-posts-scroll{overflow-x:hidden;overflow-y:hidden;scrollbar-width:none;padding:0 48px 10px;position:relative;max-height:66.67vh}
 .bw-posts-scroll::-webkit-scrollbar{display:none}
 .bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
 .bw-col{display:flex;flex-direction:column;gap:10px;width:max-content}
 /* ── SCROLL ARROW BUTTONS ── */
-.bw-scroll-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:20;background:#3b2a1a;border:3px solid #1a1008;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c8d8a0;box-shadow:4px 4px 0 0 #1a1008,0 2px 8px rgba(0,0,0,.35);transition:background .15s,box-shadow .1s,transform .1s;opacity:1;pointer-events:all}
+/* overlay sits after scroll container in DOM so it always paints on top;
+   pointer-events:none lets clicks pass through to cards everywhere except the buttons */
+.bw-gallery-btns{position:absolute;inset:0;pointer-events:none;z-index:50}
+.bw-scroll-btn{position:absolute;top:50%;transform:translateY(-50%);pointer-events:all;background:#3b2a1a;border:3px solid #1a1008;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c8d8a0;box-shadow:4px 4px 0 0 #1a1008,0 2px 8px rgba(0,0,0,.35);transition:background .15s,box-shadow .1s,transform .1s;opacity:1}
 .bw-scroll-btn:hover{background:#4e3820;box-shadow:6px 6px 0 0 #1a1008,0 4px 12px rgba(0,0,0,.4)}
 .bw-scroll-btn:active{box-shadow:2px 2px 0 0 #1a1008;transform:translateY(-50%) scale(.94)}
-.bw-scroll-btn:disabled{opacity:.5;cursor:default;box-shadow:2px 2px 0 0 #1a1008;pointer-events:none}
+.bw-scroll-btn:disabled{opacity:.5;cursor:default;pointer-events:none}
 .bw-scroll-btn--left{left:8px}
 .bw-scroll-btn--right{right:8px}
 /* ── POST CARDS: MOSS-COVERED ROCKS ── */
@@ -383,11 +386,13 @@ body{background:#EEE0CC}
       <img src="explore%20trees.svg" alt="">
     </div>
     <div class="bw-gallery-wrap" id="bw-explore-wrap">
-      <button class="bw-scroll-btn bw-scroll-btn--left" id="bw-explore-prev" aria-label="Scroll left">&#8592;</button>
       <div class="bw-posts-scroll" id="bw-posts-scroll">
         <div class="bw-posts" id="bw-posts-list"></div>
       </div>
-      <button class="bw-scroll-btn bw-scroll-btn--right" id="bw-explore-next" aria-label="Scroll right">&#8594;</button>
+      <div class="bw-gallery-btns">
+        <button class="bw-scroll-btn bw-scroll-btn--left" id="bw-explore-prev" aria-label="Scroll left">&#8592;</button>
+        <button class="bw-scroll-btn bw-scroll-btn--right" id="bw-explore-next" aria-label="Scroll right">&#8594;</button>
+      </div>
     </div>
   </section>
 
@@ -448,7 +453,6 @@ body{background:#EEE0CC}
       <h2 class="bw-saved-heading">your saved posts</h2>
     </div>
     <div class="bw-gallery-wrap" id="bw-saved-wrap">
-      <button class="bw-scroll-btn bw-scroll-btn--left" id="bw-saved-prev" aria-label="Scroll left">&#8592;</button>
       <div class="bw-posts-scroll" id="bw-saved-scroll">
         <div class="bw-posts" id="bw-saved-list">
           <div class="bw-saved-empty-card" id="bw-saved-empty">
@@ -456,7 +460,10 @@ body{background:#EEE0CC}
           </div>
         </div>
       </div>
-      <button class="bw-scroll-btn bw-scroll-btn--right" id="bw-saved-next" aria-label="Scroll right">&#8594;</button>
+      <div class="bw-gallery-btns">
+        <button class="bw-scroll-btn bw-scroll-btn--left" id="bw-saved-prev" aria-label="Scroll left">&#8592;</button>
+        <button class="bw-scroll-btn bw-scroll-btn--right" id="bw-saved-next" aria-label="Scroll right">&#8594;</button>
+      </div>
     </div>
   </section>
 
