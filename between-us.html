@@ -52,10 +52,10 @@ body{background:#EEE0CC}
 /* ── SCROLL ARROW BUTTONS ── */
 /* overlay sits after scroll container in DOM so it always paints on top;
    pointer-events:none lets clicks pass through to cards everywhere except the buttons */
-.bw-gallery-btns{position:absolute;inset:0;pointer-events:none;z-index:50}
-.bw-scroll-btn{position:absolute;top:50%;transform:translateY(-50%);pointer-events:all;background:#3b2a1a;border:3px solid #1a1008;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c8d8a0;box-shadow:4px 4px 0 0 #1a1008,0 2px 8px rgba(0,0,0,.35);transition:background .15s,box-shadow .1s,transform .1s;opacity:1}
+.bw-gallery-btns{position:absolute;inset:0;pointer-events:none;z-index:50;isolation:isolate}
+.bw-scroll-btn{position:absolute;top:50%;transform:translateY(-50%);pointer-events:auto;background:#3b2a1a;border:3px solid #1a1008;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c8d8a0;box-shadow:4px 4px 0 0 #1a1008,0 2px 8px rgba(0,0,0,.35);transition:background .15s,box-shadow .1s,transform .1s;opacity:1;user-select:none;-webkit-user-select:none}
 .bw-scroll-btn:hover{background:#4e3820;box-shadow:6px 6px 0 0 #1a1008,0 4px 12px rgba(0,0,0,.4)}
-.bw-scroll-btn:active{box-shadow:2px 2px 0 0 #1a1008;transform:translateY(-50%) scale(.94)}
+.bw-scroll-btn:active,.bw-btn-pressed{box-shadow:2px 2px 0 0 #1a1008!important;transform:translateY(-50%) scale(.94)!important}
 .bw-scroll-btn:disabled{opacity:.5;cursor:default;pointer-events:none}
 .bw-scroll-btn--left{left:8px}
 .bw-scroll-btn--right{right:8px}
@@ -1103,7 +1103,6 @@ function initLightbox(){
 function initScrollGallery(scrollEl, prevBtn, nextBtn){
   if(!scrollEl||!prevBtn||!nextBtn)return;
   function colStep(){
-    /* use the width of the first column + gap (10px) as the scroll unit */
     var col=scrollEl.querySelector('.bw-col');
     return col ? col.offsetWidth+10 : 260;
   }
@@ -1112,22 +1111,35 @@ function initScrollGallery(scrollEl, prevBtn, nextBtn){
     prevBtn.disabled=scrollEl.scrollLeft<=1;
     nextBtn.disabled=scrollEl.scrollLeft>=max-1;
   }
-  function scrollBy(delta){
+  function doScroll(delta){
     var max=scrollEl.scrollWidth-scrollEl.clientWidth;
     var target=Math.max(0,Math.min(max,scrollEl.scrollLeft+delta));
     scrollEl.style.scrollBehavior='smooth';
     scrollEl.scrollLeft=target;
     setTimeout(updateButtons,500);
   }
-  [prevBtn,nextBtn].forEach(function(btn){
-    btn.addEventListener('mousedown',function(e){e.stopPropagation();});
-    btn.addEventListener('touchstart',function(e){e.stopPropagation();},{passive:true});
-  });
-  prevBtn.addEventListener('click',function(e){e.stopPropagation();scrollBy(-colStep());});
-  nextBtn.addEventListener('click',function(e){e.stopPropagation();scrollBy(colStep());});
+  /* Capture-phase pointerdown fires before any element's handler.
+     If the press lands inside a button's bounding rect, consume it and
+     perform the scroll directly — the card never sees the event. */
+  document.addEventListener('pointerdown', function(e){
+    var pairs=[{btn:prevBtn,delta:-1},{btn:nextBtn,delta:1}];
+    for(var i=0;i<pairs.length;i++){
+      var b=pairs[i].btn;
+      if(b.disabled)continue;
+      var r=b.getBoundingClientRect();
+      if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){
+        e.stopImmediatePropagation();
+        doScroll(pairs[i].delta*colStep());
+        /* visual feedback */
+        b.classList.add('bw-btn-pressed');
+        setTimeout(function(){b.classList.remove('bw-btn-pressed');},200);
+        return;
+      }
+    }
+  }, true);
   scrollEl.addEventListener('scroll',updateButtons,{passive:true});
   updateButtons();
-  window.addEventListener('resize',function(){STEP=Math.round(window.innerWidth*0.6);updateButtons();},{passive:true});
+  window.addEventListener('resize',updateButtons,{passive:true});
 }
 function initGalleryDrag(){
   initScrollGallery(
