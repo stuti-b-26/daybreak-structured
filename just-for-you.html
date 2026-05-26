@@ -209,6 +209,41 @@ body.jfy-scissors-active .jfy-scissors {
   overflow-y: auto;
 }
 .jfy-tool-panel.open { display: block; }
+
+/* ── History toolbar (undo / redo / clear / erase) ── */
+#jfy-history-bar {
+  position: fixed;
+  top: calc(var(--hh) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  padding: 6px 8px;
+  z-index: 3500;
+  user-select: none;
+}
+#jfy-history-bar button {
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+#jfy-history-bar button:hover { background: #f3eafa; color: #9A59C8; }
+#jfy-history-bar button:disabled { opacity: 0.32; cursor: default; }
+#jfy-history-bar button:disabled:hover { background: transparent; color: #555; }
+#jfy-history-bar .hbar-sep {
+  width: 1px; background: #e5e5e5; margin: 4px 2px; border-radius: 1px;
+}
 /* wider panels: lay contents out in a row */
 .jfy-tool-panel .jfy-color-swatches { flex-wrap: wrap; max-width: 400px; }
 .jfy-tool-panel h3 {
@@ -674,6 +709,16 @@ body.jfy-scissors-active .jfy-scissors {
     <img class="jfy-paper" src="paper.svg" alt="paper tool" id="jfy-paper-prop">
   </div>
 </main>
+
+<!-- Always-visible history toolbar -->
+<div id="jfy-history-bar" role="toolbar" aria-label="Notebook history">
+  <button id="jfy-undo-btn" title="Undo" disabled>↩ undo</button>
+  <button id="jfy-redo-btn" title="Redo" disabled>↪ redo</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-erase-btn" title="Erase mode">⌫ erase</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-clear-btn" title="Clear all">✕ clear all</button>
+</div>
 
 <!-- FOOTER -->
 <footer id="site-footer">
@@ -1976,6 +2021,52 @@ function applyCut(paperCanvas, nbLayerPts){
 
   // Remove rectangular box-shadow so it doesn't outline the original canvas bounds
   paperCanvas.style.boxShadow = 'none';
+
+  // Add a cut-edge SVG overlay that casts a soft shadow following the cut path
+  addCutEdge(paperCanvas, nbLayerPts);
+}
+
+function addCutEdge(paperCanvas, nbLayerPts){
+  var offX = parseFloat(paperCanvas.style.left)||0;
+  var offY = parseFloat(paperCanvas.style.top) ||0;
+  var w = parseFloat(paperCanvas.style.width)  ||paperCanvas.width;
+  var h = parseFloat(paperCanvas.style.height) ||paperCanvas.height;
+
+  // Build SVG path string in canvas-local coordinates
+  var pts = nbLayerPts.map(function(p){ return {x: p.x-offX, y: p.y-offY}; });
+  var d = 'M'+pts[0].x+','+pts[0].y;
+  for(var i=1;i<pts.length;i++) d += 'L'+pts[i].x+','+pts[i].y;
+  d += 'Z';
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',  w);
+  svg.setAttribute('height', h);
+  svg.style.cssText = 'position:absolute;left:'+offX+'px;top:'+offY+'px;width:'+w+'px;height:'+h+'px;pointer-events:none;overflow:visible;z-index:12;';
+
+  var defs = document.createElementNS(svgNS,'defs');
+  var filt = document.createElementNS(svgNS,'filter');
+  filt.setAttribute('id','cut-shadow-'+Date.now());
+  filt.setAttribute('x','-20%'); filt.setAttribute('y','-20%');
+  filt.setAttribute('width','140%'); filt.setAttribute('height','140%');
+  var fe = document.createElementNS(svgNS,'feDropShadow');
+  fe.setAttribute('dx','0'); fe.setAttribute('dy','1.5');
+  fe.setAttribute('stdDeviation','3');
+  fe.setAttribute('flood-color','rgba(0,0,0,0.22)');
+  filt.appendChild(fe);
+  defs.appendChild(filt);
+  svg.appendChild(defs);
+
+  var path = document.createElementNS(svgNS,'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill','transparent');
+  path.setAttribute('stroke','transparent');
+  path.style.filter = 'url(#'+filt.getAttribute('id')+')';
+  svg.appendChild(path);
+
+  paperCanvas.dataset.cutSvgId = filt.getAttribute('id');
+  nbLayer.appendChild(svg);
+  paperCanvas._cutEdgeSvg = svg;
 }
 
 /* ── GLOBAL DRAG MANAGER ── */
@@ -2015,6 +2106,174 @@ function makeDraggable(handle, mover){
     mover.style.zIndex = 30;
   });
 }
+
+/* ── HISTORY (undo / redo / clear / erase) ── */
+var _hist = { stack: [], cursor: -1, maxSize: 40 };
+
+function snapshotNbLayer(){
+  return {
+    html:   nbLayer.innerHTML,
+    canvas: canvas.toDataURL()
+  };
+}
+
+function restoreSnapshot(snap){
+  nbLayer.innerHTML = snap.html;
+  // Restore drawing canvas
+  var img = new Image();
+  img.onload = function(){
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0);
+  };
+  img.src = snap.canvas;
+  // Re-attach drag handlers to restored placed elements
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
+    makeDraggable(pc, pc);
+  });
+  nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
+    var handle = wrap.querySelector('.jfy-text-drag-handle');
+    if(handle) makeDraggable(handle, wrap);
+    makeResizable(wrap);
+    var txt = wrap.querySelector('.jfy-text-node');
+    if(txt){
+      txt.addEventListener('focus',function(){ showTextToolbar(txt); });
+      txt.addEventListener('blur',function(){
+        setTimeout(function(){
+          if(document.activeElement && txtToolbar && txtToolbar.contains(document.activeElement)) return;
+          hideTextToolbar();
+        }, 150);
+      });
+    }
+  });
+  nbLayer.querySelectorAll('.jfy-polaroid').forEach(function(pol){
+    var dragLayer = pol.querySelector('.jfy-polaroid-drag');
+    if(dragLayer) makeDraggable(dragLayer, pol);
+  });
+  nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
+    makeDraggable(node, node);
+  });
+}
+
+function pushHistory(){
+  // Drop any redo entries
+  _hist.stack = _hist.stack.slice(0, _hist.cursor + 1);
+  _hist.stack.push(snapshotNbLayer());
+  if(_hist.stack.length > _hist.maxSize) _hist.stack.shift();
+  _hist.cursor = _hist.stack.length - 1;
+  updateHistoryButtons();
+}
+
+function updateHistoryButtons(){
+  var undoBtn = document.getElementById('jfy-undo-btn');
+  var redoBtn = document.getElementById('jfy-redo-btn');
+  if(undoBtn) undoBtn.disabled = (_hist.cursor < 1);
+  if(redoBtn) redoBtn.disabled = (_hist.cursor >= _hist.stack.length - 1);
+}
+
+// Push initial blank state
+(function(){ pushHistory(); })();
+
+// Patch placement functions to record history before each action
+var _origPlaceTextBox  = placeTextBox;
+var _origPlacePolaroid = placePolaroid;
+var _origPlaceSticker  = placeSticker;
+var _origPlacePaper    = placePaper;
+var _origApplyCut      = applyCut;
+
+placeTextBox  = function(e){ pushHistory(); _origPlaceTextBox(e);  };
+placePolaroid = function(e){ pushHistory(); _origPlacePolaroid(e); };
+placeSticker  = function(e){ pushHistory(); _origPlaceSticker(e);  };
+placePaper    = function(e){ pushHistory(); _origPlacePaper(e);    };
+applyCut      = function(pc, pts){ pushHistory(); _origApplyCut(pc, pts); };
+
+// Save history on drag end (position changes)
+document.addEventListener('mouseup', function(){
+  if(_drag && _drag.active) pushHistory();
+});
+
+// Save after canvas drawing strokes finish
+canvas.addEventListener('mouseup', function(){
+  if(S.tool === 'washi' || S.tool === 'doodle') pushHistory();
+});
+
+// Undo
+document.getElementById('jfy-undo-btn').addEventListener('click', function(){
+  if(_hist.cursor < 1) return;
+  _hist.cursor--;
+  restoreSnapshot(_hist.stack[_hist.cursor]);
+  updateHistoryButtons();
+});
+
+// Redo
+document.getElementById('jfy-redo-btn').addEventListener('click', function(){
+  if(_hist.cursor >= _hist.stack.length - 1) return;
+  _hist.cursor++;
+  restoreSnapshot(_hist.stack[_hist.cursor]);
+  updateHistoryButtons();
+});
+
+// Clear all
+document.getElementById('jfy-clear-btn').addEventListener('click', function(){
+  if(!confirm('Clear everything on the notebook page?')) return;
+  pushHistory();
+  // Remove all placed elements (keep the canvas element itself)
+  Array.from(nbLayer.children).forEach(function(el){
+    if(el !== canvas) el.remove();
+  });
+  // Clear drawing canvas
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  updateHistoryButtons();
+});
+
+// Erase mode: click a placed element to remove it
+var _eraseActive = false;
+var _eraseBtn = document.getElementById('jfy-erase-btn');
+
+function setEraseMode(on){
+  _eraseActive = on;
+  _eraseBtn.style.background = on ? '#f3eafa' : '';
+  _eraseBtn.style.color      = on ? '#9A59C8' : '';
+  nbLayer.style.cursor       = on ? 'cell' : '';
+}
+
+_eraseBtn.addEventListener('click', function(){
+  setEraseMode(!_eraseActive);
+  if(_eraseActive){ closeAll(); setTool(null); }
+});
+
+nbLayer.addEventListener('click', function(e){
+  if(!_eraseActive) return;
+  var target =
+    e.target.closest('.jfy-placed-paper') ||
+    e.target.closest('.jfy-text-node-wrap') ||
+    e.target.closest('.jfy-polaroid') ||
+    e.target.closest('.jfy-sticker-node');
+  if(!target) return;
+  e.stopPropagation();
+  pushHistory();
+  // Also remove associated cut-edge SVG if present
+  if(target._cutEdgeSvg) target._cutEdgeSvg.remove();
+  target.remove();
+}, true);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e){
+  var isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  var mod = isMac ? e.metaKey : e.ctrlKey;
+  if(!mod) return;
+  if(e.key === 'z' && !e.shiftKey){
+    e.preventDefault();
+    document.getElementById('jfy-undo-btn').click();
+  } else if(e.key === 'z' && e.shiftKey){
+    e.preventDefault();
+    document.getElementById('jfy-redo-btn').click();
+  } else if(e.key === 'y'){
+    e.preventDefault();
+    document.getElementById('jfy-redo-btn').click();
+  }
+});
 
 })();
 </script>
