@@ -1014,6 +1014,28 @@ function escHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+/* ── HOLD-TO-REPEAT ──
+   Fire `action` immediately on pointerdown, then again after DELAY ms,
+   then repeatedly every INTERVAL ms until pointer is released/cancelled. */
+function holdRepeat(el, action, delay, interval){
+  delay=delay||400; interval=interval||100;
+  var _t1=null, _t2=null;
+  function stop(){ clearTimeout(_t1); clearInterval(_t2); _t1=_t2=null; }
+  el.addEventListener('pointerdown',function(e){
+    if(e.button!==undefined&&e.button!==0)return;
+    e.preventDefault();
+    stop();
+    action();
+    _t1=setTimeout(function(){
+      action();
+      _t2=setInterval(action, interval);
+    }, delay);
+  });
+  el.addEventListener('pointerup', stop);
+  el.addEventListener('pointercancel', stop);
+  el.addEventListener('pointerleave', stop);
+}
+
 /* ── LIGHTBOX ── */
 var _lbPosts=[], _lbIdx=0;
 
@@ -1073,10 +1095,10 @@ function initLightbox(){
   document.getElementById('bw-lb-close').addEventListener('click',closeLightbox);
   lb.addEventListener('click',function(e){if(e.target===lb)closeLightbox();});
 
-  document.getElementById('bw-lb-prev').addEventListener('click',function(){
+  holdRepeat(document.getElementById('bw-lb-prev'),function(){
     if(_lbIdx>0){_lbIdx--;renderLightboxCard();}
   });
-  document.getElementById('bw-lb-next').addEventListener('click',function(){
+  holdRepeat(document.getElementById('bw-lb-next'),function(){
     if(_lbIdx<_lbPosts.length-1){_lbIdx++;renderLightboxCard();}
   });
 
@@ -1152,25 +1174,12 @@ function initScrollGallery(scrollEl, prevBtn, nextBtn){
     scrollEl.scrollLeft=target;
     setTimeout(updateButtons,500);
   }
-  /* Capture-phase pointerdown fires before any element's handler.
-     If the press lands inside a button's bounding rect, consume it and
-     perform the scroll directly — the card never sees the event. */
-  document.addEventListener('pointerdown', function(e){
-    var pairs=[{btn:prevBtn,delta:-1},{btn:nextBtn,delta:1}];
-    for(var i=0;i<pairs.length;i++){
-      var b=pairs[i].btn;
-      if(b.disabled)continue;
-      var r=b.getBoundingClientRect();
-      if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){
-        e.stopImmediatePropagation();
-        doScroll(pairs[i].delta*colStep());
-        /* visual feedback */
-        b.classList.add('bw-btn-pressed');
-        setTimeout(function(){b.classList.remove('bw-btn-pressed');},200);
-        return;
-      }
-    }
-  }, true);
+  holdRepeat(prevBtn, function(){
+    if(!prevBtn.disabled){ doScroll(-colStep()); }
+  });
+  holdRepeat(nextBtn, function(){
+    if(!nextBtn.disabled){ doScroll(colStep()); }
+  });
   scrollEl.addEventListener('scroll',updateButtons,{passive:true});
   updateButtons();
   window.addEventListener('resize',updateButtons,{passive:true});
