@@ -76,11 +76,12 @@ body{background:#EEE0CC}
   height:auto;
   background:#5a5c47; /* fallback while SVG loads */
 }
-/* tile <img> — JS fitTileToCard() applies computed scale/offset after load */
+/* tile <img> — centered at 140% so rock always fills edge-to-edge */
 .bw-post-tile{
   position:absolute;
-  top:-20%;left:-20%;
+  top:50%;left:50%;
   width:140%;height:140%;
+  transform:translate(-50%,-50%);
   object-fit:fill;
   display:block;
   pointer-events:none;
@@ -910,56 +911,6 @@ function postColorIndex(id){
   return Math.abs(h)%FRAME_COLORS;
 }
 
-/* Measures content bounding box of tile via canvas pixel scan, then scales
-   the img so the rock fills the card with no border showing. */
-function fitTileToCard(imgEl, cardEl){
-  var IW=imgEl.naturalWidth, IH=imgEl.naturalHeight;
-  if(!IW||!IH) return;
-  var canvas=document.createElement('canvas');
-  canvas.width=IW; canvas.height=IH;
-  var ctx=canvas.getContext('2d');
-  try{
-    ctx.drawImage(imgEl,0,0);
-    var px=ctx.getImageData(0,0,IW,IH).data;
-    /* sample corner pixels to detect background color */
-    var bgR=px[0],bgG=px[1],bgB=px[2];
-    var THR=40; /* colour distance threshold to classify as "content" */
-    var minX=IW,minY=IH,maxX=0,maxY=0,found=false;
-    for(var y=0;y<IH;y++){
-      for(var x=0;x<IW;x++){
-        var i=(y*IW+x)*4;
-        if(px[i+3]<20) continue; /* nearly transparent → skip */
-        var d=Math.abs(px[i]-bgR)+Math.abs(px[i+1]-bgG)+Math.abs(px[i+2]-bgB);
-        if(d>THR){
-          if(x<minX)minX=x; if(x>maxX)maxX=x;
-          if(y<minY)minY=y; if(y>maxY)maxY=y;
-          found=true;
-        }
-      }
-    }
-    if(!found) return;
-    /* content dimensions in image-space */
-    var cW=maxX-minX, cH=maxY-minY;
-    /* scale so content fills card + 40% extra so no background shows */
-    var scaleX=(IW/cW)*1.4, scaleY=(IH/cH)*1.4;
-    var scale=Math.max(scaleX,scaleY);
-    /* offset so content centre aligns with card centre */
-    var contentCX=(minX+maxX)/2, contentCY=(minY+maxY)/2;
-    var imgCX=IW/2, imgCY=IH/2;
-    /* shift as % of CARD size (img is scale*100% of card) */
-    var pctW=scale*100;
-    var pctH=scale*100;
-    var shiftX=((imgCX-contentCX)/IW)*pctW;
-    var shiftY=((imgCY-contentCY)/IH)*pctH;
-    imgEl.style.width=pctW+'%';
-    imgEl.style.height=pctH+'%';
-    imgEl.style.left=(-(pctW-100)/2+shiftX)+'%';
-    imgEl.style.top=(-(pctH-100)/2+shiftY)+'%';
-  }catch(e){
-    /* cross-origin or other canvas error — leave default CSS */
-  }
-}
-
 function renderCard(post, isOwn, idx, showJournal, context){
   var card=document.createElement('div');
   card.className='bw-post-card'+(isOwn?' bw-post-card--own':'');
@@ -974,8 +925,6 @@ function renderCard(post, isOwn, idx, showJournal, context){
   tileImg.alt='';
   tileImg.setAttribute('aria-hidden','true');
   tileImg.className='bw-post-tile';
-  tileImg.addEventListener('load',function(){fitTileToCard(tileImg,card);});
-  if(tileImg.complete&&tileImg.naturalWidth) fitTileToCard(tileImg,card);
   card.appendChild(tileImg);
 
   var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>';
