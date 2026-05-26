@@ -2127,6 +2127,7 @@ document.addEventListener('mousemove', function(e){
 document.addEventListener('mouseup', function(){
   if(_drag.active){
     _drag.mover.style.zIndex = '';
+    _drag.wasActive = true; // signal history listener
     _drag.active = false;
     _drag.mover  = null;
   }
@@ -2216,25 +2217,25 @@ function updateHistoryButtons(){
   if(redoBtn) redoBtn.disabled = (_hist.cursor >= _hist.stack.length - 1);
 }
 
-// Push initial blank state
+// Push initial blank state so the first action can be undone back to empty
 (function(){ pushHistory(); })();
 
-// Patch placement functions to record history before each action
+// Patch placement functions to record history AFTER the action completes
 var _origPlaceTextBox  = placeTextBox;
 var _origPlacePolaroid = placePolaroid;
 var _origPlaceSticker  = placeSticker;
 var _origPlacePaper    = placePaper;
 var _origApplyCut      = applyCut;
 
-placeTextBox  = function(e){ pushHistory(); _origPlaceTextBox(e);  };
-placePolaroid = function(e){ pushHistory(); _origPlacePolaroid(e); };
-placeSticker  = function(e){ pushHistory(); _origPlaceSticker(e);  };
-placePaper    = function(e){ pushHistory(); _origPlacePaper(e);    };
-applyCut      = function(pc, pts){ pushHistory(); _origApplyCut(pc, pts); };
+placeTextBox  = function(e){ _origPlaceTextBox(e);  pushHistory(); };
+placePolaroid = function(e){ _origPlacePolaroid(e); pushHistory(); };
+placeSticker  = function(e){ _origPlaceSticker(e);  pushHistory(); };
+placePaper    = function(e){ _origPlacePaper(e);    pushHistory(); };
+applyCut      = function(pc, pts){ _origApplyCut(pc, pts); pushHistory(); };
 
-// Save history on drag end (position changes)
+// Save after drag ends (position changes) — fires after _drag.active is cleared
 document.addEventListener('mouseup', function(){
-  if(_drag && _drag.active) pushHistory();
+  if(_drag && _drag.wasActive) { _drag.wasActive = false; pushHistory(); }
 });
 
 // Save after canvas drawing strokes finish
