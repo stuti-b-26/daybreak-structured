@@ -69,21 +69,30 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
 .jfy-stickers, .jfy-pen, .jfy-scissors {
   position: absolute;
 }
-/* props without tools stay non-interactive */
-.jfy-scissors { pointer-events: none; }
-/* interactive props */
-.jfy-washi, .jfy-frames, .jfy-stickers, .jfy-pen {
+/* all props interactive */
+.jfy-washi, .jfy-frames, .jfy-stickers, .jfy-pen, .jfy-scissors {
   pointer-events: auto;
   cursor: pointer;
   transition: filter 0.15s;
+  /* above nbLayer (z-index:10) so placed content appears under prop images */
   z-index: 20;
 }
-.jfy-washi:hover, .jfy-frames:hover, .jfy-stickers:hover, .jfy-pen:hover {
+.jfy-scissors { z-index: 21; }
+.jfy-pen      { z-index: 22; }
+.jfy-washi:hover, .jfy-frames:hover, .jfy-stickers:hover,
+.jfy-pen:hover, .jfy-scissors:hover {
   filter: drop-shadow(0 2px 10px rgba(154,89,200,0.5));
 }
 body.jfy-sticker-active .jfy-stickers {
   filter: drop-shadow(0 0 8px #9A59C8);
 }
+body.jfy-scissors-active .jfy-scissors {
+  filter: drop-shadow(0 0 8px #9A59C8);
+}
+/* paper prop (in paper-wrap below notebook) */
+.jfy-paper-wrap { pointer-events: auto; cursor: pointer; }
+.jfy-paper { transition: filter 0.15s; }
+.jfy-paper-wrap:hover .jfy-paper { filter: drop-shadow(0 2px 10px rgba(154,89,200,0.5)); }
 
 /* ── Notebook inner layer (clips canvas + placed elements) ── */
 .jfy-nb-layer {
@@ -144,26 +153,50 @@ body.jfy-sticker-active .jfy-stickers {
   /* z-index: 100 declared above, keeps canvas visually above placed elements */
 }
 #jfy-canvas.draw-active { pointer-events: auto; cursor: crosshair; }
+#jfy-canvas.scissors-active { pointer-events: auto; cursor: crosshair; }
 
-/* ── Tool panels — pinned to right margin, never over notebook ── */
+/* placed paper canvas */
+.jfy-placed-paper {
+  position: absolute;
+  z-index: 11; /* below other placed items but above the notebook background */
+  box-shadow: 1px 2px 8px rgba(0,0,0,0.13);
+  cursor: move;
+  pointer-events: auto;
+}
+
+/* paper pattern/size picker */
+.jfy-pattern-row, .jfy-size-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.jfy-pattern-btn, .jfy-size-btn {
+  padding: 6px 12px; border: 2px solid #e5e5e5; border-radius: 10px;
+  background: #fafafa; cursor: pointer; font-size: 12px; font-weight: 600;
+  font-family: inherit; transition: border-color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+.jfy-pattern-btn:hover, .jfy-size-btn:hover { border-color: #c8a4e4; }
+.jfy-pattern-btn.active, .jfy-size-btn.active { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
+.jfy-panel-row-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+
+/* ── Tool panels — bottom-center, never over notebook ── */
 .jfy-tool-panel {
   position: fixed;
-  right: 16px;
-  top: 80px;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  padding: 16px;
+  padding: 14px 18px;
   z-index: 2000;
   display: none;
-  width: 230px;
-  max-height: calc(100vh - 100px);
+  width: auto;
+  min-width: 260px;
+  max-width: min(92vw, 600px);
+  max-height: 40vh;
   overflow-y: auto;
 }
 .jfy-tool-panel.open { display: block; }
-@media (max-width: 480px) {
-  .jfy-tool-panel { right: 8px; top: auto; bottom: 80px; width: calc(100vw - 16px); max-height: 55vh; }
-}
+/* wider panels: lay contents out in a row */
+.jfy-tool-panel .jfy-color-swatches { flex-wrap: wrap; max-width: 400px; }
 .jfy-tool-panel h3 {
   margin: 0 0 12px;
   font-size: 13px;
@@ -615,7 +648,7 @@ body.jfy-sticker-active .jfy-stickers {
       <!-- below the page: stickers left, pen center, scissors right -->
       <img class="jfy-stickers" src="stickers.svg"   alt="stickers tool"   id="jfy-stickers-prop">
       <img class="jfy-pen"      src="pen.svg"        alt="pen tool"        id="jfy-pen-prop">
-      <img class="jfy-scissors" src="scissors2.svg"  alt="" aria-hidden="true">
+      <img class="jfy-scissors" src="scissors2.svg" alt="scissors tool" id="jfy-scissors-prop">
       <!-- interactive drawing layer -->
       <div class="jfy-nb-layer" id="jfy-nb-layer">
         <canvas id="jfy-canvas"></canvas>
@@ -624,7 +657,7 @@ body.jfy-sticker-active .jfy-stickers {
   </div>
   <!-- paper is in normal document flow — scroll down to see it below the pen -->
   <div class="jfy-paper-wrap">
-    <img class="jfy-paper" src="paper.svg" alt="" aria-hidden="true">
+    <img class="jfy-paper" src="paper.svg" alt="paper tool" id="jfy-paper-prop">
   </div>
 </main>
 
@@ -765,6 +798,32 @@ body.jfy-sticker-active .jfy-stickers {
   <h3>stickers</h3>
   <div class="jfy-sticker-grid" id="jfy-sticker-grid"></div>
   <p class="jfy-tool-hint">choose a sticker, then click the notebook to stamp it. click the stickers prop again to stop.</p>
+</div>
+
+<div id="jfy-paper-panel" class="jfy-tool-panel" role="dialog" aria-label="Paper">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>paper</h3>
+  <p class="jfy-panel-row-label">pattern</p>
+  <div class="jfy-pattern-row">
+    <button class="jfy-pattern-btn active" data-pattern="lined">lined</button>
+    <button class="jfy-pattern-btn" data-pattern="dotted">dotted</button>
+    <button class="jfy-pattern-btn" data-pattern="grid">grid</button>
+    <button class="jfy-pattern-btn" data-pattern="blank">blank</button>
+    <button class="jfy-pattern-btn" data-pattern="kraft">kraft</button>
+  </div>
+  <p class="jfy-panel-row-label">size</p>
+  <div class="jfy-size-row">
+    <button class="jfy-size-btn" data-size="small">small</button>
+    <button class="jfy-size-btn active" data-size="medium">medium</button>
+    <button class="jfy-size-btn" data-size="large">large</button>
+  </div>
+  <p class="jfy-tool-hint">click on the notebook to place paper. use scissors to cut it.</p>
+</div>
+
+<div id="jfy-scissors-panel" class="jfy-tool-panel" role="dialog" aria-label="Scissors">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>scissors</h3>
+  <p class="jfy-tool-hint">click & drag over a piece of placed paper to cut it into a shape. the area you trace becomes the cut edge — everything outside is removed.</p>
 </div>
 
 <button class="fab" id="fab-btn" aria-label="Surprise me">
@@ -1198,7 +1257,9 @@ var panels = {
   washi:    document.getElementById('jfy-washi-panel'),
   pen:      document.getElementById('jfy-pen-panel'),
   frames:   document.getElementById('jfy-frames-panel'),
-  stickers: document.getElementById('jfy-stickers-panel')
+  stickers: document.getElementById('jfy-stickers-panel'),
+  paper:    document.getElementById('jfy-paper-panel'),
+  scissors: document.getElementById('jfy-scissors-panel')
 };
 
 function closeAll(){
@@ -1208,8 +1269,10 @@ function closeAll(){
 
 function setTool(tool){
   S.tool = tool;
-  canvas.classList.toggle('draw-active', tool==='washi'||tool==='doodle');
-  document.body.classList.toggle('jfy-sticker-active', tool==='stickers');
+  canvas.classList.toggle('draw-active',   tool==='washi'||tool==='doodle');
+  canvas.classList.toggle('scissors-active', tool==='scissors');
+  document.body.classList.toggle('jfy-sticker-active',  tool==='stickers');
+  document.body.classList.toggle('jfy-scissors-active', tool==='scissors');
   if(tool && typeof hideTextToolbar==='function') hideTextToolbar();
 }
 
@@ -1236,6 +1299,9 @@ var penProp      = document.getElementById('jfy-pen-prop');
 var framesProp   = document.getElementById('jfy-frames-prop');
 var stickersProp = document.getElementById('jfy-stickers-prop');
 
+var paperProp   = document.getElementById('jfy-paper-prop');
+var scissorsProp = document.getElementById('jfy-scissors-prop');
+
 if(washiProp) washiProp.addEventListener('click', function(e){
   e.stopPropagation();
   openPanel('washi', 'washi');
@@ -1260,16 +1326,44 @@ if(stickersProp) stickersProp.addEventListener('click', function(e){
   }
 });
 
-/* close on outside click */
+if(paperProp) paperProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  openPanel('paper', 'paper');
+});
+
+if(scissorsProp) scissorsProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  if(S.tool==='scissors'){
+    closeAll(); setTool(null);
+  } else {
+    openPanel('scissors', 'scissors');
+  }
+});
+
+/* close panels when clicking outside the notebook area */
 document.addEventListener('click', function(e){
-  var inPanel = Object.keys(panels).some(function(k){ return panels[k] && panels[k].contains(e.target); });
-  var inProp  = [washiProp,penProp,framesProp,stickersProp].some(function(el){ return el && el.contains(e.target); });
-  if(!inPanel && !inProp && !nbLayer.contains(e.target)){
+  var inPanel   = Object.keys(panels).some(function(k){ return panels[k] && panels[k].contains(e.target); });
+  var inToolbar = txtToolbar && txtToolbar.contains(e.target);
+  var inNotebook = notebook.contains(e.target);
+  var inPaperProp = paperProp && paperProp.contains(e.target);
+  if(!inPanel && !inToolbar && !inNotebook && !inPaperProp){
     closeAll(); setTool(null);
   }
 });
 
-/* ── CANVAS DRAWING (washi + doodle) ── */
+/* ── CANVAS DRAWING (washi, doodle, scissors preview) ── */
+/* scissors state */
+var _sc = { dragging: false, pts: [], target: null };
+
+function getPaperAt(clientX, clientY){
+  var papers = nbLayer.querySelectorAll('.jfy-placed-paper');
+  for(var i=papers.length-1; i>=0; i--){
+    var r=papers[i].getBoundingClientRect();
+    if(clientX>=r.left&&clientX<=r.right&&clientY>=r.top&&clientY<=r.bottom) return papers[i];
+  }
+  return null;
+}
+
 canvas.addEventListener('mousedown', function(e){
   if(e.button!==0) return;
   var pos = canvasPos(e);
@@ -1278,6 +1372,11 @@ canvas.addEventListener('mousedown', function(e){
   } else if(S.tool==='doodle'){
     S.dragging=true;
     S.currentPath={type:'doodle',pts:[pos],color:S.penColor,size:S.penSize};
+  } else if(S.tool==='scissors'){
+    var target = getPaperAt(e.clientX, e.clientY);
+    if(target){
+      _sc.dragging=true; _sc.pts=[pos]; _sc.target=target;
+    }
   }
 });
 
@@ -1290,6 +1389,23 @@ canvas.addEventListener('mousemove', function(e){
     S.currentPath.pts.push(pos);
     redrawAll();
     drawDoodle(S.currentPath.pts, S.currentPath.color, S.currentPath.size);
+  } else if(S.tool==='scissors' && _sc.dragging){
+    _sc.pts.push(pos);
+    // draw scissors preview on canvas (temporary)
+    redrawAll();
+    if(_sc.pts.length>1){
+      ctx.save();
+      ctx.strokeStyle='rgba(60,60,60,0.7)';
+      ctx.lineWidth=1.5;
+      ctx.setLineDash([5,4]);
+      ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.moveTo(_sc.pts[0].x,_sc.pts[0].y);
+      for(var i=1;i<_sc.pts.length;i++) ctx.lineTo(_sc.pts[i].x,_sc.pts[i].y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
   }
 });
 
@@ -1306,10 +1422,17 @@ function finishDraw(e){
     if(S.currentPath && S.currentPath.pts.length>1) drawCmds.push(S.currentPath);
     S.currentPath=null;
     redrawAll();
+  } else if(S.tool==='scissors' && _sc.dragging){
+    _sc.dragging=false;
+    redrawAll(); // clear preview
+    if(_sc.target && _sc.pts.length>2){
+      applyCut(_sc.target, _sc.pts);
+    }
+    _sc.pts=[]; _sc.target=null;
   }
 }
 canvas.addEventListener('mouseup',    finishDraw);
-canvas.addEventListener('mouseleave', function(){ if(S.dragging) finishDraw(); });
+canvas.addEventListener('mouseleave', function(){ if(S.dragging||_sc.dragging) finishDraw(); });
 
 /* touch support for canvas */
 canvas.addEventListener('touchstart',function(e){
@@ -1328,16 +1451,18 @@ canvas.addEventListener('touchend',function(e){
   canvas.dispatchEvent(new MouseEvent('mouseup',{clientX:t.clientX,clientY:t.clientY,bubbles:true}));
 },{passive:false});
 
-/* ── NOTEBOOK LAYER CLICKS (write / frames / stickers) ── */
+/* ── NOTEBOOK LAYER CLICKS (write / frames / stickers / paper) ── */
 nbLayer.addEventListener('click', function(e){
-  // Ignore clicks on already-placed elements
+  // Ignore clicks on already-placed elements (unless scissors — handled by canvas)
   if(e.target.closest('.jfy-text-node-wrap') ||
      e.target.closest('.jfy-polaroid') ||
-     e.target.closest('.jfy-sticker-node')) return;
+     e.target.closest('.jfy-sticker-node') ||
+     e.target.closest('.jfy-placed-paper')) return;
   if(S.tool==='write')         placeTextBox(e);
   else if(S.tool==='frames')   placePolaroid(e);
   else if(S.tool==='stickers') placeSticker(e);
-}, false); // bubble phase — after capture focus handler above
+  else if(S.tool==='paper')    placePaper(e);
+}, false);
 
 /* ── TEXT EDITING TOOLBAR ── */
 var txtToolbar    = document.getElementById('jfy-text-toolbar');
