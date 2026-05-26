@@ -1697,7 +1697,7 @@ function placeSticker(e){
 }
 
 /* ── PAPER TOOL ── */
-var selectedPaperPattern = 'lined';
+var selectedPaperPattern = 'diamonds';
 var selectedPaperSize    = 'medium';
 var PAPER_SIZES = { small:{w:130,h:170}, medium:{w:200,h:260}, large:{w:280,h:360} };
 
@@ -1706,13 +1706,14 @@ var PAPER_SIZES = { small:{w:130,h:170}, medium:{w:200,h:260}, large:{w:280,h:36
   if(!row) return;
 
   var PATTERNS = [
-    { key:'lined',  label:'lined' },
-    { key:'dotted', label:'dotted' },
-    { key:'grid',   label:'grid' },
-    { key:'blank',  label:'blank' },
-    { key:'kraft',  label:'kraft' },
-    { key:'music',  label:'music' },
-    { key:'checks', label:'checks' },
+    { key:'diamonds', label:'diamonds' },
+    { key:'maze',     label:'maze' },
+    { key:'stars',    label:'stars' },
+    { key:'checker',  label:'checker' },
+    { key:'dots',     label:'dots' },
+    { key:'circles',  label:'circles' },
+    { key:'lined',    label:'lined' },
+    { key:'kraft',    label:'kraft' },
   ];
 
   var TW = 54, TH = 70; // thumbnail dimensions in CSS px
@@ -1761,60 +1762,162 @@ var PAPER_SIZES = { small:{w:130,h:170}, medium:{w:200,h:260}, large:{w:280,h:36
 function drawPaperPattern(pctx, w, h, pattern){
   var dpr = window.devicePixelRatio||1;
   pctx.setTransform(dpr,0,0,dpr,0,0);
+  var i, j, r, c, x, y;
   switch(pattern){
-    case 'lined':
+
+    case 'diamonds': {
+      // Pink/coral concentric diamonds on cream — like reference image left
+      pctx.fillStyle='#fde8df'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='#d96060'; pctx.lineWidth=1.4;
+      var ds=26;
+      for(r=-1;r<=Math.ceil(h/ds)+1;r++){
+        for(c=-1;c<=Math.ceil(w/ds)+1;c++){
+          var cx=(c+(r%2?0.5:0))*ds, cy=r*ds;
+          pctx.beginPath();
+          pctx.moveTo(cx,      cy-ds*0.5);
+          pctx.lineTo(cx+ds*0.5, cy);
+          pctx.lineTo(cx,      cy+ds*0.5);
+          pctx.lineTo(cx-ds*0.5, cy);
+          pctx.closePath();
+          pctx.stroke();
+        }
+      }
+      break;
+    }
+
+    case 'maze': {
+      // Teal rectangular spiral/maze on white — like reference image second
       pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      pctx.strokeStyle='rgba(140,170,220,0.45)'; pctx.lineWidth=0.8;
-      for(var y=22;y<h;y+=22){ pctx.beginPath();pctx.moveTo(0,y);pctx.lineTo(w,y);pctx.stroke(); }
-      pctx.strokeStyle='rgba(220,90,90,0.25)'; pctx.lineWidth=1;
+      pctx.strokeStyle='#2aaca6'; pctx.lineWidth=2;
+      var ms=28;
+      for(r=-1;r<=Math.ceil(h/ms)+1;r++){
+        for(c=-1;c<=Math.ceil(w/ms)+1;c++){
+          var bx=c*ms, by=r*ms;
+          // Alternate orientation per cell (checkerboard of two spiral directions)
+          var alt=(r+c)%2===0;
+          pctx.save();
+          pctx.translate(bx+ms/2, by+ms/2);
+          if(alt) pctx.scale(-1,1);
+          // Draw three nested open squares (spiral feel)
+          var gaps=[3,8,13];
+          for(i=0;i<gaps.length;i++){
+            var g=gaps[i], half=ms/2-g;
+            if(half<2) continue;
+            // three sides only (open on one side to create maze feel)
+            pctx.beginPath();
+            pctx.moveTo(-half, half);
+            pctx.lineTo(-half,-half);
+            pctx.lineTo( half,-half);
+            pctx.lineTo( half, half);
+            pctx.stroke();
+          }
+          pctx.restore();
+        }
+      }
+      break;
+    }
+
+    case 'stars': {
+      // Gold 6-armed asterisk / star on white — like reference image third
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='#d4921e'; pctx.lineWidth=1.5;
+      var ss=28, sr_=ss*0.44;
+      for(r=-1;r<=Math.ceil(h/ss)+1;r++){
+        for(c=-1;c<=Math.ceil(w/ss)+1;c++){
+          var sx=c*ss+(r%2?ss*0.5:0), sy_=r*ss;
+          // 6 arms
+          for(i=0;i<6;i++){
+            var ang=i*Math.PI/3;
+            pctx.beginPath();
+            pctx.moveTo(sx,sy_);
+            pctx.lineTo(sx+Math.cos(ang)*sr_, sy_+Math.sin(ang)*sr_);
+            pctx.stroke();
+          }
+          // hub circle
+          pctx.beginPath();
+          pctx.arc(sx,sy_,2.2,0,Math.PI*2);
+          pctx.stroke();
+          // connect midpoints to form outer hexagon
+          for(i=0;i<6;i++){
+            var a1=i*Math.PI/3, a2=(i+1)*Math.PI/3;
+            pctx.beginPath();
+            pctx.moveTo(sx+Math.cos(a1)*sr_, sy_+Math.sin(a1)*sr_);
+            pctx.lineTo(sx+Math.cos(a2)*sr_, sy_+Math.sin(a2)*sr_);
+            pctx.stroke();
+          }
+        }
+      }
+      break;
+    }
+
+    case 'checker': {
+      // Bold navy + white checkerboard — like reference image fourth
+      var cs=20;
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.fillStyle='#2b3a7a';
+      for(r=0;r<=Math.ceil(h/cs);r++) for(c=0;c<=Math.ceil(w/cs);c++){
+        if((r+c)%2===0) pctx.fillRect(c*cs,r*cs,cs,cs);
+      }
+      break;
+    }
+
+    case 'dots': {
+      // Pink polka dots on white — like reference image fifth
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.fillStyle='#e06c88';
+      var dp=22, dr_=7;
+      for(r=-1;r<=Math.ceil(h/dp)+1;r++){
+        for(c=-1;c<=Math.ceil(w/dp)+1;c++){
+          var dx=c*dp+(r%2?dp*0.5:0), dy=r*dp;
+          pctx.beginPath();
+          pctx.arc(dx,dy,dr_,0,Math.PI*2);
+          pctx.fill();
+        }
+      }
+      break;
+    }
+
+    case 'circles': {
+      // Green overlapping concentric quarter-arcs — like reference image right
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='#4e8c36'; pctx.lineWidth=2.2;
+      var ci_s=32, ci_n=3;
+      for(r=-1;r<=Math.ceil(h/ci_s)+2;r++){
+        for(c=-1;c<=Math.ceil(w/ci_s)+2;c++){
+          for(i=1;i<=ci_n;i++){
+            var rad=i*(ci_s/ci_n);
+            if((r+c)%2===0){
+              pctx.beginPath();
+              pctx.arc(c*ci_s, r*ci_s, rad, 0, Math.PI*0.5);
+              pctx.stroke();
+            } else {
+              pctx.beginPath();
+              pctx.arc(c*ci_s+ci_s, r*ci_s+ci_s, rad, Math.PI, Math.PI*1.5);
+              pctx.stroke();
+            }
+          }
+        }
+      }
+      break;
+    }
+
+    case 'lined': {
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='rgba(140,170,220,0.5)'; pctx.lineWidth=0.8;
+      for(y=22;y<h;y+=22){ pctx.beginPath();pctx.moveTo(0,y);pctx.lineTo(w,y);pctx.stroke(); }
+      pctx.strokeStyle='rgba(220,90,90,0.28)'; pctx.lineWidth=1;
       pctx.beginPath();pctx.moveTo(28,0);pctx.lineTo(28,h);pctx.stroke();
       break;
-    case 'dotted':
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      pctx.fillStyle='rgba(130,160,210,0.5)';
-      for(var yy=22;yy<h;yy+=22) for(var xx=22;xx<w;xx+=22){
-        pctx.beginPath();pctx.arc(xx,yy,1.4,0,Math.PI*2);pctx.fill();
-      }
-      break;
-    case 'grid':
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      pctx.strokeStyle='rgba(140,170,220,0.35)'; pctx.lineWidth=0.8;
-      for(var yg=0;yg<h;yg+=22){ pctx.beginPath();pctx.moveTo(0,yg);pctx.lineTo(w,yg);pctx.stroke(); }
-      for(var xg=0;xg<w;xg+=22){ pctx.beginPath();pctx.moveTo(xg,0);pctx.lineTo(xg,h);pctx.stroke(); }
-      break;
-    case 'kraft':
+    }
+
+    case 'kraft': {
       pctx.fillStyle='#c9a97a'; pctx.fillRect(0,0,w,h);
       pctx.fillStyle='rgba(0,0,0,0.04)';
-      for(var k=0;k<600;k++){
-        pctx.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1);
-      }
+      for(i=0;i<600;i++) pctx.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1);
       break;
-    case 'music':
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      pctx.strokeStyle='rgba(60,60,60,0.35)'; pctx.lineWidth=0.7;
-      /* groups of 5 staff lines with gaps between */
-      var staffSpacing=8, groupH=staffSpacing*4, groupGap=18;
-      var ym=10;
-      while(ym+groupH<h){
-        for(var s=0;s<5;s++){
-          var sy=ym+s*staffSpacing;
-          pctx.beginPath();pctx.moveTo(0,sy);pctx.lineTo(w,sy);pctx.stroke();
-        }
-        ym+=groupH+groupGap;
-      }
-      break;
-    case 'checks':
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      var cs=18;
-      pctx.fillStyle='rgba(154,89,200,0.08)';
-      for(var cr=0;cr<Math.ceil(h/cs);cr++) for(var cc=0;cc<Math.ceil(w/cs);cc++){
-        if((cr+cc)%2===0) pctx.fillRect(cc*cs,cr*cs,cs,cs);
-      }
-      pctx.strokeStyle='rgba(154,89,200,0.15)'; pctx.lineWidth=0.5;
-      for(var cy=0;cy<=h;cy+=cs){ pctx.beginPath();pctx.moveTo(0,cy);pctx.lineTo(w,cy);pctx.stroke(); }
-      for(var cx=0;cx<=w;cx+=cs){ pctx.beginPath();pctx.moveTo(cx,0);pctx.lineTo(cx,h);pctx.stroke(); }
-      break;
-    default: // blank
+    }
+
+    default:
       pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
   }
 }
