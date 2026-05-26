@@ -170,15 +170,17 @@ body{background:#EEE0CC}
 .bw-toast.bw-toast--show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ── SAVED POSTS ── */
-.bw-saved{padding:0 0 80px;background:transparent;position:relative;z-index:3}
+.bw-saved{padding:0 0 0;background:transparent;position:relative;z-index:3}
 .bw-saved-hero{position:relative;display:flex;align-items:center;justify-content:center;min-height:220px;overflow:hidden;width:100vw;left:50%;transform:translateX(-50%);margin-top:-140px;padding-top:140px;background:transparent}
 .bw-saved-inner{max-width:1200px;margin:0 auto;padding:0 48px;position:relative;z-index:1}
 .bw-saved-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.2vw,48px);color:#000;margin-bottom:16px;text-align:center}
+.bw-gallery-wrap.is-empty{min-height:0}
+.bw-gallery-wrap.is-empty .bw-posts-scroll{height:0;padding:0}
 .bw-saved-empty-card{background:transparent;padding:24px 0;text-align:center;max-width:560px;margin:0 auto;width:100%}
 .bw-saved-empty-card p{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#000;line-height:1.65}
 
 /* ── BOTTOM WALL ── */
-.bw-bottom-wall{width:145vw;line-height:0;position:relative;z-index:1;left:50%;transform:translateX(-50%);overflow:hidden}
+.bw-bottom-wall{width:145vw;line-height:0;position:relative;z-index:0;left:50%;transform:translateX(-50%);overflow:hidden;margin-bottom:-320px}
 .bw-bottom-wall img{width:145vw;height:auto;display:block}
 
 
@@ -187,7 +189,7 @@ body{background:#EEE0CC}
 .nav-sun{background:#097F14}
 #sun-rect,#sun-circle-left,#sun-circle-right{fill:#097F14}
 #logo-sun{fill:#097F14}
-#site-footer{background:#EEE0CB}
+#site-footer{background:transparent;position:relative;z-index:1}
 #site-footer path[fill="#fdd306"],#site-footer path[fill="#FFD400"]{fill:#097F14}
 
 /* ── RESPONSIVE ── */
@@ -1225,7 +1227,7 @@ function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
   container.id=listId;
   scrollEl.insertBefore(container,scrollEl.firstChild);
 
-  if(emptyEl)emptyEl.style.display=posts.length?'none':'block';
+  if(emptyEl){emptyEl.style.display=posts.length?'none':'block';var wrap=scrollEl.closest('.bw-gallery-wrap');if(wrap)wrap.classList.toggle('is-empty',!posts.length);}
   if(!posts.length)return;
 
   var GAP=14;
