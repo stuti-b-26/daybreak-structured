@@ -971,6 +971,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
     else{savedList.unshift(post);showToast('saved!');this.innerHTML='&#9733;';}
     saveSaved(savedList);
     renderSaved();
+    renderFeed();
   });
 
   if(isOwn){
