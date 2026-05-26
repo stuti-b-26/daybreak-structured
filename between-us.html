@@ -36,59 +36,81 @@ body{background:#EEE0CC}
 
 
 /* ── EXPLORE SECTION ── */
-.bw-feed{padding:0;background:#EEE0CC;margin-top:500px;position:relative;z-index:2}
+.bw-feed{padding:0;background:#EEE0CC;margin-top:120px;position:relative;z-index:2}
 .bw-feed-inner{max-width:1200px;margin:0 auto;padding:0 48px}
-.bw-explore-header{padding-left:calc(100vw/12);position:relative;z-index:2;margin-top:200px}
-.bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(32px,4vw,60px);color:#000;margin-bottom:12px;line-height:1}
-.bw-explore-trees{position:absolute;bottom:calc(72px + 66.67vh);left:0;width:100%;pointer-events:none;z-index:1;line-height:0}
+/* trees + header in one layer: header overlays the gap between trees */
+.bw-explore-trees-wrap{position:relative;width:100%;line-height:0;margin-bottom:-2px}
+.bw-explore-trees{display:block;width:100vw;position:relative;left:50%;transform:translateX(-50%);pointer-events:none;line-height:0}
+.bw-explore-trees img{width:100%;height:auto;display:block}
+/* header absolutely centered in the gap between the two tree clusters */
+.bw-explore-header{position:absolute;top:50%;left:22%;right:22%;transform:translateY(-50%);z-index:2;text-align:center}
+.bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.5vw,56px);color:#000;margin-bottom:10px;line-height:1}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
-.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 48px 10px;position:relative;z-index:2;max-height:66.67vh}
-.bw-posts-scroll::-webkit-scrollbar{height:6px;display:none}
-.bw-posts-scroll::-webkit-scrollbar-track{background:transparent}
-.bw-posts-scroll::-webkit-scrollbar-thumb{background:transparent;border-radius:3px;transition:background .2s}
-.bw-posts-scroll:hover{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,0.35) transparent}
-.bw-posts-scroll:hover::-webkit-scrollbar{display:block}
-.bw-posts-scroll:hover::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.35)}
-.bw-posts-scroll.is-dragging{cursor:grabbing;user-select:none}
-.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
-.bw-col{display:flex;flex-direction:column;gap:10px;width:max-content}
-.bw-post-card{min-width:180px;max-width:480px}
-.bw-post-card{border:3px solid #000;border-radius:18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #000;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;background:#fff;position:relative;height:auto}
+.bw-gallery-wrap{position:relative}
+.bw-posts-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 48px 16px;position:relative;height:66.67vh}
+.bw-posts-scroll::-webkit-scrollbar{display:none}
+.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:14px;width:max-content;padding:6px 8px 12px}
+.bw-col{display:flex;flex-direction:column;gap:14px;width:220px;align-items:stretch;justify-content:flex-start;overflow:visible}
+.bw-post-card{max-height:none;overflow:hidden}
+/* ── SCROLL ARROW BUTTONS ── */
+/* overlay sits after scroll container in DOM so it always paints on top;
+   pointer-events:none lets clicks pass through to cards everywhere except the buttons */
+.bw-gallery-btns{position:absolute;inset:0;pointer-events:none;z-index:50;isolation:isolate}
+.bw-scroll-btn{position:absolute;top:50%;transform:translateY(-50%);pointer-events:auto;background:#3b2a1a;border:3px solid #1a1008;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c8d8a0;box-shadow:4px 4px 0 0 #1a1008,0 2px 8px rgba(0,0,0,.35);transition:background .15s,box-shadow .1s,transform .1s;opacity:1;user-select:none;-webkit-user-select:none}
+.bw-scroll-btn:hover{background:#4e3820;box-shadow:6px 6px 0 0 #1a1008,0 4px 12px rgba(0,0,0,.4)}
+.bw-scroll-btn:active,.bw-btn-pressed{box-shadow:2px 2px 0 0 #1a1008!important;transform:translateY(-50%) scale(.94)!important}
+.bw-scroll-btn:disabled{opacity:.5;cursor:default;pointer-events:none}
+.bw-scroll-btn--left{left:8px}
+.bw-scroll-btn--right{right:8px}
+/* ── POST CARDS: MOSS ROCK TILES ── */
+.bw-post-card{width:100%;box-sizing:border-box}
+.bw-post-card{
+  border:none;
+  border-radius:18px;
+  clip-path:inset(0 round 18px); /* bulletproof rounded clip — overflow:hidden alone misses transformed children */
+  padding:16px 14px 10px;
+  box-shadow:none;
+  display:flex;flex-direction:column;gap:6px;
+  cursor:pointer;
+  transition:transform .15s;
+  overflow:hidden;
+  position:relative;
+  height:auto;
+  background:#5a5c47;
+  isolation:isolate;
+}
+/* tile div: extends 25% beyond each edge so stone fills with no border bleed */
+.bw-post-tile{
+  position:absolute;
+  top:-25%;left:-25%;
+  width:150%;height:150%;
+  background-size:cover;
+  background-position:center center;
+  pointer-events:none;
+  z-index:0;
+}
 .bw-post-card:hover{transform:translate(-2px,-2px)}
-.bw-post-card[data-fc="0"]{border-color:#FF6FAA;box-shadow:5px 5px 0 0 #FF6FAA}
-.bw-post-card[data-fc="1"]{border-color:#0E9E1B;box-shadow:5px 5px 0 0 #0E9E1B}
-.bw-post-card[data-fc="2"]{border-color:#FD9E30;box-shadow:5px 5px 0 0 #FD9E30}
-.bw-post-card[data-fc="3"]{border-color:#9A59C8;box-shadow:5px 5px 0 0 #9A59C8}
-.bw-post-card[data-fc="4"]{border-color:#00B4CC;box-shadow:5px 5px 0 0 #00B4CC}
-.bw-post-card[data-fc="5"]{border-color:#E8344A;box-shadow:5px 5px 0 0 #E8344A}
-.bw-post-card[data-fc="6"]{border-color:#3D7EFF;box-shadow:5px 5px 0 0 #3D7EFF}
-.bw-post-card[data-fc="7"]{border-color:#C8A200;box-shadow:5px 5px 0 0 #C8A200}
-.bw-post-card[data-fc="0"]:hover{box-shadow:7px 7px 0 0 #FF6FAA}
-.bw-post-card[data-fc="1"]:hover{box-shadow:7px 7px 0 0 #0E9E1B}
-.bw-post-card[data-fc="2"]:hover{box-shadow:7px 7px 0 0 #FD9E30}
-.bw-post-card[data-fc="3"]:hover{box-shadow:7px 7px 0 0 #9A59C8}
-.bw-post-card[data-fc="4"]:hover{box-shadow:7px 7px 0 0 #00B4CC}
-.bw-post-card[data-fc="5"]:hover{box-shadow:7px 7px 0 0 #E8344A}
-.bw-post-card[data-fc="6"]:hover{box-shadow:7px 7px 0 0 #3D7EFF}
-.bw-post-card[data-fc="7"]:hover{box-shadow:7px 7px 0 0 #C8A200}
-.bw-post-card--own{border-color:#2e7d32!important;box-shadow:5px 5px 0 0 #2e7d32!important}
-.bw-post-card--own:hover{box-shadow:7px 7px 0 0 #2e7d32!important}
-.bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:999px;background:#f5c842;color:#000;width:fit-content;flex-shrink:0}
-.bw-post-tag--own{background:#a5d6a7}
-.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;line-height:1.55;color:#000;overflow:hidden;flex:1 1 auto}
+/* beige scrim so black text is legible over any tile */
+.bw-post-card::before{content:'';position:absolute;inset:0;background:rgba(232,220,196,.52);pointer-events:none;z-index:1}
+.bw-post-card::after{display:none}
+.bw-post-card>*:not(.bw-post-tile){position:relative;z-index:2}
+.bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.12);color:#1a140a;width:fit-content;flex-shrink:0;border:1px solid rgba(0,0,0,.18)}
+.bw-post-tag--own{background:rgba(0,0,0,.15);color:#1a140a}
+.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;line-height:1.65;color:#1a140a;overflow:visible;flex:1 1 auto}
 .bw-post-media{width:100%;object-fit:cover;border-radius:10px;display:block}
 .bw-post-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-shrink:0}
 .bw-post-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.bw-post-save-btn{background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:2px;transition:transform .15s;flex-shrink:0}
-.bw-post-save-btn:hover{transform:scale(1.3)}
-.bw-post-journal-btn{background:none;border:1.5px solid #000;border-radius:999px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;padding:3px 8px;line-height:1.4;transition:background .15s,color .15s;flex-shrink:0;white-space:nowrap}
-.bw-post-journal-btn:hover{background:#000;color:#fff}
-.bw-post-journal-btn.bw-in-journal{background:#000;color:#fff;border-color:#000}
-.bw-post-delete-btn{background:none;border:none;cursor:pointer;font-size:13px;line-height:1;padding:2px 4px;color:rgba(0,0,0,.4);transition:color .15s,transform .15s;flex-shrink:0}
-.bw-post-delete-btn:hover{color:#e8344a;transform:scale(1.2)}
-.bw-post-time{font-family:'Nunito',sans-serif;font-size:10px;color:rgba(0,0,0,.4);font-weight:500;flex-shrink:0}
+.bw-post-save-btn{background:rgba(0,0,0,.12);border:1.5px solid rgba(0,0,0,.25);border-radius:999px;cursor:pointer;font-size:15px;line-height:1;padding:4px 8px;transition:background .15s,transform .15s;flex-shrink:0;color:#1a140a}
+.bw-post-save-btn:hover{background:rgba(0,0,0,.22);transform:scale(1.1)}
+.bw-post-save-btn.bw-saved{background:rgba(0,0,0,.22);border-color:rgba(0,0,0,.4)}
+.bw-post-journal-btn{background:none;border:1.5px solid rgba(0,0,0,.25);border-radius:999px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;color:#1a140a;padding:3px 8px;line-height:1.4;transition:background .15s,color .15s;flex-shrink:0;white-space:nowrap}
+.bw-post-journal-btn:hover{background:rgba(0,0,0,.08);color:#1a140a}
+.bw-post-journal-btn.bw-in-journal{background:rgba(0,0,0,.15);color:#1a140a;border-color:rgba(0,0,0,.3)}
+.bw-post-delete-btn{background:rgba(160,48,48,.15);border:1.5px solid rgba(160,48,48,.4);border-radius:999px;cursor:pointer;font-size:11px;font-family:'Nunito',sans-serif;font-weight:700;padding:3px 8px;color:#7a2020;transition:background .15s,color .15s;flex-shrink:0}
+.bw-post-delete-btn:hover{background:rgba(160,48,48,.85);color:#fff}
+.bw-post-time{font-family:'Nunito',sans-serif;font-size:11px;color:rgba(10,8,2,.75);font-weight:700;flex-shrink:0;letter-spacing:.02em}
 /* ── LIGHTBOX ── */
 .bw-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .bw-lightbox.bw-lb-open{opacity:1;pointer-events:all}
@@ -103,34 +125,38 @@ body{background:#EEE0CC}
 .bw-lb-media{width:100%;border-radius:14px;margin-bottom:20px;display:block}
 .bw-lb-footer{display:flex;align-items:center;justify-content:space-between}
 .bw-lb-time{font-family:'Nunito',sans-serif;font-size:12px;color:rgba(0,0,0,.4)}
-.bw-lb-actions{display:flex;gap:12px}
-.bw-lb-btn{background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;padding:6px 10px;border-radius:10px;transition:transform .15s}
-.bw-lb-btn:hover{transform:scale(1.15)}
-.bw-lb-btn.bw-liked{color:#e8344a}
-.bw-lb-btn.bw-bookmarked{color:#2e7d32}
+.bw-lb-actions{display:flex;gap:8px;align-items:center}
+.bw-lb-btn{cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;transition:background .15s,transform .15s}
+.bw-lb-btn:hover{transform:scale(1.05)}
+.bw-lb-btn--save{background:#f0f0e8;border:2px solid #2e2e1a;color:#2e2e1a}
+.bw-lb-btn--save.bw-bookmarked{background:#2e2e1a;color:#f0f0e8}
+.bw-lb-btn--journal{background:#f0f0e8;border:2px solid #2e2e1a;color:#2e2e1a}
+.bw-lb-btn--journal.bw-in-journal{background:#2e2e1a;color:#f0f0e8}
+.bw-lb-btn--delete{background:#fff0f0;border:2px solid #a03030;color:#a03030}
+.bw-lb-btn--delete:hover{background:#a03030;color:#fff}
 .bw-lb-counter{font-family:'Nunito',sans-serif;font-size:12px;color:rgba(0,0,0,.4);text-align:center;margin-top:12px}
 .bw-empty{font-family:'Nunito',sans-serif;font-size:16px;color:rgba(0,0,0,.4);font-style:italic;padding:32px 0}
 
 /* ── INSPIRED ZONE (flower vines + write section) ── */
-.bw-inspired-zone{position:relative;margin-top:-55px;z-index:1}
-.bw-write-bg{position:absolute;inset:0;pointer-events:none;z-index:0}
+.bw-inspired-zone{position:relative;margin-top:-55px;z-index:1;overflow-x:clip}
+.bw-write-bg{position:absolute;top:0;bottom:-160px;left:50%;transform:translateX(-50%);width:110vw;pointer-events:none;z-index:0}
 .bw-write-bg img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
-.bw-bushes{width:115vw;line-height:0;position:relative;z-index:2;margin-bottom:-160px;margin-top:90px;left:50%;transform:translateX(-50%);overflow:hidden;pointer-events:none}
-.bw-bushes img{width:115vw;height:auto;display:block;margin:-2px 0;}
+.bw-bushes{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120%;pointer-events:none;z-index:0;line-height:0}
+.bw-bushes img{width:100%;height:auto;display:block}
 
 /* ── FLOWER VINES DIVIDER ── */
-.bw-flower-vines{width:100%;line-height:0;position:relative;z-index:1;overflow:hidden}
-.bw-flower-vines img{width:calc(100% + 4px);height:auto;display:block;margin:-2px}
+.bw-flower-vines{width:100%;display:flex;justify-content:center;line-height:0;z-index:1;position:relative;margin-top:-120px;overflow:hidden}
+.bw-flower-vines img{height:auto;display:block;max-width:100%}
 
 /* ── WRITE SECTION ── */
 .bw-write{background:transparent;padding:48px 0 100px;position:relative;z-index:1}
 .bw-write-inner{max-width:640px;margin:0 auto;padding:0 48px;position:relative;z-index:1}
 .bw-write-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.5vw,52px);color:#000;line-height:1.2;margin-bottom:16px}
 .bw-write-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;margin-bottom:28px}
-.bw-textarea{width:100%;min-height:160px;border:2px solid rgba(0,0,0,.2);border-radius:12px;outline:none;font-family:'Nunito',sans-serif;font-size:17px;color:#000;resize:none;background:rgba(255,255,255,.5);line-height:1.55;display:block;padding:16px;transition:border-color .2s}
+.bw-textarea{width:100%;min-height:160px;border:2px solid rgba(0,0,0,.2);border-radius:12px;outline:none;font-family:'Nunito',sans-serif;font-size:17px;color:#000;resize:none;overflow-y:hidden;background:rgba(255,255,255,.5);line-height:1.55;display:block;padding:16px;transition:border-color .2s}
 .bw-textarea::placeholder{color:rgba(0,0,0,.35)}
 .bw-textarea:focus{border-color:rgba(0,0,0,.5)}
-.bw-write-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px}
+.bw-write-footer{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:16px}
 .bw-char-count{font-family:'Nunito',sans-serif;font-size:13px;color:rgba(0,0,0,.45);font-weight:600}
 .bw-char-count.bw-char-low{color:#ff8a65}
 .bw-write-actions{display:flex;gap:12px}
@@ -144,24 +170,27 @@ body{background:#EEE0CC}
 .bw-toast.bw-toast--show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ── SAVED POSTS ── */
-.bw-saved{padding:0 0 80px;background:transparent;position:relative;z-index:3;margin-top:30px}
-.bw-saved-inner{max-width:1200px;margin:0 auto;padding:0 48px}
-.bw-saved-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.2vw,48px);color:#000;margin-bottom:16px;padding-top:16px;text-align:center}
+.bw-saved{padding:0 0 0;background:transparent;position:relative;z-index:3}
+.bw-saved-hero{position:relative;display:flex;align-items:center;justify-content:center;min-height:220px;overflow:hidden;width:100vw;left:50%;transform:translateX(-50%);margin-top:-140px;padding-top:140px;background:transparent}
+.bw-saved-inner{max-width:1200px;margin:0 auto;padding:0 48px;position:relative;z-index:1}
+.bw-saved-heading{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.2vw,48px);color:#000;margin-bottom:16px;text-align:center}
+.bw-gallery-wrap.is-empty .bw-posts-scroll{height:0;padding:0;overflow:hidden}
+.bw-gallery-wrap.is-empty .bw-gallery-btns{display:none}
 .bw-saved-empty-card{background:transparent;padding:24px 0;text-align:center;max-width:560px;margin:0 auto;width:100%}
 .bw-saved-empty-card p{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#000;line-height:1.65}
 
 /* ── BOTTOM WALL ── */
-.bw-bottom-wall{width:145vw;line-height:0;position:relative;z-index:1;left:50%;transform:translateX(-50%);overflow:hidden}
+.bw-bottom-wall{width:145vw;line-height:0;position:relative;z-index:0;left:50%;transform:translateX(-50%);overflow:hidden;margin-bottom:-320px}
 .bw-bottom-wall img{width:145vw;height:auto;display:block}
 
 
 /* ── HEADER / FOOTER OVERRIDES ── */
-#site-header{--yellow:#FF6FAA}
-.nav-sun{background:#FF6FAA}
-#sun-rect,#sun-circle-left,#sun-circle-right{fill:#FF6FAA}
-#logo-sun{fill:#FF6FAA}
-#site-footer{background:#EEE0CB}
-#site-footer path[fill="#fdd306"],#site-footer path[fill="#FFD400"]{fill:#FF6FAA}
+#site-header{--yellow:#097F14}
+.nav-sun{background:#097F14}
+#sun-rect,#sun-circle-left,#sun-circle-right{fill:#097F14}
+#logo-sun{fill:#097F14}
+#site-footer{background:transparent;position:relative;z-index:1}
+#site-footer path[fill="#fdd306"],#site-footer path[fill="#FFD400"]{fill:#097F14}
 
 /* ── RESPONSIVE ── */
 @media(min-width:768px) and (max-width:1023px){
@@ -170,12 +199,8 @@ body{background:#EEE0CC}
   /* hero text start position */
   #bw-hero-track{top:calc(40% - 200px)}
   /* explore: constrain header text to central 8 of 12 columns */
-  .bw-feed{margin-top:360px}
-  .bw-explore-header{
-    padding-left:calc(100vw/6);
-    padding-right:calc(100vw/6);
-    margin-top:140px;
-  }
+  .bw-feed{margin-top:80px}
+  .bw-explore-header{left:18%;right:18%}
   .bw-section-desc{max-width:100%}
   /* saved posts: constrain heading and empty state to central 8 columns */
   .bw-saved-inner{
@@ -191,14 +216,9 @@ body{background:#EEE0CC}
   .bw-intro-blurb{margin-top:0;padding:48px 24px}
   .bw-saved{padding:48px 0}
   .bw-write{padding:32px 0 80px}
-  .bw-feed{padding:0;margin-top:320px}
+  .bw-feed{padding:0;margin-top:40px}
   .bw-feed-inner,.bw-write-inner,.bw-saved-inner{padding:0 20px}
-  /* explore header: constrain text to gap between trees (~18vw to ~79vw) */
-  .bw-explore-header{
-    padding-left:20vw;
-    padding-right:23vw;
-    margin-top:120px;
-  }
+  .bw-explore-header{left:10%;right:10%;top:45%}
   .bw-section-desc{max-width:100%}
   .bw-write-actions{flex-direction:column;gap:8px}
   .bw-btn{text-align:center;justify-content:center}
@@ -365,17 +385,23 @@ body{background:#EEE0CC}
 
   <!-- EXPLORE -->
   <section class="bw-feed">
-    <div class="bw-feed-inner">
+    <div class="bw-explore-trees-wrap">
+      <div class="bw-explore-trees" aria-hidden="true">
+        <img src="explore%20trees.svg" alt="">
+      </div>
       <div class="bw-explore-header">
         <h2 class="bw-section-title">explore</h2>
         <p class="bw-section-desc">see what's making other people happy today. you're welcome to just read through them, or you can click the + to save them to your profile. you can also add on to saved posts in just for you. whatever makes your happiness garden bloom.</p>
       </div>
     </div>
-    <div class="bw-explore-trees" aria-hidden="true">
-      <img src="explore%20trees.svg" alt="">
-    </div>
-    <div class="bw-posts-scroll" id="bw-posts-scroll">
-      <div class="bw-posts" id="bw-posts-list"></div>
+    <div class="bw-gallery-wrap" id="bw-explore-wrap">
+      <div class="bw-posts-scroll" id="bw-posts-scroll">
+        <div class="bw-posts" id="bw-posts-list"></div>
+      </div>
+      <div class="bw-gallery-btns">
+        <button class="bw-scroll-btn bw-scroll-btn--left" id="bw-explore-prev" aria-label="Scroll left">&#8592;</button>
+        <button class="bw-scroll-btn bw-scroll-btn--right" id="bw-explore-next" aria-label="Scroll right">&#8594;</button>
+      </div>
     </div>
   </section>
 
@@ -390,8 +416,9 @@ body{background:#EEE0CC}
       <div class="bw-lb-footer">
         <span class="bw-lb-time" id="bw-lb-time"></span>
         <div class="bw-lb-actions">
-          <button class="bw-lb-btn" id="bw-lb-like">&#9825; <span id="bw-lb-like-count"></span></button>
-          <button class="bw-lb-btn" id="bw-lb-save">&#9734; save</button>
+          <button class="bw-lb-btn bw-lb-btn--journal" id="bw-lb-journal">+ journal</button>
+          <button class="bw-lb-btn bw-lb-btn--save" id="bw-lb-save">&#9734; save</button>
+          <button class="bw-lb-btn bw-lb-btn--delete" id="bw-lb-delete" style="display:none">&#10005; remove</button>
         </div>
       </div>
       <div class="bw-lb-counter" id="bw-lb-counter"></div>
@@ -405,7 +432,7 @@ body{background:#EEE0CC}
 
     <!-- VINE DIVIDER -->
     <div class="bw-flower-vines" aria-hidden="true">
-      <img src="flower%20vines.svg" alt="">
+      <img src="flower%20vines%20new.svg" alt="">
     </div>
 
     <!-- WRITE -->
@@ -424,22 +451,28 @@ body{background:#EEE0CC}
       </div>
     </section>
 
-    <!-- BUSHES -->
-    <div class="bw-bushes" aria-hidden="true">
-      <img src="bushes2.svg" alt="">
-    </div>
   </div>
 
   <!-- SAVED POSTS -->
   <section class="bw-saved">
-    <div class="bw-saved-inner">
-      <h2 class="bw-saved-heading">your saved posts</h2>
+    <div class="bw-saved-hero">
+      <div class="bw-bushes" aria-hidden="true">
+        <img src="bushes%20new.svg" alt="">
+      </div>
+      <div class="bw-saved-inner">
+        <h2 class="bw-saved-heading">your saved posts</h2>
+      </div>
     </div>
-    <div class="bw-posts-scroll" id="bw-saved-scroll">
-      <div class="bw-posts" id="bw-saved-list">
-        <div class="bw-saved-empty-card" id="bw-saved-empty">
-          <p>no saved posts yet. save posts using the '+' on posts in explore to see them all here!</p>
-        </div>
+    <div class="bw-gallery-wrap" id="bw-saved-wrap">
+      <div class="bw-posts-scroll" id="bw-saved-scroll">
+        <div class="bw-posts" id="bw-saved-list"></div>
+      </div>
+      <div class="bw-saved-empty-card" id="bw-saved-empty" style="display:none">
+        <p>no saved posts yet. save posts using the '+' on posts in explore to see them all here!</p>
+      </div>
+      <div class="bw-gallery-btns">
+        <button class="bw-scroll-btn bw-scroll-btn--left" id="bw-saved-prev" aria-label="Scroll left">&#8592;</button>
+        <button class="bw-scroll-btn bw-scroll-btn--right" id="bw-saved-next" aria-label="Scroll right">&#8594;</button>
       </div>
     </div>
   </section>
@@ -609,6 +642,12 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   });
   pbtns.forEach(function(btn){btn.addEventListener('click',function(){var isA=btn.classList.contains('active');document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});pbtns.forEach(function(pb){pb.classList.remove('active')});hideSuns(false);closeAll(null);if(!isA)pbtns.forEach(function(pb){pb.classList.add('active')})})});
   document.addEventListener('click',function(){items.forEach(function(item){var drop=item.querySelector('.dropdown'),btn=item.querySelector('.nav-btn');if(drop&&drop.classList.contains('open')){drop.classList.remove('open');btn.setAttribute('aria-expanded','false')}});hideSuns(true)});
+  /* between-us lives under "seek" — mark it active by default */
+  document.querySelectorAll('.nav-btn[data-key="seek"]').forEach(function(btn){
+    btn.classList.add('active');
+    var sun=btn.closest('.nav-item')&&btn.closest('.nav-item').querySelector('.nav-sun');
+    if(sun)sun.classList.add('visible');
+  });
 })();
 
 /* 3. MOBILE MENU */
@@ -868,12 +907,8 @@ function showToast(msg){
 }
 
 /* estimate rendered height for a card at a given pixel width */
-var DEFAULT_CARD_WIDTHS=[230,180,290,230,290,180,230,230,290,180];
-var MAX_CARD_W=480;
-var GAP=10; /* gap between cards in a column */
-var SHADOW_PAD=13; /* 5px shadow + 8px bottom padding */
 
-var FRAME_COLORS=8;
+var FRAME_COLORS=9;
 function postColorIndex(id){
   /* deterministic hash of the post id string → 0..FRAME_COLORS-1 */
   var h=0,s=String(id);
@@ -886,7 +921,10 @@ function renderCard(post, isOwn, idx, showJournal, context){
   card.className='bw-post-card'+(isOwn?' bw-post-card--own':'');
   card.dataset.id=post.id;
   card.dataset.idx=idx;
-  if(!isOwn)card.dataset.fc=postColorIndex(post.id);
+  var fc=postColorIndex(post.id);
+  if(!isOwn)card.dataset.fc=fc;
+
+  var tileSrc='moss-tile-'+(fc+1)+'.svg';
 
   var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>';
   var mediaEl='';
@@ -901,7 +939,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
     ?'<button class="bw-post-journal-btn'+(inJournal?' bw-in-journal':'')+'" data-id="'+post.id+'" aria-label="Add to journal">'+(inJournal?'in journal':'+ journal')+'</button>'
     :'';
   var deleteBtn=isOwn
-    ?'<button class="bw-post-delete-btn" data-id="'+post.id+'" aria-label="Delete post" title="Delete">&#10005;</button>'
+    ?'<button class="bw-post-delete-btn" data-id="'+post.id+'" aria-label="Delete post">remove</button>'
     :'';
   var footerEl='<div class="bw-post-footer">'+
     '<span class="bw-post-time">'+timeAgo(post.time)+'</span>'+
@@ -913,6 +951,10 @@ function renderCard(post, isOwn, idx, showJournal, context){
     '</div>';
 
   card.innerHTML=tagEl+mediaEl+textEl+footerEl;
+  var tileDiv=document.createElement('div');
+  tileDiv.className='bw-post-tile';
+  tileDiv.style.backgroundImage='url("'+tileSrc+'")';
+  card.insertBefore(tileDiv,card.firstChild);
 
   card.querySelector('.bw-post-save-btn').addEventListener('click', function(e){
     e.stopPropagation();
@@ -970,11 +1012,34 @@ function escHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+/* ── HOLD-TO-REPEAT ──
+   Fire `action` immediately on pointerdown, then again after DELAY ms,
+   then repeatedly every INTERVAL ms until pointer is released/cancelled. */
+function holdRepeat(el, action, delay, interval){
+  delay=delay||400; interval=interval||100;
+  var _t1=null, _t2=null;
+  function stop(){ clearTimeout(_t1); clearInterval(_t2); _t1=_t2=null; }
+  el.addEventListener('pointerdown',function(e){
+    if(e.button!==undefined&&e.button!==0)return;
+    e.preventDefault();
+    stop();
+    action();
+    _t1=setTimeout(function(){
+      action();
+      _t2=setInterval(action, interval);
+    }, delay);
+  });
+  el.addEventListener('pointerup', stop);
+  el.addEventListener('pointercancel', stop);
+  el.addEventListener('pointerleave', stop);
+}
+
 /* ── LIGHTBOX ── */
-var _lbPosts=[], _lbIdx=0;
+var _lbPosts=[], _lbIdx=0, _lbContext='feed';
 
 function openLightbox(postId, context){
-  var posts=(context==='saved')?loadSaved():loadPosts();
+  _lbContext=context||'feed';
+  var posts=(_lbContext==='saved')?loadSaved():loadPosts();
   var idx=posts.findIndex(function(p){return p.id===postId;});
   if(idx<0)return;
   _lbPosts=posts;_lbIdx=idx;
@@ -1001,13 +1066,15 @@ function renderLightboxCard(){
   document.getElementById('bw-lb-tag').textContent=isOwn?'you':'anonymous';
   document.getElementById('bw-lb-text').textContent=post.text;
   document.getElementById('bw-lb-time').textContent=timeAgo(post.time);
-  document.getElementById('bw-lb-like-count').textContent=post.likes;
-  var likeBtn=document.getElementById('bw-lb-like');
-  likeBtn.className='bw-lb-btn'+(post.liked?' bw-liked':'');
-  likeBtn.innerHTML=(post.liked?'&#9829;':'&#9825;')+' <span id="bw-lb-like-count">'+post.likes+'</span>';
   var saveBtn=document.getElementById('bw-lb-save');
-  saveBtn.className='bw-lb-btn'+(isSaved?' bw-bookmarked':'');
+  saveBtn.className='bw-lb-btn bw-lb-btn--save'+(isSaved?' bw-bookmarked':'');
   saveBtn.textContent=isSaved?'★ saved':'☆ save';
+  var inJournal=loadJournal().some(function(e){return e.id===post.id});
+  var journalBtn=document.getElementById('bw-lb-journal');
+  journalBtn.className='bw-lb-btn bw-lb-btn--journal'+(inJournal?' bw-in-journal':'');
+  journalBtn.textContent=inJournal?'✓ in journal':'+ journal';
+  var deleteBtn=document.getElementById('bw-lb-delete');
+  deleteBtn.style.display=isOwn?'':'none';
   document.getElementById('bw-lb-counter').textContent=(_lbIdx+1)+' / '+_lbPosts.length;
 
   var mediaEl=document.getElementById('bw-lb-media');
@@ -1027,32 +1094,54 @@ function initLightbox(){
   document.getElementById('bw-lb-close').addEventListener('click',closeLightbox);
   lb.addEventListener('click',function(e){if(e.target===lb)closeLightbox();});
 
-  document.getElementById('bw-lb-prev').addEventListener('click',function(){
+  holdRepeat(document.getElementById('bw-lb-prev'),function(){
     if(_lbIdx>0){_lbIdx--;renderLightboxCard();}
   });
-  document.getElementById('bw-lb-next').addEventListener('click',function(){
+  holdRepeat(document.getElementById('bw-lb-next'),function(){
     if(_lbIdx<_lbPosts.length-1){_lbIdx++;renderLightboxCard();}
-  });
-
-  document.getElementById('bw-lb-like').addEventListener('click',function(){
-    var posts=loadPosts();
-    var p=posts.find(function(x){return x.id===_lbPosts[_lbIdx].id});
-    if(!p)return;
-    p.liked=!p.liked;p.likes=p.liked?p.likes+1:p.likes-1;
-    savePosts(posts);
-    _lbPosts[_lbIdx]=p;
-    renderLightboxCard();
-    renderFeed();
   });
 
   document.getElementById('bw-lb-save').addEventListener('click',function(){
     var savedList=loadSaved();
     var post=_lbPosts[_lbIdx];
     var ix=savedList.findIndex(function(x){return x.id===post.id});
-    if(ix>=0){savedList.splice(ix,1);showToast('removed from saved');}
-    else{savedList.unshift(post);showToast('saved!');}
+    if(ix>=0){
+      savedList.splice(ix,1);
+      showToast('removed from saved');
+      /* if viewing saved gallery, remove this post from the lightbox list too */
+      if(_lbContext==='saved'){
+        _lbPosts.splice(_lbIdx,1);
+        if(!_lbPosts.length){closeLightbox();renderSaved();return;}
+        if(_lbIdx>=_lbPosts.length)_lbIdx=_lbPosts.length-1;
+      }
+    } else {
+      savedList.unshift(post);
+      showToast('saved!');
+    }
     saveSaved(savedList);
     renderLightboxCard();
+    renderFeed();renderSaved();
+  });
+
+  document.getElementById('bw-lb-journal').addEventListener('click',function(){
+    var post=_lbPosts[_lbIdx];
+    var journal=loadJournal();
+    var ix=journal.findIndex(function(x){return x.id===post.id});
+    if(ix>=0){journal.splice(ix,1);showToast('removed from journal');}
+    else{journal.unshift(post);showToast('added to journal!');}
+    saveJournal(journal);
+    renderLightboxCard();
+  });
+
+  document.getElementById('bw-lb-delete').addEventListener('click',function(){
+    var post=_lbPosts[_lbIdx];
+    if(!post.own)return;
+    var posts=loadPosts();
+    savePosts(posts.filter(function(x){return x.id!==post.id}));
+    var savedList=loadSaved();
+    saveSaved(savedList.filter(function(x){return x.id!==post.id}));
+    showToast('post deleted');
+    closeLightbox();
     renderFeed();renderSaved();
   });
 
@@ -1076,189 +1165,127 @@ function initLightbox(){
   });
 }
 
-/* drag-to-scroll on the gallery */
-function initScrollGallery(scroll){
-  if(!scroll)return;
-  var isDown=false,startX=0,scrollLeft=0;
-  scroll.addEventListener('mousedown',function(e){isDown=true;scroll.classList.add('is-dragging');startX=e.pageX-scroll.offsetLeft;scrollLeft=scroll.scrollLeft;});
-  scroll.addEventListener('mouseleave',function(){isDown=false;scroll.classList.remove('is-dragging');});
-  scroll.addEventListener('mouseup',function(){isDown=false;scroll.classList.remove('is-dragging');});
-  scroll.addEventListener('mousemove',function(e){if(!isDown)return;e.preventDefault();var x=e.pageX-scroll.offsetLeft;scroll.scrollLeft=scrollLeft-(x-startX)*1.5;});
-  var target=0,raf=null;
-  function ease(){
-    var diff=target-scroll.scrollLeft;
-    if(Math.abs(diff)<0.5){scroll.scrollLeft=target;raf=null;return;}
-    scroll.scrollLeft+=diff*0.12;
-    raf=requestAnimationFrame(ease);
+/* left/right button navigation for galleries */
+function initScrollGallery(scrollEl, prevBtn, nextBtn){
+  if(!scrollEl||!prevBtn||!nextBtn)return;
+  function colStep(){
+    var col=scrollEl.querySelector('.bw-col');
+    return col ? col.offsetWidth+10 : 260;
   }
-  scroll.addEventListener('wheel',function(e){
-    var maxScroll=scroll.scrollWidth-scroll.clientWidth;
-    var atStart=scroll.scrollLeft<=0&&e.deltaY<0;
-    var atEnd=scroll.scrollLeft>=maxScroll-1&&e.deltaY>0;
-    if(atStart||atEnd)return;
-    e.preventDefault();
-    target=Math.max(0,Math.min(maxScroll,target+e.deltaY*1.4));
-    if(!raf)raf=requestAnimationFrame(ease);
-  },{passive:false});
+  function updateButtons(){
+    var max=scrollEl.scrollWidth-scrollEl.clientWidth;
+    prevBtn.disabled=scrollEl.scrollLeft<=1;
+    nextBtn.disabled=scrollEl.scrollLeft>=max-1;
+  }
+  function doScroll(delta){
+    var max=scrollEl.scrollWidth-scrollEl.clientWidth;
+    var target=Math.max(0,Math.min(max,scrollEl.scrollLeft+delta));
+    scrollEl.style.scrollBehavior='smooth';
+    scrollEl.scrollLeft=target;
+    setTimeout(updateButtons,500);
+  }
+  holdRepeat(prevBtn, function(){
+    if(!prevBtn.disabled){ doScroll(-colStep()); }
+  });
+  holdRepeat(nextBtn, function(){
+    if(!nextBtn.disabled){ doScroll(colStep()); }
+  });
+  scrollEl.addEventListener('scroll',updateButtons,{passive:true});
+  updateButtons();
+  window.addEventListener('resize',updateButtons,{passive:true});
 }
 function initGalleryDrag(){
-  initScrollGallery(document.getElementById('bw-posts-scroll'));
-  initScrollGallery(document.getElementById('bw-saved-scroll'));
+  initScrollGallery(
+    document.getElementById('bw-posts-scroll'),
+    document.getElementById('bw-explore-prev'),
+    document.getElementById('bw-explore-next')
+  );
+  initScrollGallery(
+    document.getElementById('bw-saved-scroll'),
+    document.getElementById('bw-saved-prev'),
+    document.getElementById('bw-saved-next')
+  );
 }
 
-/* measure the true rendered height of a card at a given width using a hidden probe */
-var _probe=(function(){
-  var el=document.createElement('div');
-  el.style.cssText='position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;z-index:-1';
-  document.addEventListener('DOMContentLoaded',function(){document.body.appendChild(el)});
-  return el;
-})();
 
-function measureCardHeight(post,isOwn,idx,w){
-  var card=renderCard(post,isOwn,idx);
-  card.style.width=w+'px';
-  _probe.appendChild(card);
-  var h=card.offsetHeight;
-  _probe.removeChild(card);
-  return h;
+/* estimate card height; clamped to maxH so a single card never exceeds the gallery */
+function estimateCardH(post, maxH){
+  var h = 90 + Math.ceil(post.text.length / 35) * 20;
+  return Math.min(h, maxH);
 }
 
-/* find the narrowest width (starting from w, stepping up) at which the card fits in targetH */
-function widenToFit(post,isOwn,idx,targetH,startW){
-  var w=startW;
-  while(w<=MAX_CARD_W){
-    if(measureCardHeight(post,isOwn,idx,w)<=targetH)return w;
-    w+=20;
-  }
-  return null; /* can't fit even at max width */
-}
+/* Sequential masonry: posts flow into columns top-to-bottom.
+   When the next card would exceed maxH a new column opens.
+   After DOM insertion a rAF pass fixes any column whose actual
+   rendered height overflows (estimate mismatch) by moving the
+   last card to a new column. */
+function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
+  var oldList=document.getElementById(listId);
+  if(oldList)oldList.remove();
+  var container=document.createElement('div');
+  container.className='bw-posts';
+  container.id=listId;
+  scrollEl.insertBefore(container,scrollEl.firstChild);
 
-function rearrangeGallery(posts,MAX_COL_H){
-  /* returns array of {post, idx, cardW} in column order:
-     for each post, find the shortest column it fits in at its natural width;
-     if none, widen until it fits; if still none, open a new column. */
-  var cols=[],heights=[];
+  if(emptyEl){emptyEl.style.display=posts.length?'none':'block';var wrap=scrollEl.closest('.bw-gallery-wrap');if(wrap)wrap.classList.toggle('is-empty',!posts.length);}
+  if(!posts.length)return;
 
-  function addCol(){
-    var defaultW=DEFAULT_CARD_WIDTHS[cols.length%DEFAULT_CARD_WIDTHS.length];
-    cols.push({items:[],defaultW:defaultW});
-    heights.push(0);
-  }
-  addCol();
+  var GAP=14;
+  /* use real clientHeight; fall back to CSS value if not yet laid out */
+  var maxH=(scrollEl.clientHeight||window.innerHeight*(2/3))-GAP*2;
+  /* expose to CSS so .bw-post-card max-height tracks the real value */
+  scrollEl.style.setProperty('--gallery-max-card-h', maxH+'px');
 
+  var cols=[[]], heights=[0];
   posts.forEach(function(post,i){
-    var placed=false;
-    /* try each existing column, shortest first */
-    var order=heights.map(function(_,ci){return ci}).sort(function(a,b){return heights[a]-heights[b]});
-    for(var oi=0;oi<order.length;oi++){
-      var ci=order[oi];
-      var remaining=MAX_COL_H-(heights[ci]>0?heights[ci]+GAP:0);
-      var dw=cols[ci].defaultW;
-      var h=measureCardHeight(post,post.own,i,dw);
-      var cardW=dw;
-      if(h>remaining){
-        /* try widening */
-        var wider=widenToFit(post,post.own,i,remaining,dw+20);
-        if(wider!==null){cardW=wider;h=measureCardHeight(post,post.own,i,cardW);}
-        else{continue;} /* doesn't fit here even at max width, try next column */
-      }
-      cols[ci].items.push({post:post,idx:i,cardW:cardW});
-      heights[ci]+=(heights[ci]>0?GAP:0)+h;
-      placed=true;
-      break;
-    }
-    if(!placed){
-      /* no existing column works — open a new one */
-      addCol();
-      var ci=cols.length-1;
-      var dw=cols[ci].defaultW;
-      var h=measureCardHeight(post,post.own,i,dw);
-      var cardW=dw;
-      /* if even a fresh column isn't tall enough, widen */
-      if(h>MAX_COL_H){
-        var wider=widenToFit(post,post.own,i,MAX_COL_H,dw+20);
-        if(wider!==null){cardW=wider;}
-      }
-      cols[ci].items.push({post:post,idx:i,cardW:cardW});
-      heights[ci]+=h;
-    }
+    var h=estimateCardH(post,maxH);
+    var ci=cols.length-1;
+    var used=heights[ci];
+    var wouldBe=used+(used>0?GAP:0)+h;
+    if(wouldBe>maxH&&used>0){ci=cols.length;cols.push([]);heights.push(0);}
+    cols[ci].push({post:post,idx:i});
+    heights[ci]+=(heights[ci]>0?GAP:0)+h;
   });
-  return cols;
+
+  cols.forEach(function(items){
+    var colEl=document.createElement('div');
+    colEl.className='bw-col';
+    items.forEach(function(item){
+      colEl.appendChild(renderCard(item.post,item.post.own,item.idx,showJournal,context));
+    });
+    container.appendChild(colEl);
+  });
+
+  /* rAF pass: if any column's real rendered height exceeds maxH,
+     pull its last card into a new column appended to the right */
+  requestAnimationFrame(function(){
+    var colEls=container.querySelectorAll('.bw-col');
+    colEls.forEach(function(col){
+      while(col.scrollHeight>maxH+GAP&&col.children.length>1){
+        var overflow=col.lastElementChild;
+        var newCol=document.createElement('div');
+        newCol.className='bw-col';
+        newCol.appendChild(overflow);
+        container.appendChild(newCol);
+      }
+    });
+    scrollEl.dispatchEvent(new Event('scroll'));
+  });
 }
 
 function renderFeed(){
   var scrollEl=document.getElementById('bw-posts-scroll');
   if(!scrollEl)return;
-  /* ensure probe is in DOM */
-  if(!_probe.parentNode)document.body.appendChild(_probe);
   var posts=loadPosts();
   _lbPosts=posts;
-
-  var oldList=document.getElementById('bw-posts-list');
-  if(oldList)oldList.remove();
-  var container=document.createElement('div');
-  container.className='bw-posts';
-  container.id='bw-posts-list';
-  scrollEl.insertBefore(container,scrollEl.firstChild);
-
-  if(!posts.length){container.innerHTML='<p class="bw-empty">nothing shared yet — be the first.</p>';return;}
-
-  var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
-  var packedCols=rearrangeGallery(posts,MAX_COL_H);
-
-  packedCols.forEach(function(col){
-    var colEl=document.createElement('div');
-    colEl.className='bw-col';
-    colEl.style.height=MAX_COL_H+'px';
-    container.appendChild(colEl);
-    col.items.forEach(function(item){
-      var card=renderCard(item.post,item.post.own,item.idx,false,'feed');
-      card.style.width=item.cardW+'px';
-      card.style.flex='1 1 auto';
-      colEl.appendChild(card);
-    });
-  });
+  buildMasonry(scrollEl,posts,'bw-posts-list',false,'feed',null);
 }
 
-function renderSaved(){/* saved gallery — journal buttons enabled */
+function renderSaved(){
   var scrollEl=document.getElementById('bw-saved-scroll');
   if(!scrollEl)return;
-  if(!_probe.parentNode)document.body.appendChild(_probe);
   var saved=loadSaved();
-  var empty=document.getElementById('bw-saved-empty');
-
-  var oldList=document.getElementById('bw-saved-list');
-  if(oldList)oldList.remove();
-  var container=document.createElement('div');
-  container.className='bw-posts';
-  container.id='bw-saved-list';
-  scrollEl.insertBefore(container,scrollEl.firstChild);
-
-  if(!saved.length){
-    /* empty state: bypass the flex gallery container, show centered message */
-    container.style.width='100%';
-    container.style.display='flex';
-    container.style.justifyContent='center';
-    if(empty){container.appendChild(empty);empty.style.display='block';}
-    return;
-  }
-  if(empty)empty.style.display='none';
-
-  var MAX_COL_H=window.innerHeight*(2/3)-SHADOW_PAD;
-  var packedCols=rearrangeGallery(saved,MAX_COL_H);
-
-  packedCols.forEach(function(col){
-    var colEl=document.createElement('div');
-    colEl.className='bw-col';
-    colEl.style.height=MAX_COL_H+'px';
-    container.appendChild(colEl);
-    col.items.forEach(function(item){
-      var card=renderCard(item.post,item.post.own,item.idx,true,'saved');
-      card.style.width=item.cardW+'px';
-      card.style.flex='1 1 auto';
-      colEl.appendChild(card);
-    });
-  });
+  buildMasonry(scrollEl,saved,'bw-saved-list',true,'saved',document.getElementById('bw-saved-empty'));
 }
 
 /* Write */
@@ -1292,9 +1319,9 @@ document.getElementById('bw-share-btn')&&document.getElementById('bw-share-btn')
 });
 
 initLightbox();
-initGalleryDrag();
 renderFeed();
 renderSaved();
+initGalleryDrag();
 })();
 
 </script>
