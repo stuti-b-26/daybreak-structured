@@ -98,14 +98,15 @@ body{background:#EEE0CC}
 .bw-post-media{width:100%;object-fit:cover;border-radius:10px;display:block}
 .bw-post-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-shrink:0}
 .bw-post-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.bw-post-save-btn{background:none;border:none;cursor:pointer;font-size:18px;line-height:1;padding:2px;transition:transform .15s;flex-shrink:0;filter:brightness(1.4)}
-.bw-post-save-btn:hover{transform:scale(1.3)}
+.bw-post-save-btn{background:rgba(0,0,0,.12);border:1.5px solid rgba(0,0,0,.25);border-radius:999px;cursor:pointer;font-size:15px;line-height:1;padding:4px 8px;transition:background .15s,transform .15s;flex-shrink:0;color:#1a140a}
+.bw-post-save-btn:hover{background:rgba(0,0,0,.22);transform:scale(1.1)}
+.bw-post-save-btn.bw-saved{background:rgba(0,0,0,.22);border-color:rgba(0,0,0,.4)}
 .bw-post-journal-btn{background:none;border:1.5px solid rgba(0,0,0,.25);border-radius:999px;cursor:pointer;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;color:#1a140a;padding:3px 8px;line-height:1.4;transition:background .15s,color .15s;flex-shrink:0;white-space:nowrap}
 .bw-post-journal-btn:hover{background:rgba(0,0,0,.08);color:#1a140a}
 .bw-post-journal-btn.bw-in-journal{background:rgba(0,0,0,.15);color:#1a140a;border-color:rgba(0,0,0,.3)}
-.bw-post-delete-btn{background:none;border:none;cursor:pointer;font-size:13px;line-height:1;padding:2px 4px;color:rgba(30,20,8,.45);transition:color .15s,transform .15s;flex-shrink:0}
-.bw-post-delete-btn:hover{color:#a03030;transform:scale(1.2)}
-.bw-post-time{font-family:'Nunito',sans-serif;font-size:10px;color:rgba(30,20,8,.6);font-weight:600;flex-shrink:0}
+.bw-post-delete-btn{background:rgba(160,48,48,.15);border:1.5px solid rgba(160,48,48,.4);border-radius:999px;cursor:pointer;font-size:11px;font-family:'Nunito',sans-serif;font-weight:700;padding:3px 8px;color:#7a2020;transition:background .15s,color .15s;flex-shrink:0}
+.bw-post-delete-btn:hover{background:rgba(160,48,48,.85);color:#fff}
+.bw-post-time{font-family:'Nunito',sans-serif;font-size:11px;color:rgba(10,8,2,.75);font-weight:700;flex-shrink:0;letter-spacing:.02em}
 /* ── LIGHTBOX ── */
 .bw-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .bw-lightbox.bw-lb-open{opacity:1;pointer-events:all}
@@ -120,11 +121,15 @@ body{background:#EEE0CC}
 .bw-lb-media{width:100%;border-radius:14px;margin-bottom:20px;display:block}
 .bw-lb-footer{display:flex;align-items:center;justify-content:space-between}
 .bw-lb-time{font-family:'Nunito',sans-serif;font-size:12px;color:rgba(0,0,0,.4)}
-.bw-lb-actions{display:flex;gap:12px}
-.bw-lb-btn{background:none;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;padding:6px 10px;border-radius:10px;transition:transform .15s}
-.bw-lb-btn:hover{transform:scale(1.15)}
-.bw-lb-btn.bw-liked{color:#e8344a}
-.bw-lb-btn.bw-bookmarked{color:#2e7d32}
+.bw-lb-actions{display:flex;gap:8px;align-items:center}
+.bw-lb-btn{cursor:pointer;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;transition:background .15s,transform .15s}
+.bw-lb-btn:hover{transform:scale(1.05)}
+.bw-lb-btn--save{background:#f0f0e8;border:2px solid #2e2e1a;color:#2e2e1a}
+.bw-lb-btn--save.bw-bookmarked{background:#2e2e1a;color:#f0f0e8}
+.bw-lb-btn--journal{background:#f0f0e8;border:2px solid #2e2e1a;color:#2e2e1a}
+.bw-lb-btn--journal.bw-in-journal{background:#2e2e1a;color:#f0f0e8}
+.bw-lb-btn--delete{background:#fff0f0;border:2px solid #a03030;color:#a03030}
+.bw-lb-btn--delete:hover{background:#a03030;color:#fff}
 .bw-lb-counter{font-family:'Nunito',sans-serif;font-size:12px;color:rgba(0,0,0,.4);text-align:center;margin-top:12px}
 .bw-empty{font-family:'Nunito',sans-serif;font-size:16px;color:rgba(0,0,0,.4);font-style:italic;padding:32px 0}
 
@@ -413,8 +418,9 @@ body{background:#EEE0CC}
       <div class="bw-lb-footer">
         <span class="bw-lb-time" id="bw-lb-time"></span>
         <div class="bw-lb-actions">
-          <button class="bw-lb-btn" id="bw-lb-like">&#9825; <span id="bw-lb-like-count"></span></button>
-          <button class="bw-lb-btn" id="bw-lb-save">&#9734; save</button>
+          <button class="bw-lb-btn bw-lb-btn--journal" id="bw-lb-journal">+ journal</button>
+          <button class="bw-lb-btn bw-lb-btn--save" id="bw-lb-save">&#9734; save</button>
+          <button class="bw-lb-btn bw-lb-btn--delete" id="bw-lb-delete" style="display:none">&#10005; remove</button>
         </div>
       </div>
       <div class="bw-lb-counter" id="bw-lb-counter"></div>
@@ -935,7 +941,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
     ?'<button class="bw-post-journal-btn'+(inJournal?' bw-in-journal':'')+'" data-id="'+post.id+'" aria-label="Add to journal">'+(inJournal?'in journal':'+ journal')+'</button>'
     :'';
   var deleteBtn=isOwn
-    ?'<button class="bw-post-delete-btn" data-id="'+post.id+'" aria-label="Delete post" title="Delete">&#10005;</button>'
+    ?'<button class="bw-post-delete-btn" data-id="'+post.id+'" aria-label="Delete post">remove</button>'
     :'';
   var footerEl='<div class="bw-post-footer">'+
     '<span class="bw-post-time">'+timeAgo(post.time)+'</span>'+
@@ -1039,13 +1045,15 @@ function renderLightboxCard(){
   document.getElementById('bw-lb-tag').textContent=isOwn?'you':'anonymous';
   document.getElementById('bw-lb-text').textContent=post.text;
   document.getElementById('bw-lb-time').textContent=timeAgo(post.time);
-  document.getElementById('bw-lb-like-count').textContent=post.likes;
-  var likeBtn=document.getElementById('bw-lb-like');
-  likeBtn.className='bw-lb-btn'+(post.liked?' bw-liked':'');
-  likeBtn.innerHTML=(post.liked?'&#9829;':'&#9825;')+' <span id="bw-lb-like-count">'+post.likes+'</span>';
   var saveBtn=document.getElementById('bw-lb-save');
-  saveBtn.className='bw-lb-btn'+(isSaved?' bw-bookmarked':'');
+  saveBtn.className='bw-lb-btn bw-lb-btn--save'+(isSaved?' bw-bookmarked':'');
   saveBtn.textContent=isSaved?'★ saved':'☆ save';
+  var inJournal=loadJournal().some(function(e){return e.id===post.id});
+  var journalBtn=document.getElementById('bw-lb-journal');
+  journalBtn.className='bw-lb-btn bw-lb-btn--journal'+(inJournal?' bw-in-journal':'');
+  journalBtn.textContent=inJournal?'✓ in journal':'+ journal';
+  var deleteBtn=document.getElementById('bw-lb-delete');
+  deleteBtn.style.display=isOwn?'':'none';
   document.getElementById('bw-lb-counter').textContent=(_lbIdx+1)+' / '+_lbPosts.length;
 
   var mediaEl=document.getElementById('bw-lb-media');
@@ -1072,17 +1080,6 @@ function initLightbox(){
     if(_lbIdx<_lbPosts.length-1){_lbIdx++;renderLightboxCard();}
   });
 
-  document.getElementById('bw-lb-like').addEventListener('click',function(){
-    var posts=loadPosts();
-    var p=posts.find(function(x){return x.id===_lbPosts[_lbIdx].id});
-    if(!p)return;
-    p.liked=!p.liked;p.likes=p.liked?p.likes+1:p.likes-1;
-    savePosts(posts);
-    _lbPosts[_lbIdx]=p;
-    renderLightboxCard();
-    renderFeed();
-  });
-
   document.getElementById('bw-lb-save').addEventListener('click',function(){
     var savedList=loadSaved();
     var post=_lbPosts[_lbIdx];
@@ -1091,6 +1088,28 @@ function initLightbox(){
     else{savedList.unshift(post);showToast('saved!');}
     saveSaved(savedList);
     renderLightboxCard();
+    renderFeed();renderSaved();
+  });
+
+  document.getElementById('bw-lb-journal').addEventListener('click',function(){
+    var post=_lbPosts[_lbIdx];
+    var journal=loadJournal();
+    var ix=journal.findIndex(function(x){return x.id===post.id});
+    if(ix>=0){journal.splice(ix,1);showToast('removed from journal');}
+    else{journal.unshift(post);showToast('added to journal!');}
+    saveJournal(journal);
+    renderLightboxCard();
+  });
+
+  document.getElementById('bw-lb-delete').addEventListener('click',function(){
+    var post=_lbPosts[_lbIdx];
+    if(!post.own)return;
+    var posts=loadPosts();
+    savePosts(posts.filter(function(x){return x.id!==post.id}));
+    var savedList=loadSaved();
+    saveSaved(savedList.filter(function(x){return x.id!==post.id}));
+    showToast('post deleted');
+    closeLightbox();
     renderFeed();renderSaved();
   });
 
