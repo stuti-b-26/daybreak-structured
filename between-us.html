@@ -1036,10 +1036,11 @@ function holdRepeat(el, action, delay, interval){
 }
 
 /* ── LIGHTBOX ── */
-var _lbPosts=[], _lbIdx=0;
+var _lbPosts=[], _lbIdx=0, _lbContext='feed';
 
 function openLightbox(postId, context){
-  var posts=(context==='saved')?loadSaved():loadPosts();
+  _lbContext=context||'feed';
+  var posts=(_lbContext==='saved')?loadSaved():loadPosts();
   var idx=posts.findIndex(function(p){return p.id===postId;});
   if(idx<0)return;
   _lbPosts=posts;_lbIdx=idx;
@@ -1105,8 +1106,19 @@ function initLightbox(){
     var savedList=loadSaved();
     var post=_lbPosts[_lbIdx];
     var ix=savedList.findIndex(function(x){return x.id===post.id});
-    if(ix>=0){savedList.splice(ix,1);showToast('removed from saved');}
-    else{savedList.unshift(post);showToast('saved!');}
+    if(ix>=0){
+      savedList.splice(ix,1);
+      showToast('removed from saved');
+      /* if viewing saved gallery, remove this post from the lightbox list too */
+      if(_lbContext==='saved'){
+        _lbPosts.splice(_lbIdx,1);
+        if(!_lbPosts.length){closeLightbox();renderSaved();return;}
+        if(_lbIdx>=_lbPosts.length)_lbIdx=_lbPosts.length-1;
+      }
+    } else {
+      savedList.unshift(post);
+      showToast('saved!');
+    }
     saveSaved(savedList);
     renderLightboxCard();
     renderFeed();renderSaved();
