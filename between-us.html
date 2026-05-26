@@ -180,6 +180,7 @@ body{background:#EEE0CC}
 .bw-saved-empty-card p{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#000;line-height:1.65}
 
 /* ── BOTTOM WALL ── */
+.bw-footer-clip{position:relative;overflow:hidden}
 .bw-bottom-wall{width:145vw;line-height:0;position:relative;z-index:0;left:50%;transform:translateX(-50%);overflow:hidden;margin-bottom:-320px}
 .bw-bottom-wall img{width:145vw;height:auto;display:block}
 
@@ -484,17 +485,17 @@ body{background:#EEE0CC}
     </div>
   </section>
 
-  <!-- BOTTOM WALL -->
-  <div class="bw-bottom-wall" aria-hidden="true">
-    <img src="bottom%20wall.svg" alt="">
-  </div>
-
 </main>
 
 <div class="bw-toast" id="bw-toast"></div>
 
 <div class="bw-toast" id="bw-toast"></div>
 
+<div class="bw-footer-clip">
+  <!-- BOTTOM WALL -->
+  <div class="bw-bottom-wall" aria-hidden="true">
+    <img src="bottom%20wall.svg" alt="">
+  </div>
 <!-- FOOTER -->
 <footer id="site-footer">
 
@@ -586,7 +587,7 @@ body{background:#EEE0CC}
   </div>
 
 </footer>
-
+</div><!-- /.bw-footer-clip -->
 
 <button class="fab" id="fab-btn" aria-label="Surprise me">
   <canvas id="fab-canvas" width="60" height="60"></canvas>
