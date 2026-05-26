@@ -16,9 +16,12 @@ body.page-jfy {
   background: #EEE0CB url('wood background.svg') center / cover no-repeat fixed;
 }
 
-/* Header keeps its solid white background — no change needed */
-/* Footer stays solid white above the wood texture */
+/* Header and footer: beige base color */
+body.page-jfy #site-header {
+  background: #EEE0CB;
+}
 body.page-jfy #site-footer {
+  background: #EEE0CB;
   position: relative;
   z-index: 1;
 }
@@ -31,117 +34,112 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
 
 /* ── Just For You main layout ── */
 #page-main.jfy-main {
-  position: relative;
-  /* fills exactly one screen; footer scrolls into view below */
-  height: calc(100dvh - var(--hh));
-  margin-top: var(--hh);
-  overflow: visible;
+  padding-top: var(--hh);
 }
 
-/* ── Central notebook page ── */
+/* 12-column grid container for the notebook */
+.jfy-grid-wrap {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--col-gap);
+  padding: 20px var(--gutter) 46vw;
+}
+
+/* Notebook spans center 10 of 12 columns */
 .jfy-notebook {
-  position: absolute;
-  top: 14px;
-  left: 10px;
-  right: 10px;
-  /* bottom leaves room for props that hang below */
-  bottom: 150px;
+  grid-column: 2 / 12;
+  position: relative;
+  overflow: visible;
+  height: calc(100dvh - var(--hh) - 52vw);
+  min-height: 260px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 4px 28px rgba(0,0,0,0.13);
-  z-index: 0;
+  z-index: 1;
 }
 
-/* ── Craft props – absolutely positioned ── */
-/* pointer-events off so they never block interaction */
-.jfy-washi,
-.jfy-frames,
-.jfy-stickers,
-.jfy-paper,
-.jfy-pen,
-.jfy-scissors { pointer-events: none; position: absolute; }
+/* All props absolutely positioned relative to the notebook */
+.jfy-washi, .jfy-frames,
+.jfy-stickers, .jfy-paper,
+.jfy-pen, .jfy-scissors {
+  position: absolute;
+  pointer-events: none;
+}
 
-/* Washi tape – top-left, overlapping left edge */
+/* ── ABOVE THE NOTEBOOK ── */
 .jfy-washi {
-  top: -10px;
-  left: -30px;
-  width: 38vw;
-  max-width: 160px;
+  top: -9vw;
+  left: -16vw;
+  width: 50vw;
+  max-width: 210px;
   transform: rotate(-8deg);
-  transform-origin: top right;
-  z-index: 3;
+  transform-origin: bottom right;
+  z-index: 2;
 }
-
-/* Frames – top-right, overlapping top-right corner of notebook */
 .jfy-frames {
-  top: -18px;
-  right: -8px;
-  width: 36vw;
-  max-width: 155px;
-  z-index: 3;
-}
-
-/* Stickers – bottom-left, overlapping lower-left of notebook */
-.jfy-stickers {
-  bottom: 110px;
-  left: -12px;
-  width: 28vw;
-  max-width: 120px;
-  z-index: 3;
-}
-
-/* Paper cards – bottom-center, fan below/overlapping notebook bottom */
-.jfy-paper {
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-40%);
-  width: 90vw;
-  max-width: 380px;
+  top: -14vw;
+  right: -12vw;
+  width: 48vw;
+  max-width: 200px;
   z-index: 2;
 }
 
-/* Pen – diagonal over paper, bottom-center-left */
+/* ── BELOW THE NOTEBOOK ── */
+.jfy-stickers {
+  bottom: -14vw;
+  left: -10vw;
+  width: 30vw;
+  max-width: 130px;
+  z-index: 3;
+}
 .jfy-pen {
-  bottom: 60px;
+  bottom: -16vw;
   left: 4vw;
-  width: 44vw;
-  max-width: 190px;
+  width: 48vw;
+  max-width: 200px;
   transform: rotate(-38deg);
   transform-origin: bottom right;
-  z-index: 4;
+  z-index: 3;
 }
-
-/* Scissors – bottom-right, overlapping paper right */
 .jfy-scissors {
-  bottom: 80px;
-  right: 2vw;
+  bottom: -16vw;
+  right: -6vw;
   width: 28vw;
   max-width: 120px;
-  transform: rotate(15deg);
+  transform: rotate(12deg);
   transform-origin: bottom left;
-  z-index: 4;
+  z-index: 3;
+}
+.jfy-paper {
+  bottom: -44vw;
+  left: 50%;
+  transform: translateX(-44%);
+  width: 125%;
+  z-index: 2;
 }
 
 /* ── Tablet ── */
 @media (min-width: 768px) {
-  .jfy-notebook { top: 20px; left: 16px; right: 16px; bottom: 200px; border-radius: 24px; }
-  .jfy-washi    { width: 22vw; max-width: 200px; left: -20px; }
-  .jfy-frames   { width: 22vw; max-width: 200px; right: -10px; }
-  .jfy-stickers { width: 18vw; max-width: 160px; bottom: 150px; }
-  .jfy-paper    { width: 70vw; max-width: 540px; bottom: -30px; }
-  .jfy-pen      { width: 28vw; max-width: 240px; bottom: 90px; }
-  .jfy-scissors { width: 18vw; max-width: 160px; bottom: 110px; }
+  .jfy-grid-wrap { padding-bottom: 32vw; }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); }
+  .jfy-washi     { top: -6vw;  left: -10vw;  width: 34vw; }
+  .jfy-frames    { top: -8vw;  right: -8vw;  width: 32vw; }
+  .jfy-stickers  { bottom: -10vw; left: -6vw;  width: 20vw; }
+  .jfy-pen       { bottom: -12vw; width: 32vw; }
+  .jfy-scissors  { bottom: -12vw; right: -4vw; width: 18vw; }
+  .jfy-paper     { bottom: -30vw; width: 110%; }
 }
 
 /* ── Desktop ── */
 @media (min-width: 1024px) {
-  .jfy-notebook { left: 20px; right: 20px; bottom: 220px; }
-  .jfy-washi    { width: 15vw; max-width: 220px; left: -30px; }
-  .jfy-frames   { width: 15vw; max-width: 220px; }
-  .jfy-stickers { width: 12vw; max-width: 180px; bottom: 170px; }
-  .jfy-paper    { width: 55vw; max-width: 640px; }
-  .jfy-pen      { width: 20vw; max-width: 280px; }
-  .jfy-scissors { width: 12vw; max-width: 180px; }
+  .jfy-grid-wrap { padding-bottom: 300px; }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); }
+  .jfy-washi     { top: -80px;  left: -110px; width: 240px; }
+  .jfy-frames    { top: -100px; right: -70px; width: 230px; }
+  .jfy-stickers  { bottom: -100px; left: -70px;  width: 150px; }
+  .jfy-pen       { bottom: -110px; width: 250px; }
+  .jfy-scissors  { bottom: -110px; right: -30px; width: 130px; }
+  .jfy-paper     { bottom: -290px; width: 105%; }
 }
 </style>
 </head>
@@ -262,16 +260,18 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
 
 <!-- MAIN CONTENT -->
 <main id="page-main" class="jfy-main">
-  <!-- blank notebook page (central anchor) -->
-  <div class="jfy-notebook"></div>
-
-  <!-- craft props scattered around the notebook -->
-  <img class="jfy-washi"    src="washi tape.svg" alt="" aria-hidden="true">
-  <img class="jfy-frames"   src="frames.svg"     alt="" aria-hidden="true">
-  <img class="jfy-stickers" src="stickers.svg"   alt="" aria-hidden="true">
-  <img class="jfy-paper"    src="paper.svg"      alt="" aria-hidden="true">
-  <img class="jfy-pen"      src="pen.svg"        alt="" aria-hidden="true">
-  <img class="jfy-scissors" src="scissors2.svg"  alt="" aria-hidden="true">
+  <div class="jfy-grid-wrap">
+    <div class="jfy-notebook">
+      <!-- above the page -->
+      <img class="jfy-washi"    src="washi tape.svg" alt="" aria-hidden="true">
+      <img class="jfy-frames"   src="frames.svg"     alt="" aria-hidden="true">
+      <!-- below the page -->
+      <img class="jfy-stickers" src="stickers.svg"   alt="" aria-hidden="true">
+      <img class="jfy-pen"      src="pen.svg"        alt="" aria-hidden="true">
+      <img class="jfy-scissors" src="scissors2.svg"  alt="" aria-hidden="true">
+      <img class="jfy-paper"    src="paper.svg"      alt="" aria-hidden="true">
+    </div>
+  </div>
 </main>
 
 <!-- FOOTER -->
