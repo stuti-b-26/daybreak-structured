@@ -37,12 +37,13 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
   padding-top: var(--hh);
 }
 
-/* 12-column grid; top pad = space for above-notebook props; bottom pad = space for below-notebook props */
 .jfy-grid-wrap {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   column-gap: var(--col-gap);
-  padding: 20vw var(--gutter) 32vw;
+  /* top: clears fixed header + space for above-notebook props
+     bottom: space for stickers/pen/scissors */
+  padding: 17vw var(--gutter) 30vw;
 }
 
 /* Notebook: center 10 of 12 columns */
@@ -50,8 +51,7 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
   grid-column: 2 / 12;
   position: relative;
   overflow: visible;
-  /* fill most of the viewport between the above/below prop spaces */
-  height: calc(100dvh - var(--hh) - 56vw);
+  height: calc(100dvh - var(--hh) - 50vw);
   min-height: 240px;
   background: #fff;
   border-radius: 18px;
@@ -59,62 +59,63 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
   z-index: 1;
 }
 
-/* All props abs-positioned relative to the notebook */
 .jfy-washi, .jfy-frames,
 .jfy-stickers, .jfy-pen, .jfy-scissors {
   position: absolute;
   pointer-events: none;
 }
 
-/* ── ABOVE THE NOTEBOOK ── */
+/* ── ABOVE ── */
+/* Washi tape: ~40% of screen, top-left, slightly off edge */
 .jfy-washi {
-  top: -18vw;
-  left: -16vw;
-  width: 52vw;
-  max-width: 210px;
+  top: -14vw;
+  left: -14vw;
+  width: 40vw;
+  max-width: 160px;
   transform: rotate(-8deg);
   transform-origin: bottom right;
   z-index: 2;
 }
+/* Frames: ~36% of screen, top-right */
 .jfy-frames {
-  top: -16vw;
-  right: -12vw;
-  width: 48vw;
-  max-width: 200px;
+  top: -12vw;
+  right: -10vw;
+  width: 36vw;
+  max-width: 145px;
   z-index: 2;
 }
 
-/* ── BELOW THE NOTEBOOK ── */
-/* Stickers: left */
+/* ── BELOW ── */
+/* Stickers: ~20% of screen, left */
 .jfy-stickers {
-  bottom: -16vw;
-  left: -12vw;
-  width: 28vw;
-  max-width: 120px;
+  bottom: -14vw;
+  left: -10vw;
+  width: 22vw;
+  max-width: 90px;
   z-index: 3;
 }
-/* Pen: centered, near-vertical */
+/* Pen: thin and long, centered, ~25deg from vertical */
 .jfy-pen {
-  bottom: -28vw;
+  bottom: -26vw;
   left: 50%;
-  transform: translateX(-50%) rotate(-18deg);
+  transform: translateX(-50%) rotate(-25deg);
   transform-origin: top center;
-  width: 13vw;
-  max-width: 55px;
+  width: 11vw;
+  max-width: 46px;
   z-index: 4;
 }
-/* Scissors: right */
+/* Scissors: ~22% of screen, right */
 .jfy-scissors {
-  bottom: -16vw;
-  right: -8vw;
-  width: 26vw;
-  max-width: 110px;
-  transform: rotate(20deg);
+  bottom: -13vw;
+  right: -6vw;
+  width: 22vw;
+  max-width: 92px;
+  transform: rotate(18deg);
   transform-origin: bottom left;
   z-index: 3;
 }
 
-/* Paper: in document flow — visible on scroll, below the pen */
+/* Paper: in document flow, centered, scroll to see */
 .jfy-paper-wrap {
   display: flex;
   justify-content: center;
@@ -123,32 +124,32 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
 }
 .jfy-paper {
   display: block;
-  width: 90vw;
-  max-width: 420px;
+  width: 88vw;
+  max-width: 380px;
 }
 
 /* ── Tablet ── */
 @media (min-width: 768px) {
-  .jfy-grid-wrap { padding-top: 13vw; padding-bottom: 24vw; }
-  .jfy-notebook  { height: calc(100dvh - var(--hh) - 40vw); }
-  .jfy-washi     { top: -10vw; left: -10vw; width: 34vw; }
-  .jfy-frames    { top: -10vw; right: -8vw;  width: 32vw; }
-  .jfy-stickers  { bottom: -12vw; left: -6vw;  width: 20vw; }
-  .jfy-pen       { bottom: -20vw; width: 9vw; max-width: 70px; }
-  .jfy-scissors  { bottom: -12vw; right: -4vw; width: 18vw; }
-  .jfy-paper     { width: 70vw; }
+  .jfy-grid-wrap { padding-top: 12vw; padding-bottom: 22vw; }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); }
+  .jfy-washi     { top: -10vw; left: -8vw;  width: 28vw; max-width: 200px; }
+  .jfy-frames    { top: -8vw;  right: -6vw; width: 26vw; max-width: 190px; }
+  .jfy-stickers  { bottom: -10vw; left: -5vw; width: 16vw; max-width: 130px; }
+  .jfy-pen       { bottom: -17vw; width: 8vw; max-width: 60px; }
+  .jfy-scissors  { bottom: -10vw; right: -3vw; width: 16vw; max-width: 130px; }
+  .jfy-paper     { width: 68vw; }
 }
 
 /* ── Desktop ── */
 @media (min-width: 1024px) {
-  .jfy-grid-wrap { padding-top: 110px; padding-bottom: 200px; }
-  .jfy-notebook  { height: calc(100dvh - var(--hh) - 380px); }
-  .jfy-washi     { top: -90px;  left: -110px; width: 240px; }
-  .jfy-frames    { top: -100px; right: -70px; width: 230px; }
-  .jfy-stickers  { bottom: -110px; left: -70px;  width: 150px; }
-  .jfy-pen       { bottom: -150px; width: 55px; max-width: 55px; }
-  .jfy-scissors  { bottom: -110px; right: -30px; width: 130px; }
-  .jfy-paper     { width: 580px; }
+  .jfy-grid-wrap { padding-top: 110px; padding-bottom: 180px; }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); }
+  .jfy-washi     { top: -85px;  left: -95px;  width: 210px; }
+  .jfy-frames    { top: -90px;  right: -65px; width: 200px; }
+  .jfy-stickers  { bottom: -95px; left: -55px;  width: 120px; }
+  .jfy-pen       { bottom: -140px; width: 50px; }
+  .jfy-scissors  { bottom: -95px; right: -25px; width: 120px; }
+  .jfy-paper     { width: 560px; }
 }
 </style>
 </head>
