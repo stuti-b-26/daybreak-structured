@@ -92,8 +92,15 @@ body.jfy-sticker-active .jfy-stickers {
   border-radius: 18px;
   overflow: hidden;
   z-index: 10;
-  pointer-events: none; /* canvas/layer handles it; children opt-in below */
+  /* always auto: placement tools need empty-space clicks to reach this layer */
+  pointer-events: auto;
 }
+
+#jfy-canvas {
+  /* sits above all placed HTML elements; pointer-events toggled by JS */
+  z-index: 100;
+}
+
 /* placed elements are always interactive regardless of active tool */
 .jfy-text-node-wrap,
 .jfy-polaroid,
@@ -134,6 +141,7 @@ body.jfy-sticker-active .jfy-stickers {
   height: 100%;
   pointer-events: none;
   display: block;
+  /* z-index: 100 declared above, keeps canvas visually above placed elements */
 }
 #jfy-canvas.draw-active { pointer-events: auto; cursor: crosshair; }
 
@@ -981,15 +989,10 @@ function initCanvas(){
   var W = canvas.offsetWidth, H = canvas.offsetHeight;
   if(!W||!H) return;
   var dpr = window.devicePixelRatio||1;
-  var prev = null;
-  if(drawCmds.length){ // save existing content
-    prev = document.createElement('canvas');
-    prev.width = canvas.width; prev.height = canvas.height;
-    prev.getContext('2d').drawImage(canvas,0,0);
-  }
   canvas.width  = Math.round(W*dpr);
   canvas.height = Math.round(H*dpr);
-  ctx.scale(dpr,dpr);
+  // setTransform resets any previous scale before applying the new one
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   redrawAll();
 }
 if(window.ResizeObserver){
@@ -1200,13 +1203,14 @@ var panels = {
 
 function closeAll(){
   Object.keys(panels).forEach(function(k){ if(panels[k]) panels[k].classList.remove('open'); });
+  if(typeof hideTextToolbar==='function') hideTextToolbar();
 }
 
 function setTool(tool){
   S.tool = tool;
-  // canvas pointer events only for drawing tools
   canvas.classList.toggle('draw-active', tool==='washi'||tool==='doodle');
   document.body.classList.toggle('jfy-sticker-active', tool==='stickers');
+  if(tool && typeof hideTextToolbar==='function') hideTextToolbar();
 }
 
 function openPanel(key, andSetTool){
@@ -1458,10 +1462,10 @@ function placeTextBox(e){
   setTimeout(function(){ txt.focus(); }, 10);
 }
 
-/* clicking an existing text node while in write mode focuses it */
+/* clicking any placed text node focuses it for editing — regardless of active tool */
 nbLayer.addEventListener('click', function(e){
   var tw = e.target.closest('.jfy-text-node-wrap');
-  if(tw && S.tool==='write'){
+  if(tw){
     var t=tw.querySelector('.jfy-text-node');
     if(t){ t.focus(); }
   }
@@ -1472,6 +1476,7 @@ function makeResizable(el){
   corner.style.cssText='position:absolute;right:0;bottom:0;width:12px;height:12px;cursor:se-resize;z-index:20;background:rgba(154,89,200,0.3);border-radius:2px;';
   corner.addEventListener('mousedown', function(e){
     e.stopPropagation(); e.preventDefault();
+    _drag.active = false; // don't let drag manager interfere while resizing
     var startX=e.clientX, startY=e.clientY;
     var startW=el.offsetWidth, startH=el.offsetHeight;
     function onMove(ev){
@@ -1558,30 +1563,40 @@ function placeSticker(e){
   nbLayer.appendChild(node);
 }
 
-/* ── DRAG HELPER ── */
+/* ── GLOBAL DRAG MANAGER ── */
+/* Single document-level pair of listeners; no accumulation with many placed items */
+var _drag = { active: false, mover: null, offX: 0, offY: 0 };
+
+document.addEventListener('mousemove', function(e){
+  if(!_drag.active) return;
+  var nr = nbLayer.getBoundingClientRect();
+  _drag.mover.style.left = (e.clientX - nr.left - _drag.offX) + 'px';
+  _drag.mover.style.top  = (e.clientY - nr.top  - _drag.offY) + 'px';
+});
+document.addEventListener('mouseup', function(){
+  if(_drag.active){
+    _drag.mover.style.zIndex = '';
+    _drag.active = false;
+    _drag.mover  = null;
+  }
+});
+
 function makeDraggable(handle, mover){
-  var dragging=false, offX=0, offY=0;
-  handle.addEventListener('mousedown',function(e){
-    /* skip if click is on interactive child */
+  handle.addEventListener('mousedown', function(e){
+    /* skip interactive children */
     if(e.target.closest && (
       e.target.closest('.ph-add-btn') ||
-      e.target.closest('input') ||
+      e.target.closest('input[type=file]') ||
+      e.target.closest('.ph-caption') ||
       e.target.closest('.jfy-text-node')
     )) return;
     e.preventDefault(); e.stopPropagation();
-    dragging=true;
-    var mr=mover.getBoundingClientRect();
-    offX=e.clientX-mr.left; offY=e.clientY-mr.top;
-    mover.style.zIndex=30;
-  });
-  document.addEventListener('mousemove',function(e){
-    if(!dragging) return;
-    var nr = nbLayer.getBoundingClientRect();
-    mover.style.left = (e.clientX-nr.left-offX)+'px';
-    mover.style.top  = (e.clientY-nr.top -offY)+'px';
-  });
-  document.addEventListener('mouseup',function(){
-    if(dragging){ dragging=false; mover.style.zIndex=''; }
+    var mr = mover.getBoundingClientRect();
+    _drag.active = true;
+    _drag.mover  = mover;
+    _drag.offX   = e.clientX - mr.left;
+    _drag.offY   = e.clientY - mr.top;
+    mover.style.zIndex = 30;
   });
 }
 
