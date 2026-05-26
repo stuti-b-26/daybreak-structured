@@ -165,16 +165,30 @@ body.jfy-scissors-active .jfy-scissors {
 }
 
 /* paper pattern/size picker */
-.jfy-pattern-row, .jfy-size-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-.jfy-pattern-btn, .jfy-size-btn {
+.jfy-size-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.jfy-size-btn {
   padding: 6px 12px; border: 2px solid #e5e5e5; border-radius: 10px;
   background: #fafafa; cursor: pointer; font-size: 12px; font-weight: 600;
   font-family: inherit; transition: border-color 0.12s, background 0.12s;
   white-space: nowrap;
 }
-.jfy-pattern-btn:hover, .jfy-size-btn:hover { border-color: #c8a4e4; }
-.jfy-pattern-btn.active, .jfy-size-btn.active { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
+.jfy-size-btn:hover { border-color: #c8a4e4; }
+.jfy-size-btn.active { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
 .jfy-panel-row-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+
+/* pattern picker: canvas thumbnail grid */
+.jfy-pattern-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.jfy-pattern-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  border: 2px solid #e5e5e5; border-radius: 10px; background: #fafafa;
+  cursor: pointer; padding: 6px 8px; transition: border-color 0.12s, background 0.12s;
+  font-family: inherit;
+}
+.jfy-pattern-btn:hover { border-color: #c8a4e4; }
+.jfy-pattern-btn.active { border-color: #9A59C8; background: #f3eafa; }
+.jfy-pattern-btn canvas { display: block; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.jfy-pattern-btn span { font-size: 10px; font-weight: 600; color: #888; letter-spacing: 0.03em; }
+.jfy-pattern-btn.active span { color: #9A59C8; }
 
 /* ── Tool panels — bottom-center, never over notebook ── */
 .jfy-tool-panel {
@@ -804,20 +818,14 @@ body.jfy-scissors-active .jfy-scissors {
   <button class="jfy-panel-close" aria-label="Close">×</button>
   <h3>paper</h3>
   <p class="jfy-panel-row-label">pattern</p>
-  <div class="jfy-pattern-row">
-    <button class="jfy-pattern-btn active" data-pattern="lined">lined</button>
-    <button class="jfy-pattern-btn" data-pattern="dotted">dotted</button>
-    <button class="jfy-pattern-btn" data-pattern="grid">grid</button>
-    <button class="jfy-pattern-btn" data-pattern="blank">blank</button>
-    <button class="jfy-pattern-btn" data-pattern="kraft">kraft</button>
-  </div>
+  <div class="jfy-pattern-row" id="jfy-pattern-row"></div>
   <p class="jfy-panel-row-label">size</p>
   <div class="jfy-size-row">
     <button class="jfy-size-btn" data-size="small">small</button>
     <button class="jfy-size-btn active" data-size="medium">medium</button>
     <button class="jfy-size-btn" data-size="large">large</button>
   </div>
-  <p class="jfy-tool-hint">click on the notebook to place paper. use scissors to cut it.</p>
+  <p class="jfy-tool-hint">click on the notebook to place. use scissors to cut to shape.</p>
 </div>
 
 <div id="jfy-scissors-panel" class="jfy-tool-panel" role="dialog" aria-label="Scissors">
@@ -1694,15 +1702,53 @@ var selectedPaperSize    = 'medium';
 var PAPER_SIZES = { small:{w:130,h:170}, medium:{w:200,h:260}, large:{w:280,h:360} };
 
 (function setupPaperPanel(){
+  var row = document.getElementById('jfy-pattern-row');
+  if(!row) return;
+
+  var PATTERNS = [
+    { key:'lined',  label:'lined' },
+    { key:'dotted', label:'dotted' },
+    { key:'grid',   label:'grid' },
+    { key:'blank',  label:'blank' },
+    { key:'kraft',  label:'kraft' },
+    { key:'music',  label:'music' },
+    { key:'checks', label:'checks' },
+  ];
+
+  var TW = 54, TH = 70; // thumbnail dimensions in CSS px
+  var dpr = window.devicePixelRatio || 1;
+
+  PATTERNS.forEach(function(p, i){
+    var btn = document.createElement('button');
+    btn.className = 'jfy-pattern-btn' + (i===0 ? ' active' : '');
+    btn.dataset.pattern = p.key;
+
+    /* canvas thumbnail preview */
+    var tc = document.createElement('canvas');
+    tc.width  = Math.round(TW * dpr);
+    tc.height = Math.round(TH * dpr);
+    tc.style.width  = TW + 'px';
+    tc.style.height = TH + 'px';
+    drawPaperPattern(tc.getContext('2d'), TW, TH, p.key);
+
+    var lbl = document.createElement('span');
+    lbl.textContent = p.label;
+
+    btn.appendChild(tc);
+    btn.appendChild(lbl);
+
+    btn.addEventListener('click', function(){
+      row.querySelectorAll('.jfy-pattern-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedPaperPattern = p.key;
+    });
+
+    row.appendChild(btn);
+  });
+
+  /* size buttons */
   var pp = document.getElementById('jfy-paper-panel');
   if(!pp) return;
-  pp.querySelectorAll('.jfy-pattern-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      pp.querySelectorAll('.jfy-pattern-btn').forEach(function(b){b.classList.remove('active')});
-      btn.classList.add('active');
-      selectedPaperPattern = btn.dataset.pattern;
-    });
-  });
   pp.querySelectorAll('.jfy-size-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
       pp.querySelectorAll('.jfy-size-btn').forEach(function(b){b.classList.remove('active')});
@@ -1742,6 +1788,31 @@ function drawPaperPattern(pctx, w, h, pattern){
       for(var k=0;k<600;k++){
         pctx.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1);
       }
+      break;
+    case 'music':
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='rgba(60,60,60,0.35)'; pctx.lineWidth=0.7;
+      /* groups of 5 staff lines with gaps between */
+      var staffSpacing=8, groupH=staffSpacing*4, groupGap=18;
+      var ym=10;
+      while(ym+groupH<h){
+        for(var s=0;s<5;s++){
+          var sy=ym+s*staffSpacing;
+          pctx.beginPath();pctx.moveTo(0,sy);pctx.lineTo(w,sy);pctx.stroke();
+        }
+        ym+=groupH+groupGap;
+      }
+      break;
+    case 'checks':
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      var cs=18;
+      pctx.fillStyle='rgba(154,89,200,0.08)';
+      for(var cr=0;cr<Math.ceil(h/cs);cr++) for(var cc=0;cc<Math.ceil(w/cs);cc++){
+        if((cr+cc)%2===0) pctx.fillRect(cc*cs,cr*cs,cs,cs);
+      }
+      pctx.strokeStyle='rgba(154,89,200,0.15)'; pctx.lineWidth=0.5;
+      for(var cy=0;cy<=h;cy+=cs){ pctx.beginPath();pctx.moveTo(0,cy);pctx.lineTo(w,cy);pctx.stroke(); }
+      for(var cx=0;cx<=w;cx+=cs){ pctx.beginPath();pctx.moveTo(cx,0);pctx.lineTo(cx,h);pctx.stroke(); }
       break;
     default: // blank
       pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
