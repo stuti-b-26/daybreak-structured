@@ -13,7 +13,7 @@
 /* ── Just For You page overrides ── */
 body.page-jfy {
   --yellow: #9A59C8;
-  background: #EEE0CB url('wood background.svg') center / cover no-repeat fixed;
+  background: #EEE0CB url('wood background.svg') center / cover no-repeat;
 }
 
 /* Header and footer: beige base color */
@@ -25,6 +25,12 @@ body.page-jfy #site-footer {
   position: relative;
   z-index: 1;
 }
+
+/* Hide decorative blobs/scribbles not used on this page */
+body.page-jfy #pink-blob,
+body.page-jfy #orange-blob,
+body.page-jfy #teal-blob,
+body.page-jfy #yellow-blob { display: none; }
 
 /* Purple overrides: nav sun, mobile menu, profile btn, dropdown active */
 body.page-jfy .nav-sun { background: #9A59C8; }
