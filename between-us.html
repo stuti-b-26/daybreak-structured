@@ -76,17 +76,6 @@ body{background:#EEE0CC}
   height:auto;
   background:#5a5c47; /* fallback while SVG loads */
 }
-/* tile <img> — centered at 140% so rock always fills edge-to-edge */
-.bw-post-tile{
-  position:absolute;
-  top:50%;left:50%;
-  width:140%;height:140%;
-  transform:translate(-50%,-50%);
-  object-fit:fill;
-  display:block;
-  pointer-events:none;
-  z-index:0;
-}
 .bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #1a1a1a}
 .bw-post-card:hover,.bw-post-card--own:hover{box-shadow:7px 7px 0 0 #1a1a1a}
 .bw-post-card::before,.bw-post-card::after{display:none}
@@ -919,13 +908,10 @@ function renderCard(post, isOwn, idx, showJournal, context){
   var fc=isOwn?8:postColorIndex(post.id);
   if(!isOwn)card.dataset.fc=fc;
 
-  /* tile image covers the card completely — no page background bleed */
-  var tileImg=document.createElement('img');
-  tileImg.src='moss-tile-'+(fc+1)+'.svg';
-  tileImg.alt='';
-  tileImg.setAttribute('aria-hidden','true');
-  tileImg.className='bw-post-tile';
-  card.appendChild(tileImg);
+  /* tile as background-image: always covers 100% of card, no img positioning bugs */
+  card.style.backgroundImage='url("moss-tile-'+(fc+1)+'.svg")';
+  card.style.backgroundSize='150% 150%';
+  card.style.backgroundPosition='center';
 
   var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>';
   var mediaEl='';
@@ -952,7 +938,6 @@ function renderCard(post, isOwn, idx, showJournal, context){
     '</div>';
 
   card.innerHTML=tagEl+mediaEl+textEl+footerEl;
-  card.insertBefore(tileImg, card.firstChild);
 
   card.querySelector('.bw-post-save-btn').addEventListener('click', function(e){
     e.stopPropagation();
