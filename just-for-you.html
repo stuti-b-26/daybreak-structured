@@ -1136,54 +1136,59 @@ function drawWashi(x1,y1,x2,y2,col,preview,tapeW){
   if(len < 2) return;
   tapeW = tapeW || washibWidth;
 
-  // Unit vector along the tape, perpendicular for width
+  // Unit vector along tape; perpendicular unit vector for width
   var ux = dx/len, uy = dy/len;
-  var px = -uy, py = ux; // perpendicular
+  var nx = -uy,   ny =  ux; // perpendicular (rotated 90°)
+  var hw = tapeW / 2;
 
-  var hw = tapeW/2;
-  // Four corners of the tape strip
-  var c0x = x1 + px*hw, c0y = y1 + py*hw;
-  var c1x = x1 - px*hw, c1y = y1 - py*hw;
-  var c2x = x2 - px*hw, c2y = y2 - py*hw;
-  var c3x = x2 + px*hw, c3y = y2 + py*hw;
+  // Four corners of the parallelogram strip
+  var c0x = x1 + nx*hw, c0y = y1 + ny*hw;
+  var c1x = x1 - nx*hw, c1y = y1 - ny*hw;
+  var c2x = x2 - nx*hw, c2y = y2 - ny*hw;
+  var c3x = x2 + nx*hw, c3y = y2 + ny*hw;
+
+  function buildPath(){
+    ctx.beginPath();
+    ctx.moveTo(c0x,c0y);
+    ctx.lineTo(c3x,c3y);
+    ctx.lineTo(c2x,c2y);
+    ctx.lineTo(c1x,c1y);
+    ctx.closePath();
+  }
 
   ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(c0x,c0y); ctx.lineTo(c1x,c1y);
-  ctx.lineTo(c2x,c2y); ctx.lineTo(c3x,c3y);
-  ctx.closePath();
-  ctx.clip();
-
+  buildPath();
   ctx.fillStyle = col.rgba;
   ctx.fill();
 
-  // Diagonal stripes perpendicular to the tape angle (always 45° to strip)
-  ctx.strokeStyle = col.rgba.replace(/[\d.]+\)$/,'0.22)');
+  // Diagonal stripes: lines parallel to the tape's length axis, spaced across width
+  ctx.save();
+  buildPath();
+  ctx.clip();
+  ctx.strokeStyle = col.rgba.replace(/[\d.]+\)$/,'0.25)');
   ctx.lineWidth = 1.5;
-  // Stripe along the perpendicular direction, over length+width span
   var span = len + tapeW * 2;
   for(var i = -tapeW; i < span; i += WASHI_STRIPE_SPACING){
-    var sx = x1 + ux*i + px*hw*2;
-    var sy = y1 + uy*i + py*hw*2;
-    var ex = x1 + ux*i - px*hw*2;
-    var ey = y1 + uy*i - py*hw*2;
+    // Each stripe runs perpendicular to the tape (across the width)
+    var ax = x1 + ux*i + nx*(hw+2);
+    var ay = y1 + uy*i + ny*(hw+2);
+    var bx = x1 + ux*i - nx*(hw+2);
+    var by = y1 + uy*i - ny*(hw+2);
     ctx.beginPath();
-    ctx.moveTo(sx, sy);
-    ctx.lineTo(ex, ey);
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
     ctx.stroke();
   }
+  ctx.restore();
 
   ctx.restore();
 
   if(preview){
     ctx.save();
+    buildPath();
     ctx.strokeStyle = col.solid;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4,4]);
-    ctx.beginPath();
-    ctx.moveTo(c0x,c0y); ctx.lineTo(c1x,c1y);
-    ctx.lineTo(c2x,c2y); ctx.lineTo(c3x,c3y);
-    ctx.closePath();
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.restore();
