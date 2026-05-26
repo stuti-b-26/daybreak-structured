@@ -61,53 +61,45 @@ body{background:#EEE0CC}
 .bw-scroll-btn:disabled{opacity:.5;cursor:default;pointer-events:none}
 .bw-scroll-btn--left{left:8px}
 .bw-scroll-btn--right{right:8px}
-/* ── POST CARDS: MOSS-COVERED ROCKS ── */
+/* ── POST CARDS: MOSS ROCK TILES ── */
 .bw-post-card{width:100%;box-sizing:border-box}
-.bw-post-card{border:3px solid #4a4a4a;border-radius:22px 16px 20px 18px;padding:16px 14px 10px;box-shadow:5px 5px 0 0 #2a2a2a;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s,box-shadow .15s;overflow:hidden;position:relative;height:auto;
-  background:linear-gradient(148deg,#787878 0%,#5a5a5a 40%,#6e6e6e 70%,#4a4a4a 100%)}
-/* mossy texture: ::before = grey rock sheen, ::after = green moss patches */
-.bw-post-card::before{content:'';position:absolute;inset:0;border-radius:inherit;
-  background:radial-gradient(ellipse at 25% 20%,rgba(255,255,255,.18) 0%,transparent 45%),
-             radial-gradient(ellipse at 80% 80%,rgba(0,0,0,.22) 0%,transparent 50%),
-             radial-gradient(ellipse at 55% 50%,rgba(0,0,0,.08) 0%,transparent 60%);
-  pointer-events:none;z-index:0}
-.bw-post-card::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse at 70% 15%,rgba(80,140,40,.55) 0%,transparent 38%),
-             radial-gradient(ellipse at 20% 75%,rgba(60,110,25,.5) 0%,transparent 32%),
-             radial-gradient(ellipse at 50% 90%,rgba(100,160,50,.35) 0%,transparent 28%)}
+.bw-post-card{
+  border:none;
+  border-radius:18px;
+  padding:16px 14px 10px;
+  box-shadow:5px 5px 0 0 #2a2a2a;
+  display:flex;flex-direction:column;gap:6px;
+  cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  overflow:hidden;
+  position:relative;
+  height:auto;
+  background-image:url('moss%20tile%201.svg');
+  background-size:100% 100%;
+  background-repeat:no-repeat;
+}
+.bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #1a1a1a}
+/* cycle through all 9 tile variants */
+.bw-post-card[data-fc="0"]{background-image:url('moss%20tile%201.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="1"]{background-image:url('moss%20tile%202.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="2"]{background-image:url('moss%20tile%203.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="3"]{background-image:url('moss%20tile%204.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="4"]{background-image:url('moss%20tile%205.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="5"]{background-image:url('moss%20tile%206.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="6"]{background-image:url('moss%20tile%207.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="7"]{background-image:url('moss%20tile%208.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card[data-fc="8"]{background-image:url('moss%20tile%209.svg');box-shadow:5px 5px 0 0 #2a2a2a}
+.bw-post-card--own{background-image:url('moss%20tile%209.svg')!important;box-shadow:5px 5px 0 0 #2a2a2a!important}
+.bw-post-card[data-fc="0"]:hover,.bw-post-card[data-fc="1"]:hover,.bw-post-card[data-fc="2"]:hover,
+.bw-post-card[data-fc="3"]:hover,.bw-post-card[data-fc="4"]:hover,.bw-post-card[data-fc="5"]:hover,
+.bw-post-card[data-fc="6"]:hover,.bw-post-card[data-fc="7"]:hover,.bw-post-card--own:hover{box-shadow:7px 7px 0 0 #1a1a1a}
+/* dark semi-transparent overlay so text is always readable over the stone */
+.bw-post-card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(0,0,0,.28);pointer-events:none;z-index:0}
+.bw-post-card::after{display:none}
 .bw-post-card>*{position:relative;z-index:1}
-.bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #2a2a2a}
-/* per-slot variants: shift the grey tone and reposition moss patches for variety */
-.bw-post-card[data-fc="0"]{background:linear-gradient(135deg,#6e6e6e 0%,#505050 45%,#686868 100%);border-color:#3a3a3a;box-shadow:5px 5px 0 0 #242424}
-.bw-post-card[data-fc="0"]::after{background:radial-gradient(ellipse at 65% 20%,rgba(70,130,30,.6) 0%,transparent 35%),radial-gradient(ellipse at 15% 70%,rgba(55,105,20,.5) 0%,transparent 30%),radial-gradient(ellipse at 45% 85%,rgba(90,150,40,.4) 0%,transparent 25%)}
-.bw-post-card[data-fc="0"]:hover{box-shadow:7px 7px 0 0 #242424}
-.bw-post-card[data-fc="1"]{background:linear-gradient(160deg,#828282 0%,#606060 50%,#4e4e4e 100%);border-color:#525252;box-shadow:5px 5px 0 0 #303030}
-.bw-post-card[data-fc="1"]::after{background:radial-gradient(ellipse at 30% 10%,rgba(90,150,40,.65) 0%,transparent 40%),radial-gradient(ellipse at 80% 60%,rgba(65,115,25,.5) 0%,transparent 35%),radial-gradient(ellipse at 55% 95%,rgba(80,140,35,.3) 0%,transparent 22%)}
-.bw-post-card[data-fc="1"]:hover{box-shadow:7px 7px 0 0 #303030}
-.bw-post-card[data-fc="2"]{background:linear-gradient(120deg,#757575 0%,#585858 40%,#727272 80%,#484848 100%);border-color:#484848;box-shadow:5px 5px 0 0 #2c2c2c}
-.bw-post-card[data-fc="2"]::after{background:radial-gradient(ellipse at 85% 25%,rgba(75,135,35,.55) 0%,transparent 38%),radial-gradient(ellipse at 25% 55%,rgba(95,155,45,.5) 0%,transparent 30%),radial-gradient(ellipse at 60% 80%,rgba(60,110,25,.45) 0%,transparent 28%)}
-.bw-post-card[data-fc="2"]:hover{box-shadow:7px 7px 0 0 #2c2c2c}
-.bw-post-card[data-fc="3"]{background:linear-gradient(170deg,#7a7a7a 0%,#545454 55%,#666666 100%);border-color:#404040;box-shadow:5px 5px 0 0 #282828}
-.bw-post-card[data-fc="3"]::after{background:radial-gradient(ellipse at 40% 15%,rgba(85,145,38,.6) 0%,transparent 42%),radial-gradient(ellipse at 75% 70%,rgba(58,108,22,.5) 0%,transparent 33%),radial-gradient(ellipse at 20% 88%,rgba(100,160,50,.35) 0%,transparent 26%)}
-.bw-post-card[data-fc="3"]:hover{box-shadow:7px 7px 0 0 #282828}
-.bw-post-card[data-fc="4"]{background:linear-gradient(140deg,#7e7e7e 0%,#5c5c5c 42%,#6a6a6a 75%,#4c4c4c 100%);border-color:#464646;box-shadow:5px 5px 0 0 #2e2e2e}
-.bw-post-card[data-fc="4"]::after{background:radial-gradient(ellipse at 55% 12%,rgba(70,130,30,.5) 0%,transparent 36%),radial-gradient(ellipse at 10% 60%,rgba(88,148,42,.55) 0%,transparent 32%),radial-gradient(ellipse at 80% 88%,rgba(62,112,28,.4) 0%,transparent 27%)}
-.bw-post-card[data-fc="4"]:hover{box-shadow:7px 7px 0 0 #2e2e2e}
-.bw-post-card[data-fc="5"]{background:linear-gradient(155deg,#6a6a6a 0%,#4e4e4e 48%,#5e5e5e 100%);border-color:#3e3e3e;box-shadow:5px 5px 0 0 #262626}
-.bw-post-card[data-fc="5"]::after{background:radial-gradient(ellipse at 20% 20%,rgba(95,155,45,.6) 0%,transparent 40%),radial-gradient(ellipse at 70% 55%,rgba(72,132,32,.5) 0%,transparent 34%),radial-gradient(ellipse at 40% 90%,rgba(85,145,38,.38) 0%,transparent 26%)}
-.bw-post-card[data-fc="5"]:hover{box-shadow:7px 7px 0 0 #262626}
-.bw-post-card[data-fc="6"]{background:linear-gradient(128deg,#808080 0%,#626262 44%,#747474 78%,#505050 100%);border-color:#4c4c4c;box-shadow:5px 5px 0 0 #323232}
-.bw-post-card[data-fc="6"]::after{background:radial-gradient(ellipse at 75% 18%,rgba(78,138,36,.58) 0%,transparent 37%),radial-gradient(ellipse at 28% 65%,rgba(68,128,28,.52) 0%,transparent 31%),radial-gradient(ellipse at 55% 92%,rgba(98,158,48,.36) 0%,transparent 25%)}
-.bw-post-card[data-fc="6"]:hover{box-shadow:7px 7px 0 0 #323232}
-.bw-post-card[data-fc="7"]{background:linear-gradient(145deg,#727272 0%,#565656 46%,#686868 76%,#464646 100%);border-color:#424242;box-shadow:5px 5px 0 0 #2a2a2a}
-.bw-post-card[data-fc="7"]::after{background:radial-gradient(ellipse at 60% 22%,rgba(82,142,38,.62) 0%,transparent 39%),radial-gradient(ellipse at 18% 72%,rgba(63,113,26,.52) 0%,transparent 33%),radial-gradient(ellipse at 85% 85%,rgba(94,154,46,.38) 0%,transparent 27%)}
-.bw-post-card[data-fc="7"]:hover{box-shadow:7px 7px 0 0 #2a2a2a}
-.bw-post-card--own{background:linear-gradient(148deg,#5a6e48 0%,#3e5230 50%,#4e6238 100%)!important;border-color:#2a3e18!important;box-shadow:5px 5px 0 0 #1e3010!important}
-.bw-post-card--own::after{background:radial-gradient(ellipse at 60% 20%,rgba(120,180,60,.5) 0%,transparent 35%),radial-gradient(ellipse at 20% 75%,rgba(100,160,45,.45) 0%,transparent 30%)!important}
-.bw-post-card--own:hover{box-shadow:7px 7px 0 0 #1e3010!important}
-.bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:999px;background:rgba(180,220,120,.85);color:#1a2e08;width:fit-content;flex-shrink:0}
-.bw-post-tag--own{background:rgba(160,210,100,.85);color:#1a2e08}
-.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;line-height:1.55;color:#eef2e8;overflow:hidden;flex:1 1 auto}
+.bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.25);color:#fff;width:fit-content;flex-shrink:0;backdrop-filter:blur(2px)}
+.bw-post-tag--own{background:rgba(255,255,255,.3);color:#fff}
+.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;line-height:1.55;color:#f5f0e8;overflow:hidden;flex:1 1 auto;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .bw-post-media{width:100%;object-fit:cover;border-radius:10px;display:block}
 .bw-post-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-shrink:0}
 .bw-post-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
@@ -917,7 +909,7 @@ function showToast(msg){
 
 /* estimate rendered height for a card at a given pixel width */
 
-var FRAME_COLORS=8;
+var FRAME_COLORS=9;
 function postColorIndex(id){
   /* deterministic hash of the post id string → 0..FRAME_COLORS-1 */
   var h=0,s=String(id);
