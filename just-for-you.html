@@ -3,436 +3,36 @@
 <head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Rammetto+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://use.typekit.net/gdm5amj.css">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Just for You — daybreak</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-/* ── Just For You page overrides ── */
-body.page-jfy {
-  --yellow: #9A59C8;
-  background: #EEE0CB url('wood background.svg') center / cover no-repeat;
-}
-
-/* Header and footer: beige base color */
-body.page-jfy #site-header {
-  background: #EEE0CB;
-}
-body.page-jfy #site-footer {
-  background: #EEE0CB;
-  position: relative;
-  z-index: 1;
-}
-
-/* Hide decorative blobs/scribbles not used on this page */
-body.page-jfy #pink-blob,
-body.page-jfy #orange-blob,
-body.page-jfy #teal-blob,
-body.page-jfy #yellow-blob { display: none; }
-
-/* Purple overrides: nav sun, mobile menu, profile btn, dropdown active */
-body.page-jfy .nav-sun { background: #9A59C8; }
-body.page-jfy .mobile-menu-panel { background: #9A59C8; }
-body.page-jfy .profile-btn.active { background: #9A59C8; border-color: #9A59C8; }
-body.page-jfy .dropdown-link.active { color: #9A59C8; }
-
-/* ── Just For You main layout ── */
-#page-main.jfy-main {
-  padding-top: var(--hh);
-}
-
-.jfy-grid-wrap {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  column-gap: var(--col-gap);
-  /* top: clears fixed header + space for above-notebook props
-     bottom: space for stickers/pen/scissors */
-  padding: 18vw var(--gutter) 48vw;
-}
-
-/* Notebook: center 10 of 12 columns */
-.jfy-notebook {
-  grid-column: 2 / 12;
-  position: relative;
-  overflow: visible;
-  height: calc(100dvh - var(--hh) - 40vw);
-  min-height: 240px;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 28px rgba(0,0,0,0.13);
-  z-index: 1;
-}
-
-.jfy-washi, .jfy-frames,
-.jfy-stickers, .jfy-pen, .jfy-scissors {
-  position: absolute;
-}
-/* all props interactive */
-.jfy-washi, .jfy-frames, .jfy-stickers, .jfy-pen, .jfy-scissors {
-  pointer-events: auto;
-  cursor: pointer;
-  transition: filter 0.15s;
-  /* above nbLayer (z-index:10) so placed content appears under prop images */
-  z-index: 20;
-}
-.jfy-scissors { z-index: 21; }
-.jfy-pen      { z-index: 22; }
-.jfy-washi:hover, .jfy-frames:hover, .jfy-stickers:hover,
-.jfy-pen:hover, .jfy-scissors:hover {
-  filter: drop-shadow(0 2px 10px rgba(154,89,200,0.5));
-}
-body.jfy-sticker-active .jfy-stickers {
-  filter: drop-shadow(0 0 8px #9A59C8);
-}
-body.jfy-scissors-active .jfy-scissors {
-  filter: drop-shadow(0 0 8px #9A59C8);
-}
-/* paper prop (in paper-wrap below notebook) */
-.jfy-paper-wrap { pointer-events: auto; cursor: pointer; }
-.jfy-paper { transition: filter 0.15s; }
-.jfy-paper-wrap:hover .jfy-paper { filter: drop-shadow(0 2px 10px rgba(154,89,200,0.5)); }
-
-/* ── Notebook inner layer (clips canvas + placed elements) ── */
-.jfy-nb-layer {
-  position: absolute;
-  inset: 0;
-  border-radius: 18px;
-  overflow: hidden;
-  z-index: 10;
-  /* always auto: placement tools need empty-space clicks to reach this layer */
-  pointer-events: auto;
-}
-
-#jfy-canvas {
-  /* sits above all placed HTML elements; pointer-events toggled by JS */
-  z-index: 100;
-}
-
-/* placed elements are always interactive regardless of active tool */
-.jfy-text-node-wrap,
-.jfy-polaroid,
-.jfy-sticker-node { pointer-events: auto; }
-
-/* text editing toolbar */
-#jfy-text-toolbar {
-  position: fixed;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.16);
-  padding: 10px 12px;
-  z-index: 3000;
-  display: none;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  width: 230px;
-}
-#jfy-text-toolbar.visible { display: flex; }
-#jfy-text-toolbar .jfy-color-swatches { gap: 5px; }
-#jfy-text-toolbar .jfy-swatch { width: 20px; height: 20px; }
-.jfy-txt-size-ctrl { display: flex; align-items: center; gap: 4px; margin-left: auto; }
-.jfy-txt-size-btn {
-  width: 24px; height: 24px; border: 1.5px solid #e0e0e0; border-radius: 6px;
-  background: #fafafa; cursor: pointer; font-size: 13px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center; line-height: 1;
-  padding: 0; font-family: inherit; color: #555;
-  transition: border-color 0.1s, background 0.1s;
-}
-.jfy-txt-size-btn:hover { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
-.jfy-txt-size-val { font-size: 11px; color: #888; min-width: 20px; text-align: center; }
-
-#jfy-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  display: block;
-  /* z-index: 100 declared above, keeps canvas visually above placed elements */
-}
-#jfy-canvas.draw-active { pointer-events: auto; cursor: crosshair; }
-#jfy-canvas.scissors-active { pointer-events: auto; cursor: crosshair; }
-
-/* placed paper canvas */
-.jfy-placed-paper {
-  position: absolute;
-  z-index: 11; /* below other placed items but above the notebook background */
-  box-shadow: 1px 2px 8px rgba(0,0,0,0.13);
-  cursor: move;
-  pointer-events: auto;
-}
-
-/* paper pattern/size picker */
-.jfy-pattern-row, .jfy-size-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-.jfy-pattern-btn, .jfy-size-btn {
-  padding: 6px 12px; border: 2px solid #e5e5e5; border-radius: 10px;
-  background: #fafafa; cursor: pointer; font-size: 12px; font-weight: 600;
-  font-family: inherit; transition: border-color 0.12s, background 0.12s;
-  white-space: nowrap;
-}
-.jfy-pattern-btn:hover, .jfy-size-btn:hover { border-color: #c8a4e4; }
-.jfy-pattern-btn.active, .jfy-size-btn.active { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
-.jfy-panel-row-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-
-/* ── Tool panels — bottom-center, never over notebook ── */
-.jfy-tool-panel {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  padding: 14px 18px;
-  z-index: 2000;
-  display: none;
-  width: auto;
-  min-width: 260px;
-  max-width: min(92vw, 600px);
-  max-height: 40vh;
-  overflow-y: auto;
-}
-.jfy-tool-panel.open { display: block; }
-/* wider panels: lay contents out in a row */
-.jfy-tool-panel .jfy-color-swatches { flex-wrap: wrap; max-width: 400px; }
-.jfy-tool-panel h3 {
-  margin: 0 0 12px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #9A59C8;
-}
-.jfy-tool-hint {
-  margin: 10px 0 0;
-  font-size: 12px;
-  color: #888;
-  line-height: 1.5;
-}
-.jfy-panel-close {
-  position: absolute;
-  top: 10px; right: 12px;
-  background: none; border: none;
-  font-size: 18px; cursor: pointer; color: #aaa;
-  line-height: 1; padding: 2px 4px; border-radius: 4px;
-}
-.jfy-panel-close:hover { color: #9A59C8; }
-
-/* color swatches */
-.jfy-color-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
-.jfy-swatch {
-  width: 26px; height: 26px; border-radius: 50%;
-  cursor: pointer; border: 2px solid transparent;
-  transition: transform 0.12s, border-color 0.12s;
-  padding: 0; flex-shrink: 0;
-}
-.jfy-swatch:hover { transform: scale(1.18); }
-.jfy-swatch.active { border-color: #9A59C8; transform: scale(1.12); box-shadow: 0 0 0 2px #fff, 0 0 0 4px #9A59C8; }
-.jfy-swatch-custom { padding: 2px; box-sizing: border-box; cursor: pointer; }
-
-/* pen mode buttons */
-.jfy-mode-btns { display: flex; gap: 8px; margin-bottom: 14px; }
-.jfy-mode-btn {
-  flex: 1; padding: 9px 6px; border: 2px solid #e5e5e5;
-  border-radius: 10px; background: #fafafa;
-  cursor: pointer; font-size: 13px; font-weight: 600;
-  font-family: inherit; transition: border-color 0.12s, background 0.12s;
-}
-.jfy-mode-btn:hover { border-color: #c8a4e4; }
-.jfy-mode-btn.active { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
-.jfy-pen-size-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-.jfy-pen-size-row label { font-size: 12px; color: #888; white-space: nowrap; }
-.jfy-pen-size-row input[type=range] { flex: 1; accent-color: #9A59C8; }
-
-/* sticker grid */
-.jfy-sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.jfy-sticker-opt {
-  width: 44px; height: 44px; cursor: pointer; border-radius: 8px;
-  border: 2px solid transparent; background: #fafafa;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; transition: border-color 0.12s, background 0.12s;
-  padding: 0; font-family: inherit;
-}
-.jfy-sticker-opt:hover { background: #f3eafa; }
-.jfy-sticker-opt.active { border-color: #9A59C8; background: #f3eafa; }
-
-/* ── Placed elements on notebook ── */
-.jfy-text-node {
-  position: absolute;
-  min-width: 60px; min-height: 24px;
-  padding: 5px 7px;
-  outline: none;
-  cursor: text;
-  box-sizing: border-box;
-  line-height: 1.5;
-  resize: both; overflow: auto;
-  border: 1.5px dashed transparent;
-  border-radius: 4px;
-  background: transparent;
-  white-space: pre-wrap;
-  z-index: 15;
-  font-family: inherit;
-}
-.jfy-text-node:focus { border-color: #9A59C8; background: rgba(255,255,255,0.5); }
-.jfy-text-node-wrap {
-  position: absolute;
-  z-index: 15;
-}
-.jfy-text-node-wrap .jfy-text-drag-handle {
-  position: absolute; top: -18px; left: 0; right: 0;
-  height: 18px; background: #9A59C8; border-radius: 5px 5px 0 0;
-  cursor: move; display: none; align-items: center; padding: 0 6px;
-  font-size: 10px; color: #fff; letter-spacing: 0.05em;
-}
-.jfy-text-node-wrap:hover .jfy-text-drag-handle,
-.jfy-text-node-wrap:focus-within .jfy-text-drag-handle { display: flex; }
-.jfy-text-node-wrap .jfy-text-node { width: 100%; height: 100%; }
-
-.jfy-polaroid {
-  position: absolute;
-  background: #fff;
-  box-shadow: 2px 4px 16px rgba(0,0,0,0.18);
-  padding: 8px 8px 30px;
-  cursor: default;
-  border-radius: 2px;
-  width: 130px;
-  z-index: 15;
-  user-select: none;
-}
-.jfy-polaroid-drag {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 30px;
-  cursor: move; z-index: 1;
-}
-.jfy-polaroid .ph-img-area {
-  width: 100%; height: 110px; background: #f0eef8;
-  display: flex; align-items: center; justify-content: center;
-  position: relative; overflow: hidden; pointer-events: none;
-}
-.jfy-polaroid .ph-img-area img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.jfy-polaroid .ph-add-btn {
-  position: absolute; inset: 0; display: flex; align-items: center;
-  justify-content: center; background: rgba(154,89,200,0.08);
-  cursor: pointer; pointer-events: auto; z-index: 2;
-  font-size: 32px; color: #c8a4e4; transition: background 0.15s;
-}
-.jfy-polaroid .ph-add-btn:hover { background: rgba(154,89,200,0.18); color: #9A59C8; }
-.jfy-polaroid .ph-label-area {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 30px;
-  display: flex; align-items: center; justify-content: center;
-}
-.jfy-polaroid .ph-caption {
-  font-size: 11px; text-align: center; color: #aaa;
-  border: none; outline: none; background: transparent;
-  width: 100%; text-align: center; font-family: inherit; cursor: text;
-}
-
-.jfy-sticker-node {
-  position: absolute;
-  font-size: 36px;
-  line-height: 1;
-  cursor: move;
-  user-select: none;
-  z-index: 16;
-  transform-origin: center;
-  transition: filter 0.1s;
-}
-.jfy-sticker-node:hover { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-
-/* ── ABOVE ── */
-/* Washi tape: top-left, partially off-screen */
-.jfy-washi {
-  top: -12vw;
-  left: -14vw;
-  width: 40vw;
-  max-width: 160px;
-  transform: rotate(-8deg);
-  transform-origin: bottom right;
-  z-index: 2;
-}
-/* Frames: top-right */
-.jfy-frames {
-  top: -12vw;
-  right: -10vw;
-  width: 36vw;
-  max-width: 145px;
-  z-index: 2;
-}
-
-/* ── BELOW ── */
-/* Stickers: left, bleeds off left edge */
-.jfy-stickers {
-  bottom: -28vw;
-  left: -20vw;
-  width: 55vw;
-  z-index: 3;
-}
-/* Pen: centered, large enough to look like it could write on the paper */
-.jfy-pen {
-  bottom: -42vw;
-  left: 50%;
-  transform: translateX(-50%) rotate(-25deg);
-  transform-origin: top center;
-  width: 38vw;
-  z-index: 4;
-}
-/* Scissors: right, bleeds off right edge */
-.jfy-scissors {
-  bottom: -26vw;
-  right: -18vw;
-  width: 52vw;
-  transform: rotate(18deg);
-  transform-origin: bottom left;
-  z-index: 3;
-}
-
-/* Paper: in document flow, centered, scroll to see */
-.jfy-paper-wrap {
-  overflow: visible;
-  padding: 0 0 48px;
-  pointer-events: none;
-}
-.jfy-paper {
-  display: block;
-  width: 130vw;
-  margin-left: -12vw;
-}
-
-/* ── Tablet ── */
-@media (min-width: 768px) {
-  .jfy-grid-wrap { padding-top: 12vw; padding-bottom: 22vw; }
-  .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); }
-  .jfy-washi     { top: -10vw; left: -8vw;  width: 28vw; max-width: 200px; }
-  .jfy-frames    { top: -8vw;  right: -6vw; width: 26vw; max-width: 190px; }
-  .jfy-stickers  { bottom: -20vw; left: -12vw; width: 38vw; }
-  .jfy-pen       { bottom: -28vw; width: 26vw; }
-  .jfy-scissors  { bottom: -20vw; right: -12vw; width: 36vw; }
-  .jfy-paper     { width: 110vw; margin-left: -8vw; }
-}
-
-/* ── Desktop ── */
-@media (min-width: 1024px) {
-  .jfy-grid-wrap { padding-top: 110px; padding-bottom: 180px; }
-  .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); }
-  .jfy-washi     { top: -85px;  left: -95px;  width: 210px; }
-  .jfy-frames    { top: -90px;  right: -65px; width: 200px; }
-  .jfy-stickers  { bottom: -220px; left: -120px; width: 420px; }
-  .jfy-pen       { bottom: -320px; width: 280px; max-width: 280px; }
-  .jfy-scissors  { bottom: -210px; right: -130px; width: 390px; }
-  .jfy-paper     { width: 1100px; margin-left: -80px; }
-}
+/* ── Just for You page overrides ── */
+body{background:#EEE0CC;position:relative}
+#site-header{background:#EEE0CC}
+.nav-sun{background:#9A59C8}
+.profile-btn{background:#EEE0CC}
+.profile-btn:hover{background:#000;color:#fff}
+.profile-btn.active{background:#9A59C8;border-color:#9A59C8;color:#fff}
+.dropdown-link.active{color:#9A59C8}
+.mobile-menu-panel{background:#EEE0CC}
+#site-footer{background:#EEE0CC}
+#logo-sun,path[fill="#fdd306"]{fill:#9A59C8}
+#pink-blob{display:none}
 </style>
 </head>
-<body class="page-jfy">
+<body>
 
 <!-- HEADER -->
 <header id="site-header">
   <svg id="sun-stretch-svg">
     <g id="sun-shape" opacity="0" style="transition:opacity .18s ease">
-      <rect id="sun-rect" fill="#FFD400" x="0" y="0" width="0" height="0"/>
-      <circle id="sun-circle-left"  fill="#FFD400" cx="0" cy="0" r="0"/>
-      <circle id="sun-circle-right" fill="#FFD400" cx="0" cy="0" r="0"/>
+      <rect id="sun-rect" fill="#9A59C8" x="0" y="0" width="0" height="0"/>
+      <circle id="sun-circle-left"  fill="#9A59C8" cx="0" cy="0" r="0"/>
+      <circle id="sun-circle-right" fill="#9A59C8" cx="0" cy="0" r="0"/>
     </g>
   </svg>
 
@@ -466,10 +66,10 @@ body.jfy-scissors-active .jfy-scissors {
       </div>
     </div>
     <div class="nav-item" data-nav="seek">
-      <span class="nav-sun" aria-hidden="true"></span>
-      <button class="nav-btn" data-key="seek" aria-haspopup="true" aria-expanded="false">seek</button>
+      <span class="nav-sun visible" aria-hidden="true"></span>
+      <button class="nav-btn active" data-key="seek" aria-haspopup="true" aria-expanded="false">seek</button>
       <div class="dropdown" id="dropdown-seek" role="menu">
-        <a class="dropdown-link" href="just-for-you.html" role="menuitem">just for you</a>
+        <a class="dropdown-link active" href="just-for-you.html" role="menuitem">just for you</a>
         <a class="dropdown-link" href="between-us.html" role="menuitem">between us</a>
         <a class="dropdown-link" href="selfless-less.html" role="menuitem">selfless-less</a>
       </div>
@@ -497,10 +97,10 @@ body.jfy-scissors-active .jfy-scissors {
       </div>
     </div>
     <div class="nav-item" data-nav="seek">
-      <span class="nav-sun" aria-hidden="true"></span>
-      <button class="nav-btn" data-key="seek" aria-haspopup="true" aria-expanded="false">seek</button>
+      <span class="nav-sun visible" aria-hidden="true"></span>
+      <button class="nav-btn active" data-key="seek" aria-haspopup="true" aria-expanded="false">seek</button>
       <div class="dropdown" id="dropdown-seek-t" role="menu">
-        <a class="dropdown-link" href="just-for-you.html" role="menuitem">just for you</a>
+        <a class="dropdown-link active" href="just-for-you.html" role="menuitem">just for you</a>
         <a class="dropdown-link" href="between-us.html" role="menuitem">between us</a>
         <a class="dropdown-link" href="selfless-less.html" role="menuitem">selfless-less</a>
       </div>
@@ -525,7 +125,41 @@ body.jfy-scissors-active .jfy-scissors {
   </div><!-- /header-inner -->
 </header>
 
-
+<div class="mobile-menu-panel" id="mobile-menu-panel" role="dialog" aria-label="Navigation menu">
+  <div class="mobile-menu-section">
+    <h3>wander</h3>
+    <ul>
+      <li><a href="mess-hall.html">mess hall</a></li>
+      <li><a href="silly-decisions.html">silly decisions</a></li>
+      <li><a href="sticker-maker.html">sticker maker</a></li>
+    </ul>
+  </div>
+  <div class="mobile-menu-section">
+    <h3 class="has-page"><a href="about.html">about</a></h3>
+    <ul>
+      <li><a href="about.html#our-mission">our mission</a></li>
+      <li><a href="about.html#our-approach">our approach</a></li>
+      <li><a href="#">how it works</a></li>
+    </ul>
+  </div>
+  <div class="mobile-menu-section">
+    <h3>seek</h3>
+    <ul>
+      <li><a href="just-for-you.html">just for you</a></li>
+      <li><a href="between-us.html">between us</a></li>
+      <li><a href="selfless-less.html">selfless-less</a></li>
+    </ul>
+  </div>
+  <div class="mobile-menu-section">
+    <h3 class="has-page"><a href="profile.html">profile</a></h3>
+    <ul>
+      <li><a href="#">my happiness</a></li>
+      <li><a href="#">gallery</a></li>
+      <li><a href="#">mood tracker</a></li>
+      <li><a href="#">journal</a></li>
+    </ul>
+  </div>
+</div>
 <path d="M230.507 415.894C230.155 418.342 227.929 421.347 226.279 418.788C225.852 418.138 227.076 417.397 227.299 415.431C227.41 414.503 228.486 413.149 230.507 415.894Z" fill="#87E5FF"/>
 <path d="M230.934 420.809C230.711 417.823 233.734 420.605 230.934 420.809V420.809Z" fill="#87E5FF"/>
 <path d="M76.3469 206.706C74.9003 208.06 73.0085 206.354 73.5835 205.278C74.5108 203.572 75.0857 203.534 76.384 202.255C77.1444 201.513 77.0517 200.14 78.0347 202.774C78.7394 204.666 77.3299 205.797 76.3284 206.706H76.3469Z" fill="#87E5FF"/>
@@ -639,27 +273,25 @@ body.jfy-scissors-active .jfy-scissors {
 
 
 <!-- MAIN CONTENT -->
-<main id="page-main" class="jfy-main">
-  <div class="jfy-grid-wrap">
-    <div class="jfy-notebook">
-      <!-- above the page -->
-      <img class="jfy-washi"    src="washi tape.svg" alt="washi tape tool" id="jfy-washi-prop">
-      <img class="jfy-frames"   src="frames.svg"     alt="frames tool"     id="jfy-frames-prop">
-      <!-- below the page: stickers left, pen center, scissors right -->
-      <img class="jfy-stickers" src="stickers.svg"   alt="stickers tool"   id="jfy-stickers-prop">
-      <img class="jfy-pen"      src="pen.svg"        alt="pen tool"        id="jfy-pen-prop">
-      <img class="jfy-scissors" src="scissors2.svg" alt="scissors tool" id="jfy-scissors-prop">
-      <!-- interactive drawing layer -->
-      <div class="jfy-nb-layer" id="jfy-nb-layer">
-        <canvas id="jfy-canvas"></canvas>
-      </div>
-    </div>
+<div id="top-paper" style="position:absolute;top:0;left:0;width:100%;height:calc(var(--hh) + 96.38vw);z-index:999;pointer-events:none">
+  <img src="orange top.svg" alt="" aria-hidden="true" style="position:absolute;top:0;left:0;width:100%;height:auto;z-index:1">
+  <img src="top paper.svg" alt="" aria-hidden="true" style="position:absolute;top:0;left:0;width:100%;height:auto;z-index:2">
+  <img src="top tape.svg" alt="" aria-hidden="true" style="position:absolute;left:0;top:calc(36.94vw - 7.5vw);width:22vw;height:auto;z-index:3">
+  <img src="purple tape.svg" alt="" aria-hidden="true" style="position:absolute;right:0;top:calc(96.38vw - 4vw);width:20vw;height:auto;z-index:3">
+</div>
+
+<!-- spacer: header (64px) + orange top height (1386/1438 vw) -->
+<div aria-hidden="true" style="height:calc(var(--hh) + 96.38vw)"></div>
+
+<!-- INTRO TEXT: just below the torn paper edge, above SVGs -->
+<div id="jfy-intro" style="position:absolute;top:calc(36.94vw + 10vw);left:0;right:0;z-index:1000;box-sizing:border-box;pointer-events:none">
+  <div style="max-width:1440px;margin:0 auto;padding:0 calc(120px + (100% - 240px) / 6);box-sizing:border-box">
+    <h1 style="font-family:'Rammetto One',cursive;font-size:clamp(32px,3.5vw,56px);font-weight:400;color:#000;line-height:1.1;margin:0 0 28px;text-align:center">this is just for you.</h1>
+    <p style="font-family:'Nunito',sans-serif;font-size:clamp(15px,1.3vw,19px);font-weight:400;color:#000;line-height:1.75;margin:0">this space is yours. it is a place to slow down, reflect, and spend time with yourself. write freely, follow a prompt, hold onto meaningful moments, or simply leave pieces of your day behind.<br><br>there's no right way to fill these pages. with consistent work, they become a space shaped by your own thoughts, rhythms, and happiness. it becomes something personal, comforting, and entirely your own.</p>
   </div>
-  <!-- paper is in normal document flow — scroll down to see it below the pen -->
-  <div class="jfy-paper-wrap">
-    <img class="jfy-paper" src="paper.svg" alt="paper tool" id="jfy-paper-prop">
-  </div>
-</main>
+</div>
+
+<main id="page-main" style="min-height:60vh"></main>
 
 <!-- FOOTER -->
 <footer id="site-footer">
@@ -710,7 +342,7 @@ body.jfy-scissors-active .jfy-scissors {
     </div>
     <div class="footer-logo-full">
       <a href="index.html" aria-label="Daybreak home">
-        <svg class="footer-logo-svg footer-logo-svg--full" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#9A59C8" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#9A59C8" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
+        <svg class="footer-logo-svg footer-logo-svg--full" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
       </a>
     </div>
   </div>
@@ -726,7 +358,7 @@ body.jfy-scissors-active .jfy-scissors {
       <div class="footer-col"><h4>profile</h4><ul><li><a href="#">my happiness</a></li><li><a href="#">gallery</a></li><li><a href="#">mood tracker</a></li><li><a href="#">journal</a></li></ul></div>
     </div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(0,0,0,.12)">
-      <a href="#" class="footer-logo-wrap" aria-label="Daybreak home"><svg class="footer-logo-svg" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#9A59C8" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#9A59C8" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg></a>
+      <a href="#" class="footer-logo-wrap" aria-label="Daybreak home"><svg class="footer-logo-svg" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg></a>
       <p class="footer-tagline" style="text-align:right">made it to the bottom?<br>that earned you another break :-)</p>
     </div>
   </div>
@@ -745,7 +377,7 @@ body.jfy-scissors-active .jfy-scissors {
       <div>
         <p class="fm-tagline">made it to the bottom?<br>that earned you another break :-)</p>
         <a href="#" class="fm-logo" style="margin-top:12px;display:flex" aria-label="Daybreak home">
-          <svg class="footer-logo-svg footer-logo-svg--mobile" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#9A59C8" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#9A59C8" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
+          <svg class="footer-logo-svg footer-logo-svg--mobile" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
         </a>
       </div>
     </div>
@@ -753,78 +385,6 @@ body.jfy-scissors-active .jfy-scissors {
 
 </footer>
 
-
-<!-- ── TEXT EDITING TOOLBAR ── -->
-<div id="jfy-text-toolbar" role="toolbar" aria-label="Text formatting">
-  <div class="jfy-color-swatches" id="jfy-text-colors"></div>
-  <div class="jfy-txt-size-ctrl">
-    <button class="jfy-txt-size-btn" id="jfy-txt-smaller" title="Smaller">A−</button>
-    <span class="jfy-txt-size-val" id="jfy-txt-size-val">15</span>
-    <button class="jfy-txt-size-btn" id="jfy-txt-larger" title="Larger">A+</button>
-  </div>
-</div>
-
-<!-- ── TOOL PANELS ── -->
-<div id="jfy-washi-panel" class="jfy-tool-panel" role="dialog" aria-label="Washi tape">
-  <button class="jfy-panel-close" aria-label="Close">×</button>
-  <h3>washi tape</h3>
-  <div class="jfy-color-swatches" id="jfy-washi-swatches"></div>
-  <p class="jfy-tool-hint">pick a color, then click &amp; drag on the notebook to place tape</p>
-</div>
-
-<div id="jfy-pen-panel" class="jfy-tool-panel" role="dialog" aria-label="Pen">
-  <button class="jfy-panel-close" aria-label="Close">×</button>
-  <h3>pen</h3>
-  <div class="jfy-mode-btns">
-    <button class="jfy-mode-btn" id="jfy-pen-write-btn">write</button>
-    <button class="jfy-mode-btn" id="jfy-pen-doodle-btn">doodle</button>
-  </div>
-  <div id="jfy-pen-colors" class="jfy-color-swatches" style="display:none;margin-bottom:10px"></div>
-  <div class="jfy-pen-size-row" id="jfy-pen-size-row" style="display:none">
-    <label for="jfy-pen-size">size</label>
-    <input type="range" id="jfy-pen-size" min="1" max="20" value="3">
-  </div>
-  <p class="jfy-tool-hint" id="jfy-pen-hint" style="display:none"></p>
-</div>
-
-<div id="jfy-frames-panel" class="jfy-tool-panel" role="dialog" aria-label="Frames">
-  <button class="jfy-panel-close" aria-label="Close">×</button>
-  <h3>polaroid frames</h3>
-  <p class="jfy-tool-hint">click anywhere on the notebook to place a frame. click the photo area on the frame to add an image.</p>
-</div>
-
-<div id="jfy-stickers-panel" class="jfy-tool-panel" role="dialog" aria-label="Stickers">
-  <button class="jfy-panel-close" aria-label="Close">×</button>
-  <h3>stickers</h3>
-  <div class="jfy-sticker-grid" id="jfy-sticker-grid"></div>
-  <p class="jfy-tool-hint">choose a sticker, then click the notebook to stamp it. click the stickers prop again to stop.</p>
-</div>
-
-<div id="jfy-paper-panel" class="jfy-tool-panel" role="dialog" aria-label="Paper">
-  <button class="jfy-panel-close" aria-label="Close">×</button>
-  <h3>paper</h3>
-  <p class="jfy-panel-row-label">pattern</p>
-  <div class="jfy-pattern-row">
-    <button class="jfy-pattern-btn active" data-pattern="lined">lined</button>
-    <button class="jfy-pattern-btn" data-pattern="dotted">dotted</button>
-    <button class="jfy-pattern-btn" data-pattern="grid">grid</button>
-    <button class="jfy-pattern-btn" data-pattern="blank">blank</button>
-    <button class="jfy-pattern-btn" data-pattern="kraft">kraft</button>
-  </div>
-  <p class="jfy-panel-row-label">size</p>
-  <div class="jfy-size-row">
-    <button class="jfy-size-btn" data-size="small">small</button>
-    <button class="jfy-size-btn active" data-size="medium">medium</button>
-    <button class="jfy-size-btn" data-size="large">large</button>
-  </div>
-  <p class="jfy-tool-hint">click on the notebook to place paper. use scissors to cut it.</p>
-</div>
-
-<div id="jfy-scissors-panel" class="jfy-tool-panel" role="dialog" aria-label="Scissors">
-  <button class="jfy-panel-close" aria-label="Close">×</button>
-  <h3>scissors</h3>
-  <p class="jfy-tool-hint">click & drag over a piece of placed paper to cut it into a shape. the area you trace becomes the cut edge — everything outside is removed.</p>
-</div>
 
 <button class="fab" id="fab-btn" aria-label="Surprise me">
   <canvas id="fab-canvas" width="60" height="60"></canvas>
@@ -1016,830 +576,6 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   window.addEventListener('load',update);
 })();
 
-</script>
-
-<script>
-/* ── INTERACTIVE NOTEBOOK TOOLS ── */
-(function(){
-'use strict';
-
-var notebook = document.querySelector('.jfy-notebook');
-var nbLayer  = document.getElementById('jfy-nb-layer');
-var canvas   = document.getElementById('jfy-canvas');
-if(!canvas||!notebook||!nbLayer) return;
-var ctx = canvas.getContext('2d');
-
-/* ── state ── */
-var S = {
-  tool: null,        // 'washi'|'write'|'doodle'|'frames'|'stickers'
-  wasbiColor: null,  // set after washi panel init
-  penColor: '#111111',
-  penSize: 3,
-  selectedSticker: null,
-  dragging: false,
-  dStart: null,
-  currentPath: null
-};
-
-var drawCmds = []; // { type:'washi'|'doodle', ... }
-
-/* ── canvas init / resize ── */
-function initCanvas(){
-  var W = canvas.offsetWidth, H = canvas.offsetHeight;
-  if(!W||!H) return;
-  var dpr = window.devicePixelRatio||1;
-  canvas.width  = Math.round(W*dpr);
-  canvas.height = Math.round(H*dpr);
-  // setTransform resets any previous scale before applying the new one
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  redrawAll();
-}
-if(window.ResizeObserver){
-  new ResizeObserver(initCanvas).observe(notebook);
-} else {
-  window.addEventListener('resize', initCanvas);
-}
-initCanvas();
-
-/* ── coordinate helper ── */
-function canvasPos(e){
-  var t = e.touches ? e.touches[0] : e;
-  var r = canvas.getBoundingClientRect();
-  return { x: t.clientX - r.left, y: t.clientY - r.top };
-}
-
-/* ── DRAW FUNCTIONS ── */
-var WASHI_STRIPE_SPACING = 10;
-
-function drawWashi(x1,y1,x2,y2,col,preview){
-  var minX=Math.min(x1,x2), maxX=Math.max(x1,x2);
-  var minY=Math.min(y1,y2), maxY=Math.max(y1,y2);
-  var w=maxX-minX, h=maxY-minY;
-  if(w<2||h<2) return;
-  ctx.save();
-  // clip all subsequent drawing to the tape rectangle
-  ctx.beginPath();
-  ctx.rect(minX,minY,w,h);
-  ctx.clip();
-  // fill
-  ctx.fillStyle = col.rgba;
-  ctx.fillRect(minX,minY,w,h);
-  // diagonal stripes (clipped inside rect)
-  ctx.strokeStyle = col.rgba.replace(/[\d.]+\)$/,'0.22)');
-  ctx.lineWidth = 1.5;
-  var span = w + h;
-  for(var i=-h; i<span; i+=WASHI_STRIPE_SPACING){
-    ctx.beginPath();
-    ctx.moveTo(minX+i, minY);
-    ctx.lineTo(minX+i+h, minY+h);
-    ctx.stroke();
-  }
-  ctx.restore();
-  // preview dashed border drawn OUTSIDE the clip (after restore)
-  if(preview){
-    ctx.save();
-    ctx.strokeStyle = col.solid;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4,4]);
-    ctx.strokeRect(minX,minY,w,h);
-    ctx.setLineDash([]);
-    ctx.restore();
-  }
-}
-
-function drawDoodle(pts,color,size){
-  if(pts.length<2) return;
-  ctx.save();
-  ctx.strokeStyle = color;
-  ctx.lineWidth = size;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  for(var i=1; i<pts.length-1; i++){
-    ctx.quadraticCurveTo(pts[i].x, pts[i].y,
-      (pts[i].x+pts[i+1].x)/2, (pts[i].y+pts[i+1].y)/2);
-  }
-  ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function redrawAll(){
-  var W = canvas.offsetWidth, H = canvas.offsetHeight;
-  ctx.clearRect(0,0,W,H);
-  drawCmds.forEach(function(cmd){
-    if(cmd.type==='washi') drawWashi(cmd.x1,cmd.y1,cmd.x2,cmd.y2,cmd.col,false);
-    else if(cmd.type==='doodle') drawDoodle(cmd.pts,cmd.color,cmd.size);
-  });
-}
-
-/* ── WASHI COLORS ── */
-var WASHI_COLORS = [
-  {label:'blush',    rgba:'rgba(255,182,193,0.6)', solid:'#ffb6c1'},
-  {label:'lavender', rgba:'rgba(196,165,224,0.6)', solid:'#c4a5e0'},
-  {label:'mint',     rgba:'rgba(152,225,189,0.6)', solid:'#98e1bd'},
-  {label:'sky',      rgba:'rgba(135,206,235,0.6)', solid:'#87ceeb'},
-  {label:'peach',    rgba:'rgba(255,200,152,0.6)', solid:'#ffc898'},
-  {label:'butter',   rgba:'rgba(255,236,153,0.6)', solid:'#ffec99'},
-  {label:'rose',     rgba:'rgba(255,130,150,0.6)', solid:'#ff8296'},
-  {label:'sage',     rgba:'rgba(176,208,169,0.6)', solid:'#b0d0a9'},
-  {label:'lilac',    rgba:'rgba(215,185,230,0.6)', solid:'#d7b9e6'},
-  {label:'coral',    rgba:'rgba(255,167,131,0.6)', solid:'#ffa783'},
-];
-S.wasbiColor = WASHI_COLORS[0];
-
-(function buildWashiSwatches(){
-  var c = document.getElementById('jfy-washi-swatches');
-  if(!c) return;
-  WASHI_COLORS.forEach(function(col,i){
-    var btn = document.createElement('button');
-    btn.className='jfy-swatch'+(i===0?' active':'');
-    btn.style.background = col.solid;
-    btn.title = col.label;
-    btn.addEventListener('click',function(){
-      S.wasbiColor = col;
-      c.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
-      btn.classList.add('active');
-    });
-    c.appendChild(btn);
-  });
-  var custom = document.createElement('input');
-  custom.type='color'; custom.className='jfy-swatch jfy-swatch-custom'; custom.title='custom';
-  custom.addEventListener('input',function(){
-    var h=custom.value, r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
-    S.wasbiColor={rgba:'rgba('+r+','+g+','+b+',0.6)',solid:h,label:'custom'};
-    c.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
-    custom.classList.add('active');
-  });
-  c.appendChild(custom);
-})();
-
-/* ── PEN COLORS ── */
-var PEN_COLORS = ['#111111','#9A59C8','#e63946','#f4a261','#2a9d8f','#4361ee','#c77dff','#ffffff'];
-
-function buildPenSwatches(container, onPick){
-  container.innerHTML='';
-  PEN_COLORS.forEach(function(c,i){
-    var btn=document.createElement('button');
-    btn.className='jfy-swatch'+(i===0?' active':'');
-    btn.style.background=c;
-    if(c==='#ffffff') btn.style.boxShadow='inset 0 0 0 1px #ddd';
-    btn.title=c;
-    btn.addEventListener('click',function(){
-      container.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
-      btn.classList.add('active');
-      onPick(c);
-    });
-    container.appendChild(btn);
-  });
-  var custom=document.createElement('input');
-  custom.type='color'; custom.className='jfy-swatch jfy-swatch-custom'; custom.title='custom';
-  custom.addEventListener('input',function(){
-    onPick(custom.value);
-    container.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
-    custom.classList.add('active');
-  });
-  container.appendChild(custom);
-}
-
-(function setupPenPanel(){
-  var writeBtn  = document.getElementById('jfy-pen-write-btn');
-  var doodleBtn = document.getElementById('jfy-pen-doodle-btn');
-  var colEl     = document.getElementById('jfy-pen-colors');
-  var sizeRow   = document.getElementById('jfy-pen-size-row');
-  var hintEl    = document.getElementById('jfy-pen-hint');
-  var sizeInput = document.getElementById('jfy-pen-size');
-  if(!writeBtn||!doodleBtn) return;
-
-  if(sizeInput) sizeInput.addEventListener('input',function(){ S.penSize=+sizeInput.value; });
-
-  function activateMode(mode){
-    writeBtn.classList.toggle('active', mode==='write');
-    doodleBtn.classList.toggle('active', mode==='doodle');
-    colEl.style.display='flex';
-    sizeRow.style.display = mode==='doodle' ? 'flex' : 'none';
-    hintEl.style.display='';
-    hintEl.textContent = mode==='write'
-      ? 'click the notebook to place a text box'
-      : 'click & drag on the notebook to draw a line';
-    buildPenSwatches(colEl, function(c){ S.penColor=c; });
-    setTool(mode);
-  }
-
-  writeBtn.addEventListener('click',  function(){ activateMode('write'); });
-  doodleBtn.addEventListener('click', function(){ activateMode('doodle'); });
-})();
-
-/* ── STICKERS ── */
-var STICKERS = ['⭐','🌸','🌈','☁️','🌙','💫','🦋','🌺','☀️','💜','🌿','🍄','🎀','✨','🌻','🍀','🎵','🍬','🦄','🌊'];
-S.selectedSticker = STICKERS[0];
-
-(function buildStickerGrid(){
-  var grid = document.getElementById('jfy-sticker-grid');
-  if(!grid) return;
-  STICKERS.forEach(function(s,i){
-    var btn=document.createElement('button');
-    btn.className='jfy-sticker-opt'+(i===0?' active':'');
-    btn.textContent=s;
-    btn.title='sticker '+s;
-    btn.addEventListener('click',function(){
-      grid.querySelectorAll('.jfy-sticker-opt').forEach(function(o){o.classList.remove('active')});
-      btn.classList.add('active');
-      S.selectedSticker=s;
-    });
-    grid.appendChild(btn);
-  });
-})();
-
-/* ── PANEL / TOOL MANAGEMENT ── */
-var panels = {
-  washi:    document.getElementById('jfy-washi-panel'),
-  pen:      document.getElementById('jfy-pen-panel'),
-  frames:   document.getElementById('jfy-frames-panel'),
-  stickers: document.getElementById('jfy-stickers-panel'),
-  paper:    document.getElementById('jfy-paper-panel'),
-  scissors: document.getElementById('jfy-scissors-panel')
-};
-
-function closeAll(){
-  Object.keys(panels).forEach(function(k){ if(panels[k]) panels[k].classList.remove('open'); });
-  if(typeof hideTextToolbar==='function') hideTextToolbar();
-}
-
-function setTool(tool){
-  S.tool = tool;
-  canvas.classList.toggle('draw-active',   tool==='washi'||tool==='doodle');
-  canvas.classList.toggle('scissors-active', tool==='scissors');
-  document.body.classList.toggle('jfy-sticker-active',  tool==='stickers');
-  document.body.classList.toggle('jfy-scissors-active', tool==='scissors');
-  if(tool && typeof hideTextToolbar==='function') hideTextToolbar();
-}
-
-function openPanel(key, andSetTool){
-  var alreadyOpen = panels[key] && panels[key].classList.contains('open');
-  closeAll();
-  setTool(null);
-  if(!alreadyOpen){
-    panels[key].classList.add('open');
-    if(andSetTool) setTool(andSetTool);
-  }
-}
-
-/* close buttons inside panels */
-document.querySelectorAll('.jfy-panel-close').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    closeAll(); setTool(null);
-  });
-});
-
-/* ── PROP CLICK HANDLERS ── */
-var washiProp    = document.getElementById('jfy-washi-prop');
-var penProp      = document.getElementById('jfy-pen-prop');
-var framesProp   = document.getElementById('jfy-frames-prop');
-var stickersProp = document.getElementById('jfy-stickers-prop');
-
-var paperProp   = document.getElementById('jfy-paper-prop');
-var scissorsProp = document.getElementById('jfy-scissors-prop');
-
-if(washiProp) washiProp.addEventListener('click', function(e){
-  e.stopPropagation();
-  openPanel('washi', 'washi');
-});
-
-if(penProp) penProp.addEventListener('click', function(e){
-  e.stopPropagation();
-  openPanel('pen', null); // tool set by mode button inside panel
-});
-
-if(framesProp) framesProp.addEventListener('click', function(e){
-  e.stopPropagation();
-  openPanel('frames', 'frames');
-});
-
-if(stickersProp) stickersProp.addEventListener('click', function(e){
-  e.stopPropagation();
-  if(S.tool==='stickers'){
-    closeAll(); setTool(null);
-  } else {
-    openPanel('stickers', 'stickers');
-  }
-});
-
-if(paperProp) paperProp.addEventListener('click', function(e){
-  e.stopPropagation();
-  openPanel('paper', 'paper');
-});
-
-if(scissorsProp) scissorsProp.addEventListener('click', function(e){
-  e.stopPropagation();
-  if(S.tool==='scissors'){
-    closeAll(); setTool(null);
-  } else {
-    openPanel('scissors', 'scissors');
-  }
-});
-
-/* close panels when clicking outside the notebook area */
-document.addEventListener('click', function(e){
-  var inPanel   = Object.keys(panels).some(function(k){ return panels[k] && panels[k].contains(e.target); });
-  var inToolbar = txtToolbar && txtToolbar.contains(e.target);
-  var inNotebook = notebook.contains(e.target);
-  var inPaperProp = paperProp && paperProp.contains(e.target);
-  if(!inPanel && !inToolbar && !inNotebook && !inPaperProp){
-    closeAll(); setTool(null);
-  }
-});
-
-/* ── CANVAS DRAWING (washi, doodle, scissors preview) ── */
-/* scissors state */
-var _sc = { dragging: false, pts: [], target: null };
-
-function getPaperAt(clientX, clientY){
-  var papers = nbLayer.querySelectorAll('.jfy-placed-paper');
-  for(var i=papers.length-1; i>=0; i--){
-    var r=papers[i].getBoundingClientRect();
-    if(clientX>=r.left&&clientX<=r.right&&clientY>=r.top&&clientY<=r.bottom) return papers[i];
-  }
-  return null;
-}
-
-canvas.addEventListener('mousedown', function(e){
-  if(e.button!==0) return;
-  var pos = canvasPos(e);
-  if(S.tool==='washi'){
-    S.dragging=true; S.dStart=pos;
-  } else if(S.tool==='doodle'){
-    S.dragging=true;
-    S.currentPath={type:'doodle',pts:[pos],color:S.penColor,size:S.penSize};
-  } else if(S.tool==='scissors'){
-    var target = getPaperAt(e.clientX, e.clientY);
-    if(target){
-      _sc.dragging=true; _sc.pts=[pos]; _sc.target=target;
-    }
-  }
-});
-
-canvas.addEventListener('mousemove', function(e){
-  var pos = canvasPos(e);
-  if(S.tool==='washi' && S.dragging && S.dStart){
-    redrawAll();
-    drawWashi(S.dStart.x, S.dStart.y, pos.x, pos.y, S.wasbiColor, true);
-  } else if(S.tool==='doodle' && S.dragging && S.currentPath){
-    S.currentPath.pts.push(pos);
-    redrawAll();
-    drawDoodle(S.currentPath.pts, S.currentPath.color, S.currentPath.size);
-  } else if(S.tool==='scissors' && _sc.dragging){
-    _sc.pts.push(pos);
-    // draw scissors preview on canvas (temporary)
-    redrawAll();
-    if(_sc.pts.length>1){
-      ctx.save();
-      ctx.strokeStyle='rgba(60,60,60,0.7)';
-      ctx.lineWidth=1.5;
-      ctx.setLineDash([5,4]);
-      ctx.lineCap='round';
-      ctx.beginPath();
-      ctx.moveTo(_sc.pts[0].x,_sc.pts[0].y);
-      for(var i=1;i<_sc.pts.length;i++) ctx.lineTo(_sc.pts[i].x,_sc.pts[i].y);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-    }
-  }
-});
-
-function finishDraw(e){
-  var pos = canvasPos(e||{clientX:0,clientY:0});
-  if(S.tool==='washi' && S.dragging){
-    S.dragging=false;
-    var w=Math.abs(pos.x-S.dStart.x), h=Math.abs(pos.y-S.dStart.y);
-    if(w>4||h>4) drawCmds.push({type:'washi',x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor});
-    S.dStart=null;
-    redrawAll();
-  } else if(S.tool==='doodle' && S.dragging){
-    S.dragging=false;
-    if(S.currentPath && S.currentPath.pts.length>1) drawCmds.push(S.currentPath);
-    S.currentPath=null;
-    redrawAll();
-  } else if(S.tool==='scissors' && _sc.dragging){
-    _sc.dragging=false;
-    redrawAll(); // clear preview
-    if(_sc.target && _sc.pts.length>2){
-      applyCut(_sc.target, _sc.pts);
-    }
-    _sc.pts=[]; _sc.target=null;
-  }
-}
-canvas.addEventListener('mouseup',    finishDraw);
-canvas.addEventListener('mouseleave', function(){ if(S.dragging||_sc.dragging) finishDraw(); });
-
-/* touch support for canvas */
-canvas.addEventListener('touchstart',function(e){
-  e.preventDefault();
-  var t=e.touches[0];
-  canvas.dispatchEvent(new MouseEvent('mousedown',{clientX:t.clientX,clientY:t.clientY,button:0,bubbles:true}));
-},{passive:false});
-canvas.addEventListener('touchmove',function(e){
-  e.preventDefault();
-  var t=e.touches[0];
-  canvas.dispatchEvent(new MouseEvent('mousemove',{clientX:t.clientX,clientY:t.clientY,bubbles:true}));
-},{passive:false});
-canvas.addEventListener('touchend',function(e){
-  e.preventDefault();
-  var t=e.changedTouches[0];
-  canvas.dispatchEvent(new MouseEvent('mouseup',{clientX:t.clientX,clientY:t.clientY,bubbles:true}));
-},{passive:false});
-
-/* ── NOTEBOOK LAYER CLICKS (write / frames / stickers / paper) ── */
-nbLayer.addEventListener('click', function(e){
-  // Ignore clicks on already-placed elements (unless scissors — handled by canvas)
-  if(e.target.closest('.jfy-text-node-wrap') ||
-     e.target.closest('.jfy-polaroid') ||
-     e.target.closest('.jfy-sticker-node') ||
-     e.target.closest('.jfy-placed-paper')) return;
-  if(S.tool==='write')         placeTextBox(e);
-  else if(S.tool==='frames')   placePolaroid(e);
-  else if(S.tool==='stickers') placeSticker(e);
-  else if(S.tool==='paper')    placePaper(e);
-}, false);
-
-/* ── TEXT EDITING TOOLBAR ── */
-var txtToolbar    = document.getElementById('jfy-text-toolbar');
-var txtColorsEl   = document.getElementById('jfy-text-colors');
-var txtSizeVal    = document.getElementById('jfy-txt-size-val');
-var txtSmallerBtn = document.getElementById('jfy-txt-smaller');
-var txtLargerBtn  = document.getElementById('jfy-txt-larger');
-var activeTxt = null; // the currently focused text div
-
-function buildTextColorSwatches(txtEl){
-  if(!txtColorsEl) return;
-  txtColorsEl.innerHTML='';
-  PEN_COLORS.forEach(function(c){
-    var btn=document.createElement('button');
-    btn.className='jfy-swatch';
-    btn.style.background=c;
-    if(c==='#ffffff') btn.style.boxShadow='inset 0 0 0 1px #ddd';
-    if(txtEl.style.color===c||txtEl.style.color===hexToRgb(c)) btn.classList.add('active');
-    btn.title=c;
-    btn.addEventListener('mousedown',function(e){
-      e.preventDefault(); // don't blur txtEl
-      txtColorsEl.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
-      btn.classList.add('active');
-      if(activeTxt) activeTxt.style.color=c;
-    });
-    txtColorsEl.appendChild(btn);
-  });
-  var custom=document.createElement('input');
-  custom.type='color'; custom.className='jfy-swatch jfy-swatch-custom'; custom.title='custom';
-  custom.addEventListener('input',function(){
-    if(activeTxt) activeTxt.style.color=custom.value;
-    txtColorsEl.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
-    custom.classList.add('active');
-  });
-  txtColorsEl.appendChild(custom);
-}
-
-function hexToRgb(hex){
-  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-  return 'rgb('+r+','+g+','+b+')';
-}
-
-function showTextToolbar(txtEl){
-  activeTxt=txtEl;
-  buildTextColorSwatches(txtEl);
-  var fs=parseInt(txtEl.style.fontSize)||15;
-  if(txtSizeVal) txtSizeVal.textContent=fs;
-  positionTextToolbar(txtEl);
-  if(txtToolbar) txtToolbar.classList.add('visible');
-}
-
-function positionTextToolbar(txtEl){
-  if(!txtToolbar||!txtEl) return;
-  var r=txtEl.getBoundingClientRect();
-  var tw=230, th=60;
-  var left=r.left, top=r.top-th-8;
-  if(top<70) top=r.bottom+8;
-  left=Math.max(8, Math.min(left, window.innerWidth-tw-8));
-  txtToolbar.style.left=left+'px';
-  txtToolbar.style.top=top+'px';
-}
-
-function hideTextToolbar(){
-  activeTxt=null;
-  if(txtToolbar) txtToolbar.classList.remove('visible');
-}
-
-if(txtSmallerBtn) txtSmallerBtn.addEventListener('mousedown',function(e){
-  e.preventDefault();
-  if(!activeTxt) return;
-  var fs=Math.max(8, (parseInt(activeTxt.style.fontSize)||15)-1);
-  activeTxt.style.fontSize=fs+'px';
-  if(txtSizeVal) txtSizeVal.textContent=fs;
-});
-if(txtLargerBtn) txtLargerBtn.addEventListener('mousedown',function(e){
-  e.preventDefault();
-  if(!activeTxt) return;
-  var fs=Math.min(96, (parseInt(activeTxt.style.fontSize)||15)+1);
-  activeTxt.style.fontSize=fs+'px';
-  if(txtSizeVal) txtSizeVal.textContent=fs;
-});
-
-/* ── TEXT BOX TOOL ── */
-function placeTextBox(e){
-  var nr = nbLayer.getBoundingClientRect();
-  var x = e.clientX - nr.left;
-  var y = e.clientY - nr.top;
-
-  var wrap = document.createElement('div');
-  wrap.className='jfy-text-node-wrap';
-  wrap.style.cssText='position:absolute;left:'+x+'px;top:'+y+'px;width:140px;height:60px;z-index:15;';
-
-  var handle = document.createElement('div');
-  handle.className='jfy-text-drag-handle';
-  handle.textContent='⠿ move';
-  handle.style.userSelect='none';
-
-  var txt = document.createElement('div');
-  txt.className='jfy-text-node';
-  txt.contentEditable='true';
-  txt.style.color=S.penColor;
-  txt.style.fontSize='15px';
-  txt.style.width='100%';
-  txt.style.height='100%';
-  txt.setAttribute('aria-label','text note');
-
-  txt.addEventListener('focus',function(){ showTextToolbar(txt); });
-  txt.addEventListener('blur',function(){
-    // delay so toolbar button clicks fire first
-    setTimeout(function(){
-      if(document.activeElement && txtToolbar && txtToolbar.contains(document.activeElement)) return;
-      hideTextToolbar();
-    }, 150);
-  });
-
-  wrap.appendChild(handle);
-  wrap.appendChild(txt);
-  makeDraggable(handle, wrap);
-  makeResizable(wrap);
-
-  nbLayer.appendChild(wrap);
-  setTimeout(function(){ txt.focus(); }, 10);
-}
-
-/* clicking any placed text node focuses it for editing — regardless of active tool */
-nbLayer.addEventListener('click', function(e){
-  var tw = e.target.closest('.jfy-text-node-wrap');
-  if(tw){
-    var t=tw.querySelector('.jfy-text-node');
-    if(t){ t.focus(); }
-  }
-}, true); // capture phase so it fires before the placement handler
-
-function makeResizable(el){
-  var corner = document.createElement('div');
-  corner.style.cssText='position:absolute;right:0;bottom:0;width:12px;height:12px;cursor:se-resize;z-index:20;background:rgba(154,89,200,0.3);border-radius:2px;';
-  corner.addEventListener('mousedown', function(e){
-    e.stopPropagation(); e.preventDefault();
-    _drag.active = false; // don't let drag manager interfere while resizing
-    var startX=e.clientX, startY=e.clientY;
-    var startW=el.offsetWidth, startH=el.offsetHeight;
-    function onMove(ev){
-      el.style.width  = Math.max(80, startW+ev.clientX-startX)+'px';
-      el.style.height = Math.max(30, startH+ev.clientY-startY)+'px';
-      if(activeTxt && el.contains(activeTxt)) positionTextToolbar(activeTxt);
-    }
-    function onUp(){ document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); }
-    document.addEventListener('mousemove',onMove);
-    document.addEventListener('mouseup',onUp);
-  });
-  el.appendChild(corner);
-}
-
-/* ── POLAROID FRAME TOOL ── */
-function placePolaroid(e){
-  var nr = nbLayer.getBoundingClientRect();
-  var x = e.clientX - nr.left - 65;
-  var y = e.clientY - nr.top  - 55;
-
-  var pol = document.createElement('div');
-  pol.className='jfy-polaroid';
-  pol.style.left = Math.max(0,x)+'px';
-  pol.style.top  = Math.max(0,y)+'px';
-
-  /* invisible drag layer on top (above image) */
-  var dragLayer = document.createElement('div');
-  dragLayer.className='jfy-polaroid-drag';
-  makeDraggable(dragLayer, pol);
-
-  var imgArea = document.createElement('div');
-  imgArea.className='ph-img-area';
-
-  var addBtn = document.createElement('div');
-  addBtn.className='ph-add-btn';
-  addBtn.innerHTML='<span style="pointer-events:none">＋</span>';
-  addBtn.title='Add photo';
-
-  var fileInput = document.createElement('input');
-  fileInput.type='file'; fileInput.accept='image/*'; fileInput.style.display='none';
-  addBtn.addEventListener('click',function(ev){ ev.stopPropagation(); fileInput.click(); });
-  fileInput.addEventListener('change',function(){
-    if(!fileInput.files[0]) return;
-    var fr=new FileReader();
-    fr.onload=function(re){
-      var img=document.createElement('img');
-      img.src=re.target.result;
-      addBtn.remove();
-      imgArea.appendChild(img);
-    };
-    fr.readAsDataURL(fileInput.files[0]);
-  });
-
-  imgArea.appendChild(addBtn);
-  imgArea.appendChild(fileInput);
-
-  var labelArea = document.createElement('div');
-  labelArea.className='ph-label-area';
-  var caption = document.createElement('input');
-  caption.type='text'; caption.className='ph-caption';
-  caption.placeholder='add a caption...';
-  caption.addEventListener('click', function(ev){ ev.stopPropagation(); });
-  labelArea.appendChild(caption);
-
-  pol.appendChild(dragLayer);
-  pol.appendChild(imgArea);
-  pol.appendChild(labelArea);
-  nbLayer.appendChild(pol);
-}
-
-/* ── STICKER TOOL ── */
-function placeSticker(e){
-  if(!S.selectedSticker) return;
-  var nr = nbLayer.getBoundingClientRect();
-  var x = e.clientX - nr.left - 18;
-  var y = e.clientY - nr.top  - 18;
-
-  var node = document.createElement('div');
-  node.className='jfy-sticker-node';
-  node.textContent = S.selectedSticker;
-  node.style.left = x+'px';
-  node.style.top  = y+'px';
-  makeDraggable(node, node);
-  nbLayer.appendChild(node);
-}
-
-/* ── PAPER TOOL ── */
-var selectedPaperPattern = 'lined';
-var selectedPaperSize    = 'medium';
-var PAPER_SIZES = { small:{w:130,h:170}, medium:{w:200,h:260}, large:{w:280,h:360} };
-
-(function setupPaperPanel(){
-  var pp = document.getElementById('jfy-paper-panel');
-  if(!pp) return;
-  pp.querySelectorAll('.jfy-pattern-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      pp.querySelectorAll('.jfy-pattern-btn').forEach(function(b){b.classList.remove('active')});
-      btn.classList.add('active');
-      selectedPaperPattern = btn.dataset.pattern;
-    });
-  });
-  pp.querySelectorAll('.jfy-size-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      pp.querySelectorAll('.jfy-size-btn').forEach(function(b){b.classList.remove('active')});
-      btn.classList.add('active');
-      selectedPaperSize = btn.dataset.size;
-    });
-  });
-})();
-
-function drawPaperPattern(pctx, w, h, pattern){
-  var dpr = window.devicePixelRatio||1;
-  pctx.setTransform(dpr,0,0,dpr,0,0);
-  switch(pattern){
-    case 'lined':
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      pctx.strokeStyle='rgba(140,170,220,0.45)'; pctx.lineWidth=0.8;
-      for(var y=22;y<h;y+=22){ pctx.beginPath();pctx.moveTo(0,y);pctx.lineTo(w,y);pctx.stroke(); }
-      pctx.strokeStyle='rgba(220,90,90,0.25)'; pctx.lineWidth=1;
-      pctx.beginPath();pctx.moveTo(28,0);pctx.lineTo(28,h);pctx.stroke();
-      break;
-    case 'dotted':
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      pctx.fillStyle='rgba(130,160,210,0.5)';
-      for(var yy=22;yy<h;yy+=22) for(var xx=22;xx<w;xx+=22){
-        pctx.beginPath();pctx.arc(xx,yy,1.4,0,Math.PI*2);pctx.fill();
-      }
-      break;
-    case 'grid':
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-      pctx.strokeStyle='rgba(140,170,220,0.35)'; pctx.lineWidth=0.8;
-      for(var yg=0;yg<h;yg+=22){ pctx.beginPath();pctx.moveTo(0,yg);pctx.lineTo(w,yg);pctx.stroke(); }
-      for(var xg=0;xg<w;xg+=22){ pctx.beginPath();pctx.moveTo(xg,0);pctx.lineTo(xg,h);pctx.stroke(); }
-      break;
-    case 'kraft':
-      pctx.fillStyle='#c9a97a'; pctx.fillRect(0,0,w,h);
-      pctx.fillStyle='rgba(0,0,0,0.04)';
-      for(var k=0;k<600;k++){
-        pctx.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1);
-      }
-      break;
-    default: // blank
-      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
-  }
-}
-
-function placePaper(e){
-  var nr = nbLayer.getBoundingClientRect();
-  var sz = PAPER_SIZES[selectedPaperSize];
-  var x = e.clientX - nr.left - sz.w/2;
-  var y = e.clientY - nr.top  - sz.h/2;
-  var dpr = window.devicePixelRatio||1;
-
-  var pc = document.createElement('canvas');
-  pc.className = 'jfy-placed-paper';
-  pc.width  = Math.round(sz.w * dpr);
-  pc.height = Math.round(sz.h * dpr);
-  pc.style.width  = sz.w+'px';
-  pc.style.height = sz.h+'px';
-  pc.style.left   = Math.max(0,x)+'px';
-  pc.style.top    = Math.max(0,y)+'px';
-  pc.dataset.pattern = selectedPaperPattern;
-
-  drawPaperPattern(pc.getContext('2d'), sz.w, sz.h, selectedPaperPattern);
-  makeDraggable(pc, pc);
-  nbLayer.appendChild(pc);
-}
-
-/* ── SCISSORS CUT ── */
-function applyCut(paperCanvas, nbLayerPts){
-  if(nbLayerPts.length < 3) return;
-  var offX = parseFloat(paperCanvas.style.left)||0;
-  var offY = parseFloat(paperCanvas.style.top) ||0;
-  var dpr  = window.devicePixelRatio||1;
-  var pctx = paperCanvas.getContext('2d');
-
-  // Create a temporary canvas with the cut shape (filled) to use as mask
-  var tmp = document.createElement('canvas');
-  tmp.width  = paperCanvas.width;
-  tmp.height = paperCanvas.height;
-  var tctx = tmp.getContext('2d');
-  tctx.setTransform(dpr,0,0,dpr,0,0);
-
-  // Draw the closed cut path as a filled shape
-  tctx.beginPath();
-  tctx.moveTo(nbLayerPts[0].x - offX, nbLayerPts[0].y - offY);
-  for(var i=1;i<nbLayerPts.length;i++) tctx.lineTo(nbLayerPts[i].x - offX, nbLayerPts[i].y - offY);
-  tctx.closePath();
-  tctx.fillStyle = '#000';
-  tctx.fill();
-
-  // Apply: keep only the pixels inside the cut path
-  pctx.save();
-  pctx.setTransform(1,0,0,1,0,0); // raw canvas pixels for drawImage
-  pctx.globalCompositeOperation = 'destination-in';
-  pctx.drawImage(tmp, 0, 0);
-  pctx.restore();
-}
-
-/* ── GLOBAL DRAG MANAGER ── */
-/* Single document-level pair of listeners; no accumulation with many placed items */
-var _drag = { active: false, mover: null, offX: 0, offY: 0 };
-
-document.addEventListener('mousemove', function(e){
-  if(!_drag.active) return;
-  var nr = nbLayer.getBoundingClientRect();
-  _drag.mover.style.left = (e.clientX - nr.left - _drag.offX) + 'px';
-  _drag.mover.style.top  = (e.clientY - nr.top  - _drag.offY) + 'px';
-});
-document.addEventListener('mouseup', function(){
-  if(_drag.active){
-    _drag.mover.style.zIndex = '';
-    _drag.active = false;
-    _drag.mover  = null;
-  }
-});
-
-function makeDraggable(handle, mover){
-  handle.addEventListener('mousedown', function(e){
-    /* skip interactive children and paper when scissors is active */
-    if(e.target.closest && (
-      e.target.closest('.ph-add-btn') ||
-      e.target.closest('input[type=file]') ||
-      e.target.closest('.ph-caption') ||
-      e.target.closest('.jfy-text-node')
-    )) return;
-    if(S.tool==='scissors') return; // scissors handles paper via canvas overlay
-    e.preventDefault(); e.stopPropagation();
-    var mr = mover.getBoundingClientRect();
-    _drag.active = true;
-    _drag.mover  = mover;
-    _drag.offX   = e.clientX - mr.left;
-    _drag.offY   = e.clientY - mr.top;
-    mover.style.zIndex = 30;
-  });
-}
-
-})();
 </script>
 </body>
 </html>
