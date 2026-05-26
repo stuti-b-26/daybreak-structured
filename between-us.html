@@ -38,11 +38,13 @@ body{background:#EEE0CC}
 /* ── EXPLORE SECTION ── */
 .bw-feed{padding:0;background:#EEE0CC;margin-top:280px;position:relative;z-index:2}
 .bw-feed-inner{max-width:1200px;margin:0 auto;padding:0 48px}
-/* header sits in the gap between the two trees — constrained to ~18vw–70vw */
-.bw-explore-header{padding-left:19vw;padding-right:32vw;position:relative;z-index:2;margin-top:0;padding-top:40px;padding-bottom:0}
-.bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(32px,4vw,60px);color:#000;margin-bottom:12px;line-height:1}
-/* trees overlap the header from below: negative margin pulls them up over header bottom */
-.bw-explore-trees{display:block;width:100vw;position:relative;left:50%;transform:translateX(-50%);pointer-events:none;line-height:0;margin-top:-40px;margin-bottom:-2px}
+/* trees + header in one layer: header overlays the gap between trees */
+.bw-explore-trees-wrap{position:relative;width:100%;line-height:0;margin-bottom:-2px}
+.bw-explore-trees{display:block;width:100vw;position:relative;left:50%;transform:translateX(-50%);pointer-events:none;line-height:0}
+.bw-explore-trees img{width:100%;height:auto;display:block}
+/* header absolutely centered in the gap between the two tree clusters */
+.bw-explore-header{position:absolute;top:50%;left:22%;right:22%;transform:translateY(-50%);z-index:2;text-align:center}
+.bw-section-title{font-family:'Rammetto One',cursive;font-size:clamp(28px,3.5vw,56px);color:#000;margin-bottom:10px;line-height:1}
 .bw-explore-trees img{width:100%;height:auto;display:block}
 .bw-section-desc{font-family:'Nunito',sans-serif;font-size:clamp(14px,1.3vw,17px);color:#444;line-height:1.65;max-width:680px;margin-bottom:40px}
 /* ── COLLAGE GALLERY ── */
@@ -195,7 +197,7 @@ body{background:#EEE0CC}
   #bw-hero-track{top:calc(40% - 200px)}
   /* explore: constrain header text to central 8 of 12 columns */
   .bw-feed{margin-top:200px}
-  .bw-explore-header{padding-left:19vw;padding-right:32vw;margin-top:0;padding-top:32px}
+  .bw-explore-header{left:18%;right:18%}
   .bw-section-desc{max-width:100%}
   /* saved posts: constrain heading and empty state to central 8 columns */
   .bw-saved-inner{
@@ -211,9 +213,9 @@ body{background:#EEE0CC}
   .bw-intro-blurb{margin-top:0;padding:48px 24px}
   .bw-saved{padding:48px 0}
   .bw-write{padding:32px 0 80px}
-  .bw-feed{padding:0;margin-top:160px}
+  .bw-feed{padding:0;margin-top:120px}
   .bw-feed-inner,.bw-write-inner,.bw-saved-inner{padding:0 20px}
-  .bw-explore-header{padding-left:18vw;padding-right:24vw;margin-top:0;padding-top:24px}
+  .bw-explore-header{left:10%;right:10%;top:45%}
   .bw-section-desc{max-width:100%}
   .bw-write-actions{flex-direction:column;gap:8px}
   .bw-btn{text-align:center;justify-content:center}
@@ -380,14 +382,14 @@ body{background:#EEE0CC}
 
   <!-- EXPLORE -->
   <section class="bw-feed">
-    <div class="bw-feed-inner">
+    <div class="bw-explore-trees-wrap">
+      <div class="bw-explore-trees" aria-hidden="true">
+        <img src="explore%20trees.svg" alt="">
+      </div>
       <div class="bw-explore-header">
         <h2 class="bw-section-title">explore</h2>
         <p class="bw-section-desc">see what's making other people happy today. you're welcome to just read through them, or you can click the + to save them to your profile. you can also add on to saved posts in just for you. whatever makes your happiness garden bloom.</p>
       </div>
-    </div>
-    <div class="bw-explore-trees" aria-hidden="true">
-      <img src="explore%20trees.svg" alt="">
     </div>
     <div class="bw-gallery-wrap" id="bw-explore-wrap">
       <div class="bw-posts-scroll" id="bw-posts-scroll">
