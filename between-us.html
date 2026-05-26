@@ -47,9 +47,9 @@ body{background:#EEE0CC}
 .bw-gallery-wrap{position:relative}
 .bw-posts-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 48px 16px;position:relative;height:66.67vh}
 .bw-posts-scroll::-webkit-scrollbar{display:none}
-.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:10px;width:max-content;padding:4px 8px 8px}
-/* each column stacks cards naturally — no fixed height, no stretch */
-.bw-col{display:flex;flex-direction:column;gap:10px;width:240px;align-items:stretch}
+.bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:14px;width:max-content;padding:6px 8px 12px}
+/* each column stacks cards top-to-bottom at natural height */
+.bw-col{display:flex;flex-direction:column;gap:14px;width:220px;align-items:stretch;justify-content:flex-start}
 /* ── SCROLL ARROW BUTTONS ── */
 /* overlay sits after scroll container in DOM so it always paints on top;
    pointer-events:none lets clicks pass through to cards everywhere except the buttons */
@@ -1175,13 +1175,18 @@ function initGalleryDrag(){
 }
 
 
-/* estimate card height from text length — avoids expensive DOM probing.
-   at 240px col width, Nunito 13px/1.55 fits ~38 chars per line (~20px/line).
-   base = tag(22) + footer(36) + padding(26) = 84px */
+/* Estimate card pixel height from text length.
+   220px col, Nunito 13px/1.55 ≈ 35 chars/line, ~20px/line.
+   base = tag 22 + gap 6 + footer 36 + padding top+bottom 26 = 90px */
 function estimateCardH(post){
-  return 84 + Math.ceil(post.text.length / 38) * 20;
+  return 90 + Math.ceil(post.text.length / 35) * 20;
 }
 
+/* Sequential masonry: fill each column top-to-bottom until it would
+   overflow, then open the next column. This mirrors the reference
+   layout exactly — tall cards naturally dominate a column, short
+   ones share. Consistent on every rebuild so adding a post never
+   changes the order of existing cards. */
 function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
   var oldList=document.getElementById(listId);
   if(oldList)oldList.remove();
@@ -1196,21 +1201,21 @@ function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
   }
   if(emptyEl)emptyEl.style.display='none';
 
-  var GAP=10;
+  var GAP=14;
   var maxH=(scrollEl.clientHeight||window.innerHeight*(2/3))-GAP;
-  var cols=[], heights=[];
+  var cols=[[]], heights=[0];
 
   posts.forEach(function(post,i){
     var h=estimateCardH(post);
-    /* find the shortest column that still has room */
-    var best=-1, bestH=Infinity;
-    for(var j=0;j<cols.length;j++){
-      var nh=heights[j]+(heights[j]>0?GAP:0)+h;
-      if(nh<=maxH&&heights[j]<bestH){bestH=heights[j];best=j;}
+    var ci=cols.length-1; /* current (rightmost) column */
+    var used=heights[ci];
+    var wouldBe=used+(used>0?GAP:0)+h;
+    if(wouldBe>maxH&&used>0){
+      /* this card overflows — start a new column */
+      ci=cols.length;cols.push([]);heights.push(0);
     }
-    if(best===-1){best=cols.length;cols.push([]);heights.push(0);}
-    cols[best].push({post:post,idx:i});
-    heights[best]+=(heights[best]>0?GAP:0)+h;
+    cols[ci].push({post:post,idx:i});
+    heights[ci]+=(heights[ci]>0?GAP:0)+h;
   });
 
   cols.forEach(function(items){
@@ -1221,6 +1226,8 @@ function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
     });
     container.appendChild(colEl);
   });
+  /* update nav buttons now that content width is known */
+  scrollEl.dispatchEvent(new Event('scroll'));
 }
 
 function renderFeed(){
