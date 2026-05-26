@@ -952,6 +952,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
     '</div>';
 
   card.innerHTML=tagEl+mediaEl+textEl+footerEl;
+  card.insertBefore(tileImg, card.firstChild);
 
   card.querySelector('.bw-post-save-btn').addEventListener('click', function(e){
     e.stopPropagation();
