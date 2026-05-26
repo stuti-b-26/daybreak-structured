@@ -1688,6 +1688,119 @@ function placeSticker(e){
   nbLayer.appendChild(node);
 }
 
+/* ── PAPER TOOL ── */
+var selectedPaperPattern = 'lined';
+var selectedPaperSize    = 'medium';
+var PAPER_SIZES = { small:{w:130,h:170}, medium:{w:200,h:260}, large:{w:280,h:360} };
+
+(function setupPaperPanel(){
+  var pp = document.getElementById('jfy-paper-panel');
+  if(!pp) return;
+  pp.querySelectorAll('.jfy-pattern-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      pp.querySelectorAll('.jfy-pattern-btn').forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      selectedPaperPattern = btn.dataset.pattern;
+    });
+  });
+  pp.querySelectorAll('.jfy-size-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      pp.querySelectorAll('.jfy-size-btn').forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      selectedPaperSize = btn.dataset.size;
+    });
+  });
+})();
+
+function drawPaperPattern(pctx, w, h, pattern){
+  var dpr = window.devicePixelRatio||1;
+  pctx.setTransform(dpr,0,0,dpr,0,0);
+  switch(pattern){
+    case 'lined':
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='rgba(140,170,220,0.45)'; pctx.lineWidth=0.8;
+      for(var y=22;y<h;y+=22){ pctx.beginPath();pctx.moveTo(0,y);pctx.lineTo(w,y);pctx.stroke(); }
+      pctx.strokeStyle='rgba(220,90,90,0.25)'; pctx.lineWidth=1;
+      pctx.beginPath();pctx.moveTo(28,0);pctx.lineTo(28,h);pctx.stroke();
+      break;
+    case 'dotted':
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.fillStyle='rgba(130,160,210,0.5)';
+      for(var yy=22;yy<h;yy+=22) for(var xx=22;xx<w;xx+=22){
+        pctx.beginPath();pctx.arc(xx,yy,1.4,0,Math.PI*2);pctx.fill();
+      }
+      break;
+    case 'grid':
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='rgba(140,170,220,0.35)'; pctx.lineWidth=0.8;
+      for(var yg=0;yg<h;yg+=22){ pctx.beginPath();pctx.moveTo(0,yg);pctx.lineTo(w,yg);pctx.stroke(); }
+      for(var xg=0;xg<w;xg+=22){ pctx.beginPath();pctx.moveTo(xg,0);pctx.lineTo(xg,h);pctx.stroke(); }
+      break;
+    case 'kraft':
+      pctx.fillStyle='#c9a97a'; pctx.fillRect(0,0,w,h);
+      pctx.fillStyle='rgba(0,0,0,0.04)';
+      for(var k=0;k<600;k++){
+        pctx.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1);
+      }
+      break;
+    default: // blank
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+  }
+}
+
+function placePaper(e){
+  var nr = nbLayer.getBoundingClientRect();
+  var sz = PAPER_SIZES[selectedPaperSize];
+  var x = e.clientX - nr.left - sz.w/2;
+  var y = e.clientY - nr.top  - sz.h/2;
+  var dpr = window.devicePixelRatio||1;
+
+  var pc = document.createElement('canvas');
+  pc.className = 'jfy-placed-paper';
+  pc.width  = Math.round(sz.w * dpr);
+  pc.height = Math.round(sz.h * dpr);
+  pc.style.width  = sz.w+'px';
+  pc.style.height = sz.h+'px';
+  pc.style.left   = Math.max(0,x)+'px';
+  pc.style.top    = Math.max(0,y)+'px';
+  pc.dataset.pattern = selectedPaperPattern;
+
+  drawPaperPattern(pc.getContext('2d'), sz.w, sz.h, selectedPaperPattern);
+  makeDraggable(pc, pc);
+  nbLayer.appendChild(pc);
+}
+
+/* ── SCISSORS CUT ── */
+function applyCut(paperCanvas, nbLayerPts){
+  if(nbLayerPts.length < 3) return;
+  var offX = parseFloat(paperCanvas.style.left)||0;
+  var offY = parseFloat(paperCanvas.style.top) ||0;
+  var dpr  = window.devicePixelRatio||1;
+  var pctx = paperCanvas.getContext('2d');
+
+  // Create a temporary canvas with the cut shape (filled) to use as mask
+  var tmp = document.createElement('canvas');
+  tmp.width  = paperCanvas.width;
+  tmp.height = paperCanvas.height;
+  var tctx = tmp.getContext('2d');
+  tctx.setTransform(dpr,0,0,dpr,0,0);
+
+  // Draw the closed cut path as a filled shape
+  tctx.beginPath();
+  tctx.moveTo(nbLayerPts[0].x - offX, nbLayerPts[0].y - offY);
+  for(var i=1;i<nbLayerPts.length;i++) tctx.lineTo(nbLayerPts[i].x - offX, nbLayerPts[i].y - offY);
+  tctx.closePath();
+  tctx.fillStyle = '#000';
+  tctx.fill();
+
+  // Apply: keep only the pixels inside the cut path
+  pctx.save();
+  pctx.setTransform(1,0,0,1,0,0); // raw canvas pixels for drawImage
+  pctx.globalCompositeOperation = 'destination-in';
+  pctx.drawImage(tmp, 0, 0);
+  pctx.restore();
+}
+
 /* ── GLOBAL DRAG MANAGER ── */
 /* Single document-level pair of listeners; no accumulation with many placed items */
 var _drag = { active: false, mover: null, offX: 0, offY: 0 };
@@ -1708,13 +1821,14 @@ document.addEventListener('mouseup', function(){
 
 function makeDraggable(handle, mover){
   handle.addEventListener('mousedown', function(e){
-    /* skip interactive children */
+    /* skip interactive children and paper when scissors is active */
     if(e.target.closest && (
       e.target.closest('.ph-add-btn') ||
       e.target.closest('input[type=file]') ||
       e.target.closest('.ph-caption') ||
       e.target.closest('.jfy-text-node')
     )) return;
+    if(S.tool==='scissors') return; // scissors handles paper via canvas overlay
     e.preventDefault(); e.stopPropagation();
     var mr = mover.getBoundingClientRect();
     _drag.active = true;
