@@ -828,7 +828,12 @@ body.jfy-scissors-active .jfy-scissors {
   <button class="jfy-panel-close" aria-label="Close">×</button>
   <h3>washi tape</h3>
   <div class="jfy-color-swatches" id="jfy-washi-swatches"></div>
-  <p class="jfy-tool-hint">pick a color, then click &amp; drag on the notebook to place tape</p>
+  <div class="jfy-pen-size-row" style="margin-top:10px">
+    <label for="jfy-washi-width">width</label>
+    <input type="range" id="jfy-washi-width" min="8" max="80" value="28">
+    <span id="jfy-washi-width-val" style="font-size:11px;color:#888;min-width:28px">28px</span>
+  </div>
+  <p class="jfy-tool-hint">pick a color &amp; width, then click &amp; drag at any angle to place tape</p>
 </div>
 
 <div id="jfy-pen-panel" class="jfy-tool-panel" role="dialog" aria-label="Pen">
@@ -1123,38 +1128,63 @@ function canvasPos(e){
 
 /* ── DRAW FUNCTIONS ── */
 var WASHI_STRIPE_SPACING = 10;
+var washibWidth = 28; // current tape width in px
 
-function drawWashi(x1,y1,x2,y2,col,preview){
-  var minX=Math.min(x1,x2), maxX=Math.max(x1,x2);
-  var minY=Math.min(y1,y2), maxY=Math.max(y1,y2);
-  var w=maxX-minX, h=maxY-minY;
-  if(w<2||h<2) return;
+function drawWashi(x1,y1,x2,y2,col,preview,tapeW){
+  var dx = x2-x1, dy = y2-y1;
+  var len = Math.sqrt(dx*dx+dy*dy);
+  if(len < 2) return;
+  tapeW = tapeW || washibWidth;
+
+  // Unit vector along the tape, perpendicular for width
+  var ux = dx/len, uy = dy/len;
+  var px = -uy, py = ux; // perpendicular
+
+  var hw = tapeW/2;
+  // Four corners of the tape strip
+  var c0x = x1 + px*hw, c0y = y1 + py*hw;
+  var c1x = x1 - px*hw, c1y = y1 - py*hw;
+  var c2x = x2 - px*hw, c2y = y2 - py*hw;
+  var c3x = x2 + px*hw, c3y = y2 + py*hw;
+
   ctx.save();
-  // clip all subsequent drawing to the tape rectangle
   ctx.beginPath();
-  ctx.rect(minX,minY,w,h);
+  ctx.moveTo(c0x,c0y); ctx.lineTo(c1x,c1y);
+  ctx.lineTo(c2x,c2y); ctx.lineTo(c3x,c3y);
+  ctx.closePath();
   ctx.clip();
-  // fill
+
   ctx.fillStyle = col.rgba;
-  ctx.fillRect(minX,minY,w,h);
-  // diagonal stripes (clipped inside rect)
+  ctx.fill();
+
+  // Diagonal stripes perpendicular to the tape angle (always 45° to strip)
   ctx.strokeStyle = col.rgba.replace(/[\d.]+\)$/,'0.22)');
   ctx.lineWidth = 1.5;
-  var span = w + h;
-  for(var i=-h; i<span; i+=WASHI_STRIPE_SPACING){
+  // Stripe along the perpendicular direction, over length+width span
+  var span = len + tapeW * 2;
+  for(var i = -tapeW; i < span; i += WASHI_STRIPE_SPACING){
+    var sx = x1 + ux*i + px*hw*2;
+    var sy = y1 + uy*i + py*hw*2;
+    var ex = x1 + ux*i - px*hw*2;
+    var ey = y1 + uy*i - py*hw*2;
     ctx.beginPath();
-    ctx.moveTo(minX+i, minY);
-    ctx.lineTo(minX+i+h, minY+h);
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(ex, ey);
     ctx.stroke();
   }
+
   ctx.restore();
-  // preview dashed border drawn OUTSIDE the clip (after restore)
+
   if(preview){
     ctx.save();
     ctx.strokeStyle = col.solid;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4,4]);
-    ctx.strokeRect(minX,minY,w,h);
+    ctx.beginPath();
+    ctx.moveTo(c0x,c0y); ctx.lineTo(c1x,c1y);
+    ctx.lineTo(c2x,c2y); ctx.lineTo(c3x,c3y);
+    ctx.closePath();
+    ctx.stroke();
     ctx.setLineDash([]);
     ctx.restore();
   }
@@ -1182,7 +1212,7 @@ function redrawAll(){
   var W = canvas.offsetWidth, H = canvas.offsetHeight;
   ctx.clearRect(0,0,W,H);
   drawCmds.forEach(function(cmd){
-    if(cmd.type==='washi') drawWashi(cmd.x1,cmd.y1,cmd.x2,cmd.y2,cmd.col,false);
+    if(cmd.type==='washi') drawWashi(cmd.x1,cmd.y1,cmd.x2,cmd.y2,cmd.col,false,cmd.w);
     else if(cmd.type==='doodle') drawDoodle(cmd.pts,cmd.color,cmd.size);
   });
 }
@@ -1226,6 +1256,16 @@ S.wasbiColor = WASHI_COLORS[0];
     custom.classList.add('active');
   });
   c.appendChild(custom);
+})();
+
+(function initWashiWidth(){
+  var slider = document.getElementById('jfy-washi-width');
+  var valEl  = document.getElementById('jfy-washi-width-val');
+  if(!slider) return;
+  slider.addEventListener('input', function(){
+    washibWidth = parseInt(slider.value);
+    if(valEl) valEl.textContent = washibWidth + 'px';
+  });
 })();
 
 /* ── PEN COLORS ── */
@@ -1437,7 +1477,7 @@ canvas.addEventListener('mousemove', function(e){
   var pos = canvasPos(e);
   if(S.tool==='washi' && S.dragging && S.dStart){
     redrawAll();
-    drawWashi(S.dStart.x, S.dStart.y, pos.x, pos.y, S.wasbiColor, true);
+    drawWashi(S.dStart.x, S.dStart.y, pos.x, pos.y, S.wasbiColor, true, washibWidth);
   } else if(S.tool==='doodle' && S.dragging && S.currentPath){
     S.currentPath.pts.push(pos);
     redrawAll();
@@ -1466,8 +1506,8 @@ function finishDraw(e){
   var pos = canvasPos(e||{clientX:0,clientY:0});
   if(S.tool==='washi' && S.dragging){
     S.dragging=false;
-    var w=Math.abs(pos.x-S.dStart.x), h=Math.abs(pos.y-S.dStart.y);
-    if(w>4||h>4) drawCmds.push({type:'washi',x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor});
+    var dx=pos.x-S.dStart.x, dy=pos.y-S.dStart.y;
+    if(Math.sqrt(dx*dx+dy*dy)>4) drawCmds.push({type:'washi',x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor,w:washibWidth});
     S.dStart=null;
     redrawAll();
   } else if(S.tool==='doodle' && S.dragging){
