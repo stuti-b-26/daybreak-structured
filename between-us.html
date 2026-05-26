@@ -466,10 +466,9 @@ body{background:#EEE0CC}
     </div>
     <div class="bw-gallery-wrap" id="bw-saved-wrap">
       <div class="bw-posts-scroll" id="bw-saved-scroll">
-        <div class="bw-posts" id="bw-saved-list">
-          <div class="bw-saved-empty-card" id="bw-saved-empty">
-            <p>no saved posts yet. save posts using the '+' on posts in explore to see them all here!</p>
-          </div>
+        <div class="bw-posts" id="bw-saved-list"></div>
+        <div class="bw-saved-empty-card" id="bw-saved-empty" style="display:none">
+          <p>no saved posts yet. save posts using the '+' on posts in explore to see them all here!</p>
         </div>
       </div>
       <div class="bw-gallery-btns">
@@ -1217,11 +1216,8 @@ function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
   container.id=listId;
   scrollEl.insertBefore(container,scrollEl.firstChild);
 
-  if(!posts.length){
-    if(emptyEl){container.style.cssText='width:100%;display:flex;justify-content:center';container.appendChild(emptyEl);emptyEl.style.display='block';}
-    return;
-  }
-  if(emptyEl)emptyEl.style.display='none';
+  if(emptyEl)emptyEl.style.display=posts.length?'none':'block';
+  if(!posts.length)return;
 
   var GAP=14;
   /* use real clientHeight; fall back to CSS value if not yet laid out */
