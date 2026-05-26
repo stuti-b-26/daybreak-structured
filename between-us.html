@@ -917,7 +917,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
   card.className='bw-post-card'+(isOwn?' bw-post-card--own':'');
   card.dataset.id=post.id;
   card.dataset.idx=idx;
-  var fc=isOwn?8:postColorIndex(post.id);
+  var fc=postColorIndex(post.id);
   if(!isOwn)card.dataset.fc=fc;
 
   var tileSrc='moss-tile-'+(fc+1)+'.svg';
