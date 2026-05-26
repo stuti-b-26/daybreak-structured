@@ -75,20 +75,23 @@ body{background:#EEE0CC}
   position:relative;
   height:auto;
   background:#5a5c47;
+  isolation:isolate;
 }
-/* tile div: covers card, cover preserves aspect ratio, scale(1.5) zooms in to hide whitespace border */
+/* tile div: extends 25% beyond each edge so stone fills with no border bleed */
 .bw-post-tile{
-  position:absolute;inset:0;
+  position:absolute;
+  top:-25%;left:-25%;
+  width:150%;height:150%;
   background-size:cover;
   background-position:center center;
-  transform:scale(1.5);
   pointer-events:none;
   z-index:0;
+  border-radius:inherit;
 }
 .bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #1a1a1a}
 .bw-post-card:hover,.bw-post-card--own:hover{box-shadow:7px 7px 0 0 #1a1a1a}
 /* subtle dark scrim above tile so text is always legible */
-.bw-post-card::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.28);pointer-events:none;z-index:1}
+.bw-post-card::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.45);pointer-events:none;z-index:1}
 .bw-post-card::after{display:none}
 .bw-post-card>*:not(.bw-post-tile){position:relative;z-index:2}
 .bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;width:fit-content;flex-shrink:0;border:1px solid rgba(255,255,255,.25)}
