@@ -79,8 +79,8 @@ body{background:#EEE0CC}
 /* tile <img> — JS fitTileToCard() applies computed scale/offset after load */
 .bw-post-tile{
   position:absolute;
-  top:0;left:0;
-  width:100%;height:100%;
+  top:-20%;left:-20%;
+  width:140%;height:140%;
   object-fit:fill;
   display:block;
   pointer-events:none;
@@ -940,8 +940,8 @@ function fitTileToCard(imgEl, cardEl){
     if(!found) return;
     /* content dimensions in image-space */
     var cW=maxX-minX, cH=maxY-minY;
-    /* scale so content fills card + 4% breathing room on each edge */
-    var scaleX=(IW/cW)*1.08, scaleY=(IH/cH)*1.08;
+    /* scale so content fills card + 40% extra so no background shows */
+    var scaleX=(IW/cW)*1.4, scaleY=(IH/cH)*1.4;
     var scale=Math.max(scaleX,scaleY);
     /* offset so content centre aligns with card centre */
     var contentCX=(minX+maxX)/2, contentCY=(minY+maxY)/2;
