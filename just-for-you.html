@@ -1973,6 +1973,9 @@ function applyCut(paperCanvas, nbLayerPts){
   pctx.globalCompositeOperation = 'destination-in';
   pctx.drawImage(tmp, 0, 0);
   pctx.restore();
+
+  // Remove rectangular box-shadow so it doesn't outline the original canvas bounds
+  paperCanvas.style.boxShadow = 'none';
 }
 
 /* ── GLOBAL DRAG MANAGER ── */
