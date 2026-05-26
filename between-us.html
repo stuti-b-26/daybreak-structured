@@ -48,8 +48,9 @@ body{background:#EEE0CC}
 .bw-posts-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:0 48px 16px;position:relative;height:66.67vh}
 .bw-posts-scroll::-webkit-scrollbar{display:none}
 .bw-posts{display:flex;flex-direction:row;align-items:flex-start;gap:14px;width:max-content;padding:6px 8px 12px}
-/* each column stacks cards top-to-bottom at natural height */
-.bw-col{display:flex;flex-direction:column;gap:14px;width:220px;align-items:stretch;justify-content:flex-start}
+/* columns and cards are bounded so nothing overflows the gallery */
+.bw-col{display:flex;flex-direction:column;gap:14px;width:220px;align-items:stretch;justify-content:flex-start;overflow:hidden}
+.bw-post-card{max-height:var(--gallery-max-card-h,calc(66.67vh - 44px));overflow:hidden}
 /* ── SCROLL ARROW BUTTONS ── */
 /* overlay sits after scroll container in DOM so it always paints on top;
    pointer-events:none lets clicks pass through to cards everywhere except the buttons */
@@ -1175,18 +1176,17 @@ function initGalleryDrag(){
 }
 
 
-/* Estimate card pixel height from text length.
-   220px col, Nunito 13px/1.55 ≈ 35 chars/line, ~20px/line.
-   base = tag 22 + gap 6 + footer 36 + padding top+bottom 26 = 90px */
-function estimateCardH(post){
-  return 90 + Math.ceil(post.text.length / 35) * 20;
+/* estimate card height; clamped to maxH so a single card never exceeds the gallery */
+function estimateCardH(post, maxH){
+  var h = 90 + Math.ceil(post.text.length / 35) * 20;
+  return Math.min(h, maxH);
 }
 
-/* Sequential masonry: fill each column top-to-bottom until it would
-   overflow, then open the next column. This mirrors the reference
-   layout exactly — tall cards naturally dominate a column, short
-   ones share. Consistent on every rebuild so adding a post never
-   changes the order of existing cards. */
+/* Sequential masonry: posts flow into columns top-to-bottom.
+   When the next card would exceed maxH a new column opens.
+   After DOM insertion a rAF pass fixes any column whose actual
+   rendered height overflows (estimate mismatch) by moving the
+   last card to a new column. */
 function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
   var oldList=document.getElementById(listId);
   if(oldList)oldList.remove();
@@ -1202,18 +1202,18 @@ function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
   if(emptyEl)emptyEl.style.display='none';
 
   var GAP=14;
-  var maxH=(scrollEl.clientHeight||window.innerHeight*(2/3))-GAP;
-  var cols=[[]], heights=[0];
+  /* use real clientHeight; fall back to CSS value if not yet laid out */
+  var maxH=(scrollEl.clientHeight||window.innerHeight*(2/3))-GAP*2;
+  /* expose to CSS so .bw-post-card max-height tracks the real value */
+  scrollEl.style.setProperty('--gallery-max-card-h', maxH+'px');
 
+  var cols=[[]], heights=[0];
   posts.forEach(function(post,i){
-    var h=estimateCardH(post);
-    var ci=cols.length-1; /* current (rightmost) column */
+    var h=estimateCardH(post,maxH);
+    var ci=cols.length-1;
     var used=heights[ci];
     var wouldBe=used+(used>0?GAP:0)+h;
-    if(wouldBe>maxH&&used>0){
-      /* this card overflows — start a new column */
-      ci=cols.length;cols.push([]);heights.push(0);
-    }
+    if(wouldBe>maxH&&used>0){ci=cols.length;cols.push([]);heights.push(0);}
     cols[ci].push({post:post,idx:i});
     heights[ci]+=(heights[ci]>0?GAP:0)+h;
   });
@@ -1226,8 +1226,22 @@ function buildMasonry(scrollEl, posts, listId, showJournal, context, emptyEl){
     });
     container.appendChild(colEl);
   });
-  /* update nav buttons now that content width is known */
-  scrollEl.dispatchEvent(new Event('scroll'));
+
+  /* rAF pass: if any column's real rendered height exceeds maxH,
+     pull its last card into a new column appended to the right */
+  requestAnimationFrame(function(){
+    var colEls=container.querySelectorAll('.bw-col');
+    colEls.forEach(function(col){
+      while(col.scrollHeight>maxH+GAP&&col.children.length>1){
+        var overflow=col.lastElementChild;
+        var newCol=document.createElement('div');
+        newCol.className='bw-col';
+        newCol.appendChild(overflow);
+        container.appendChild(newCol);
+      }
+    });
+    scrollEl.dispatchEvent(new Event('scroll'));
+  });
 }
 
 function renderFeed(){
