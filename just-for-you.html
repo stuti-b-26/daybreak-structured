@@ -43,7 +43,7 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
   column-gap: var(--col-gap);
   /* top: clears fixed header + space for above-notebook props
      bottom: space for stickers/pen/scissors */
-  padding: 17vw var(--gutter) 30vw;
+  padding: 17vw var(--gutter) 36vw;
 }
 
 /* Notebook: center 10 of 12 columns */
@@ -86,30 +86,30 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
 }
 
 /* ── BELOW ── */
-/* Stickers: ~20vw, left */
+/* Stickers: left, bleeds off viewport left edge */
 .jfy-stickers {
-  bottom: -15vw;
-  left: -10vw;
-  width: 20vw;
-  max-width: 82px;
+  bottom: -18vw;
+  left: -18vw;
+  width: 38vw;
+  max-width: 158px;
   z-index: 3;
 }
-/* Pen: clearly visible, centered, ~25deg from vertical */
+/* Pen: large enough to look proportional to the paper */
 .jfy-pen {
-  bottom: -24vw;
+  bottom: -32vw;
   left: 50%;
   transform: translateX(-50%) rotate(-25deg);
   transform-origin: top center;
-  width: 16vw;
-  max-width: 68px;
+  width: 26vw;
+  max-width: 108px;
   z-index: 4;
 }
-/* Scissors: ~20vw, right, slightly lower than stickers */
+/* Scissors: right, bleeds off viewport right edge */
 .jfy-scissors {
-  bottom: -15vw;
-  right: -6vw;
-  width: 20vw;
-  max-width: 82px;
+  bottom: -18vw;
+  right: -16vw;
+  width: 34vw;
+  max-width: 142px;
   transform: rotate(18deg);
   transform-origin: bottom left;
   z-index: 3;
