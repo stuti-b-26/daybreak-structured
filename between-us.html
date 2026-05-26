@@ -74,7 +74,16 @@ body{background:#EEE0CC}
   overflow:hidden;
   position:relative;
   height:auto;
-  background:#5a5c47; /* fallback while SVG loads */
+  background:#5a5c47;
+}
+/* tile div: covers card, cover preserves aspect ratio, scale(1.5) zooms in to hide whitespace border */
+.bw-post-tile{
+  position:absolute;inset:0;
+  background-size:cover;
+  background-position:center center;
+  transform:scale(1.5);
+  pointer-events:none;
+  z-index:0;
 }
 .bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #1a1a1a}
 .bw-post-card:hover,.bw-post-card--own:hover{box-shadow:7px 7px 0 0 #1a1a1a}
@@ -908,10 +917,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
   var fc=isOwn?8:postColorIndex(post.id);
   if(!isOwn)card.dataset.fc=fc;
 
-  /* tile as background-image: always covers 100% of card, no img positioning bugs */
-  card.style.backgroundImage='url("moss-tile-'+(fc+1)+'.svg")';
-  card.style.backgroundSize='150% 150%';
-  card.style.backgroundPosition='center';
+  var tileSrc='moss-tile-'+(fc+1)+'.svg';
 
   var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>';
   var mediaEl='';
@@ -938,6 +944,10 @@ function renderCard(post, isOwn, idx, showJournal, context){
     '</div>';
 
   card.innerHTML=tagEl+mediaEl+textEl+footerEl;
+  var tileDiv=document.createElement('div');
+  tileDiv.className='bw-post-tile';
+  tileDiv.style.backgroundImage='url("'+tileSrc+'")';
+  card.insertBefore(tileDiv,card.firstChild);
 
   card.querySelector('.bw-post-save-btn').addEventListener('click', function(e){
     e.stopPropagation();
