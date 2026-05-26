@@ -87,11 +87,13 @@ body{background:#EEE0CC}
 }
 .bw-post-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 0 #1a1a1a}
 .bw-post-card:hover,.bw-post-card--own:hover{box-shadow:7px 7px 0 0 #1a1a1a}
-.bw-post-card::before,.bw-post-card::after{display:none}
+/* subtle dark scrim above tile so text is always legible */
+.bw-post-card::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.28);pointer-events:none;z-index:1}
+.bw-post-card::after{display:none}
 .bw-post-card>*:not(.bw-post-tile){position:relative;z-index:2}
-.bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.18);color:#1a1a0e;width:fit-content;flex-shrink:0;border:1px solid rgba(0,0,0,.15)}
-.bw-post-tag--own{background:rgba(0,0,0,.22);color:#1a1a0e}
-.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;line-height:1.6;color:#1a1a0e;overflow:hidden;flex:1 1 auto;text-shadow:0 1px 3px rgba(255,255,255,.5)}
+.bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;width:fit-content;flex-shrink:0;border:1px solid rgba(255,255,255,.25)}
+.bw-post-tag--own{background:rgba(255,255,255,.22);color:#fff}
+.bw-post-text{font-family:'Nunito',sans-serif;font-size:13px;font-weight:600;line-height:1.6;color:#fff;overflow:hidden;flex:1 1 auto;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .bw-post-media{width:100%;object-fit:cover;border-radius:10px;display:block}
 .bw-post-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;flex-shrink:0}
 .bw-post-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
@@ -102,7 +104,7 @@ body{background:#EEE0CC}
 .bw-post-journal-btn.bw-in-journal{background:rgba(240,245,232,.3);color:#fff;border-color:rgba(240,245,232,.8)}
 .bw-post-delete-btn{background:none;border:none;cursor:pointer;font-size:13px;line-height:1;padding:2px 4px;color:rgba(240,245,232,.5);transition:color .15s,transform .15s;flex-shrink:0}
 .bw-post-delete-btn:hover{color:#ffb3b3;transform:scale(1.2)}
-.bw-post-time{font-family:'Nunito',sans-serif;font-size:10px;color:rgba(0,0,0,.6);font-weight:600;flex-shrink:0}
+.bw-post-time{font-family:'Nunito',sans-serif;font-size:10px;color:rgba(255,255,255,.8);font-weight:600;flex-shrink:0;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 /* ── LIGHTBOX ── */
 .bw-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .bw-lightbox.bw-lb-open{opacity:1;pointer-events:all}
