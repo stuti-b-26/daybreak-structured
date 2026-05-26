@@ -1454,10 +1454,28 @@ document.addEventListener('click', function(e){
 var _sc = { dragging: false, pts: [], target: null };
 
 function getPaperAt(clientX, clientY){
-  var papers = nbLayer.querySelectorAll('.jfy-placed-paper');
-  for(var i=papers.length-1; i>=0; i--){
-    var r=papers[i].getBoundingClientRect();
-    if(clientX>=r.left&&clientX<=r.right&&clientY>=r.top&&clientY<=r.bottom) return papers[i];
+  // Use visual hit-testing so stacked elements are respected
+  var els = document.elementsFromPoint(clientX, clientY);
+  for(var i=0;i<els.length;i++){
+    var pc = els[i].classList && els[i].classList.contains('jfy-placed-paper')
+      ? els[i] : null;
+    if(!pc && els[i].closest) pc = els[i].closest('.jfy-placed-paper');
+    if(pc) return pc;
+  }
+  return null;
+}
+
+// Returns the topmost placed notebook element at a point (any type)
+function getPlacedAt(clientX, clientY){
+  var els = document.elementsFromPoint(clientX, clientY);
+  var selectors = ['.jfy-placed-paper','.jfy-text-node-wrap','.jfy-polaroid','.jfy-sticker-node'];
+  for(var i=0;i<els.length;i++){
+    for(var s=0;s<selectors.length;s++){
+      var found = els[i].classList && els[i].classList.contains(selectors[s].slice(1))
+        ? els[i]
+        : (els[i].closest ? els[i].closest(selectors[s]) : null);
+      if(found && nbLayer.contains(found)) return found;
+    }
   }
   return null;
 }
@@ -1695,11 +1713,13 @@ nbLayer.addEventListener('click', function(e){
 }, true); // capture phase so it fires before the placement handler
 
 function makeResizable(el){
+  if(el.querySelector('.jfy-resize-corner')) return; // already wired
   var corner = document.createElement('div');
+  corner.className = 'jfy-resize-corner';
   corner.style.cssText='position:absolute;right:0;bottom:0;width:12px;height:12px;cursor:se-resize;z-index:20;background:rgba(154,89,200,0.3);border-radius:2px;';
   corner.addEventListener('mousedown', function(e){
     e.stopPropagation(); e.preventDefault();
-    _drag.active = false; // don't let drag manager interfere while resizing
+    _drag.active = false;
     var startX=e.clientX, startY=e.clientY;
     var startW=el.offsetWidth, startH=el.offsetHeight;
     function onMove(ev){
@@ -1707,7 +1727,11 @@ function makeResizable(el){
       el.style.height = Math.max(30, startH+ev.clientY-startY)+'px';
       if(activeTxt && el.contains(activeTxt)) positionTextToolbar(activeTxt);
     }
-    function onUp(){ document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); }
+    function onUp(){
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+      pushHistory();
+    }
     document.addEventListener('mousemove',onMove);
     document.addEventListener('mouseup',onUp);
   });
@@ -2109,9 +2133,10 @@ function addCutEdge(paperCanvas, nbLayerPts){
   path.style.filter = 'url(#'+filt.getAttribute('id')+')';
   svg.appendChild(path);
 
-  paperCanvas.dataset.cutSvgId = filt.getAttribute('id');
+  var svgId = 'cut-edge-' + Date.now();
+  svg.id = svgId;
+  paperCanvas.dataset.cutEdge = svgId; // survives innerHTML snapshot/restore
   nbLayer.appendChild(svg);
-  paperCanvas._cutEdgeSvg = svg;
 }
 
 /* ── GLOBAL DRAG MANAGER ── */
@@ -2163,28 +2188,61 @@ function snapshotNbLayer(){
   };
 }
 
+function rewirePolaroid(pol){
+  var dragLayer = pol.querySelector('.jfy-polaroid-drag');
+  if(dragLayer) makeDraggable(dragLayer, pol);
+
+  var addBtn   = pol.querySelector('.ph-add-btn');
+  var fileInput = pol.querySelector('input[type=file]');
+  if(addBtn && fileInput){
+    addBtn.addEventListener('click', function(ev){ ev.stopPropagation(); fileInput.click(); });
+    fileInput.addEventListener('change', function(){
+      if(!fileInput.files[0]) return;
+      var fr = new FileReader();
+      fr.onload = function(re){
+        var img = document.createElement('img');
+        img.src = re.target.result;
+        addBtn.remove();
+        var imgArea = pol.querySelector('.ph-img-area');
+        if(imgArea) imgArea.appendChild(img);
+        pushHistory();
+      };
+      fr.readAsDataURL(fileInput.files[0]);
+    });
+  }
+
+  var caption = pol.querySelector('.ph-caption');
+  if(caption) caption.addEventListener('click', function(ev){ ev.stopPropagation(); });
+}
+
 function restoreSnapshot(snap){
+  // Pull canvas out before innerHTML wipe so the module-level `canvas` var
+  // keeps pointing at the live element (canvas content is not in HTML).
+  nbLayer.removeChild(canvas);
   nbLayer.innerHTML = snap.html;
-  // Restore drawing canvas
-  var img = new Image();
-  img.onload = function(){
-    var ctx = canvas.getContext('2d');
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img,0,0);
+  nbLayer.insertBefore(canvas, nbLayer.firstChild);
+
+  // Restore drawing canvas pixel content
+  var snapImg = new Image();
+  snapImg.onload = function(){
+    var c = canvas.getContext('2d');
+    c.clearRect(0, 0, canvas.width, canvas.height);
+    c.drawImage(snapImg, 0, 0);
   };
-  img.src = snap.canvas;
-  // Re-attach drag handlers to restored placed elements
+  snapImg.src = snap.canvas;
+
+  // Re-attach all placed-element interactivity
   nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
     makeDraggable(pc, pc);
   });
   nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
     var handle = wrap.querySelector('.jfy-text-drag-handle');
     if(handle) makeDraggable(handle, wrap);
-    makeResizable(wrap);
+    makeResizable(wrap); // guarded internally — won't add duplicate corner
     var txt = wrap.querySelector('.jfy-text-node');
     if(txt){
-      txt.addEventListener('focus',function(){ showTextToolbar(txt); });
-      txt.addEventListener('blur',function(){
+      txt.addEventListener('focus', function(){ showTextToolbar(txt); });
+      txt.addEventListener('blur', function(){
         setTimeout(function(){
           if(document.activeElement && txtToolbar && txtToolbar.contains(document.activeElement)) return;
           hideTextToolbar();
@@ -2193,8 +2251,7 @@ function restoreSnapshot(snap){
     }
   });
   nbLayer.querySelectorAll('.jfy-polaroid').forEach(function(pol){
-    var dragLayer = pol.querySelector('.jfy-polaroid-drag');
-    if(dragLayer) makeDraggable(dragLayer, pol);
+    rewirePolaroid(pol);
   });
   nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
     makeDraggable(node, node);
@@ -2291,16 +2348,14 @@ _eraseBtn.addEventListener('click', function(){
 
 nbLayer.addEventListener('click', function(e){
   if(!_eraseActive) return;
-  var target =
-    e.target.closest('.jfy-placed-paper') ||
-    e.target.closest('.jfy-text-node-wrap') ||
-    e.target.closest('.jfy-polaroid') ||
-    e.target.closest('.jfy-sticker-node');
-  if(!target) return;
+  var target = getPlacedAt(e.clientX, e.clientY);
+  if(!target || !nbLayer.contains(target)) return;
   e.stopPropagation();
+  e.preventDefault();
   pushHistory();
-  // Also remove associated cut-edge SVG if present
-  if(target._cutEdgeSvg) target._cutEdgeSvg.remove();
+  // Remove associated cut-edge SVG overlay if present
+  var svgId = target.dataset && target.dataset.cutEdge;
+  if(svgId){ var edgeSvg = document.getElementById(svgId); if(edgeSvg) edgeSvg.remove(); }
   target.remove();
 }, true);
 
