@@ -798,6 +798,8 @@ body.jfy-scissors-active .jfy-scissors {
   <button id="jfy-share-btn" title="Share to Between Us">↗ share</button>
   <button id="jfy-save-btn" title="Save to journal">♡ save</button>
   <button id="jfy-export-btn" title="Export as image">↓ export</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-new-entry-btn" title="New journal entry">+ new entry</button>
 </div>
 <div id="jfy-toast"><span id="jfy-toast-msg"></span><button id="jfy-toast-undo" style="display:none"></button></div>
 
@@ -2447,14 +2449,18 @@ document.getElementById('jfy-redo-btn').addEventListener('click', function(){
 document.getElementById('jfy-clear-btn').addEventListener('click', function(){
   if(!confirm('Clear everything on the notebook page?')) return;
   pushHistory();
-  // Remove all placed elements (keep the drawing canvas itself)
-  Array.from(nbLayer.children).forEach(function(el){
-    if(el !== canvas) el.remove();
-  });
-  drawCmds = [];
-  redrawAll();
-  updateHistoryButtons();
+  Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+  drawCmds = []; redrawAll(); updateHistoryButtons();
 });
+
+// "New entry" — saves current state to journal then clears for a fresh page
+function jfyNewEntry(){
+  pushHistory();
+  Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+  drawCmds = []; redrawAll(); updateHistoryButtons();
+  if(window._jfyEntryNav) window._jfyEntryNav.reload();
+}
+document.addEventListener('jfy-new-entry', jfyNewEntry);
 
 // Erase mode: click a placed element to remove it
 var _eraseActive = false;
@@ -2684,6 +2690,7 @@ document.getElementById('jfy-save-btn').addEventListener('click', function(){
     });
     localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
     showJfyToast('Saved to your journal ♡');
+    if(window._jfyEntryNav) window._jfyEntryNav.reload();
   });
 });
 
@@ -2722,18 +2729,16 @@ document.addEventListener('keydown', function(e){
 
 
 <!-- ════════════════════════════════════════════════════════════════════
-     JOURNAL INTRO — in-page book
-     Cover → 5 pages (back/next/page-flip) → skip anytime → journal.
+     JOURNAL INTRO — opens straight to page 1, no cover step.
+     5 intro pages (back/next page-flip) → begin → new journal page.
 ════════════════════════════════════════════════════════════════════ -->
 <style>
 /* ── Intro font assignments ── */
 #jfy-intro-wrap,
 #jfy-intro-wrap h2,
-#jfy-intro-wrap .jfy-islide-num,
-#jfy-cover-title { font-family: 'Antonio', sans-serif; }
+#jfy-intro-wrap .jfy-islide-num { font-family: 'Antonio', sans-serif; }
 
-#jfy-intro-wrap p,
-#jfy-cover-sub   { font-family: 'Bad Script', cursive; }
+#jfy-intro-wrap p { font-family: 'Bad Script', cursive; }
 
 /* ── Book wrapper ── */
 #jfy-intro-wrap {
@@ -2914,75 +2919,6 @@ document.addEventListener('keydown', function(e){
 }
 .jfy-islide-skip:hover { background: #e3d4ff; color: #5c2d96; }
 
-/* ── Cover ── */
-#jfy-intro-cover {
-  position: absolute; inset: 0;
-  background-color: #3B1E0E;
-  background-image:
-    repeating-linear-gradient(100deg,
-      rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
-      transparent 1px, transparent 7px),
-    repeating-linear-gradient(10deg,
-      rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px,
-      transparent 1px, transparent 9px),
-    radial-gradient(ellipse at 28% 38%, rgba(90,40,10,0.50) 0%, transparent 60%),
-    radial-gradient(ellipse at 72% 72%, rgba(20,8,2,0.38) 0%, transparent 55%);
-  border-radius: inherit;
-  display: flex; flex-direction: column;
-  align-items: flex-start; justify-content: flex-end;
-  padding: 9% 8% 8%;
-  cursor: pointer;
-  z-index: 20;
-  transform-origin: left center;
-  transform-style: preserve-3d;
-  transition: transform 0.9s cubic-bezier(.77,0,.18,1);
-}
-#jfy-intro-cover::after {
-  content: '';
-  position: absolute; inset: 14px;
-  border: 2px dashed rgba(255,255,255,0.09);
-  border-radius: 4px 14px 14px 4px;
-  pointer-events: none;
-}
-#jfy-intro-cover::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0; width: 32px;
-  background: linear-gradient(90deg,
-    rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.10) 60%, transparent 100%);
-  border-radius: 8px 0 0 8px;
-  pointer-events: none;
-}
-#jfy-intro-cover.flipped { transform: rotateY(-180deg); pointer-events: none; }
-
-#jfy-cover-title {
-  font-family: 'Antonio', sans-serif;
-  font-size: clamp(22px, 4.5vw, 46px);
-  font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.09em; color: #e8d5b0;
-  line-height: 1.1; margin-bottom: 10px;
-  text-shadow: 0 2px 14px rgba(0,0,0,0.55);
-}
-#jfy-cover-sub {
-  font-family: 'Bad Script', cursive;
-  font-size: clamp(12px, 1.8vw, 17px);
-  color: rgba(232,213,176,0.60);
-  letter-spacing: 0.06em;
-}
-#jfy-cover-open-hint {
-  position: absolute; bottom: 24px; right: 24px;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  color: rgba(232,213,176,0.50); font-size: 10px;
-  letter-spacing: 0.12em; text-transform: lowercase;
-  font-family: 'Antonio', sans-serif;
-  transition: color 0.2s; pointer-events: none;
-}
-#jfy-intro-cover:hover #jfy-cover-open-hint { color: rgba(232,213,176,0.9); }
-#jfy-cover-open-hint svg { animation: jfy-hint-bounce 1.8s ease-in-out infinite; }
-@keyframes jfy-hint-bounce {
-  0%,100% { transform: translateY(0); }
-  50%      { transform: translateY(5px); }
-}
-
 /* ── Journal page-flip nav arrows (on real notebook) ── */
 .jfy-entry-nav {
   position: absolute; top: 50%; transform: translateY(-50%);
@@ -3001,60 +2937,86 @@ document.addEventListener('keydown', function(e){
   #jfy-entry-next { right: -32px; width: 28px; height: 28px; font-size: 13px; }
 }
 
-/* Entry viewer overlay inside notebook */
+/* ── Entry viewer: fills notebook, page-flip in/out ── */
 #jfy-entry-viewer {
   position: absolute; inset: 0; z-index: 30;
   background: #f8f4ed;
   border-radius: 18px;
-  display: none;
+  display: flex;        /* always in DOM, controlled by opacity+pointer-events */
   flex-direction: column;
   align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transform-origin: left center;
+  backface-visibility: hidden;
 }
-#jfy-entry-viewer.open { display: flex; }
+#jfy-entry-viewer.ev-flip-in {
+  animation: jfy-flip-in-fwd 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: auto;
+}
+#jfy-entry-viewer.ev-flip-out-fwd {
+  animation: jfy-flip-out-fwd 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: none;
+}
+#jfy-entry-viewer.ev-flip-out-bck {
+  animation: jfy-flip-out-bck 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: none;
+}
+#jfy-entry-viewer.visible {
+  opacity: 1; pointer-events: auto; transform: rotateY(0deg);
+}
 #jfy-entry-viewer img {
-  max-width: 90%; max-height: 80%;
+  max-width: 88%; max-height: 75%;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.18);
   object-fit: contain;
 }
+#jfy-entry-viewer-meta {
+  display: flex; align-items: center; gap: 16px; margin-top: 14px;
+}
 #jfy-entry-viewer-label {
   font-family: 'Antonio', sans-serif;
   font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #c4b49a; margin-top: 14px;
+  color: #c4b49a;
 }
 #jfy-entry-close {
-  position: absolute; top: 14px; right: 14px;
-  background: none; border: none; font-size: 18px; cursor: pointer; color: #aaa;
+  background: none; border: none; font-size: 13px; cursor: pointer;
+  color: #bbb; font-family: 'Antonio', sans-serif; letter-spacing: 0.08em;
+  text-transform: uppercase; font-weight: 700; padding: 0;
 }
-#jfy-entry-close:hover { color: #555; }
+#jfy-entry-close:hover { color: #7d3fb8; }
+
+@keyframes jfy-flip-shadow-pulse {
+  0%   { opacity:0; }
+  30%  { opacity:1; }
+  100% { opacity:0; }
+}
+
+/* Nav arrow labels */
+.jfy-entry-nav-label {
+  position: absolute;
+  font-family: 'Antonio', sans-serif;
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #9A59C8; white-space: nowrap;
+  top: calc(100% + 6px);
+  left: 50%; transform: translateX(-50%);
+  opacity: 0; transition: opacity 0.15s;
+  pointer-events: none;
+}
+.jfy-entry-nav:hover .jfy-entry-nav-label { opacity: 1; }
+.jfy-entry-nav { overflow: visible; }
 </style>
 
 <script>
 /* ══════════════════════════════════════════════════════════════════
-   JOURNAL INTRO — fires every page load
+   JOURNAL INTRO — opens straight to page 1, no cover step
 ══════════════════════════════════════════════════════════════════ */
 (function(){
   var SLIDES = [
-    {
-      num: 'p. 1',
-      body: '<p>this space is yours. slow down, reflect, and spend time with yourself. write freely, follow a prompt, hold onto meaningful moments, or simply leave pieces of your day behind.</p><p>there\'s no right way to fill these pages. this is meant to be entirely your own.</p>'
-    },
-    {
-      num: 'p. 2',
-      body: '<p>gather the pieces of your experience in one place.</p><p>you can create pages, reflect on moments you\'ve had throughout the website, respond to something you saw, and build pages that feel personal to you.</p>'
-    },
-    {
-      num: 'p. 3',
-      body: '<p>let it become a reflection of the things you want to hold onto and the things that bring joy to your life.</p>'
-    },
-    {
-      num: 'p. 4',
-      body: '<h2>Creating A Page</h2><p>drag and drop elements from the workspace into the journal area to apply them.</p><p>if you want to change how something looks, select from the options in the pop-up at the bottom of the journal area.</p>'
-    },
-    {
-      num: 'p. 5',
-      body: '<h2>Journal Entries</h2><p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p><p>add entries to "Between Us" to share with the community. get started, and feel free to make this your own.</p>'
-    }
+    { num:'p. 1', body:'<p>this space is yours. slow down, reflect, and spend time with yourself. write freely, follow a prompt, hold onto meaningful moments, or simply leave pieces of your day behind.</p><p>there\'s no right way to fill these pages. this is meant to be entirely your own.</p>' },
+    { num:'p. 2', body:'<p>gather the pieces of your experience in one place.</p><p>you can create pages, reflect on moments you\'ve had throughout the website, respond to something you saw, and build pages that feel personal to you.</p>' },
+    { num:'p. 3', body:'<p>let it become a reflection of the things you want to hold onto and the things that bring joy to your life.</p>' },
+    { num:'p. 4', body:'<h2>Creating A Page</h2><p>drag and drop elements from the workspace into the journal area to apply them.</p><p>if you want to change how something looks, select from the options in the pop-up at the bottom of the journal area.</p>' },
+    { num:'p. 5', body:'<h2>Journal Entries</h2><p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p><p>add entries to "Between Us" to share with the community. get started, and feel free to make this your own.</p>' }
   ];
   var TOTAL = SLIDES.length;
 
@@ -3063,9 +3025,8 @@ document.addEventListener('keydown', function(e){
       return '<span'+(i===active?' class="on"':'')+' data-dot="'+i+'"></span>';
     }).join('');
   }
-
-  function makeSlide(s, i){
-    var isFirst = (i === 0), isLast = (i === TOTAL - 1);
+  function makeSlide(s,i){
+    var isFirst=(i===0), isLast=(i===TOTAL-1);
     return [
       '<div class="jfy-islide'+(i===0?' active':'')+'" data-slide="'+i+'">',
         '<span class="jfy-islide-num">'+s.num+'</span>',
@@ -3084,34 +3045,22 @@ document.addEventListener('keydown', function(e){
     ].join('');
   }
 
-  var bookHTML = [
+  var gridWrap = document.querySelector('.jfy-grid-wrap');
+  if(!gridWrap) return;
+
+  gridWrap.insertAdjacentHTML('afterbegin', [
     '<div id="jfy-intro-wrap">',
       '<div id="jfy-intro-pages">',
         '<div id="jfy-flip-shadow"></div>',
         SLIDES.map(makeSlide).join(''),
       '</div>',
-      '<div id="jfy-intro-cover">',
-        '<div id="jfy-cover-title">Your Journal</div>',
-        '<div id="jfy-cover-sub">this is just for you.</div>',
-        '<div id="jfy-cover-open-hint">',
-          '<svg width="20" height="20" viewBox="0 0 22 22" fill="none">',
-            '<path d="M4 8L11 15L18 8" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>',
-          '</svg>',
-          '<span>open</span>',
-        '</div>',
-      '</div>',
     '</div>'
-  ].join('');
+  ].join(''));
 
-  var gridWrap = document.querySelector('.jfy-grid-wrap');
-  if(!gridWrap) return;
-  gridWrap.insertAdjacentHTML('afterbegin', bookHTML);
   document.body.classList.add('jfy-intro-active');
 
   var current   = 0;
-  var coverOpen = false;
   var animating = false;
-  var cover     = document.getElementById('jfy-intro-cover');
   var shadow    = document.getElementById('jfy-flip-shadow');
   var slides    = Array.from(document.querySelectorAll('.jfy-islide'));
 
@@ -3121,179 +3070,103 @@ document.addEventListener('keydown', function(e){
     if(wrap) wrap.remove();
   }
 
-  function flipTo(idx, direction){
-    if(animating || idx === current) return;
+  function flipTo(idx, dir){
+    if(animating || idx===current) return;
     animating = true;
-
-    var from = slides[current];
-    var to   = slides[idx];
-
-    // Make sure 'to' is visible but behind
+    var from=slides[current], to=slides[idx];
     to.classList.add('active');
-    to.style.zIndex = '2';
-    from.style.zIndex = '3';
-
-    // Show spine shadow
+    to.style.zIndex='2'; from.style.zIndex='3';
     shadow.classList.add('show');
-
-    var outClass = direction === 'forward' ? 'flip-out-fwd' : 'flip-out-bck';
-    var inClass  = direction === 'forward' ? 'flip-in-fwd'  : 'flip-in-bck';
-
-    from.classList.add(outClass);
-    to.classList.add(inClass);
-
-    var DURATION = 570;
+    var outC = dir==='forward'?'flip-out-fwd':'flip-out-bck';
+    var inC  = dir==='forward'?'flip-in-fwd':'flip-in-bck';
+    from.classList.add(outC); to.classList.add(inC);
     setTimeout(function(){
-      from.classList.remove('active', outClass);
-      to.classList.remove(inClass);
-      from.style.zIndex = '';
-      to.style.zIndex   = '';
+      from.classList.remove('active',outC); to.classList.remove(inC);
+      from.style.zIndex=''; to.style.zIndex='';
       shadow.classList.remove('show');
-      current = idx;
-      animating = false;
-    }, DURATION);
+      current=idx; animating=false;
+    }, 570);
   }
 
-  function openCover(){
-    if(coverOpen) return;
-    coverOpen = true;
-    cover.classList.add('flipped');
-  }
-
-  cover.addEventListener('click', openCover);
-
-  slides.forEach(function(slide, i){
+  slides.forEach(function(slide,i){
     slide.querySelector('.jfy-islide-skip').addEventListener('click', dismiss);
-
     slide.querySelector('.jfy-islide-next').addEventListener('click', function(){
-      if(i < TOTAL - 1) flipTo(i + 1, 'forward');
-      else dismiss();
+      if(i<TOTAL-1) flipTo(i+1,'forward'); else dismiss();
     });
-
-    var backBtn = slide.querySelector('.jfy-islide-back');
-    backBtn.addEventListener('click', function(){
-      if(i > 0) flipTo(i - 1, 'back');
+    slide.querySelector('.jfy-islide-back').addEventListener('click', function(){
+      if(i>0) flipTo(i-1,'back');
     });
-
     slide.querySelectorAll('[data-dot]').forEach(function(dot){
       dot.addEventListener('click', function(){
-        var target = parseInt(dot.dataset.dot, 10);
-        if(target !== current) flipTo(target, target > current ? 'forward' : 'back');
+        var t=parseInt(dot.dataset.dot,10);
+        if(t!==current) flipTo(t, t>current?'forward':'back');
       });
     });
   });
 
   document.addEventListener('keydown', function(e){
     if(!document.body.classList.contains('jfy-intro-active')) return;
-    if(!coverOpen && (e.key === 'ArrowRight' || e.key === 'Enter')){ openCover(); return; }
-    if(e.key === 'ArrowRight'){ if(current < TOTAL-1) flipTo(current+1,'forward'); else dismiss(); }
-    if(e.key === 'ArrowLeft' && current > 0) flipTo(current-1,'back');
-    if(e.key === 'Escape') dismiss();
+    if(e.key==='ArrowRight'){ if(current<TOTAL-1) flipTo(current+1,'forward'); else dismiss(); }
+    if(e.key==='ArrowLeft' && current>0) flipTo(current-1,'back');
+    if(e.key==='Escape') dismiss();
   });
-
 })();
 
 /* ══════════════════════════════════════════════════════════════════
-   JOURNAL ENTRY NAVIGATOR
-   Seeds placeholder entries if none exist, then wires left/right
-   flip arrows on the notebook sides.
+   JOURNAL ENTRY NAVIGATOR + NEW ENTRY
+   Model: entries[0] = most recent saved. entryIdx = -1 means the
+   live (current/blank) page. ‹ flips back through saved entries;
+   › from a past entry flips forward (toward current). From the live
+   page, ‹ opens the most-recent saved entry.
 ══════════════════════════════════════════════════════════════════ */
 (function(){
   var STORE_JOURNAL = 'jfy_journal';
 
-  /* ── Placeholder entries (canvas-rendered cream pages with text) ── */
+  /* ── Seed placeholder entries once ── */
   function makePlaceholderDataUrl(lines, color){
-    var c = document.createElement('canvas');
-    c.width = 600; c.height = 420;
+    var c = document.createElement('canvas'); c.width=600; c.height=420;
     var ctx = c.getContext('2d');
-    // cream page
-    ctx.fillStyle = '#f8f4ed';
-    ctx.fillRect(0, 0, 600, 420);
-    // faint ruled lines
-    ctx.strokeStyle = 'rgba(180,160,120,0.25)';
-    ctx.lineWidth = 1;
-    for(var y = 60; y < 400; y += 28){ ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(560,y); ctx.stroke(); }
-    // washi tape strip decoration
-    ctx.globalAlpha = 0.55;
-    ctx.fillStyle = color;
-    ctx.fillRect(220, 0, 160, 22);
-    ctx.globalAlpha = 1;
-    // text
-    ctx.fillStyle = '#3a2510';
-    ctx.font = 'italic 15px Georgia, serif';
-    lines.forEach(function(line, i){
-      ctx.fillText(line, 48, 80 + i * 32);
-    });
-    return c.toDataURL('image/jpeg', 0.88);
+    ctx.fillStyle='#f8f4ed'; ctx.fillRect(0,0,600,420);
+    ctx.strokeStyle='rgba(180,160,120,0.22)'; ctx.lineWidth=1;
+    for(var y=60;y<400;y+=28){ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(560,y);ctx.stroke();}
+    ctx.globalAlpha=0.52; ctx.fillStyle=color; ctx.fillRect(210,0,180,20); ctx.globalAlpha=1;
+    ctx.fillStyle='#3a2510'; ctx.font='italic 15px Georgia,serif';
+    lines.forEach(function(l,i){ ctx.fillText(l,48,82+i*32); });
+    return c.toDataURL('image/jpeg',0.88);
   }
-
-  var PLACEHOLDERS = [
-    {
-      lines: [
-        'today felt quieter than usual.',
-        'i made tea twice and forgot to drink it both times.',
-        'the light through the window was really something.'
-      ],
-      color: '#c8a0f0'
-    },
-    {
-      lines: [
-        'started a new playlist. it has 4 songs.',
-        'i think that\'s enough for now.',
-        'some things don\'t need to be finished to be good.'
-      ],
-      color: '#ffd6a5'
-    },
-    {
-      lines: [
-        'called my grandmother. she laughed at everything.',
-        'i want to remember that laugh.',
-        'also: her chicken soup recipe is somewhere in here.'
-      ],
-      color: '#a0d4f0'
-    },
-    {
-      lines: [
-        'found an old photo. couldn\'t remember the day.',
-        'but i remembered the feeling.',
-        'that might be enough.'
-      ],
-      color: '#f0d0a0'
-    }
+  var PH=[
+    {color:'#c8a0f0',lines:['today felt quieter than usual.','i made tea twice and forgot to drink it both times.','the light through the window was really something.']},
+    {color:'#ffd6a5',lines:['started a new playlist. it has 4 songs.','i think that\'s enough for now.','some things don\'t need to be finished to be good.']},
+    {color:'#a0d4f0',lines:['called my grandmother. she laughed at everything.','i want to remember that laugh.','also: her chicken soup recipe is somewhere in here.']},
+    {color:'#f0d0a0',lines:['found an old photo. couldn\'t remember the day.','but i remembered the feeling.','that might be enough.']}
   ];
-
-  function seedEntries(){
-    var existing = [];
-    try { existing = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){}
-    if(existing.length > 0) return; // already have entries
-
-    var seeded = PLACEHOLDERS.map(function(p, i){
-      var daysAgo = (PLACEHOLDERS.length - i) * 3;
-      var t = Date.now() - daysAgo * 86400000;
-      return {
-        id: 'placeholder_' + i,
-        text: '',
-        time: t,
-        addedAt: t,
-        media: { url: makePlaceholderDataUrl(p.lines, p.color) }
-      };
+  (function seedEntries(){
+    var ex=[]; try{ex=JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]');}catch(e){}
+    if(ex.length>0) return;
+    var seeded=PH.map(function(p,i){
+      var t=Date.now()-(PH.length-i)*3*86400000;
+      return {id:'placeholder_'+i,text:'',time:t,addedAt:t,media:{url:makePlaceholderDataUrl(p.lines,p.color)}};
     });
-    localStorage.setItem(STORE_JOURNAL, JSON.stringify(seeded));
-  }
-  seedEntries();
+    localStorage.setItem(STORE_JOURNAL,JSON.stringify(seeded));
+  })();
 
-  /* ── Wire flip arrows on the notebook ── */
+  /* ── DOM injection ── */
   var notebook = document.querySelector('.jfy-notebook');
   if(!notebook) return;
 
-  // Inject nav arrows and entry viewer
   notebook.insertAdjacentHTML('beforeend', [
-    '<button class="jfy-entry-nav" id="jfy-entry-prev" title="Previous entry" aria-label="Previous journal entry">‹</button>',
-    '<button class="jfy-entry-nav" id="jfy-entry-next" title="Next entry" aria-label="Next journal entry">›</button>',
-    '<div id="jfy-entry-viewer" role="dialog" aria-label="Journal entry">',
-      '<button id="jfy-entry-close" aria-label="Close entry">✕</button>',
+    '<button class="jfy-entry-nav" id="jfy-entry-prev" aria-label="Previous journal entry">',
+      '‹<span class="jfy-entry-nav-label">older</span>',
+    '</button>',
+    '<button class="jfy-entry-nav" id="jfy-entry-next" aria-label="Newer / current page" style="opacity:0.28;pointer-events:none">',
+      '›<span class="jfy-entry-nav-label">newer</span>',
+    '</button>',
+    '<div id="jfy-entry-viewer" role="region" aria-label="Journal entry">',
       '<img id="jfy-entry-img" src="" alt="Journal entry">',
-      '<div id="jfy-entry-viewer-label"></div>',
+      '<div id="jfy-entry-viewer-meta">',
+        '<span id="jfy-entry-viewer-label"></span>',
+        '<button id="jfy-entry-close">✕ close</button>',
+      '</div>',
     '</div>'
   ].join(''));
 
@@ -3301,53 +3174,123 @@ document.addEventListener('keydown', function(e){
   var nextBtn  = document.getElementById('jfy-entry-next');
   var viewer   = document.getElementById('jfy-entry-viewer');
   var entryImg = document.getElementById('jfy-entry-img');
-  var label    = document.getElementById('jfy-entry-viewer-label');
+  var labelEl  = document.getElementById('jfy-entry-viewer-label');
   var closeBtn = document.getElementById('jfy-entry-close');
+  var flipShadow = document.getElementById('jfy-flip-shadow'); // may be gone after intro
 
-  var entries = [];
-  var entryIdx = -1; // -1 = showing blank journal
+  var entries  = [];
+  var entryIdx = -1; // -1 = live blank page
 
   function loadEntries(){
-    try { entries = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){ entries = []; }
+    try{entries=JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]');}catch(e){entries=[];}
   }
 
-  function showEntry(idx){
+  function updateArrows(){
+    // ‹ (prev/older): visible when entries exist AND we're not at the oldest
+    var hasPrev = entries.length > 0 && (entryIdx === -1 || entryIdx < entries.length-1);
+    prevBtn.style.opacity = hasPrev ? '1' : '0.28';
+    prevBtn.style.pointerEvents = hasPrev ? '' : 'none';
+    // › (next/newer): only visible when we're on a past entry
+    var hasNext = entryIdx >= 0;
+    nextBtn.style.opacity = hasNext ? '1' : '0.28';
+    nextBtn.style.pointerEvents = hasNext ? '' : 'none';
+  }
+
+  function doFlip(dir, callback){
+    /* Quick shadow pulse since we don't have intro-pages context */
+    var nb = document.querySelector('.jfy-nb-layer');
+    if(nb){
+      var sh = document.createElement('div');
+      sh.style.cssText = 'position:absolute;inset:0;z-index:100;pointer-events:none;' +
+        'background:linear-gradient(90deg,rgba(0,0,0,0.15) 0%,transparent 40%);' +
+        'animation:jfy-flip-shadow-pulse 0.5s ease forwards;border-radius:18px';
+      nb.appendChild(sh);
+      setTimeout(function(){ sh.remove(); }, 520);
+    }
+    // Animate viewer
+    if(dir === 'in'){
+      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','visible');
+      viewer.classList.add('ev-flip-in');
+      setTimeout(function(){ viewer.classList.remove('ev-flip-in'); viewer.classList.add('visible'); callback&&callback(); }, 520);
+    } else {
+      viewer.classList.add(dir==='fwd'?'ev-flip-out-fwd':'ev-flip-out-bck');
+      setTimeout(function(){
+        viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','visible');
+        callback&&callback();
+      }, 520);
+    }
+  }
+
+  function showEntry(idx, animDir){
     loadEntries();
-    if(!entries.length){ viewer.classList.remove('open'); entryIdx = -1; return; }
-    idx = Math.max(0, Math.min(entries.length - 1, idx));
-    entryIdx = idx;
+    if(!entries.length){ entryIdx=-1; updateArrows(); return; }
+    idx = Math.max(0, Math.min(entries.length-1, idx));
     var e = entries[idx];
-    var url = e.media && e.media.url ? e.media.url : '';
-    entryImg.src = url;
-    entryImg.style.display = url ? '' : 'none';
-    var d = new Date(e.time || e.addedAt || Date.now());
-    label.textContent = 'entry ' + (entries.length - idx) + ' of ' + entries.length +
-      '  ·  ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    viewer.classList.add('open');
-    // update arrow states
-    prevBtn.style.opacity = idx > 0 ? '1' : '0.3';
-    nextBtn.style.opacity = idx < entries.length - 1 ? '1' : '0.3';
+    var url = e.media&&e.media.url ? e.media.url : '';
+    var d = new Date(e.time||e.addedAt||Date.now());
+    var label = 'entry '+(entries.length-idx)+' of '+entries.length+
+      '  ·  '+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+    if(!viewer.classList.contains('visible')){
+      // Viewer not open: flip it in
+      entryImg.src = url;
+      entryImg.style.display = url?'':'none';
+      labelEl.textContent = label;
+      entryIdx = idx;
+      doFlip('in', function(){ updateArrows(); });
+    } else {
+      // Viewer already open: flip out then in
+      doFlip(animDir==='back'?'bck':'fwd', function(){
+        entryImg.src = url;
+        entryImg.style.display = url?'':'none';
+        labelEl.textContent = label;
+        entryIdx = idx;
+        doFlip('in', function(){ updateArrows(); });
+      });
+    }
   }
 
   function closeEntry(){
-    viewer.classList.remove('open');
-    entryIdx = -1;
-    prevBtn.style.opacity = '1';
-    nextBtn.style.opacity = '1';
+    doFlip('fwd', function(){ entryIdx=-1; updateArrows(); });
   }
 
+  /* ── Button wiring ── */
   prevBtn.addEventListener('click', function(){
-    if(entryIdx === -1) showEntry(0);          // open at first/most-recent
-    else showEntry(entryIdx - 1);
+    loadEntries();
+    if(entryIdx===-1) showEntry(0,'fwd');               // live page → most recent
+    else if(entryIdx<entries.length-1) showEntry(entryIdx+1,'fwd'); // go older
   });
 
   nextBtn.addEventListener('click', function(){
-    if(entryIdx === -1) showEntry(0);
-    else if(entryIdx < entries.length - 1) showEntry(entryIdx + 1);
-    else closeEntry();                         // past last entry → close
+    loadEntries();
+    if(entryIdx>0) showEntry(entryIdx-1,'back');        // go newer entry
+    else closeEntry();                                   // entryIdx===0 → back to live
   });
 
   closeBtn.addEventListener('click', closeEntry);
+
+  /* ── New Entry button in history bar ── */
+  var newEntryBtn = document.getElementById('jfy-new-entry-btn');
+  if(newEntryBtn){
+    newEntryBtn.addEventListener('click', function(){
+      // If currently viewing a past entry, close viewer first
+      if(entryIdx !== -1){ viewer.classList.remove('visible','ev-flip-in','ev-flip-out-fwd','ev-flip-out-bck'); entryIdx=-1; }
+      // The "clear all" logic (mirrors existing clear-all handler in main IIFE)
+      // We fire a custom event that the main IIFE listens to
+      document.dispatchEvent(new CustomEvent('jfy-new-entry'));
+      loadEntries(); updateArrows();
+    });
+  }
+
+  // Listen for external saves so arrows stay current
+  window.addEventListener('storage', function(e){
+    if(e.key===STORE_JOURNAL){ loadEntries(); updateArrows(); }
+  });
+
+  loadEntries(); updateArrows();
+
+  /* Expose for main IIFE to call after save */
+  window._jfyEntryNav = { reload: function(){ loadEntries(); updateArrows(); } };
 
 })();
 </script>
