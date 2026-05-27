@@ -1444,8 +1444,10 @@ document.addEventListener('click', function(e){
   var inToolbar = txtToolbar && txtToolbar.contains(e.target);
   var inNotebook = notebook.contains(e.target);
   var inPaperProp = paperProp && paperProp.contains(e.target);
-  if(!inPanel && !inToolbar && !inNotebook && !inPaperProp){
+  var inHistoryBar = document.getElementById('jfy-history-bar').contains(e.target);
+  if(!inPanel && !inToolbar && !inNotebook && !inPaperProp && !inHistoryBar){
     closeAll(); setTool(null);
+    setEraseMode(false); // clear erase cursor when clicking outside
   }
 });
 
@@ -1530,14 +1532,24 @@ function finishDraw(e){
   if(S.tool==='washi' && S.dragging){
     S.dragging=false;
     var dx=pos.x-S.dStart.x, dy=pos.y-S.dStart.y;
-    if(Math.sqrt(dx*dx+dy*dy)>4) drawCmds.push({type:'washi',x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor,w:washibWidth});
+    if(Math.sqrt(dx*dx+dy*dy)>4){
+      drawCmds.push({type:'washi',x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor,w:washibWidth});
+      redrawAll();
+      pushHistory();
+    } else {
+      redrawAll(); // clear any preview without saving
+    }
     S.dStart=null;
-    redrawAll();
   } else if(S.tool==='doodle' && S.dragging){
     S.dragging=false;
-    if(S.currentPath && S.currentPath.pts.length>1) drawCmds.push(S.currentPath);
+    if(S.currentPath && S.currentPath.pts.length>1){
+      drawCmds.push(S.currentPath);
+      redrawAll();
+      pushHistory();
+    } else {
+      redrawAll();
+    }
     S.currentPath=null;
-    redrawAll();
   } else if(S.tool==='scissors' && _sc.dragging){
     _sc.dragging=false;
     redrawAll(); // clear preview
@@ -2141,20 +2153,29 @@ function addCutEdge(paperCanvas, nbLayerPts){
 
 /* ── GLOBAL DRAG MANAGER ── */
 /* Single document-level pair of listeners; no accumulation with many placed items */
-var _drag = { active: false, mover: null, offX: 0, offY: 0 };
+var _drag = { active: false, mover: null, offX: 0, offY: 0, startLeft: 0, startTop: 0, moved: false };
 
 document.addEventListener('mousemove', function(e){
   if(!_drag.active) return;
   var nr = nbLayer.getBoundingClientRect();
-  _drag.mover.style.left = (e.clientX - nr.left - _drag.offX) + 'px';
-  _drag.mover.style.top  = (e.clientY - nr.top  - _drag.offY) + 'px';
+  var newLeft = e.clientX - nr.left - _drag.offX;
+  var newTop  = e.clientY - nr.top  - _drag.offY;
+  _drag.mover.style.left = newLeft + 'px';
+  _drag.mover.style.top  = newTop  + 'px';
+  // Mark as a real drag only if item moved more than 4px
+  if(!_drag.moved){
+    var dl = newLeft - _drag.startLeft, dt = newTop - _drag.startTop;
+    if(Math.sqrt(dl*dl + dt*dt) > 4) _drag.moved = true;
+  }
 });
 document.addEventListener('mouseup', function(){
   if(_drag.active){
     _drag.mover.style.zIndex = '';
-    _drag.wasActive = true; // signal history listener
+    var didMove = _drag.moved;
     _drag.active = false;
     _drag.mover  = null;
+    _drag.moved  = false;
+    if(didMove) pushHistory(); // only save when position actually changed
   }
 });
 
@@ -2170,10 +2191,13 @@ function makeDraggable(handle, mover){
     if(S.tool==='scissors') return; // scissors handles paper via canvas overlay
     e.preventDefault(); e.stopPropagation();
     var mr = mover.getBoundingClientRect();
-    _drag.active = true;
-    _drag.mover  = mover;
-    _drag.offX   = e.clientX - mr.left;
-    _drag.offY   = e.clientY - mr.top;
+    _drag.active    = true;
+    _drag.mover     = mover;
+    _drag.offX      = e.clientX - mr.left;
+    _drag.offY      = e.clientY - mr.top;
+    _drag.startLeft = parseFloat(mover.style.left) || 0;
+    _drag.startTop  = parseFloat(mover.style.top)  || 0;
+    _drag.moved     = false;
     mover.style.zIndex = 30;
   });
 }
@@ -2183,8 +2207,9 @@ var _hist = { stack: [], cursor: -1, maxSize: 40 };
 
 function snapshotNbLayer(){
   return {
-    html:   nbLayer.innerHTML,
-    canvas: canvas.toDataURL()
+    html:      nbLayer.innerHTML,
+    canvas:    canvas.toDataURL(),
+    drawCmds:  drawCmds.slice() // preserve stroke list so redrawAll stays in sync
   };
 }
 
@@ -2216,6 +2241,9 @@ function rewirePolaroid(pol){
 }
 
 function restoreSnapshot(snap){
+  // Restore stroke list so redrawAll() stays in sync with the canvas pixels
+  drawCmds = snap.drawCmds ? snap.drawCmds.slice() : [];
+
   // Pull canvas out before innerHTML wipe so the module-level `canvas` var
   // keeps pointing at the live element (canvas content is not in HTML).
   nbLayer.removeChild(canvas);
@@ -2290,15 +2318,8 @@ placeSticker  = function(e){ _origPlaceSticker(e);  pushHistory(); };
 placePaper    = function(e){ _origPlacePaper(e);    pushHistory(); };
 applyCut      = function(pc, pts){ _origApplyCut(pc, pts); pushHistory(); };
 
-// Save after drag ends (position changes) — fires after _drag.active is cleared
-document.addEventListener('mouseup', function(){
-  if(_drag && _drag.wasActive) { _drag.wasActive = false; pushHistory(); }
-});
-
-// Save after canvas drawing strokes finish
-canvas.addEventListener('mouseup', function(){
-  if(S.tool === 'washi' || S.tool === 'doodle') pushHistory();
-});
+// Canvas drawing strokes: pushHistory is now called inside finishDraw
+// when a stroke is actually committed, so no separate mouseup listener needed.
 
 // Undo
 document.getElementById('jfy-undo-btn').addEventListener('click', function(){
