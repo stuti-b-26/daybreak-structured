@@ -505,10 +505,10 @@ body.jfy-scissors-active .jfy-scissors {
 
 /* ── Tablet prop positions (768–1023px) ── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Washi: top-left, overlaps top-left corner, clips off left screen — scaled up */
+  /* Washi: vw only, no cap — overflows left edge and scales freely */
   .jfy-washi {
     top: -18vw; left: -5vw;
-    width: 24vw; max-width: 185px;
+    width: 24vw;
     z-index: 25;
   }
   /* Stickers: top-center-left near the spine, slides UNDER notebook page content */
@@ -523,10 +523,10 @@ body.jfy-scissors-active .jfy-scissors {
     width: 22vw; max-width: 170px;
     z-index: 22;
   }
-  /* Scissors: top-right, overlaps top-right corner, clips right screen — scaled up */
+  /* Scissors: vw only, no cap — scales freely at any tablet width */
   .jfy-scissors {
     top: -16vw; right: -5vw; left: auto; bottom: auto;
-    width: 28vw; max-width: 215px;
+    width: 28vw;
     z-index: 25;
   }
   /* Frames: bottom-right, level with paper, no overlap, no clip */
@@ -629,10 +629,10 @@ body.jfy-scissors-active .jfy-scissors {
     width: 195px; max-width: none;
     z-index: 22;
   }
-  /* Scissors: scaled up, does not need to clip off edge */
+  /* Scissors: vw-based, scales with viewport like washi — no cap */
   .jfy-scissors {
-    top: -170px; right: -30px; left: auto; bottom: auto;
-    width: 300px; max-width: none;
+    top: -170px; right: -4vw; left: auto; bottom: auto;
+    width: 27vw; max-width: none;
     z-index: 25;
   }
   /* Frames: bottom-right, no overlap, no clip */
