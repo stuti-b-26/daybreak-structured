@@ -1097,7 +1097,7 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
         var p=PAGES[key];if(!p)return;
         var a=document.createElement('a');
         a.className='mood-sug-item';a.href=p.href;
-        a.innerHTML='<span class="mood-sug-dot" style="background:'+p.color+'"></span><span class="mood-sug-info"><span class="mood-sug-name">'+p.name+'</span><p class="mood-sug-desc">'+p.desc+'</p></span>';
+        a.innerHTML='<span class="mood-sug-dot" style="background:'+p.color+'"></span><span class="mood-sug-name">'+p.name+'</span><p class="mood-sug-desc">'+p.desc+'</p>';
         sugList.appendChild(a);
       });
       sugPanel.classList.add('show');

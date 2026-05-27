@@ -1834,12 +1834,12 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 /* MOOD POPUP */
 (function(){
   var PAGES = {
-    'mess-hall':     {name:'mess hall',     href:'mess-hall.html',     color:'#a8f0bc', desc:'explore a feast of small, funny, tactile, and creative activities designed so that something here puts a smile on your face, no matter where you\'re starting from. no rules, no wrong answers, no skill required. just play.'},
-    'silly-decisions':{name:'silly decisions',href:'silly-decisions.html',color:'#f5a04a',desc:'celebrates the idea that happiness can come from not taking yourself too seriously — using exaggerated and silly choices to temporarily disconnect from reality.'},
-    'sticker-maker': {name:'sticker maker', href:'sticker-maker.html', color:'#e8a8f0', desc:'layer in personality with a little emoji, a doodle or a phrase. picking one should feel like choosing a mood, not making a decision.'},
-    'between-us':    {name:'between us',    href:'between-us.html',    color:'#7de8f5', desc:'share short stories that capture little pockets of happiness in your life, or moments you\'re still hoping to reach. tiny snapshots of lived experience.'},
-    'just-for-you':  {name:'just for you',  href:'just-for-you.html',  color:'#ffd400', desc:'a personal, protected place where you can create your own world by choosing what you want to keep, create, and design.'},
-    'selfless-less': {name:'selfless less',  href:'selfless-less.html', color:'#c4b8f5', desc:'explores how people-pleasing habits can quietly distance us from our own happiness — recognizing when we say "i\'m fine" when we\'re not.'}
+    'mess-hall':      {name:'mess hall',      href:'mess-hall.html',      color:'#a8f0bc', desc:'small, funny, creative activities designed to put a smile on your face — no rules, no skill required.'},
+    'silly-decisions':{name:'silly decisions',href:'silly-decisions.html',color:'#f5a04a', desc:'use exaggerated, silly choices to temporarily disconnect from reality and stop taking yourself too seriously.'},
+    'sticker-maker':  {name:'sticker maker',  href:'sticker-maker.html',  color:'#e8a8f0', desc:'layer a doodle, emoji, or phrase onto your moment — picking one should feel like choosing a mood.'},
+    'between-us':     {name:'between us',     href:'between-us.html',     color:'#7de8f5', desc:'share a short story about a pocket of happiness in your life, or a moment you\'re still hoping to reach.'},
+    'just-for-you':   {name:'just for you',   href:'just-for-you.html',   color:'#ffd400', desc:'a personal, protected space to create your own world with what you want to keep, build, and design.'},
+    'selfless-less':  {name:'selfless less',  href:'selfless-less.html',  color:'#c4b8f5', desc:'explore how people-pleasing habits quietly distance you from your own happiness.'}
   };
   var MAP = {
     overwhelmed:   ['mess-hall','silly-decisions','sticker-maker'],
@@ -1883,7 +1883,7 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
         var p=PAGES[key];if(!p)return;
         var a=document.createElement('a');
         a.className='mood-sug-item';a.href=p.href;
-        a.innerHTML='<span class="mood-sug-dot" style="background:'+p.color+'"></span><span class="mood-sug-info"><span class="mood-sug-name">'+p.name+'</span><p class="mood-sug-desc">'+p.desc+'</p></span>';
+        a.innerHTML='<span class="mood-sug-dot" style="background:'+p.color+'"></span><span class="mood-sug-name">'+p.name+'</span><p class="mood-sug-desc">'+p.desc+'</p>';
         sugList.appendChild(a);
       });
       sugPanel.classList.add('show');
