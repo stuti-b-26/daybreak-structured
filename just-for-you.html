@@ -2579,7 +2579,8 @@ function jfyNewEntry(){
     pushHistory();
     Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
     drawCmds.length = 0; redrawAll(); updateHistoryButtons();
-    if(window._jfyEntryNav) window._jfyEntryNav.reload();
+    if(editId && window._jfyEntryNav) window._jfyEntryNav.resetToLive();
+    else if(window._jfyEntryNav) window._jfyEntryNav.reload();
   }
 
   if(typeof captureNotebook === 'function'){
@@ -2735,7 +2736,12 @@ function captureNotebook(quality, callback){
     blitElement(pc);
   });
 
-  // 2. Main doodle/washi canvas
+  // 2. Washi tape DOM-canvas elements (placed above papers, below doodles)
+  nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(wc){
+    blitElement(wc);
+  });
+
+  // 2b. Main doodle canvas
   blitElement(canvas);
 
   // 3. Polaroids (img inside .jfy-polaroid)
@@ -2825,7 +2831,7 @@ document.getElementById('jfy-save-btn').addEventListener('click', function(){
       window._jfyEditingEntryId  = null;
       window._jfyEditingEntryIdx = null;
       window._jfyEditBg          = null;
-      if(window._jfyEntryNav) window._jfyEntryNav.reload();
+      if(window._jfyEntryNav) window._jfyEntryNav.resetToLive();
       return;
     }
 
@@ -3654,7 +3660,16 @@ window._jfyNotebook = {
   loadEntries(); updateArrows();
 
   /* Expose for main IIFE to call after save */
-  window._jfyEntryNav = { reload: function(){ loadEntries(); updateArrows(); } };
+  window._jfyEntryNav = {
+    reload: function(){ loadEntries(); updateArrows(); },
+    // Call after editing an entry — forces us back to the live-page state
+    // so ‹/› arrows are correctly disabled/enabled
+    resetToLive: function(){
+      entryIdx = -1;
+      viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
+      loadEntries(); updateArrows();
+    }
+  };
 
 })();
 </script>
