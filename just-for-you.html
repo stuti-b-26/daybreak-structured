@@ -2207,9 +2207,8 @@ var _hist = { stack: [], cursor: -1, maxSize: 40 };
 
 function snapshotNbLayer(){
   return {
-    html:      nbLayer.innerHTML,
-    canvas:    canvas.toDataURL(),
-    drawCmds:  drawCmds.slice() // preserve stroke list so redrawAll stays in sync
+    html:     nbLayer.innerHTML,
+    drawCmds: drawCmds.slice()
   };
 }
 
@@ -2250,14 +2249,8 @@ function restoreSnapshot(snap){
   nbLayer.innerHTML = snap.html;
   nbLayer.insertBefore(canvas, nbLayer.firstChild);
 
-  // Restore drawing canvas pixel content
-  var snapImg = new Image();
-  snapImg.onload = function(){
-    var c = canvas.getContext('2d');
-    c.clearRect(0, 0, canvas.width, canvas.height);
-    c.drawImage(snapImg, 0, 0);
-  };
-  snapImg.src = snap.canvas;
+  // Redraw strokes from commands — avoids DPR mismatch of pixel-snapshot restore
+  redrawAll();
 
   // Re-attach all placed-element interactivity
   nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
