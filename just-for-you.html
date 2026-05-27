@@ -3,16 +3,812 @@
 <head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Antonio:wght@700&family=Bad+Script&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://use.typekit.net/gdm5amj.css">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Just for You — daybreak</title>
 <link rel="stylesheet" href="styles.css">
+<style>
+/* ── Just For You page overrides ── */
+body.page-jfy {
+  --yellow: #9A59C8;
+  background: #EEE0CB url('wood background.svg') center / cover no-repeat;
+}
+
+/* Header and footer: beige base color */
+body.page-jfy #site-header {
+  background: #EEE0CB;
+}
+body.page-jfy #site-footer {
+  background: #EEE0CB;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hide decorative blobs/scribbles not used on this page */
+body.page-jfy #pink-blob,
+body.page-jfy #orange-blob,
+body.page-jfy #teal-blob,
+body.page-jfy #yellow-blob { display: none; }
+
+/* Purple overrides: nav sun, mobile menu, profile btn, dropdown active */
+body.page-jfy .nav-sun { background: #9A59C8; }
+
+/* Tracked logo pill: purple at desktop to match logo sun */
+@media (min-width: 1024px) {
+  body.page-jfy #sun-rect,
+  body.page-jfy #sun-circle-left,
+  body.page-jfy #sun-circle-right { fill: #9A59C8; }
+}
+
+/* Seek: persistent selected state — tablet/desktop only */
+@media (min-width: 768px) {
+  body.page-jfy .nav-item[data-nav="seek"] .nav-sun { opacity: 1; }
+  body.page-jfy .nav-item[data-nav="seek"] .nav-btn  { color: #EEE0CB; }
+  body.page-jfy .dropdown-link.active { color: #9A59C8; font-weight: 600; }
+}
+body.page-jfy #logo-sun { fill: #9A59C8; }
+body.page-jfy .mobile-menu-panel { background: #9A59C8; }
+body.page-jfy .mobile-menu-panel .mobile-menu-section h3,
+body.page-jfy .mobile-menu-panel .mobile-menu-section ul li a { color: #fff; }
+body.page-jfy .profile-btn.active { background: #9A59C8; border-color: #9A59C8; }
+
+/* ── Just For You main layout ── */
+#page-main.jfy-main {
+  padding-top: var(--hh);
+}
+
+.jfy-grid-wrap {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--col-gap);
+  /* top: clears fixed header + two-row history bar (mobile) + above-notebook props
+     bottom: space for stickers/pen/scissors */
+  padding: calc(18vw + 56px) var(--gutter) 48vw;
+  position: relative; /* positioning context for washi + scissors */
+}
+
+/* Notebook: center 10 of 12 columns */
+.jfy-notebook {
+  grid-column: 2 / 12;
+  position: relative;
+  overflow: visible;
+  height: calc(100dvh - var(--hh) - 40vw);
+  min-height: 240px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.13);
+  z-index: 1;
+}
+
+.jfy-washi, .jfy-frames,
+.jfy-stickers, .jfy-pen, .jfy-scissors {
+  position: absolute;
+}
+/* all props interactive */
+.jfy-washi, .jfy-frames, .jfy-stickers, .jfy-pen, .jfy-scissors {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: filter 0.15s;
+  /* above nbLayer (z-index:10) so placed content appears under prop images */
+  z-index: 20;
+}
+.jfy-scissors { z-index: 21; }
+.jfy-pen      { z-index: 22; }
+.jfy-washi:hover, .jfy-frames:hover, .jfy-stickers:hover,
+.jfy-pen:hover, .jfy-scissors:hover {
+  filter: drop-shadow(0 2px 10px rgba(154,89,200,0.5));
+}
+body.jfy-sticker-active .jfy-stickers {
+  filter: drop-shadow(0 0 8px #9A59C8);
+}
+body.jfy-scissors-active .jfy-scissors {
+  filter: drop-shadow(0 0 8px #9A59C8);
+}
+/* paper prop (in paper-wrap below notebook) */
+.jfy-paper-wrap { pointer-events: auto; cursor: pointer; }
+.jfy-paper { transition: filter 0.15s; }
+.jfy-paper-wrap:hover .jfy-paper { filter: drop-shadow(0 2px 10px rgba(154,89,200,0.5)); }
+
+/* ── Notebook inner layer (clips canvas + placed elements) ── */
+.jfy-nb-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  z-index: 10;
+  /* always auto: placement tools need empty-space clicks to reach this layer */
+  pointer-events: auto;
+}
+
+#jfy-canvas {
+  /* sits above all placed HTML elements; pointer-events toggled by JS */
+  z-index: 100;
+}
+
+/* placed elements are always interactive regardless of active tool */
+.jfy-text-node-wrap,
+.jfy-polaroid,
+.jfy-sticker-node { pointer-events: auto; }
+
+/* text editing toolbar */
+#jfy-text-toolbar {
+  position: fixed;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.16);
+  padding: 10px 12px;
+  z-index: 3000;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 230px;
+}
+#jfy-text-toolbar.visible { display: flex; }
+#jfy-text-toolbar .jfy-color-swatches { gap: 5px; }
+#jfy-text-toolbar .jfy-swatch { width: 20px; height: 20px; }
+.jfy-txt-size-ctrl { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.jfy-txt-size-btn {
+  width: 24px; height: 24px; border: 1.5px solid #e0e0e0; border-radius: 6px;
+  background: #fafafa; cursor: pointer; font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; line-height: 1;
+  padding: 0; font-family: inherit; color: #555;
+  transition: border-color 0.1s, background 0.1s;
+}
+.jfy-txt-size-btn:hover { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
+.jfy-txt-size-val { font-size: 11px; color: #888; min-width: 20px; text-align: center; }
+
+#jfy-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  display: block;
+  /* z-index: 100 declared above, keeps canvas visually above placed elements */
+}
+#jfy-canvas.draw-active { pointer-events: auto; cursor: crosshair; }
+#jfy-canvas.scissors-active { pointer-events: auto; cursor: crosshair; }
+
+/* placed paper canvas */
+.jfy-placed-paper {
+  position: absolute;
+  z-index: 11; /* below other placed items but above the notebook background */
+  box-shadow: 1px 2px 8px rgba(0,0,0,0.13);
+  cursor: move;
+  pointer-events: auto;
+}
+.jfy-placed-washi {
+  position: absolute;
+  z-index: 12;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+.jfy-placed-washi:active { cursor: grabbing; }
+
+/* paper pattern/size picker */
+.jfy-size-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.jfy-size-btn {
+  padding: 6px 12px; border: 2px solid #e5e5e5; border-radius: 10px;
+  background: #fafafa; cursor: pointer; font-size: 12px; font-weight: 600;
+  font-family: inherit; transition: border-color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+.jfy-size-btn:hover { border-color: #c8a4e4; }
+.jfy-size-btn.active { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
+.jfy-panel-row-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+
+/* pattern picker: canvas thumbnail grid */
+.jfy-pattern-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.jfy-pattern-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  border: 2px solid #e5e5e5; border-radius: 10px; background: #fafafa;
+  cursor: pointer; padding: 6px 8px; transition: border-color 0.12s, background 0.12s;
+  font-family: inherit;
+}
+.jfy-pattern-btn:hover { border-color: #c8a4e4; }
+.jfy-pattern-btn.active { border-color: #9A59C8; background: #f3eafa; }
+.jfy-pattern-btn canvas { display: block; border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.jfy-pattern-btn span { font-size: 10px; font-weight: 600; color: #888; letter-spacing: 0.03em; }
+.jfy-pattern-btn.active span { color: #9A59C8; }
+
+/* ── Tool panels — bottom-center, never over notebook ── */
+.jfy-tool-panel {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 14px 18px;
+  z-index: 2000;
+  display: none;
+  width: auto;
+  min-width: 260px;
+  max-width: min(92vw, 600px);
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.jfy-tool-panel.open { display: block; }
+
+/* ── History toolbar (undo / redo / clear / erase / share / save / export) ── */
+:root { --hbar-h: 46px; }        /* single-row height; overridden on mobile */
+#jfy-history-bar {
+  position: fixed;
+  top: calc(var(--hh) + 8px);
+  left: 8px;
+  right: 8px;
+  display: flex;
+  flex-wrap: wrap;              /* wraps to two rows on narrow screens */
+  gap: 3px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+  padding: 5px 7px;
+  z-index: 4000;   /* above page content, below header (9100) and mobile panel (9090) */
+  user-select: none;
+  justify-content: center;
+}
+@media (min-width: 640px) {
+  #jfy-history-bar {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    flex-wrap: nowrap;
+  }
+}
+#jfy-history-bar button {
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#jfy-history-bar button:hover { background: #f3eafa; color: #9A59C8; }
+#jfy-history-bar button:disabled { opacity: 0.32; cursor: default; }
+#jfy-history-bar button:disabled:hover { background: transparent; color: #555; }
+#jfy-history-bar .hbar-sep {
+  width: 1px; background: #e5e5e5; margin: 3px 1px; border-radius: 1px; flex-shrink: 0;
+}
+/* On mobile the bar wraps to ~2 rows; hide the separators that end up at
+   start-of-row to avoid orphaned lines. We just hide all seps on mobile
+   and rely on the button grouping being visually clear. */
+@media (max-width: 639px) {
+  #jfy-history-bar .hbar-sep { display: none; }
+}
+/* Toast notification */
+#jfy-toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #333; color: #fff; font-size: 13px; padding: 9px 18px;
+  border-radius: 20px; pointer-events: none; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s; z-index: 5000;
+  white-space: nowrap; display: flex; align-items: center; gap: 10px;
+}
+#jfy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+#jfy-toast-undo {
+  font-size: 12px; font-weight: 700; color: #c8a0f0; cursor: pointer;
+  text-decoration: underline; background: none; border: none; padding: 0; font-family: inherit;
+}
+/* wider panels: lay contents out in a row */
+.jfy-tool-panel .jfy-color-swatches { flex-wrap: wrap; max-width: 400px; }
+.jfy-tool-panel h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9A59C8;
+}
+.jfy-tool-hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #888;
+  line-height: 1.5;
+}
+.jfy-panel-close {
+  position: absolute;
+  top: 10px; right: 12px;
+  background: none; border: none;
+  font-size: 18px; cursor: pointer; color: #aaa;
+  line-height: 1; padding: 2px 4px; border-radius: 4px;
+}
+.jfy-panel-close:hover { color: #9A59C8; }
+
+/* color swatches */
+.jfy-color-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
+.jfy-swatch {
+  width: 26px; height: 26px; border-radius: 50%;
+  cursor: pointer; border: 2px solid transparent;
+  transition: transform 0.12s, border-color 0.12s;
+  padding: 0; flex-shrink: 0;
+}
+.jfy-swatch:hover { transform: scale(1.18); }
+.jfy-swatch.active { border-color: #9A59C8; transform: scale(1.12); box-shadow: 0 0 0 2px #fff, 0 0 0 4px #9A59C8; }
+.jfy-swatch-custom { padding: 2px; box-sizing: border-box; cursor: pointer; }
+
+/* pen mode buttons */
+.jfy-mode-btns { display: flex; gap: 8px; margin-bottom: 14px; }
+.jfy-mode-btn {
+  flex: 1; padding: 9px 6px; border: 2px solid #e5e5e5;
+  border-radius: 10px; background: #fafafa;
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  font-family: inherit; transition: border-color 0.12s, background 0.12s;
+}
+.jfy-mode-btn:hover { border-color: #c8a4e4; }
+.jfy-mode-btn.active { border-color: #9A59C8; background: #f3eafa; color: #9A59C8; }
+.jfy-pen-size-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.jfy-pen-size-row label { font-size: 12px; color: #888; white-space: nowrap; }
+.jfy-pen-size-row input[type=range] { flex: 1; accent-color: #9A59C8; }
+
+/* sticker grid */
+.jfy-sticker-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.jfy-sticker-opt {
+  width: 44px; height: 44px; cursor: pointer; border-radius: 8px;
+  border: 2px solid transparent; background: #fafafa;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; transition: border-color 0.12s, background 0.12s;
+  padding: 0; font-family: inherit;
+}
+.jfy-sticker-opt:hover { background: #f3eafa; }
+.jfy-sticker-opt.active { border-color: #9A59C8; background: #f3eafa; }
+
+/* ── Placed elements on notebook ── */
+.jfy-text-node {
+  position: absolute;
+  min-width: 60px; min-height: 24px;
+  padding: 5px 7px;
+  outline: none;
+  cursor: text;
+  box-sizing: border-box;
+  line-height: 1.5;
+  resize: both; overflow: auto;
+  border: 1.5px dashed transparent;
+  border-radius: 4px;
+  background: transparent;
+  white-space: pre-wrap;
+  z-index: 15;
+  font-family: inherit;
+}
+.jfy-text-node:focus { border-color: #9A59C8; background: rgba(255,255,255,0.5); }
+.jfy-text-node-wrap {
+  position: absolute;
+  z-index: 15;
+}
+.jfy-text-node-wrap .jfy-text-drag-handle {
+  position: absolute; top: -18px; left: 0; right: 0;
+  height: 18px; background: #9A59C8; border-radius: 5px 5px 0 0;
+  cursor: move; display: none; align-items: center; padding: 0 6px;
+  font-size: 10px; color: #fff; letter-spacing: 0.05em;
+}
+.jfy-text-node-wrap:hover .jfy-text-drag-handle,
+.jfy-text-node-wrap:focus-within .jfy-text-drag-handle { display: flex; }
+.jfy-text-node-wrap .jfy-text-node { width: 100%; height: 100%; }
+
+.jfy-polaroid {
+  position: absolute;
+  background: #fff;
+  box-shadow: 2px 4px 16px rgba(0,0,0,0.18);
+  padding: 8px 8px 30px;
+  cursor: default;
+  border-radius: 2px;
+  width: 130px;
+  z-index: 15;
+  user-select: none;
+}
+.jfy-polaroid-drag {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 30px;
+  cursor: move; z-index: 1;
+}
+.jfy-polaroid .ph-img-area {
+  width: 100%; height: 110px; background: #f0eef8;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; pointer-events: none;
+}
+.jfy-polaroid .ph-img-area img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.jfy-polaroid .ph-add-btn {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; background: rgba(154,89,200,0.08);
+  cursor: pointer; pointer-events: auto; z-index: 2;
+  font-size: 32px; color: #c8a4e4; transition: background 0.15s;
+}
+.jfy-polaroid .ph-add-btn:hover { background: rgba(154,89,200,0.18); color: #9A59C8; }
+.jfy-polaroid .ph-label-area {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+}
+.jfy-polaroid .ph-caption {
+  font-size: 11px; text-align: center; color: #aaa;
+  border: none; outline: none; background: transparent;
+  width: 100%; text-align: center; font-family: inherit; cursor: text;
+}
+
+.jfy-sticker-node {
+  position: absolute;
+  font-size: 36px;
+  line-height: 1;
+  cursor: move;
+  user-select: none;
+  z-index: 16;
+  transform-origin: center;
+  transition: filter 0.1s;
+}
+.jfy-sticker-node:hover { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+
+/* ── ABOVE ── */
+/* Washi tape: top-left, partially off-screen */
+.jfy-washi {
+  /* now a child of .jfy-grid-wrap (position:relative), not .jfy-notebook.
+     mobile: grid-wrap padding-top=calc(18vw+56px), notebook starts there.
+     top = (18vw+56px) - 12vw above notebook = calc(6vw+56px).
+     left = notebook is ~11vw from grid-wrap left on mobile; -14vw+11vw = -3vw */
+  top: calc(6vw + 56px);
+  left: -3vw;
+  width: 40vw;
+  max-width: 160px;
+  transform: rotate(-8deg);
+  transform-origin: bottom right;
+  z-index: 2;
+}
+/* Frames: top-right */
+.jfy-frames {
+  top: -12vw;
+  right: -10vw;
+  width: 36vw;
+  max-width: 145px;
+  z-index: 2;
+}
+
+/* ── BELOW ── */
+/* Stickers: left, bleeds off left edge */
+.jfy-stickers {
+  bottom: -28vw;
+  left: -20vw;
+  width: 55vw;
+  z-index: 3;
+}
+/* Pen: centered, large enough to look like it could write on the paper */
+.jfy-pen {
+  bottom: -42vw;
+  left: 50%;
+  transform: translateX(-50%) rotate(-25deg);
+  transform-origin: top center;
+  width: 38vw;
+  z-index: 4;
+}
+/* Scissors: right, bleeds off right edge.
+   now child of .jfy-grid-wrap; convert bottom-of-notebook to top-of-grid-wrap.
+   notebook top=calc(18vw+56px), notebook height≈calc(100dvh-var(--hh)-40vw),
+   scissors was bottom:-26vw from notebook → top≈calc(100dvh - var(--hh) - 48vw + 56px) */
+.jfy-scissors {
+  top: calc(100dvh - var(--hh) - 48vw + 56px);
+  right: -18vw;
+  width: 52vw;
+  transform: rotate(18deg);
+  transform-origin: bottom left;
+  z-index: 3;
+}
+
+/* Paper: in document flow, centered, scroll to see */
+.jfy-paper-wrap {
+  overflow: visible;
+  padding: 0 0 48px;
+  pointer-events: auto;
+}
+.jfy-paper {
+  display: block;
+  width: 130vw;
+  margin-left: -12vw;
+}
+
+/* ── Tablet ── */
+@media (min-width: 640px) {
+  /* single-row bar — only needs its own ~46px */
+  .jfy-grid-wrap { padding-top: calc(12vw + 54px); }
+}
+@media (min-width: 768px) {
+  /* padding-top accounts for props that extend ~18vw above notebook */
+  .jfy-grid-wrap { padding-top: calc(20vw + 54px); padding-bottom: 18vw; }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); min-height: 520px; }
+}
+
+/* ── Tablet prop positions (768–1023px) ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Washi: absolute on grid-wrap (full viewport width), clips left edge.
+     top = grid-wrap padding-top(20vw+54px) minus 18vw above notebook = calc(2vw+54px) */
+  .jfy-washi {
+    position: absolute;
+    top: calc(2vw + 54px); left: -10px; right: auto; bottom: auto;
+    width: 24vw;
+    z-index: 25;
+  }
+  /* Stickers: top-center-left near the spine, slides UNDER notebook page content */
+  .jfy-stickers {
+    top: -16vw; left: 18vw; bottom: auto; right: auto;
+    width: 28vw; max-width: 210px;
+    z-index: 0;
+  }
+  /* Pen: angled, top-center-right, fully outside notebook — scaled up */
+  .jfy-pen {
+    top: -16vw; right: 16vw; left: auto; bottom: auto;
+    width: 22vw; max-width: 170px;
+    z-index: 22;
+  }
+  /* Scissors: vw only, no cap — scales freely at any tablet width */
+  /* Scissors: absolute on grid-wrap, clips right edge.
+     top = grid-wrap padding-top(20vw+54px) minus 16vw above notebook = calc(4vw+54px) */
+  .jfy-scissors {
+    position: absolute;
+    top: calc(4vw + 54px); right: -5vw; left: auto; bottom: auto;
+    width: 28vw;
+    z-index: 25;
+  }
+  /* Frames: bottom-right, level with paper, no overlap, no clip */
+  .jfy-frames {
+    bottom: -16vw; right: 0; top: auto; left: auto;
+    width: 30vw; max-width: 230px;
+    z-index: 0;
+  }
+  /* Paper: bottom-left, pulled up to sit level with frames, clips slightly left */
+  .jfy-paper { width: 58vw; margin-left: -5vw; }
+  /* Pull the paper-wrap up to slightly overlap notebook bottom edge */
+  .jfy-paper-wrap {
+    position: relative;
+    top: -16vw;
+    margin-bottom: -16vw;
+  }
+}
+
+/* ── Two-page notebook spread (768px and up) ── */
+@media (min-width: 768px) {
+  /* Left page panel */
+  #jfy-notebook-left-page {
+    display: flex;
+    position: absolute;
+    inset: 0 50% 0 0;
+    background: #f8f4ed;
+    border-radius: 18px 0 0 18px;
+    overflow: hidden;
+    z-index: 5;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #jfy-notebook-left-page img {
+    max-width: 88%; max-height: 78%;
+    border-radius: 6px;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.14);
+    object-fit: contain;
+  }
+  #jfy-notebook-left-page .nb-left-label {
+    font-family: 'Antonio', sans-serif;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #c4b49a; text-align: center; margin-top: 10px;
+  }
+  #jfy-notebook-left-page .nb-left-empty {
+    font-family: 'Bad Script', cursive;
+    font-size: 14px; color: #ccc; text-align: center;
+    line-height: 1.7;
+  }
+
+  /* Center spine */
+  .jfy-notebook::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    left: calc(50% - 1px); width: 2px;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.05) 100%);
+    z-index: 15; pointer-events: none;
+  }
+
+  /* Paper: pulled up to slightly overlap notebook bottom edge */
+  .jfy-paper-wrap {
+    position: relative;
+    top: -16vw;
+    margin-bottom: -16vw;
+  }
+  .jfy-paper { width: 58vw; margin-left: -5vw; }
+}
+/* NOTE: .jfy-nb-layer and #jfy-entry-viewer right-half overrides live in the
+   second <style> block below so they come after the inset:0 base rules. */
+
+/* ── Desktop prop positions + layout (1024px and up) ── */
+@media (min-width: 1024px) {
+  /* Padding scaled from tablet vw→px; props extend ~190px above notebook */
+  .jfy-grid-wrap { padding-top: 230px; padding-bottom: 200px; }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); min-height: 540px; }
+
+  /* Paper-wrap: pulled up to slightly overlap notebook bottom edge */
+  .jfy-paper-wrap { top: -230px; margin-bottom: -230px; }
+  .jfy-paper { width: 520px; margin-left: -50px; }
+
+  /* Washi: absolute on grid-wrap. top = 230px padding-top minus 190px above notebook = 40px */
+  .jfy-washi {
+    position: absolute;
+    top: 40px; left: -10px; right: auto; bottom: auto;
+    width: 200px; max-width: none;
+    z-index: 25;
+  }
+  /* Stickers: top-center-left near spine, under page content */
+  .jfy-stickers {
+    top: -170px; left: 18vw; bottom: auto; right: auto;
+    width: 260px; max-width: none;
+    z-index: 0;
+  }
+  /* Pen: angled, top-center-right, no overlap */
+  .jfy-pen {
+    top: -170px; right: 17vw; left: auto; bottom: auto;
+    width: 195px; max-width: none;
+    z-index: 22;
+  }
+  /* Scissors: absolute on grid-wrap. top = 230px padding-top minus 200px above notebook = 30px */
+  .jfy-scissors {
+    position: absolute;
+    top: 30px; right: -10px; left: auto; bottom: auto;
+    width: 20vw; max-width: none;
+    z-index: 25;
+  }
+  /* Frames: bottom-right, no overlap, no clip */
+  .jfy-frames {
+    bottom: -160px; right: 0; top: auto; left: auto;
+    width: 280px; max-width: none;
+    z-index: 0;
+  }
+}
+
+</style>
 </head>
-<body>
+<body class="page-jfy">
 
 <!-- HEADER -->
+<header id="site-header">
+  <svg id="sun-stretch-svg">
+    <g id="sun-shape" opacity="0" style="transition:opacity .18s ease">
+      <rect id="sun-rect" fill="#FFD400" x="0" y="0" width="0" height="0"/>
+      <circle id="sun-circle-left"  fill="#FFD400" cx="0" cy="0" r="0"/>
+      <circle id="sun-circle-right" fill="#FFD400" cx="0" cy="0" r="0"/>
+    </g>
+  </svg>
+
+  <div class="header-inner">
+  <a href="index.html" class="logo" id="logo-link">
+    <svg class="logo-svg" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <g>
+        <path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/>
+        <path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/>
+        <path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/>
+        <path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/>
+        <path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/>
+        <path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/>
+      </g>
+      <g>
+        <path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/>
+        <path id="logo-sun" fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/>
+        <path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/>
+      </g>
+    </svg>
+  </a>
+
+  <nav class="desktop-nav" aria-label="Main navigation">
+    <div class="nav-item" data-nav="wander">
+      <span class="nav-sun" aria-hidden="true"></span>
+      <button class="nav-btn" data-key="wander" aria-haspopup="true" aria-expanded="false">wander</button>
+      <div class="dropdown" id="dropdown-wander" role="menu">
+        <a class="dropdown-link" href="mess-hall.html" role="menuitem">mess hall</a>
+        <a class="dropdown-link" href="silly-decisions.html" role="menuitem">silly decisions</a>
+        <a class="dropdown-link" href="sticker-maker.html" role="menuitem">sticker maker</a>
+      </div>
+    </div>
+    <div class="nav-item" data-nav="seek">
+      <span class="nav-sun" aria-hidden="true"></span>
+      <button class="nav-btn" data-key="seek" aria-haspopup="true" aria-expanded="false">seek</button>
+      <div class="dropdown" id="dropdown-seek" role="menu">
+        <a class="dropdown-link" href="just-for-you.html" role="menuitem">just for you</a>
+        <a class="dropdown-link" href="between-us.html" role="menuitem">between us</a>
+        <a class="dropdown-link" href="selfless-less.html" role="menuitem">selfless-less</a>
+      </div>
+    </div>
+    <div class="nav-item" data-nav="about">
+      <span class="nav-sun" aria-hidden="true"></span>
+      <button class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
+      <div class="dropdown" id="dropdown-about" role="menu">
+        <a class="dropdown-link" href="about.html#our-mission" role="menuitem">our mission</a>
+        <a class="dropdown-link" href="about.html#our-approach" role="menuitem">our approach</a>
+        <a class="dropdown-link" href="about.html#meet-the-team" role="menuitem">meet the team</a>
+      </div>
+    </div>
+    <a href="profile.html" class="profile-btn" data-key="profile">profile</a>
+  </nav>
+
+  <nav class="tablet-nav" aria-label="Main navigation">
+    <div class="nav-item" data-nav="wander">
+      <span class="nav-sun" aria-hidden="true"></span>
+      <button class="nav-btn" data-key="wander" aria-haspopup="true" aria-expanded="false">wander</button>
+      <div class="dropdown" id="dropdown-wander-t" role="menu">
+        <a class="dropdown-link" href="mess-hall.html" role="menuitem">mess hall</a>
+        <a class="dropdown-link" href="silly-decisions.html" role="menuitem">silly decisions</a>
+        <a class="dropdown-link" href="sticker-maker.html" role="menuitem">sticker maker</a>
+      </div>
+    </div>
+    <div class="nav-item" data-nav="seek">
+      <span class="nav-sun" aria-hidden="true"></span>
+      <button class="nav-btn" data-key="seek" aria-haspopup="true" aria-expanded="false">seek</button>
+      <div class="dropdown" id="dropdown-seek-t" role="menu">
+        <a class="dropdown-link" href="just-for-you.html" role="menuitem">just for you</a>
+        <a class="dropdown-link" href="between-us.html" role="menuitem">between us</a>
+        <a class="dropdown-link" href="selfless-less.html" role="menuitem">selfless-less</a>
+      </div>
+    </div>
+    <div class="nav-item" data-nav="about">
+      <span class="nav-sun" aria-hidden="true"></span>
+      <button class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
+      <div class="dropdown" id="dropdown-about-t" role="menu">
+        <a class="dropdown-link" href="about.html#our-mission" role="menuitem">our mission</a>
+        <a class="dropdown-link" href="about.html#our-approach" role="menuitem">our approach</a>
+        <a class="dropdown-link" href="about.html#meet-the-team" role="menuitem">meet the team</a>
+      </div>
+    </div>
+    <a href="profile.html" class="profile-btn" data-key="profile">profile</a>
+  </nav>
+
+  <div class="mobile-nav">
+    <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-menu-panel">
+      menu <span class="arrow" aria-hidden="true">&#9660;</span>
+    </button>
+  </div>
+  </div><!-- /header-inner -->
+</header>
+
+<div class="mobile-menu-panel" id="mobile-menu-panel" role="dialog" aria-label="Navigation menu">
+  <div class="mobile-menu-section">
+    <h3>wander</h3>
+    <ul>
+      <li><a href="mess-hall.html">mess hall</a></li>
+      <li><a href="silly-decisions.html">silly decisions</a></li>
+      <li><a href="sticker-maker.html">sticker maker</a></li>
+    </ul>
+  </div>
+  <div class="mobile-menu-section">
+    <h3 class="has-page"><a href="about.html">about</a></h3>
+    <ul>
+      <li><a href="about.html#our-mission">our mission</a></li>
+      <li><a href="about.html#our-approach">our approach</a></li>
+      <li><a href="#">how it works</a></li>
+    </ul>
+  </div>
+  <div class="mobile-menu-section">
+    <h3>seek</h3>
+    <ul>
+      <li><a href="just-for-you.html">just for you</a></li>
+      <li><a href="between-us.html">between us</a></li>
+      <li><a href="selfless-less.html">selfless-less</a></li>
+    </ul>
+  </div>
+  <div class="mobile-menu-section">
+    <h3 class="has-page"><a href="profile.html">profile</a></h3>
+    <ul>
+      <li><a href="#">my happiness</a></li>
+      <li><a href="#">gallery</a></li>
+      <li><a href="#">mood tracker</a></li>
+      <li><a href="#">journal</a></li>
+    </ul>
+  </div>
+</div>
+
+
 <path d="M230.507 415.894C230.155 418.342 227.929 421.347 226.279 418.788C225.852 418.138 227.076 417.397 227.299 415.431C227.41 414.503 228.486 413.149 230.507 415.894Z" fill="#87E5FF"/>
 <path d="M230.934 420.809C230.711 417.823 233.734 420.605 230.934 420.809V420.809Z" fill="#87E5FF"/>
 <path d="M76.3469 206.706C74.9003 208.06 73.0085 206.354 73.5835 205.278C74.5108 203.572 75.0857 203.534 76.384 202.255C77.1444 201.513 77.0517 200.14 78.0347 202.774C78.7394 204.666 77.3299 205.797 76.3284 206.706H76.3469Z" fill="#87E5FF"/>
@@ -126,7 +922,46 @@
 
 
 <!-- MAIN CONTENT -->
-<main id="page-main" style="min-height:60vh;padding-top:var(--hh)"></main>
+<main id="page-main" class="jfy-main">
+  <div class="jfy-grid-wrap">
+      <!-- washi + scissors sit outside the notebook so they scroll with the page
+           and can be anchored to the viewport edges via position:absolute on grid-wrap -->
+      <img class="jfy-washi"    src="washi tape.svg" alt="washi tape tool" id="jfy-washi-prop">
+      <img class="jfy-scissors" src="scissors2.svg"  alt="scissors tool"  id="jfy-scissors-prop">
+    <div class="jfy-notebook">
+      <!-- above the page -->
+      <img class="jfy-frames"   src="frames.svg"     alt="frames tool"     id="jfy-frames-prop">
+      <!-- below the page: stickers left, pen center -->
+      <img class="jfy-stickers" src="stickers.svg"   alt="stickers tool"   id="jfy-stickers-prop">
+      <img class="jfy-pen"      src="pen.svg"        alt="pen tool"        id="jfy-pen-prop">
+      <!-- interactive drawing layer -->
+      <div class="jfy-nb-layer" id="jfy-nb-layer">
+        <canvas id="jfy-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+  <!-- paper is in normal document flow — scroll down to see it below the pen -->
+  <div class="jfy-paper-wrap">
+    <img class="jfy-paper" src="paper.svg" alt="paper tool" id="jfy-paper-prop">
+  </div>
+</main>
+
+<!-- Always-visible history toolbar -->
+<div id="jfy-history-bar" role="toolbar" aria-label="Notebook history">
+  <button id="jfy-undo-btn" title="Undo" disabled>↩ undo</button>
+  <button id="jfy-redo-btn" title="Redo" disabled>↪ redo</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-erase-btn" title="Erase mode">⌫ erase</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-clear-btn" title="Clear all">✕ clear all</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-share-btn" title="Share to Between Us">↗ share</button>
+  <button id="jfy-save-btn" title="Save to journal">♡ save</button>
+  <button id="jfy-export-btn" title="Export as image">↓ export</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-new-entry-btn" title="New journal entry">+ new entry</button>
+</div>
+<div id="jfy-toast"><span id="jfy-toast-msg"></span><button id="jfy-toast-undo" style="display:none"></button></div>
 
 <!-- FOOTER -->
 <footer id="site-footer">
@@ -177,7 +1012,7 @@
     </div>
     <div class="footer-logo-full">
       <a href="index.html" aria-label="Daybreak home">
-        <svg class="footer-logo-svg footer-logo-svg--full" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
+        <svg class="footer-logo-svg footer-logo-svg--full" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#9A59C8" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#9A59C8" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
       </a>
     </div>
   </div>
@@ -193,7 +1028,7 @@
       <div class="footer-col"><h4>profile</h4><ul><li><a href="#">my happiness</a></li><li><a href="#">gallery</a></li><li><a href="#">mood tracker</a></li><li><a href="#">journal</a></li></ul></div>
     </div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(0,0,0,.12)">
-      <a href="#" class="footer-logo-wrap" aria-label="Daybreak home"><svg class="footer-logo-svg" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg></a>
+      <a href="#" class="footer-logo-wrap" aria-label="Daybreak home"><svg class="footer-logo-svg" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#9A59C8" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#9A59C8" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg></a>
       <p class="footer-tagline" style="text-align:right">made it to the bottom?<br>that earned you another break :-)</p>
     </div>
   </div>
@@ -212,7 +1047,7 @@
       <div>
         <p class="fm-tagline">made it to the bottom?<br>that earned you another break :-)</p>
         <a href="#" class="fm-logo" style="margin-top:12px;display:flex" aria-label="Daybreak home">
-          <svg class="footer-logo-svg footer-logo-svg--mobile" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
+          <svg class="footer-logo-svg footer-logo-svg--mobile" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#9A59C8" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#9A59C8" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
         </a>
       </div>
     </div>
@@ -220,6 +1055,77 @@
 
 </footer>
 
+
+<!-- ── TEXT EDITING TOOLBAR ── -->
+<div id="jfy-text-toolbar" role="toolbar" aria-label="Text formatting">
+  <div class="jfy-color-swatches" id="jfy-text-colors"></div>
+  <div class="jfy-txt-size-ctrl">
+    <button class="jfy-txt-size-btn" id="jfy-txt-smaller" title="Smaller">A−</button>
+    <span class="jfy-txt-size-val" id="jfy-txt-size-val">15</span>
+    <button class="jfy-txt-size-btn" id="jfy-txt-larger" title="Larger">A+</button>
+  </div>
+</div>
+
+<!-- ── TOOL PANELS ── -->
+<div id="jfy-washi-panel" class="jfy-tool-panel" role="dialog" aria-label="Washi tape">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>washi tape</h3>
+  <div class="jfy-color-swatches" id="jfy-washi-swatches"></div>
+  <div class="jfy-pen-size-row" style="margin-top:10px">
+    <label for="jfy-washi-width">width</label>
+    <input type="range" id="jfy-washi-width" min="8" max="80" value="28">
+    <span id="jfy-washi-width-val" style="font-size:11px;color:#888;min-width:28px">28px</span>
+  </div>
+  <p class="jfy-tool-hint">pick a color &amp; width, then click &amp; drag at any angle to place tape</p>
+</div>
+
+<div id="jfy-pen-panel" class="jfy-tool-panel" role="dialog" aria-label="Pen">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>pen</h3>
+  <div class="jfy-mode-btns">
+    <button class="jfy-mode-btn" id="jfy-pen-write-btn">write</button>
+    <button class="jfy-mode-btn" id="jfy-pen-doodle-btn">doodle</button>
+  </div>
+  <div id="jfy-pen-colors" class="jfy-color-swatches" style="display:none;margin-bottom:10px"></div>
+  <div class="jfy-pen-size-row" id="jfy-pen-size-row" style="display:none">
+    <label for="jfy-pen-size">size</label>
+    <input type="range" id="jfy-pen-size" min="1" max="20" value="3">
+  </div>
+  <p class="jfy-tool-hint" id="jfy-pen-hint" style="display:none"></p>
+</div>
+
+<div id="jfy-frames-panel" class="jfy-tool-panel" role="dialog" aria-label="Frames">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>polaroid frames</h3>
+  <p class="jfy-tool-hint">click anywhere on the notebook to place a frame. click the photo area on the frame to add an image.</p>
+</div>
+
+<div id="jfy-stickers-panel" class="jfy-tool-panel" role="dialog" aria-label="Stickers">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>stickers</h3>
+  <div class="jfy-sticker-grid" id="jfy-sticker-grid"></div>
+  <p class="jfy-tool-hint">choose a sticker, then click the notebook to stamp it. click the stickers prop again to stop.</p>
+</div>
+
+<div id="jfy-paper-panel" class="jfy-tool-panel" role="dialog" aria-label="Paper">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>paper</h3>
+  <p class="jfy-panel-row-label">pattern</p>
+  <div class="jfy-pattern-row" id="jfy-pattern-row"></div>
+  <p class="jfy-panel-row-label">size</p>
+  <div class="jfy-size-row">
+    <button class="jfy-size-btn" data-size="small">small</button>
+    <button class="jfy-size-btn active" data-size="medium">medium</button>
+    <button class="jfy-size-btn" data-size="large">large</button>
+  </div>
+  <p class="jfy-tool-hint">click on the notebook to place. use scissors to cut to shape.</p>
+</div>
+
+<div id="jfy-scissors-panel" class="jfy-tool-panel" role="dialog" aria-label="Scissors">
+  <button class="jfy-panel-close" aria-label="Close">×</button>
+  <h3>scissors</h3>
+  <p class="jfy-tool-hint">click & drag over a piece of placed paper to cut it into a shape. the area you trace becomes the cut edge — everything outside is removed.</p>
+</div>
 
 <button class="fab" id="fab-btn" aria-label="Surprise me">
   <canvas id="fab-canvas" width="60" height="60"></canvas>
@@ -282,6 +1188,8 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   });
   pbtns.forEach(function(btn){btn.addEventListener('click',function(){var isA=btn.classList.contains('active');document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});pbtns.forEach(function(pb){pb.classList.remove('active')});hideSuns(false);closeAll(null);if(!isA)pbtns.forEach(function(pb){pb.classList.add('active')})})});
   document.addEventListener('click',function(){items.forEach(function(item){var drop=item.querySelector('.dropdown'),btn=item.querySelector('.nav-btn');if(drop&&drop.classList.contains('open')){drop.classList.remove('open');btn.setAttribute('aria-expanded','false')}});hideSuns(true)});
+  /* Mark the dropdown link whose href matches the current page */
+  (function(){var page=location.pathname.split('/').pop()||'index.html';document.querySelectorAll('.dropdown-link').forEach(function(l){if(l.getAttribute('href')===page){l.classList.add('active');var nb=l.closest('.nav-item');if(nb)nb.querySelector('.nav-btn').classList.add('active')}})})();
 })();
 
 /* 3. MOBILE MENU */
@@ -354,7 +1262,7 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
     for(var y=0;y<S;y++)for(var x=0;x<S;x++){
       var i=(y*S+x)*4,dx=x-CX,dy=y-CY;
       if(dx*dx+dy*dy>CR*CR){buf[i]=buf[i+1]=buf[i+2]=buf[i+3]=0;continue}
-      if(field(x,y,bs)>=THRESH){buf[i]=255;buf[i+1]=212;buf[i+2]=0;buf[i+3]=255}
+      if(field(x,y,bs)>=THRESH){buf[i]=154;buf[i+1]=89;buf[i+2]=200;buf[i+3]=255}
       else{buf[i]=buf[i+1]=buf[i+2]=0;buf[i+3]=255}
     }
     ctx.putImageData(img,0,0);
@@ -411,6 +1319,2824 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   window.addEventListener('load',update);
 })();
 
+</script>
+
+<script>
+/* ── INTERACTIVE NOTEBOOK TOOLS ── */
+(function(){
+'use strict';
+
+var notebook = document.querySelector('.jfy-notebook');
+var nbLayer  = document.getElementById('jfy-nb-layer');
+var canvas   = document.getElementById('jfy-canvas');
+if(!canvas||!notebook||!nbLayer) return;
+var ctx = canvas.getContext('2d');
+
+/* ── state ── */
+var S = {
+  tool: null,        // 'washi'|'write'|'doodle'|'frames'|'stickers'
+  wasbiColor: null,  // set after washi panel init
+  penColor: '#111111',
+  penSize: 3,
+  selectedSticker: null,
+  dragging: false,
+  dStart: null,
+  currentPath: null
+};
+
+var drawCmds = []; // { type:'washi'|'doodle', ... }
+
+/* ── canvas init / resize ── */
+function initCanvas(){
+  var W = canvas.offsetWidth, H = canvas.offsetHeight;
+  if(!W||!H) return;
+  var dpr = window.devicePixelRatio||1;
+  canvas.width  = Math.round(W*dpr);
+  canvas.height = Math.round(H*dpr);
+  // setTransform resets any previous scale before applying the new one
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  redrawAll();
+}
+if(window.ResizeObserver){
+  new ResizeObserver(initCanvas).observe(notebook);
+} else {
+  window.addEventListener('resize', initCanvas);
+}
+initCanvas();
+
+/* ── coordinate helper ── */
+function canvasPos(e){
+  var t = e.touches ? e.touches[0] : e;
+  var r = canvas.getBoundingClientRect();
+  return { x: t.clientX - r.left, y: t.clientY - r.top };
+}
+
+/* ── DRAW FUNCTIONS ── */
+var WASHI_STRIPE_SPACING = 10;
+var washibWidth = 28; // current tape width in px
+
+function drawWashi(x1,y1,x2,y2,col,preview,tapeW){
+  var dx = x2-x1, dy = y2-y1;
+  var len = Math.sqrt(dx*dx+dy*dy);
+  if(len < 2) return;
+  tapeW = tapeW || washibWidth;
+
+  // Unit vector along tape; perpendicular unit vector for width
+  var ux = dx/len, uy = dy/len;
+  var nx = -uy,   ny =  ux; // perpendicular (rotated 90°)
+  var hw = tapeW / 2;
+
+  // Four corners of the parallelogram strip
+  var c0x = x1 + nx*hw, c0y = y1 + ny*hw;
+  var c1x = x1 - nx*hw, c1y = y1 - ny*hw;
+  var c2x = x2 - nx*hw, c2y = y2 - ny*hw;
+  var c3x = x2 + nx*hw, c3y = y2 + ny*hw;
+
+  function buildPath(){
+    ctx.beginPath();
+    ctx.moveTo(c0x,c0y);
+    ctx.lineTo(c3x,c3y);
+    ctx.lineTo(c2x,c2y);
+    ctx.lineTo(c1x,c1y);
+    ctx.closePath();
+  }
+
+  ctx.save();
+  buildPath();
+  ctx.fillStyle = col.rgba;
+  ctx.fill();
+
+  // Diagonal stripes: lines parallel to the tape's length axis, spaced across width
+  ctx.save();
+  buildPath();
+  ctx.clip();
+  ctx.strokeStyle = col.rgba.replace(/[\d.]+\)$/,'0.25)');
+  ctx.lineWidth = 1.5;
+  var span = len + tapeW * 2;
+  for(var i = -tapeW; i < span; i += WASHI_STRIPE_SPACING){
+    // Each stripe runs perpendicular to the tape (across the width)
+    var ax = x1 + ux*i + nx*(hw+2);
+    var ay = y1 + uy*i + ny*(hw+2);
+    var bx = x1 + ux*i - nx*(hw+2);
+    var by = y1 + uy*i - ny*(hw+2);
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.restore();
+
+  if(preview){
+    ctx.save();
+    buildPath();
+    ctx.strokeStyle = col.solid;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+}
+
+/* ── WASHI DOM ELEMENT HELPERS ── */
+function renderWashiOnCtx(C, x1, y1, x2, y2, col, tapeW, offX, offY){
+  offX = offX||0; offY = offY||0;
+  x1-=offX; y1-=offY; x2-=offX; y2-=offY;
+  var dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  if(len<2) return;
+  tapeW = tapeW || washibWidth;
+  var ux=dx/len, uy=dy/len, nx=-uy, ny=ux, hw=tapeW/2;
+  var c0x=x1+nx*hw, c0y=y1+ny*hw;
+  var c1x=x1-nx*hw, c1y=y1-ny*hw;
+  var c2x=x2-nx*hw, c2y=y2-ny*hw;
+  var c3x=x2+nx*hw, c3y=y2+ny*hw;
+  function bp(){ C.beginPath(); C.moveTo(c0x,c0y); C.lineTo(c3x,c3y); C.lineTo(c2x,c2y); C.lineTo(c1x,c1y); C.closePath(); }
+  C.save(); bp(); C.fillStyle=col.rgba; C.fill();
+  C.save(); bp(); C.clip();
+  C.strokeStyle=col.rgba.replace(/[\d.]+\)$/,'0.25)'); C.lineWidth=1.5;
+  var span=len+tapeW*2;
+  for(var i=-tapeW;i<span;i+=WASHI_STRIPE_SPACING){
+    var ax=x1+ux*i+nx*(hw+2), ay=y1+uy*i+ny*(hw+2);
+    var bx=x1+ux*i-nx*(hw+2), by=y1+uy*i-ny*(hw+2);
+    C.beginPath(); C.moveTo(ax,ay); C.lineTo(bx,by); C.stroke();
+  }
+  C.restore(); C.restore();
+}
+
+function _washiBbox(x1,y1,x2,y2,tapeW){
+  var dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  if(len<2) return null;
+  tapeW = tapeW || washibWidth;
+  var ux=dx/len, uy=dy/len, nx=-uy, ny=ux, hw=tapeW/2;
+  var pad=6;
+  var xs=[x1+nx*hw,x1-nx*hw,x2-nx*hw,x2+nx*hw];
+  var ys=[y1+ny*hw,y1-ny*hw,y2-ny*hw,y2+ny*hw];
+  return {
+    minX:Math.min.apply(null,xs)-pad, minY:Math.min.apply(null,ys)-pad,
+    maxX:Math.max.apply(null,xs)+pad, maxY:Math.max.apply(null,ys)+pad
+  };
+}
+
+function placeWashiElement(cmd){
+  var x1=cmd.x1, y1=cmd.y1, x2=cmd.x2, y2=cmd.y2, col=cmd.col, tapeW=cmd.w||washibWidth;
+  var bb=_washiBbox(x1,y1,x2,y2,tapeW);
+  if(!bb) return;
+  var W=Math.ceil(bb.maxX-bb.minX), H=Math.ceil(bb.maxY-bb.minY);
+  var el=document.createElement('canvas');
+  el.className='jfy-placed-washi';
+  el.width=W; el.height=H;
+  el.style.cssText='position:absolute;left:'+bb.minX+'px;top:'+bb.minY+'px;cursor:grab;touch-action:none;';
+  el.dataset.washi=JSON.stringify({x1:x1,y1:y1,x2:x2,y2:y2,col:col,w:tapeW});
+  var C=el.getContext('2d');
+  renderWashiOnCtx(C,x1,y1,x2,y2,col,tapeW,bb.minX,bb.minY);
+  nbLayer.appendChild(el);
+  makeDraggable(el,el);
+}
+
+function rewireWashi(el){
+  var data; try{ data=JSON.parse(el.dataset.washi||'{}'); }catch(e){ return; }
+  if(!data.x1 && data.x1!==0) return;
+  var bb=_washiBbox(data.x1,data.y1,data.x2,data.y2,data.w);
+  if(!bb) return;
+  var C=el.getContext('2d');
+  C.clearRect(0,0,el.width,el.height);
+  renderWashiOnCtx(C,data.x1,data.y1,data.x2,data.y2,data.col,data.w,bb.minX,bb.minY);
+  makeDraggable(el,el);
+}
+
+function drawDoodle(pts,color,size){
+  if(pts.length<2) return;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for(var i=1; i<pts.length-1; i++){
+    ctx.quadraticCurveTo(pts[i].x, pts[i].y,
+      (pts[i].x+pts[i+1].x)/2, (pts[i].y+pts[i+1].y)/2);
+  }
+  ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// When editing a saved entry, this holds the entry image so redrawAll
+// always repaints it under new strokes (survives undo/redo/clear cycles).
+// Edit background lives on window so the navigator IIFE can set it
+// and redrawAll() (inside this IIFE) reads the same object.
+window._jfyEditBg = window._jfyEditBg || null;
+
+function redrawAll(){
+  var W = canvas.offsetWidth, H = canvas.offsetHeight;
+  ctx.clearRect(0,0,W,H);
+  // Paint the edit-mode background first so strokes draw on top of it
+  var bg = window._jfyEditBg;
+  if(bg && bg.img && bg.img.complete){
+    ctx.save();
+    ctx.drawImage(bg.img, 0, 0, W, H);
+    ctx.restore();
+  }
+  drawCmds.forEach(function(cmd){
+    if(cmd.type==='doodle') drawDoodle(cmd.pts,cmd.color,cmd.size);
+  });
+}
+
+/* ── WASHI COLORS ── */
+var WASHI_COLORS = [
+  {label:'blush',    rgba:'rgba(255,182,193,0.6)', solid:'#ffb6c1'},
+  {label:'lavender', rgba:'rgba(196,165,224,0.6)', solid:'#c4a5e0'},
+  {label:'mint',     rgba:'rgba(152,225,189,0.6)', solid:'#98e1bd'},
+  {label:'sky',      rgba:'rgba(135,206,235,0.6)', solid:'#87ceeb'},
+  {label:'peach',    rgba:'rgba(255,200,152,0.6)', solid:'#ffc898'},
+  {label:'butter',   rgba:'rgba(255,236,153,0.6)', solid:'#ffec99'},
+  {label:'rose',     rgba:'rgba(255,130,150,0.6)', solid:'#ff8296'},
+  {label:'sage',     rgba:'rgba(176,208,169,0.6)', solid:'#b0d0a9'},
+  {label:'lilac',    rgba:'rgba(215,185,230,0.6)', solid:'#d7b9e6'},
+  {label:'coral',    rgba:'rgba(255,167,131,0.6)', solid:'#ffa783'},
+];
+S.wasbiColor = WASHI_COLORS[0];
+
+(function buildWashiSwatches(){
+  var c = document.getElementById('jfy-washi-swatches');
+  if(!c) return;
+  WASHI_COLORS.forEach(function(col,i){
+    var btn = document.createElement('button');
+    btn.className='jfy-swatch'+(i===0?' active':'');
+    btn.style.background = col.solid;
+    btn.title = col.label;
+    btn.addEventListener('click',function(){
+      S.wasbiColor = col;
+      c.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
+      btn.classList.add('active');
+    });
+    c.appendChild(btn);
+  });
+  var custom = document.createElement('input');
+  custom.type='color'; custom.className='jfy-swatch jfy-swatch-custom'; custom.title='custom';
+  custom.addEventListener('input',function(){
+    var h=custom.value, r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
+    S.wasbiColor={rgba:'rgba('+r+','+g+','+b+',0.6)',solid:h,label:'custom'};
+    c.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
+    custom.classList.add('active');
+  });
+  c.appendChild(custom);
+})();
+
+(function initWashiWidth(){
+  var slider = document.getElementById('jfy-washi-width');
+  var valEl  = document.getElementById('jfy-washi-width-val');
+  if(!slider) return;
+  slider.addEventListener('input', function(){
+    washibWidth = parseInt(slider.value);
+    if(valEl) valEl.textContent = washibWidth + 'px';
+  });
+})();
+
+/* ── PEN COLORS ── */
+var PEN_COLORS = ['#111111','#9A59C8','#e63946','#f4a261','#2a9d8f','#4361ee','#c77dff','#ffffff'];
+
+function buildPenSwatches(container, onPick){
+  container.innerHTML='';
+  PEN_COLORS.forEach(function(c,i){
+    var btn=document.createElement('button');
+    btn.className='jfy-swatch'+(i===0?' active':'');
+    btn.style.background=c;
+    if(c==='#ffffff') btn.style.boxShadow='inset 0 0 0 1px #ddd';
+    btn.title=c;
+    btn.addEventListener('click',function(){
+      container.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
+      btn.classList.add('active');
+      onPick(c);
+    });
+    container.appendChild(btn);
+  });
+  var custom=document.createElement('input');
+  custom.type='color'; custom.className='jfy-swatch jfy-swatch-custom'; custom.title='custom';
+  custom.addEventListener('input',function(){
+    onPick(custom.value);
+    container.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
+    custom.classList.add('active');
+  });
+  container.appendChild(custom);
+}
+
+(function setupPenPanel(){
+  var writeBtn  = document.getElementById('jfy-pen-write-btn');
+  var doodleBtn = document.getElementById('jfy-pen-doodle-btn');
+  var colEl     = document.getElementById('jfy-pen-colors');
+  var sizeRow   = document.getElementById('jfy-pen-size-row');
+  var hintEl    = document.getElementById('jfy-pen-hint');
+  var sizeInput = document.getElementById('jfy-pen-size');
+  if(!writeBtn||!doodleBtn) return;
+
+  if(sizeInput) sizeInput.addEventListener('input',function(){ S.penSize=+sizeInput.value; });
+
+  function activateMode(mode){
+    writeBtn.classList.toggle('active', mode==='write');
+    doodleBtn.classList.toggle('active', mode==='doodle');
+    colEl.style.display='flex';
+    sizeRow.style.display = mode==='doodle' ? 'flex' : 'none';
+    hintEl.style.display='';
+    hintEl.textContent = mode==='write'
+      ? 'click the notebook to place a text box'
+      : 'click & drag on the notebook to draw a line';
+    buildPenSwatches(colEl, function(c){ S.penColor=c; });
+    setTool(mode);
+  }
+
+  writeBtn.addEventListener('click',  function(){ activateMode('write'); });
+  doodleBtn.addEventListener('click', function(){ activateMode('doodle'); });
+})();
+
+/* ── STICKERS ── */
+var STICKERS = ['⭐','🌸','🌈','☁️','🌙','💫','🦋','🌺','☀️','💜','🌿','🍄','🎀','✨','🌻','🍀','🎵','🍬','🦄','🌊'];
+S.selectedSticker = STICKERS[0];
+
+(function buildStickerGrid(){
+  var grid = document.getElementById('jfy-sticker-grid');
+  if(!grid) return;
+  STICKERS.forEach(function(s,i){
+    var btn=document.createElement('button');
+    btn.className='jfy-sticker-opt'+(i===0?' active':'');
+    btn.textContent=s;
+    btn.title='sticker '+s;
+    btn.addEventListener('click',function(){
+      grid.querySelectorAll('.jfy-sticker-opt').forEach(function(o){o.classList.remove('active')});
+      btn.classList.add('active');
+      S.selectedSticker=s;
+    });
+    grid.appendChild(btn);
+  });
+})();
+
+/* ── PANEL / TOOL MANAGEMENT ── */
+var panels = {
+  washi:    document.getElementById('jfy-washi-panel'),
+  pen:      document.getElementById('jfy-pen-panel'),
+  frames:   document.getElementById('jfy-frames-panel'),
+  stickers: document.getElementById('jfy-stickers-panel'),
+  paper:    document.getElementById('jfy-paper-panel'),
+  scissors: document.getElementById('jfy-scissors-panel')
+};
+
+function closeAll(){
+  Object.keys(panels).forEach(function(k){ if(panels[k]) panels[k].classList.remove('open'); });
+  if(typeof hideTextToolbar==='function') hideTextToolbar();
+}
+
+function setTool(tool){
+  S.tool = tool;
+  canvas.classList.toggle('draw-active',   tool==='washi'||tool==='doodle');
+  canvas.classList.toggle('scissors-active', tool==='scissors');
+  document.body.classList.toggle('jfy-sticker-active',  tool==='stickers');
+  document.body.classList.toggle('jfy-scissors-active', tool==='scissors');
+  if(tool && typeof hideTextToolbar==='function') hideTextToolbar();
+}
+
+function openPanel(key, andSetTool){
+  var alreadyOpen = panels[key] && panels[key].classList.contains('open');
+  closeAll();
+  setTool(null);
+  if(!alreadyOpen){
+    panels[key].classList.add('open');
+    if(andSetTool) setTool(andSetTool);
+  }
+}
+
+/* close buttons inside panels */
+document.querySelectorAll('.jfy-panel-close').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    closeAll(); setTool(null);
+  });
+});
+
+/* ── PROP CLICK HANDLERS ── */
+var washiProp    = document.getElementById('jfy-washi-prop');
+var penProp      = document.getElementById('jfy-pen-prop');
+var framesProp   = document.getElementById('jfy-frames-prop');
+var stickersProp = document.getElementById('jfy-stickers-prop');
+
+var paperProp   = document.getElementById('jfy-paper-prop');
+var scissorsProp = document.getElementById('jfy-scissors-prop');
+
+if(washiProp) washiProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  openPanel('washi', 'washi');
+});
+
+if(penProp) penProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  openPanel('pen', null); // tool set by mode button inside panel
+});
+
+if(framesProp) framesProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  openPanel('frames', 'frames');
+});
+
+if(stickersProp) stickersProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  if(S.tool==='stickers'){
+    closeAll(); setTool(null);
+  } else {
+    openPanel('stickers', 'stickers');
+  }
+});
+
+if(paperProp) paperProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  openPanel('paper', 'paper');
+});
+
+if(scissorsProp) scissorsProp.addEventListener('click', function(e){
+  e.stopPropagation();
+  if(S.tool==='scissors'){
+    closeAll(); setTool(null);
+  } else {
+    openPanel('scissors', 'scissors');
+  }
+});
+
+/* close panels when clicking outside the notebook area */
+document.addEventListener('click', function(e){
+  var inPanel   = Object.keys(panels).some(function(k){ return panels[k] && panels[k].contains(e.target); });
+  var inToolbar = txtToolbar && txtToolbar.contains(e.target);
+  var inNotebook = notebook.contains(e.target);
+  var inPaperProp = paperProp && paperProp.contains(e.target);
+  var inHistoryBar = document.getElementById('jfy-history-bar').contains(e.target);
+  if(!inPanel && !inToolbar && !inNotebook && !inPaperProp && !inHistoryBar){
+    closeAll(); setTool(null);
+    setEraseMode(false); // clear erase cursor when clicking outside
+  }
+});
+
+/* ── CANVAS DRAWING (washi, doodle, scissors preview) ── */
+/* scissors state */
+var _sc = { dragging: false, pts: [], target: null };
+
+function getPaperAt(clientX, clientY){
+  // Use visual hit-testing so stacked elements are respected
+  var els = document.elementsFromPoint(clientX, clientY);
+  for(var i=0;i<els.length;i++){
+    var pc = els[i].classList && els[i].classList.contains('jfy-placed-paper')
+      ? els[i] : null;
+    if(!pc && els[i].closest) pc = els[i].closest('.jfy-placed-paper');
+    if(pc) return pc;
+  }
+  return null;
+}
+
+// Returns the topmost placed notebook element at a point (any type)
+function getPlacedAt(clientX, clientY){
+  var els = document.elementsFromPoint(clientX, clientY);
+  var selectors = ['.jfy-placed-paper','.jfy-text-node-wrap','.jfy-polaroid','.jfy-sticker-node','.jfy-placed-washi'];
+  for(var i=0;i<els.length;i++){
+    for(var s=0;s<selectors.length;s++){
+      var found = els[i].classList && els[i].classList.contains(selectors[s].slice(1))
+        ? els[i]
+        : (els[i].closest ? els[i].closest(selectors[s]) : null);
+      if(found && nbLayer.contains(found)) return found;
+    }
+  }
+  return null;
+}
+
+canvas.addEventListener('mousedown', function(e){
+  if(e.button!==0) return;
+  var pos = canvasPos(e);
+  if(S.tool==='washi'){
+    S.dragging=true; S.dStart=pos;
+  } else if(S.tool==='doodle'){
+    S.dragging=true;
+    S.currentPath={type:'doodle',pts:[pos],color:S.penColor,size:S.penSize};
+  } else if(S.tool==='scissors'){
+    var target = getPaperAt(e.clientX, e.clientY);
+    if(target){
+      _sc.dragging=true; _sc.pts=[pos]; _sc.target=target;
+    }
+  }
+});
+
+canvas.addEventListener('mousemove', function(e){
+  var pos = canvasPos(e);
+  if(S.tool==='washi' && S.dragging && S.dStart){
+    redrawAll();
+    drawWashi(S.dStart.x, S.dStart.y, pos.x, pos.y, S.wasbiColor, true, washibWidth);
+  } else if(S.tool==='doodle' && S.dragging && S.currentPath){
+    S.currentPath.pts.push(pos);
+    redrawAll();
+    drawDoodle(S.currentPath.pts, S.currentPath.color, S.currentPath.size);
+  } else if(S.tool==='scissors' && _sc.dragging){
+    _sc.pts.push(pos);
+    // draw scissors preview on canvas (temporary)
+    redrawAll();
+    if(_sc.pts.length>1){
+      ctx.save();
+      ctx.strokeStyle='rgba(60,60,60,0.7)';
+      ctx.lineWidth=1.5;
+      ctx.setLineDash([5,4]);
+      ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.moveTo(_sc.pts[0].x,_sc.pts[0].y);
+      for(var i=1;i<_sc.pts.length;i++) ctx.lineTo(_sc.pts[i].x,_sc.pts[i].y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+  }
+});
+
+function finishDraw(e){
+  var pos = canvasPos(e||{clientX:0,clientY:0});
+  if(S.tool==='washi' && S.dragging){
+    S.dragging=false;
+    var dx=pos.x-S.dStart.x, dy=pos.y-S.dStart.y;
+    if(Math.sqrt(dx*dx+dy*dy)>4){
+      placeWashiElement({x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor,w:washibWidth});
+      redrawAll(); // clears preview stroke
+      pushHistory();
+    } else {
+      redrawAll(); // clear any preview without saving
+    }
+    S.dStart=null;
+  } else if(S.tool==='doodle' && S.dragging){
+    S.dragging=false;
+    if(S.currentPath && S.currentPath.pts.length>1){
+      drawCmds.push(S.currentPath);
+      redrawAll();
+      pushHistory();
+    } else {
+      redrawAll();
+    }
+    S.currentPath=null;
+  } else if(S.tool==='scissors' && _sc.dragging){
+    _sc.dragging=false;
+    redrawAll(); // clear preview
+    if(_sc.target && _sc.pts.length>2){
+      applyCut(_sc.target, _sc.pts);
+    }
+    _sc.pts=[]; _sc.target=null;
+  }
+}
+canvas.addEventListener('mouseup',    finishDraw);
+canvas.addEventListener('mouseleave', function(){ if(S.dragging||_sc.dragging) finishDraw(); });
+
+/* touch support for canvas */
+canvas.addEventListener('touchstart',function(e){
+  e.preventDefault();
+  var t=e.touches[0];
+  canvas.dispatchEvent(new MouseEvent('mousedown',{clientX:t.clientX,clientY:t.clientY,button:0,bubbles:true}));
+},{passive:false});
+canvas.addEventListener('touchmove',function(e){
+  e.preventDefault();
+  var t=e.touches[0];
+  canvas.dispatchEvent(new MouseEvent('mousemove',{clientX:t.clientX,clientY:t.clientY,bubbles:true}));
+},{passive:false});
+canvas.addEventListener('touchend',function(e){
+  e.preventDefault();
+  var t=e.changedTouches[0];
+  canvas.dispatchEvent(new MouseEvent('mouseup',{clientX:t.clientX,clientY:t.clientY,bubbles:true}));
+},{passive:false});
+
+/* ── NOTEBOOK LAYER CLICKS (write / frames / stickers / paper) ── */
+nbLayer.addEventListener('click', function(e){
+  // Ignore clicks on already-placed elements (unless scissors — handled by canvas)
+  if(e.target.closest('.jfy-text-node-wrap') ||
+     e.target.closest('.jfy-polaroid') ||
+     e.target.closest('.jfy-sticker-node') ||
+     e.target.closest('.jfy-placed-paper') ||
+     e.target.closest('.jfy-placed-washi')) return;
+  if(S.tool==='write')         placeTextBox(e);
+  else if(S.tool==='frames')   placePolaroid(e);
+  else if(S.tool==='stickers') placeSticker(e);
+  else if(S.tool==='paper')    placePaper(e);
+}, false);
+
+/* ── TEXT EDITING TOOLBAR ── */
+var txtToolbar    = document.getElementById('jfy-text-toolbar');
+var txtColorsEl   = document.getElementById('jfy-text-colors');
+var txtSizeVal    = document.getElementById('jfy-txt-size-val');
+var txtSmallerBtn = document.getElementById('jfy-txt-smaller');
+var txtLargerBtn  = document.getElementById('jfy-txt-larger');
+var activeTxt = null; // the currently focused text div
+
+function buildTextColorSwatches(txtEl){
+  if(!txtColorsEl) return;
+  txtColorsEl.innerHTML='';
+  PEN_COLORS.forEach(function(c){
+    var btn=document.createElement('button');
+    btn.className='jfy-swatch';
+    btn.style.background=c;
+    if(c==='#ffffff') btn.style.boxShadow='inset 0 0 0 1px #ddd';
+    if(txtEl.style.color===c||txtEl.style.color===hexToRgb(c)) btn.classList.add('active');
+    btn.title=c;
+    btn.addEventListener('mousedown',function(e){
+      e.preventDefault(); // don't blur txtEl
+      txtColorsEl.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
+      btn.classList.add('active');
+      if(activeTxt) activeTxt.style.color=c;
+    });
+    txtColorsEl.appendChild(btn);
+  });
+  var custom=document.createElement('input');
+  custom.type='color'; custom.className='jfy-swatch jfy-swatch-custom'; custom.title='custom';
+  custom.addEventListener('input',function(){
+    if(activeTxt) activeTxt.style.color=custom.value;
+    txtColorsEl.querySelectorAll('.jfy-swatch').forEach(function(s){s.classList.remove('active')});
+    custom.classList.add('active');
+  });
+  txtColorsEl.appendChild(custom);
+}
+
+function hexToRgb(hex){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return 'rgb('+r+','+g+','+b+')';
+}
+
+function showTextToolbar(txtEl){
+  activeTxt=txtEl;
+  buildTextColorSwatches(txtEl);
+  var fs=parseInt(txtEl.style.fontSize)||15;
+  if(txtSizeVal) txtSizeVal.textContent=fs;
+  positionTextToolbar(txtEl);
+  if(txtToolbar) txtToolbar.classList.add('visible');
+}
+
+function positionTextToolbar(txtEl){
+  if(!txtToolbar||!txtEl) return;
+  var r=txtEl.getBoundingClientRect();
+  var tw=230, th=60;
+  var left=r.left, top=r.top-th-8;
+  if(top<70) top=r.bottom+8;
+  left=Math.max(8, Math.min(left, window.innerWidth-tw-8));
+  txtToolbar.style.left=left+'px';
+  txtToolbar.style.top=top+'px';
+}
+
+function hideTextToolbar(){
+  activeTxt=null;
+  if(txtToolbar) txtToolbar.classList.remove('visible');
+}
+
+if(txtSmallerBtn) txtSmallerBtn.addEventListener('mousedown',function(e){
+  e.preventDefault();
+  if(!activeTxt) return;
+  var fs=Math.max(8, (parseInt(activeTxt.style.fontSize)||15)-1);
+  activeTxt.style.fontSize=fs+'px';
+  if(txtSizeVal) txtSizeVal.textContent=fs;
+});
+if(txtLargerBtn) txtLargerBtn.addEventListener('mousedown',function(e){
+  e.preventDefault();
+  if(!activeTxt) return;
+  var fs=Math.min(96, (parseInt(activeTxt.style.fontSize)||15)+1);
+  activeTxt.style.fontSize=fs+'px';
+  if(txtSizeVal) txtSizeVal.textContent=fs;
+});
+
+/* ── TEXT BOX TOOL ── */
+function placeTextBox(e){
+  var nr = nbLayer.getBoundingClientRect();
+  var x = e.clientX - nr.left;
+  var y = e.clientY - nr.top;
+
+  var wrap = document.createElement('div');
+  wrap.className='jfy-text-node-wrap';
+  wrap.style.cssText='position:absolute;left:'+x+'px;top:'+y+'px;width:140px;height:60px;z-index:15;';
+
+  var handle = document.createElement('div');
+  handle.className='jfy-text-drag-handle';
+  handle.textContent='⠿ move';
+  handle.style.userSelect='none';
+
+  var txt = document.createElement('div');
+  txt.className='jfy-text-node';
+  txt.contentEditable='true';
+  txt.style.color=S.penColor;
+  txt.style.fontSize='15px';
+  txt.style.width='100%';
+  txt.style.height='100%';
+  txt.setAttribute('aria-label','text note');
+
+  txt.addEventListener('focus',function(){ showTextToolbar(txt); });
+  txt.addEventListener('blur',function(){
+    // delay so toolbar button clicks fire first
+    setTimeout(function(){
+      if(document.activeElement && txtToolbar && txtToolbar.contains(document.activeElement)) return;
+      hideTextToolbar();
+    }, 150);
+  });
+
+  wrap.appendChild(handle);
+  wrap.appendChild(txt);
+  makeDraggable(handle, wrap);
+  makeResizable(wrap);
+
+  nbLayer.appendChild(wrap);
+  setTimeout(function(){ txt.focus(); }, 10);
+}
+
+/* clicking any placed text node focuses it for editing — regardless of active tool */
+nbLayer.addEventListener('click', function(e){
+  var tw = e.target.closest('.jfy-text-node-wrap');
+  if(tw){
+    var t=tw.querySelector('.jfy-text-node');
+    if(t){ t.focus(); }
+  }
+}, true); // capture phase so it fires before the placement handler
+
+function makeResizable(el){
+  if(el.querySelector('.jfy-resize-corner')) return; // already wired
+  var corner = document.createElement('div');
+  corner.className = 'jfy-resize-corner';
+  corner.style.cssText='position:absolute;right:0;bottom:0;width:12px;height:12px;cursor:se-resize;z-index:20;background:rgba(154,89,200,0.3);border-radius:2px;';
+  corner.addEventListener('mousedown', function(e){
+    e.stopPropagation(); e.preventDefault();
+    _drag.active = false;
+    var startX=e.clientX, startY=e.clientY;
+    var startW=el.offsetWidth, startH=el.offsetHeight;
+    function onMove(ev){
+      el.style.width  = Math.max(80, startW+ev.clientX-startX)+'px';
+      el.style.height = Math.max(30, startH+ev.clientY-startY)+'px';
+      if(activeTxt && el.contains(activeTxt)) positionTextToolbar(activeTxt);
+    }
+    function onUp(){
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+      pushHistory();
+    }
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  });
+  el.appendChild(corner);
+}
+
+/* ── POLAROID FRAME TOOL ── */
+function placePolaroid(e){
+  var nr = nbLayer.getBoundingClientRect();
+  var x = e.clientX - nr.left - 65;
+  var y = e.clientY - nr.top  - 55;
+
+  var pol = document.createElement('div');
+  pol.className='jfy-polaroid';
+  pol.style.left = Math.max(0,x)+'px';
+  pol.style.top  = Math.max(0,y)+'px';
+
+  /* invisible drag layer on top (above image) */
+  var dragLayer = document.createElement('div');
+  dragLayer.className='jfy-polaroid-drag';
+  makeDraggable(dragLayer, pol);
+
+  var imgArea = document.createElement('div');
+  imgArea.className='ph-img-area';
+
+  var addBtn = document.createElement('div');
+  addBtn.className='ph-add-btn';
+  addBtn.innerHTML='<span style="pointer-events:none">＋</span>';
+  addBtn.title='Add photo';
+
+  var fileInput = document.createElement('input');
+  fileInput.type='file'; fileInput.accept='image/*'; fileInput.style.display='none';
+  addBtn.addEventListener('click',function(ev){ ev.stopPropagation(); fileInput.click(); });
+  fileInput.addEventListener('change',function(){
+    if(!fileInput.files[0]) return;
+    var fr=new FileReader();
+    fr.onload=function(re){
+      var img=document.createElement('img');
+      img.src=re.target.result;
+      addBtn.remove();
+      imgArea.appendChild(img);
+    };
+    fr.readAsDataURL(fileInput.files[0]);
+  });
+
+  imgArea.appendChild(addBtn);
+  imgArea.appendChild(fileInput);
+
+  var labelArea = document.createElement('div');
+  labelArea.className='ph-label-area';
+  var caption = document.createElement('input');
+  caption.type='text'; caption.className='ph-caption';
+  caption.placeholder='add a caption...';
+  caption.addEventListener('click', function(ev){ ev.stopPropagation(); });
+  labelArea.appendChild(caption);
+
+  pol.appendChild(dragLayer);
+  pol.appendChild(imgArea);
+  pol.appendChild(labelArea);
+  nbLayer.appendChild(pol);
+}
+
+/* ── STICKER TOOL ── */
+function placeSticker(e){
+  if(!S.selectedSticker) return;
+  var nr = nbLayer.getBoundingClientRect();
+  var x = e.clientX - nr.left - 18;
+  var y = e.clientY - nr.top  - 18;
+
+  var node = document.createElement('div');
+  node.className='jfy-sticker-node';
+  node.textContent = S.selectedSticker;
+  node.style.left = x+'px';
+  node.style.top  = y+'px';
+  makeDraggable(node, node);
+  nbLayer.appendChild(node);
+}
+
+/* ── PAPER TOOL ── */
+var selectedPaperPattern = 'diamonds';
+var selectedPaperSize    = 'medium';
+var PAPER_SIZES = { small:{w:130,h:170}, medium:{w:200,h:260}, large:{w:280,h:360} };
+
+(function setupPaperPanel(){
+  var row = document.getElementById('jfy-pattern-row');
+  if(!row) return;
+
+  var PATTERNS = [
+    { key:'diamonds', label:'diamonds' },
+    { key:'maze',     label:'maze' },
+    { key:'stars',    label:'stars' },
+    { key:'checker',  label:'checker' },
+    { key:'dots',     label:'dots' },
+    { key:'circles',  label:'circles' },
+    { key:'lined',    label:'lined' },
+    { key:'kraft',    label:'kraft' },
+  ];
+
+  var TW = 54, TH = 70; // thumbnail dimensions in CSS px
+  var dpr = window.devicePixelRatio || 1;
+
+  PATTERNS.forEach(function(p, i){
+    var btn = document.createElement('button');
+    btn.className = 'jfy-pattern-btn' + (i===0 ? ' active' : '');
+    btn.dataset.pattern = p.key;
+
+    /* canvas thumbnail preview */
+    var tc = document.createElement('canvas');
+    tc.width  = Math.round(TW * dpr);
+    tc.height = Math.round(TH * dpr);
+    tc.style.width  = TW + 'px';
+    tc.style.height = TH + 'px';
+    drawPaperPattern(tc.getContext('2d'), TW, TH, p.key);
+
+    var lbl = document.createElement('span');
+    lbl.textContent = p.label;
+
+    btn.appendChild(tc);
+    btn.appendChild(lbl);
+
+    btn.addEventListener('click', function(){
+      row.querySelectorAll('.jfy-pattern-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      selectedPaperPattern = p.key;
+    });
+
+    row.appendChild(btn);
+  });
+
+  /* size buttons */
+  var pp = document.getElementById('jfy-paper-panel');
+  if(!pp) return;
+  pp.querySelectorAll('.jfy-size-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      pp.querySelectorAll('.jfy-size-btn').forEach(function(b){b.classList.remove('active')});
+      btn.classList.add('active');
+      selectedPaperSize = btn.dataset.size;
+    });
+  });
+})();
+
+function drawPaperPattern(pctx, w, h, pattern){
+  var dpr = window.devicePixelRatio||1;
+  pctx.setTransform(dpr,0,0,dpr,0,0);
+  var i, j, r, c, x, y;
+  switch(pattern){
+
+    case 'diamonds': {
+      // Pink/coral concentric diamonds on cream — like reference image left
+      pctx.fillStyle='#fde8df'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='#d96060'; pctx.lineWidth=1.4;
+      var ds=26;
+      for(r=-1;r<=Math.ceil(h/ds)+1;r++){
+        for(c=-1;c<=Math.ceil(w/ds)+1;c++){
+          var cx=(c+(r%2?0.5:0))*ds, cy=r*ds;
+          pctx.beginPath();
+          pctx.moveTo(cx,      cy-ds*0.5);
+          pctx.lineTo(cx+ds*0.5, cy);
+          pctx.lineTo(cx,      cy+ds*0.5);
+          pctx.lineTo(cx-ds*0.5, cy);
+          pctx.closePath();
+          pctx.stroke();
+        }
+      }
+      break;
+    }
+
+    case 'maze': {
+      // Teal rectangular spiral/maze on white — like reference image second
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='#2aaca6'; pctx.lineWidth=2;
+      var ms=28;
+      for(r=-1;r<=Math.ceil(h/ms)+1;r++){
+        for(c=-1;c<=Math.ceil(w/ms)+1;c++){
+          var bx=c*ms, by=r*ms;
+          // Alternate orientation per cell (checkerboard of two spiral directions)
+          var alt=(r+c)%2===0;
+          pctx.save();
+          pctx.translate(bx+ms/2, by+ms/2);
+          if(alt) pctx.scale(-1,1);
+          // Draw three nested open squares (spiral feel)
+          var gaps=[3,8,13];
+          for(i=0;i<gaps.length;i++){
+            var g=gaps[i], half=ms/2-g;
+            if(half<2) continue;
+            // three sides only (open on one side to create maze feel)
+            pctx.beginPath();
+            pctx.moveTo(-half, half);
+            pctx.lineTo(-half,-half);
+            pctx.lineTo( half,-half);
+            pctx.lineTo( half, half);
+            pctx.stroke();
+          }
+          pctx.restore();
+        }
+      }
+      break;
+    }
+
+    case 'stars': {
+      // Gold 6-armed asterisk / star on white — like reference image third
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='#d4921e'; pctx.lineWidth=1.5;
+      var ss=28, sr_=ss*0.44;
+      for(r=-1;r<=Math.ceil(h/ss)+1;r++){
+        for(c=-1;c<=Math.ceil(w/ss)+1;c++){
+          var sx=c*ss+(r%2?ss*0.5:0), sy_=r*ss;
+          // 6 arms
+          for(i=0;i<6;i++){
+            var ang=i*Math.PI/3;
+            pctx.beginPath();
+            pctx.moveTo(sx,sy_);
+            pctx.lineTo(sx+Math.cos(ang)*sr_, sy_+Math.sin(ang)*sr_);
+            pctx.stroke();
+          }
+          // hub circle
+          pctx.beginPath();
+          pctx.arc(sx,sy_,2.2,0,Math.PI*2);
+          pctx.stroke();
+          // connect midpoints to form outer hexagon
+          for(i=0;i<6;i++){
+            var a1=i*Math.PI/3, a2=(i+1)*Math.PI/3;
+            pctx.beginPath();
+            pctx.moveTo(sx+Math.cos(a1)*sr_, sy_+Math.sin(a1)*sr_);
+            pctx.lineTo(sx+Math.cos(a2)*sr_, sy_+Math.sin(a2)*sr_);
+            pctx.stroke();
+          }
+        }
+      }
+      break;
+    }
+
+    case 'checker': {
+      // Bold navy + white checkerboard — like reference image fourth
+      var cs=20;
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.fillStyle='#2b3a7a';
+      for(r=0;r<=Math.ceil(h/cs);r++) for(c=0;c<=Math.ceil(w/cs);c++){
+        if((r+c)%2===0) pctx.fillRect(c*cs,r*cs,cs,cs);
+      }
+      break;
+    }
+
+    case 'dots': {
+      // Pink polka dots on white — like reference image fifth
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.fillStyle='#e06c88';
+      var dp=22, dr_=7;
+      for(r=-1;r<=Math.ceil(h/dp)+1;r++){
+        for(c=-1;c<=Math.ceil(w/dp)+1;c++){
+          var dx=c*dp+(r%2?dp*0.5:0), dy=r*dp;
+          pctx.beginPath();
+          pctx.arc(dx,dy,dr_,0,Math.PI*2);
+          pctx.fill();
+        }
+      }
+      break;
+    }
+
+    case 'circles': {
+      // Green overlapping concentric quarter-arcs — like reference image right
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='#4e8c36'; pctx.lineWidth=2.2;
+      var ci_s=32, ci_n=3;
+      for(r=-1;r<=Math.ceil(h/ci_s)+2;r++){
+        for(c=-1;c<=Math.ceil(w/ci_s)+2;c++){
+          for(i=1;i<=ci_n;i++){
+            var rad=i*(ci_s/ci_n);
+            if((r+c)%2===0){
+              pctx.beginPath();
+              pctx.arc(c*ci_s, r*ci_s, rad, 0, Math.PI*0.5);
+              pctx.stroke();
+            } else {
+              pctx.beginPath();
+              pctx.arc(c*ci_s+ci_s, r*ci_s+ci_s, rad, Math.PI, Math.PI*1.5);
+              pctx.stroke();
+            }
+          }
+        }
+      }
+      break;
+    }
+
+    case 'lined': {
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+      pctx.strokeStyle='rgba(140,170,220,0.5)'; pctx.lineWidth=0.8;
+      for(y=22;y<h;y+=22){ pctx.beginPath();pctx.moveTo(0,y);pctx.lineTo(w,y);pctx.stroke(); }
+      pctx.strokeStyle='rgba(220,90,90,0.28)'; pctx.lineWidth=1;
+      pctx.beginPath();pctx.moveTo(28,0);pctx.lineTo(28,h);pctx.stroke();
+      break;
+    }
+
+    case 'kraft': {
+      pctx.fillStyle='#c9a97a'; pctx.fillRect(0,0,w,h);
+      pctx.fillStyle='rgba(0,0,0,0.04)';
+      for(i=0;i<600;i++) pctx.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1);
+      break;
+    }
+
+    default:
+      pctx.fillStyle='#fff'; pctx.fillRect(0,0,w,h);
+  }
+}
+
+function placePaper(e){
+  var nr = nbLayer.getBoundingClientRect();
+  var sz = PAPER_SIZES[selectedPaperSize];
+  var x = e.clientX - nr.left - sz.w/2;
+  var y = e.clientY - nr.top  - sz.h/2;
+  var dpr = window.devicePixelRatio||1;
+
+  var pc = document.createElement('canvas');
+  pc.className = 'jfy-placed-paper';
+  pc.width  = Math.round(sz.w * dpr);
+  pc.height = Math.round(sz.h * dpr);
+  pc.style.width  = sz.w+'px';
+  pc.style.height = sz.h+'px';
+  pc.style.left   = Math.max(0,x)+'px';
+  pc.style.top    = Math.max(0,y)+'px';
+  pc.dataset.pattern = selectedPaperPattern;
+
+  drawPaperPattern(pc.getContext('2d'), sz.w, sz.h, selectedPaperPattern);
+  makeDraggable(pc, pc);
+  nbLayer.appendChild(pc);
+}
+
+/* ── SCISSORS CUT ── */
+function applyCut(paperCanvas, nbLayerPts){
+  if(nbLayerPts.length < 3) return;
+  var offX = parseFloat(paperCanvas.style.left)||0;
+  var offY = parseFloat(paperCanvas.style.top) ||0;
+  var dpr  = window.devicePixelRatio||1;
+  var pctx = paperCanvas.getContext('2d');
+
+  // Create a temporary canvas with the cut shape (filled) to use as mask
+  var tmp = document.createElement('canvas');
+  tmp.width  = paperCanvas.width;
+  tmp.height = paperCanvas.height;
+  var tctx = tmp.getContext('2d');
+  tctx.setTransform(dpr,0,0,dpr,0,0);
+
+  // Draw the closed cut path as a filled shape
+  tctx.beginPath();
+  tctx.moveTo(nbLayerPts[0].x - offX, nbLayerPts[0].y - offY);
+  for(var i=1;i<nbLayerPts.length;i++) tctx.lineTo(nbLayerPts[i].x - offX, nbLayerPts[i].y - offY);
+  tctx.closePath();
+  tctx.fillStyle = '#000';
+  tctx.fill();
+
+  // Apply: keep only the pixels inside the cut path
+  pctx.save();
+  pctx.setTransform(1,0,0,1,0,0); // raw canvas pixels for drawImage
+  pctx.globalCompositeOperation = 'destination-in';
+  pctx.drawImage(tmp, 0, 0);
+  pctx.restore();
+
+  // Remove rectangular box-shadow so it doesn't outline the original canvas bounds
+  paperCanvas.style.boxShadow = 'none';
+
+  // Add a cut-edge SVG overlay that casts a soft shadow following the cut path
+  addCutEdge(paperCanvas, nbLayerPts);
+}
+
+function addCutEdge(paperCanvas, nbLayerPts){
+  var offX = parseFloat(paperCanvas.style.left)||0;
+  var offY = parseFloat(paperCanvas.style.top) ||0;
+  var w = parseFloat(paperCanvas.style.width)  ||paperCanvas.width;
+  var h = parseFloat(paperCanvas.style.height) ||paperCanvas.height;
+
+  // Build SVG path string in canvas-local coordinates
+  var pts = nbLayerPts.map(function(p){ return {x: p.x-offX, y: p.y-offY}; });
+  var d = 'M'+pts[0].x+','+pts[0].y;
+  for(var i=1;i<pts.length;i++) d += 'L'+pts[i].x+','+pts[i].y;
+  d += 'Z';
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(svgNS,'svg');
+  svg.setAttribute('width',  w);
+  svg.setAttribute('height', h);
+  svg.style.cssText = 'position:absolute;left:'+offX+'px;top:'+offY+'px;width:'+w+'px;height:'+h+'px;pointer-events:none;overflow:visible;z-index:12;';
+
+  var defs = document.createElementNS(svgNS,'defs');
+  var filt = document.createElementNS(svgNS,'filter');
+  filt.setAttribute('id','cut-shadow-'+Date.now());
+  filt.setAttribute('x','-20%'); filt.setAttribute('y','-20%');
+  filt.setAttribute('width','140%'); filt.setAttribute('height','140%');
+  var fe = document.createElementNS(svgNS,'feDropShadow');
+  fe.setAttribute('dx','0'); fe.setAttribute('dy','1.5');
+  fe.setAttribute('stdDeviation','3');
+  fe.setAttribute('flood-color','rgba(0,0,0,0.22)');
+  filt.appendChild(fe);
+  defs.appendChild(filt);
+  svg.appendChild(defs);
+
+  var path = document.createElementNS(svgNS,'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill','transparent');
+  path.setAttribute('stroke','transparent');
+  path.style.filter = 'url(#'+filt.getAttribute('id')+')';
+  svg.appendChild(path);
+
+  var svgId = 'cut-edge-' + Date.now();
+  svg.id = svgId;
+  paperCanvas.dataset.cutEdge = svgId; // survives innerHTML snapshot/restore
+  nbLayer.appendChild(svg);
+}
+
+/* ── GLOBAL DRAG MANAGER ── */
+/* Single document-level pair of listeners; no accumulation with many placed items */
+var _drag = { active: false, mover: null, offX: 0, offY: 0, startLeft: 0, startTop: 0, moved: false };
+
+document.addEventListener('mousemove', function(e){
+  if(!_drag.active) return;
+  var nr = nbLayer.getBoundingClientRect();
+  var newLeft = e.clientX - nr.left - _drag.offX;
+  var newTop  = e.clientY - nr.top  - _drag.offY;
+  _drag.mover.style.left = newLeft + 'px';
+  _drag.mover.style.top  = newTop  + 'px';
+  // Mark as a real drag only if item moved more than 4px
+  if(!_drag.moved){
+    var dl = newLeft - _drag.startLeft, dt = newTop - _drag.startTop;
+    if(Math.sqrt(dl*dl + dt*dt) > 4) _drag.moved = true;
+  }
+});
+document.addEventListener('mouseup', function(){
+  if(_drag.active){
+    _drag.mover.style.zIndex = '';
+    var didMove = _drag.moved;
+    _drag.active = false;
+    _drag.mover  = null;
+    _drag.moved  = false;
+    if(didMove) pushHistory(); // only save when position actually changed
+  }
+});
+
+function makeDraggable(handle, mover){
+  handle.addEventListener('mousedown', function(e){
+    /* skip interactive children and paper when scissors is active */
+    if(e.target.closest && (
+      e.target.closest('.ph-add-btn') ||
+      e.target.closest('input[type=file]') ||
+      e.target.closest('.ph-caption') ||
+      e.target.closest('.jfy-text-node')
+    )) return;
+    if(S.tool==='scissors') return; // scissors handles paper via canvas overlay
+    e.preventDefault(); e.stopPropagation();
+    var mr = mover.getBoundingClientRect();
+    _drag.active    = true;
+    _drag.mover     = mover;
+    _drag.offX      = e.clientX - mr.left;
+    _drag.offY      = e.clientY - mr.top;
+    _drag.startLeft = parseFloat(mover.style.left) || 0;
+    _drag.startTop  = parseFloat(mover.style.top)  || 0;
+    _drag.moved     = false;
+    mover.style.zIndex = 30;
+  });
+}
+
+/* ── HISTORY (undo / redo / clear / erase) ── */
+var _hist = { stack: [], cursor: -1, maxSize: 40 };
+
+function snapshotNbLayer(){
+  // Save placed-paper pixel data before innerHTML capture.
+  // Canvas pixels are NOT serialized by innerHTML, so we store them separately.
+  var paperData = {};
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc, i){
+    // Give each paper a stable ID so we can match it after restore
+    if(!pc.dataset.paperId){
+      pc.dataset.paperId = 'p' + Date.now() + '_' + i;
+    }
+    paperData[pc.dataset.paperId] = pc.toDataURL();
+  });
+
+  // Temporarily remove the main drawing canvas so it doesn't appear in the
+  // HTML string (avoids a duplicate #jfy-canvas being recreated on restore).
+  nbLayer.removeChild(canvas);
+  var html = nbLayer.innerHTML;
+  nbLayer.insertBefore(canvas, nbLayer.firstChild);
+
+  return { html: html, drawCmds: drawCmds.slice(), paperData: paperData };
+}
+
+function rewirePolaroid(pol){
+  var dragLayer = pol.querySelector('.jfy-polaroid-drag');
+  if(dragLayer) makeDraggable(dragLayer, pol);
+
+  var addBtn   = pol.querySelector('.ph-add-btn');
+  var fileInput = pol.querySelector('input[type=file]');
+  if(addBtn && fileInput){
+    addBtn.addEventListener('click', function(ev){ ev.stopPropagation(); fileInput.click(); });
+    fileInput.addEventListener('change', function(){
+      if(!fileInput.files[0]) return;
+      var fr = new FileReader();
+      fr.onload = function(re){
+        var img = document.createElement('img');
+        img.src = re.target.result;
+        addBtn.remove();
+        var imgArea = pol.querySelector('.ph-img-area');
+        if(imgArea) imgArea.appendChild(img);
+        pushHistory();
+      };
+      fr.readAsDataURL(fileInput.files[0]);
+    });
+  }
+
+  var caption = pol.querySelector('.ph-caption');
+  if(caption) caption.addEventListener('click', function(ev){ ev.stopPropagation(); });
+}
+
+function restoreSnapshot(snap){
+  // Restore stroke list — strip out legacy washi entries (now DOM elements)
+  // and keep only doodle strokes in drawCmds
+  var allCmds = snap.drawCmds ? snap.drawCmds.slice() : [];
+  var legacyWashi = allCmds.filter(function(c){ return c.type==='washi'; });
+  drawCmds = allCmds.filter(function(c){ return c.type!=='washi'; });
+
+  // snap.html was captured WITHOUT the main canvas, so we can set innerHTML
+  // directly — no duplicate #jfy-canvas element will be created.
+  nbLayer.removeChild(canvas);
+  nbLayer.innerHTML = snap.html;
+  nbLayer.insertBefore(canvas, nbLayer.firstChild);
+
+  // Restore placed-paper pixel data (innerHTML gives blank <canvas> elements)
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
+    var id = pc.dataset.paperId;
+    var dataUrl = snap.paperData && id && snap.paperData[id];
+    if(!dataUrl) return;
+    var img = new Image();
+    img.onload = function(){
+      var pctx = pc.getContext('2d');
+      // Use identity transform so we write physical pixels 1-to-1
+      pctx.save();
+      pctx.setTransform(1, 0, 0, 1, 0, 0);
+      pctx.clearRect(0, 0, pc.width, pc.height);
+      pctx.drawImage(img, 0, 0);
+      pctx.restore();
+    };
+    img.src = dataUrl;
+  });
+
+  // Redraw canvas strokes from commands (correct DPR transform always applies)
+  redrawAll();
+
+  // Re-attach all placed-element interactivity
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
+    makeDraggable(pc, pc);
+  });
+  nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
+    var handle = wrap.querySelector('.jfy-text-drag-handle');
+    if(handle) makeDraggable(handle, wrap);
+    makeResizable(wrap); // guarded internally — won't add duplicate corner
+    var txt = wrap.querySelector('.jfy-text-node');
+    if(txt){
+      txt.addEventListener('focus', function(){ showTextToolbar(txt); });
+      txt.addEventListener('blur', function(){
+        setTimeout(function(){
+          if(document.activeElement && txtToolbar && txtToolbar.contains(document.activeElement)) return;
+          hideTextToolbar();
+        }, 150);
+      });
+    }
+  });
+  nbLayer.querySelectorAll('.jfy-polaroid').forEach(function(pol){
+    rewirePolaroid(pol);
+  });
+  nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
+    makeDraggable(node, node);
+  });
+  nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(el){
+    rewireWashi(el);
+  });
+  // Migrate legacy washi drawCmds → draggable DOM elements
+  legacyWashi.forEach(function(cmd){ placeWashiElement(cmd); });
+}
+
+function pushHistory(){
+  // Drop any redo entries
+  _hist.stack = _hist.stack.slice(0, _hist.cursor + 1);
+  _hist.stack.push(snapshotNbLayer());
+  if(_hist.stack.length > _hist.maxSize) _hist.stack.shift();
+  _hist.cursor = _hist.stack.length - 1;
+  updateHistoryButtons();
+}
+
+function updateHistoryButtons(){
+  var undoBtn = document.getElementById('jfy-undo-btn');
+  var redoBtn = document.getElementById('jfy-redo-btn');
+  if(undoBtn) undoBtn.disabled = (_hist.cursor < 1);
+  if(redoBtn) redoBtn.disabled = (_hist.cursor >= _hist.stack.length - 1);
+}
+
+// Push initial blank state so the first action can be undone back to empty
+(function(){ pushHistory(); })();
+
+// Patch placement functions to record history AFTER the action completes
+var _origPlaceTextBox  = placeTextBox;
+var _origPlacePolaroid = placePolaroid;
+var _origPlaceSticker  = placeSticker;
+var _origPlacePaper    = placePaper;
+var _origApplyCut      = applyCut;
+
+placeTextBox  = function(e){ _origPlaceTextBox(e);  pushHistory(); };
+placePolaroid = function(e){ _origPlacePolaroid(e); pushHistory(); };
+placeSticker  = function(e){ _origPlaceSticker(e);  pushHistory(); };
+placePaper    = function(e){ _origPlacePaper(e);    pushHistory(); };
+applyCut      = function(pc, pts){ _origApplyCut(pc, pts); pushHistory(); };
+
+// Canvas drawing strokes: pushHistory is now called inside finishDraw
+// when a stroke is actually committed, so no separate mouseup listener needed.
+
+// Undo
+document.getElementById('jfy-undo-btn').addEventListener('click', function(){
+  if(_hist.cursor < 1) return;
+  _hist.cursor--;
+  restoreSnapshot(_hist.stack[_hist.cursor]);
+  updateHistoryButtons();
+});
+
+// Redo
+document.getElementById('jfy-redo-btn').addEventListener('click', function(){
+  if(_hist.cursor >= _hist.stack.length - 1) return;
+  _hist.cursor++;
+  restoreSnapshot(_hist.stack[_hist.cursor]);
+  updateHistoryButtons();
+});
+
+// Clear all
+document.getElementById('jfy-clear-btn').addEventListener('click', function(){
+  if(!confirm('Clear everything on the notebook page?')) return;
+  pushHistory();
+  Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+  drawCmds.length = 0; redrawAll(); updateHistoryButtons();
+});
+
+// "New entry" — auto-saves current canvas (including any edit background)
+// then clears everything for a brand-new blank page.
+function jfyNewEntry(){
+  var editId = window._jfyEditingEntryId; // non-null if we were editing
+
+  function doSaveAndClear(dataUrl){
+    if(dataUrl){
+      var snap = snapshotNbLayer();
+      var STORE_JOURNAL = 'jfy_journal';
+      var saved = [];
+      try{ saved = JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]'); }catch(e){}
+      if(editId){
+        for(var i=0; i<saved.length; i++){
+          if(saved[i].id === editId){
+            saved[i].media={url:dataUrl}; saved[i].snapshot=snap; saved[i].time=Date.now(); break;
+          }
+        }
+      } else {
+        var now = Date.now();
+        saved.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now,
+                        media:{url:dataUrl}, snapshot:snap });
+      }
+      localStorage.setItem(STORE_JOURNAL, JSON.stringify(saved));
+    }
+    // Clear edit state
+    window._jfyEditingEntryId  = null;
+    window._jfyEditingEntryIdx = null;
+    window._jfyEditBg          = null;
+    pushHistory();
+    Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+    drawCmds.length = 0; redrawAll(); updateHistoryButtons();
+    if(editId && window._jfyEntryNav) window._jfyEntryNav.resetToLive();
+    else if(window._jfyEntryNav) window._jfyEntryNav.reload();
+  }
+
+  if(typeof captureNotebook === 'function'){
+    captureNotebook(0.88, doSaveAndClear);
+  } else {
+    doSaveAndClear(null);
+  }
+}
+document.addEventListener('jfy-new-entry', jfyNewEntry);
+
+// Erase mode: click a placed element to remove it
+var _eraseActive = false;
+var _eraseBtn = document.getElementById('jfy-erase-btn');
+
+function setEraseMode(on){
+  _eraseActive = on;
+  _eraseBtn.style.background = on ? '#f3eafa' : '';
+  _eraseBtn.style.color      = on ? '#9A59C8' : '';
+  nbLayer.style.cursor       = on ? 'cell' : '';
+}
+
+_eraseBtn.addEventListener('click', function(){
+  setEraseMode(!_eraseActive);
+  if(_eraseActive){ closeAll(); setTool(null); }
+});
+
+nbLayer.addEventListener('click', function(e){
+  if(!_eraseActive) return;
+
+  // 1. Try DOM placed elements first (stickers, paper, polaroid, text)
+  var target = getPlacedAt(e.clientX, e.clientY);
+  if(target && nbLayer.contains(target)){
+    e.stopPropagation(); e.preventDefault();
+    pushHistory();
+    var svgId = target.dataset && target.dataset.cutEdge;
+    if(svgId){ var edgeSvg = document.getElementById(svgId); if(edgeSvg) edgeSvg.remove(); }
+    target.remove();
+    return;
+  }
+
+  // 2. Try canvas strokes (washi tape, doodle) — hit-test via offscreen canvas
+  var cr = canvas.getBoundingClientRect();
+  var cssX = e.clientX - cr.left;
+  var cssY = e.clientY - cr.top;
+  var hitIdx = getDrawCmdAt(cssX, cssY);
+  if(hitIdx !== -1){
+    e.stopPropagation(); e.preventDefault();
+    pushHistory();
+    drawCmds.splice(hitIdx, 1);
+    redrawAll();
+  }
+}, true);
+
+// Returns the index of the topmost drawCmd stroke at CSS-pixel position (x, y), or -1.
+function getDrawCmdAt(cssX, cssY){
+  var HIT_RADIUS = 8; // px tolerance for doodle strokes
+  // Iterate newest-first so topmost stroke is found first
+  for(var i = drawCmds.length - 1; i >= 0; i--){
+    var cmd = drawCmds[i];
+    if(cmd.type === 'washi'){
+      if(pointInWashi(cssX, cssY, cmd)) return i;
+    } else if(cmd.type === 'doodle'){
+      if(pointNearDoodle(cssX, cssY, cmd, HIT_RADIUS)) return i;
+    }
+  }
+  return -1;
+}
+
+function pointInWashi(x, y, cmd){
+  var dx = cmd.x2 - cmd.x1, dy = cmd.y2 - cmd.y1;
+  var len = Math.sqrt(dx*dx + dy*dy);
+  if(len < 1) return false;
+  var ux = dx/len, uy = dy/len;  // along tape
+  var nx = -uy,   ny =  ux;      // perpendicular
+  var hw = (cmd.w || 28) / 2;
+  // Project (x,y) onto tape axes
+  var relX = x - cmd.x1, relY = y - cmd.y1;
+  var along = relX*ux + relY*uy;
+  var perp  = relX*nx + relY*ny;
+  return along >= 0 && along <= len && Math.abs(perp) <= hw;
+}
+
+function pointNearDoodle(x, y, cmd, radius){
+  var pts = cmd.pts;
+  var r2  = (radius + (cmd.size || 3) / 2);
+  r2 = r2 * r2;
+  for(var i = 0; i < pts.length - 1; i++){
+    if(distToSegmentSq(x, y, pts[i].x, pts[i].y, pts[i+1].x, pts[i+1].y) <= r2) return true;
+  }
+  return false;
+}
+
+function distToSegmentSq(px, py, ax, ay, bx, by){
+  var dx = bx-ax, dy = by-ay;
+  var lenSq = dx*dx + dy*dy;
+  var t = lenSq > 0 ? Math.max(0, Math.min(1, ((px-ax)*dx + (py-ay)*dy) / lenSq)) : 0;
+  var ex = ax + t*dx - px, ey = ay + t*dy - py;
+  return ex*ex + ey*ey;
+}
+
+// ── Toast helper ──────────────────────────────────────────────────────────────
+var _toastTimer = null;
+// opts: { undoLabel: string, onUndo: fn }
+function showJfyToast(msg, opts){
+  var t   = document.getElementById('jfy-toast');
+  var msgEl = document.getElementById('jfy-toast-msg');
+  var undoBtn = document.getElementById('jfy-toast-undo');
+  if(!t) return;
+  msgEl.textContent = msg;
+  if(opts && opts.onUndo){
+    undoBtn.textContent = opts.undoLabel || 'undo';
+    undoBtn.style.display = '';
+    undoBtn.onclick = function(){
+      opts.onUndo();
+      t.classList.remove('show');
+      if(_toastTimer){ clearTimeout(_toastTimer); _toastTimer = null; }
+    };
+  } else {
+    undoBtn.style.display = 'none';
+    undoBtn.onclick = null;
+  }
+  t.classList.add('show');
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3400);
+}
+
+// ── Notebook capture ──────────────────────────────────────────────────────────
+// Composites the full notebook area to a single off-screen canvas and returns
+// a JPEG data-URL via callback(dataUrl).
+function captureNotebook(quality, callback){
+  quality = quality || 0.92;
+  var nb = document.querySelector('.jfy-notebook');
+  if(!nb){ callback && callback(null); return; }
+  var rect = nb.getBoundingClientRect();
+  var w = Math.round(rect.width), h = Math.round(rect.height);
+  var out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  var octx = out.getContext('2d');
+  // White background
+  octx.fillStyle = '#fff';
+  octx.fillRect(0, 0, w, h);
+
+  // Helper: draw an element's rendered pixels onto out-canvas using its
+  // bounding rect relative to the notebook rect.
+  function blitElement(el){
+    var er = el.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    octx.drawImage(el, 0, 0, el.width, el.height, ox, oy, er.width, er.height);
+  }
+
+  // 1. Placed papers (canvas elements), bottom-up z-order (DOM order)
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
+    blitElement(pc);
+  });
+
+  // 2. Washi tape — redraw from data-washi + current drag position
+  //    (more reliable than blitElement for absolute-positioned canvases)
+  nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(wc){
+    var data; try{ data=JSON.parse(wc.dataset.washi||'{}'); }catch(e){ return; }
+    if(!data.col) return;
+    var bb = _washiBbox(data.x1, data.y1, data.x2, data.y2, data.w);
+    if(!bb) return;
+    var dragLeft = parseFloat(wc.style.left)||0;
+    var dragTop  = parseFloat(wc.style.top)||0;
+    var dx = dragLeft - bb.minX, dy = dragTop - bb.minY;
+    renderWashiOnCtx(octx,
+      data.x1+dx, data.y1+dy,
+      data.x2+dx, data.y2+dy,
+      data.col, data.w||washibWidth, 0, 0);
+  });
+
+  // 2b. Main doodle canvas
+  blitElement(canvas);
+
+  // 3. Polaroids (img inside .jfy-polaroid)
+  nbLayer.querySelectorAll('.jfy-polaroid').forEach(function(pol){
+    var er = pol.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    // Use html2canvas-style approach: just draw the img child
+    var img = pol.querySelector('img');
+    if(img){
+      var ir = img.getBoundingClientRect();
+      octx.fillStyle = '#fff';
+      octx.fillRect(ox, oy, er.width, er.height);
+      octx.drawImage(img, ir.left - rect.left, ir.top - rect.top, ir.width, ir.height);
+    }
+  });
+
+  // 4. Stickers (text nodes)
+  nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
+    var er = node.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    octx.font = (er.height * 0.8) + 'px serif';
+    octx.textBaseline = 'middle';
+    octx.fillText(node.textContent, ox, oy + er.height / 2);
+  });
+
+  // 5. Text boxes
+  nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
+    var er = wrap.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    var ta = wrap.querySelector('textarea');
+    if(!ta) return;
+    var cs = window.getComputedStyle(ta);
+    octx.font = cs.fontSize + ' ' + cs.fontFamily;
+    octx.fillStyle = cs.color || '#333';
+    octx.textBaseline = 'top';
+    var lineH = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.4;
+    ta.value.split('\n').forEach(function(line, i){
+      octx.fillText(line, ox + 4, oy + 4 + i * lineH);
+    });
+  });
+
+  callback(out.toDataURL('image/jpeg', quality));
+}
+
+// ── Share / Save / Export ─────────────────────────────────────────────────────
+document.getElementById('jfy-share-btn').addEventListener('click', function(){
+  captureNotebook(0.88, function(dataUrl){
+    if(!dataUrl){ showJfyToast('Nothing to share yet!'); return; }
+    var STORE_KEY = 'bw_posts_v5';
+    var postId = 'jfy_' + Date.now();
+    var posts = [];
+    try { posts = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e){}
+    posts.unshift({ id: postId, text: '', time: Date.now(), media: { url: dataUrl } });
+    localStorage.setItem(STORE_KEY, JSON.stringify(posts));
+    showJfyToast('Shared to Between Us ↗', {
+      undoLabel: 'remove',
+      onUndo: function(){
+        var saved = [];
+        try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e){}
+        saved = saved.filter(function(p){ return p.id !== postId; });
+        localStorage.setItem(STORE_KEY, JSON.stringify(saved));
+      }
+    });
+  });
+});
+
+document.getElementById('jfy-save-btn').addEventListener('click', function(){
+  captureNotebook(0.88, function(dataUrl){
+    if(!dataUrl){ showJfyToast('Nothing to save yet!'); return; }
+    var snap = snapshotNbLayer(); // full editable state
+    var STORE_JOURNAL = 'jfy_journal';
+    var entries = [];
+    try { entries = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){}
+
+    var editId = window._jfyEditingEntryId;
+    if(editId){
+      for(var i=0; i<entries.length; i++){
+        if(entries[i].id === editId){
+          entries[i].media    = { url: dataUrl };
+          entries[i].snapshot = snap;
+          entries[i].time     = Date.now();
+          break;
+        }
+      }
+      localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
+      showJfyToast('Entry updated ♡');
+      window._jfyEditingEntryId  = null;
+      window._jfyEditingEntryIdx = null;
+      window._jfyEditBg          = null;
+      if(window._jfyEntryNav) window._jfyEntryNav.resetToLive();
+      return;
+    }
+
+    var now = Date.now();
+    entries.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now,
+                      media:{url:dataUrl}, snapshot:snap });
+    localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
+    showJfyToast('Saved to your journal ♡');
+    if(window._jfyEntryNav) window._jfyEntryNav.reload();
+  });
+});
+
+document.getElementById('jfy-export-btn').addEventListener('click', function(){
+  captureNotebook(0.95, function(dataUrl){
+    if(!dataUrl){ showJfyToast('Nothing to export yet!'); return; }
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'just-for-you-' + new Date().toISOString().slice(0,10) + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showJfyToast('Exported ↓');
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e){
+  var isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  var mod = isMac ? e.metaKey : e.ctrlKey;
+  if(!mod) return;
+  if(e.key === 'z' && !e.shiftKey){
+    e.preventDefault();
+    document.getElementById('jfy-undo-btn').click();
+  } else if(e.key === 'z' && e.shiftKey){
+    e.preventDefault();
+    document.getElementById('jfy-redo-btn').click();
+  } else if(e.key === 'y'){
+    e.preventDefault();
+    document.getElementById('jfy-redo-btn').click();
+  }
+});
+
+// Expose internals so the navigator IIFE (loaded after this) can drive them
+window._jfyNotebook = {
+  redrawAll:       function(){ redrawAll(); },
+  clearDrawCmds:   function(){ drawCmds.length = 0; },
+  restoreSnapshot: function(snap){ restoreSnapshot(snap); },
+  clearAll: function(){
+    Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+    drawCmds.length = 0; redrawAll();
+  },
+  // Returns true if the notebook has any drawn/placed content
+  hasContent: function(){
+    if(drawCmds.length > 0) return true;
+    var kids = nbLayer.children;
+    for(var i=0; i<kids.length; i++){
+      if(kids[i] !== canvas) return true;
+    }
+    return false;
+  },
+  // Capture current notebook, save to journal, then clear — calls cb when done
+  saveAndClear: function(editId, cb){
+    captureNotebook(0.88, function(dataUrl){
+      if(dataUrl){
+        var snap = snapshotNbLayer();
+        var STORE_JOURNAL = 'jfy_journal';
+        var saved=[]; try{ saved=JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]'); }catch(e){}
+        if(editId){
+          for(var i=0;i<saved.length;i++){
+            if(saved[i].id===editId){
+              saved[i].media={url:dataUrl}; saved[i].snapshot=snap; saved[i].time=Date.now(); break;
+            }
+          }
+        } else {
+          var now=Date.now();
+          saved.unshift({id:'jfy_'+now,text:'',time:now,addedAt:now,media:{url:dataUrl},snapshot:snap});
+        }
+        localStorage.setItem(STORE_JOURNAL, JSON.stringify(saved));
+      }
+      window._jfyEditingEntryId=null; window._jfyEditingEntryIdx=null; window._jfyEditBg=null;
+      Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+      drawCmds.length=0; redrawAll(); pushHistory(); updateHistoryButtons();
+      cb && cb();
+    });
+  }
+};
+
+})();
+</script>
+
+
+<!-- ════════════════════════════════════════════════════════════════════
+     JOURNAL INTRO — opens straight to page 1, no cover step.
+     5 intro pages (back/next page-flip) → begin → new journal page.
+════════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── Intro font assignments ── */
+#jfy-intro-wrap,
+#jfy-intro-wrap h2,
+#jfy-intro-wrap .jfy-islide-num { font-family: 'Antonio', sans-serif; }
+
+#jfy-intro-wrap p { font-family: 'Bad Script', cursive; }
+
+/* ── Book wrapper ── */
+#jfy-intro-wrap {
+  grid-column: 2 / 12;
+  position: relative;
+  height: calc(100dvh - var(--hh) - 40vw);
+  min-height: 260px;
+  display: none;
+  align-items: stretch;
+  border-radius: 8px 18px 18px 8px;
+  box-shadow: -6px 0 28px rgba(0,0,0,0.38), 4px 4px 40px rgba(0,0,0,0.22);
+  overflow: hidden;
+  perspective: 1600px;
+}
+.jfy-intro-active #jfy-intro-wrap { display: flex; }
+.jfy-intro-active .jfy-notebook,
+.jfy-intro-active .jfy-paper-wrap,
+.jfy-intro-active #jfy-history-bar,
+.jfy-intro-active .jfy-washi,
+.jfy-intro-active .jfy-scissors { display: none !important; }
+
+@media (min-width: 768px)  { #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 38vw);  min-height: 520px; } }
+@media (min-width: 1024px) { #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 360px); min-height: 540px; } }
+
+/* ── Pages layer ── */
+#jfy-intro-pages {
+  position: absolute; inset: 0;
+  background: #f8f4ed;
+  border-radius: inherit;
+  overflow: hidden;         /* clips the flip panels */
+}
+
+/* ── Left page panel (tablet two-page spread) ── */
+#jfy-intro-left-page {
+  display: none; /* hidden on mobile */
+}
+
+/* ── Two-page spread: intro (768px and up) ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Portrait cover: narrow, centered */
+  #jfy-intro-wrap {
+    grid-column: 1 / 13;           /* span full grid so centering works */
+    justify-self: center;
+    width: min(42%, 320px);        /* portrait book width */
+    border-radius: 10px 14px 14px 10px;
+    transition: width 0.75s cubic-bezier(.77,0,.18,1),
+                border-radius 0.75s cubic-bezier(.77,0,.18,1);
+  }
+  /* Expanded: full two-page spread after cover opens */
+  #jfy-intro-wrap.cover-open {
+    width: 100%;
+    border-radius: 8px 18px 18px 8px;
+  }
+
+  /* Spine shadow — only visible after cover opens */
+  #jfy-intro-wrap::before {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    left: calc(50% - 1px); width: 2px;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 100%);
+    z-index: 25; pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s 0.5s; /* fades in after expand finishes */
+  }
+  #jfy-intro-wrap.cover-open::before { opacity: 1; }
+
+  /* Pages occupy only the right half (visible once cover-open) */
+  #jfy-intro-pages {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+
+  /* Left page visible underneath cover & pages */
+  #jfy-intro-left-page {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    inset: 0 50% 0 0;
+    background: #f8f4ed;
+    border-radius: 8px 0 0 8px;
+    padding: clamp(16px,5%,44px) clamp(18px,7%,60px) clamp(12px,4%,32px);
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* Left page inner body */
+  .jfy-left-page-num {
+    align-self: flex-end;
+    font-family: 'Antonio', sans-serif;
+    font-size: 11px; letter-spacing: 0.16em;
+    color: #c4b49a; text-transform: uppercase;
+  }
+  .jfy-left-page-body {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; gap: 14px;
+    padding: 6% 0 3%;
+  }
+  .jfy-left-page-body h2 {
+    font-family: 'Antonio', sans-serif;
+    font-size: clamp(18px, 2.6vw, 28px);
+    font-weight: 700; color: #2a1a0e; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .jfy-left-page-body p {
+    font-family: 'Bad Script', cursive;
+    font-size: clamp(13px, 1.55vw, 16px);
+    line-height: 1.85; color: #3a2510; margin: 0;
+  }
+}
+
+/* ── Desktop intro spread (1024px and up) — same layout, wider cover ── */
+@media (min-width: 1024px) {
+  #jfy-intro-wrap {
+    grid-column: 1 / 13;
+    justify-self: center;
+    width: min(38%, 480px);
+    border-radius: 10px 14px 14px 10px;
+    transition: width 0.75s cubic-bezier(.77,0,.18,1),
+                border-radius 0.75s cubic-bezier(.77,0,.18,1);
+  }
+  #jfy-intro-wrap.cover-open {
+    width: 100%;
+    border-radius: 8px 18px 18px 8px;
+  }
+  #jfy-intro-wrap::before {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    left: calc(50% - 1px); width: 2px;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 100%);
+    z-index: 25; pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s 0.5s;
+  }
+  #jfy-intro-wrap.cover-open::before { opacity: 1; }
+  #jfy-intro-pages {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+  #jfy-intro-left-page {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    inset: 0 50% 0 0;
+    background: #f8f4ed;
+    border-radius: 8px 0 0 8px;
+    padding: clamp(16px,5%,44px) clamp(18px,7%,60px) clamp(12px,4%,32px);
+    z-index: 0;
+    overflow: hidden;
+  }
+}
+
+/* ── Page flip stage ── */
+/* Each slide sits in a "leaf" – when flipping, a half-width curtain
+   folds over it from the right edge to reveal the next slide.        */
+.jfy-islide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: clamp(16px,5%,44px) clamp(18px,7%,60px) clamp(12px,4%,32px);
+  background: #f8f4ed;
+  backface-visibility: hidden;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+}
+.jfy-islide.active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* Flip animation — forward: pivot left edge (page turns left)
+                    backward: pivot right edge (page turns right) */
+@keyframes jfy-flip-out-fwd {
+  0%   { transform: rotateY(0deg);    }
+  100% { transform: rotateY(-180deg); }
+}
+@keyframes jfy-flip-in-fwd {
+  0%   { transform: rotateY(180deg);  }
+  100% { transform: rotateY(0deg);    }
+}
+@keyframes jfy-flip-out-bck {
+  0%   { transform: rotateY(0deg);    }
+  100% { transform: rotateY(180deg);  }
+}
+@keyframes jfy-flip-in-bck {
+  0%   { transform: rotateY(-180deg); }
+  100% { transform: rotateY(0deg);    }
+}
+
+.jfy-islide.flip-out-fwd {
+  transform-origin: left center;
+  animation: jfy-flip-out-fwd 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 3;
+}
+.jfy-islide.flip-in-fwd {
+  transform-origin: left center;
+  animation: jfy-flip-in-fwd 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 2;
+}
+.jfy-islide.flip-out-bck {
+  transform-origin: right center;
+  animation: jfy-flip-out-bck 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 3;
+}
+.jfy-islide.flip-in-bck {
+  transform-origin: right center;
+  animation: jfy-flip-in-bck 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 2;
+}
+
+/* Slide-shadow strip that appears during any flip (shows depth) */
+#jfy-flip-shadow {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 0;
+  pointer-events: none; z-index: 4;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.04) 40%, transparent 100%);
+  transition: width 0s;
+  border-radius: 0;
+  opacity: 0;
+}
+#jfy-flip-shadow.show {
+  width: 32px; opacity: 1;
+}
+
+/* ── Slide internals ── */
+.jfy-islide-num {
+  align-self: flex-end;
+  font-size: 11px; letter-spacing: 0.16em;
+  color: #c4b49a; text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+.jfy-islide-body {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; gap: 14px;
+  padding: 6% 0 3%;
+}
+.jfy-islide-body h2 {
+  font-family: 'Antonio', sans-serif;
+  font-size: clamp(18px, 2.6vw, 28px);
+  font-weight: 700; color: #2a1a0e; margin: 0 0 4px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.jfy-islide-body p {
+  font-family: 'Bad Script', cursive;
+  font-size: clamp(13px, 1.55vw, 16px);
+  line-height: 1.85; color: #3a2510; margin: 0;
+}
+
+/* ── Footer nav — two rows ──
+   Row 1: [← back]  [dots]  [next →]
+   Row 2: (centred)  skip intro
+── */
+.jfy-islide-foot {
+  display: flex; flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.09);
+}
+.jfy-islide-foot-row1 {
+  display: flex; align-items: center; gap: 10px;
+}
+.jfy-islide-foot-row2 {
+  display: flex; justify-content: center;
+}
+
+/* progress dots */
+.jfy-islide-dots {
+  flex: 1; display: flex; gap: 7px;
+  align-items: center; justify-content: center;
+}
+.jfy-islide-dots span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #ddd; transition: background 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.jfy-islide-dots span.on { background: #9A59C8; transform: scale(1.28); }
+
+/* Back */
+.jfy-islide-back {
+  background: transparent; color: #9A59C8;
+  border: 1.5px solid #c8a0f0; border-radius: 20px;
+  padding: 7px 16px; font-size: 12px; font-weight: 700;
+  font-family: 'Antonio', sans-serif; letter-spacing: 0.06em;
+  cursor: pointer; transition: background 0.14s; white-space: nowrap;
+}
+.jfy-islide-back:hover { background: #f0e9ff; }
+.jfy-islide-back:disabled { opacity: 0.28; cursor: default; }
+.jfy-islide-back:disabled:hover { background: transparent; }
+
+/* Next */
+.jfy-islide-next {
+  background: #9A59C8; color: #fff; border: none;
+  border-radius: 20px; padding: 8px 22px;
+  font-size: 12px; font-weight: 700; font-family: 'Antonio', sans-serif;
+  letter-spacing: 0.08em;
+  cursor: pointer; transition: background 0.14s; white-space: nowrap;
+}
+.jfy-islide-next:hover { background: #7d3fb8; }
+
+/* Skip — prominent, centred below */
+.jfy-islide-skip {
+  background: #f0e9ff; color: #7d3fb8; border: 1.5px solid #c8a0f0;
+  border-radius: 20px; padding: 6px 20px;
+  font-size: 11px; font-weight: 700; font-family: 'Antonio', sans-serif;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.14s, color 0.14s;
+}
+.jfy-islide-skip:hover { background: #e3d4ff; color: #5c2d96; }
+
+/* ── Cover ── */
+#jfy-intro-cover {
+  position: absolute; inset: 0;
+  background-color: #3B1E0E;
+  background-image:
+    repeating-linear-gradient(100deg,
+      rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
+      transparent 1px, transparent 7px),
+    repeating-linear-gradient(10deg,
+      rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px,
+      transparent 1px, transparent 9px),
+    radial-gradient(ellipse at 28% 38%, rgba(90,40,10,0.50) 0%, transparent 60%),
+    radial-gradient(ellipse at 72% 72%, rgba(20,8,2,0.38) 0%, transparent 55%);
+  border-radius: inherit;
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: flex-end;
+  padding: 9% 8% 8%;
+  cursor: pointer;
+  z-index: 30;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(.77,0,.18,1);
+}
+#jfy-intro-cover::after {
+  content: '';
+  position: absolute; inset: 14px;
+  border: 2px dashed rgba(255,255,255,0.09);
+  border-radius: 4px 14px 14px 4px;
+  pointer-events: none;
+}
+#jfy-intro-cover::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 32px;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.10) 60%, transparent 100%);
+  border-radius: 8px 0 0 8px;
+  pointer-events: none;
+}
+#jfy-intro-cover.flipped { transform: rotateY(-180deg); pointer-events: none; }
+#jfy-cover-title {
+  font-family: 'Antonio', sans-serif;
+  font-size: clamp(22px, 4.5vw, 46px);
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.09em; color: #e8d5b0;
+  line-height: 1.1; margin-bottom: 10px;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.55);
+}
+#jfy-cover-sub {
+  font-family: 'Bad Script', cursive;
+  font-size: clamp(12px, 1.8vw, 17px);
+  color: rgba(232,213,176,0.60);
+}
+#jfy-cover-open-hint {
+  position: absolute; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: rgba(232,213,176,0.50); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: lowercase;
+  font-family: 'Antonio', sans-serif;
+  transition: color 0.2s; pointer-events: none;
+}
+#jfy-intro-cover:hover #jfy-cover-open-hint { color: rgba(232,213,176,0.9); }
+#jfy-cover-open-hint svg { animation: jfy-hint-bounce 1.8s ease-in-out infinite; }
+@keyframes jfy-hint-bounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(5px); }
+}
+
+/* ── Journal page-flip nav arrows (on real notebook) ── */
+.jfy-entry-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 50; background: rgba(255,255,255,0.85);
+  border: none; border-radius: 50%; width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+  transition: background 0.14s, transform 0.14s;
+  font-size: 16px; color: #9A59C8;
+}
+.jfy-entry-nav:hover { background: #f0e9ff; transform: translateY(-50%) scale(1.08); }
+#jfy-entry-prev { left: -48px; }
+#jfy-entry-next { right: -48px; }
+@media (max-width: 767px) {
+  #jfy-entry-prev { left: -32px; width: 28px; height: 28px; font-size: 13px; }
+  #jfy-entry-next { right: -32px; width: 28px; height: 28px; font-size: 13px; }
+}
+
+/* ── Entry viewer: fills notebook, page-flip in/out ── */
+#jfy-entry-viewer {
+  position: absolute; inset: 0; z-index: 30;
+  background: #f8f4ed;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;        /* always in DOM, controlled by opacity+pointer-events */
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transform-origin: left center;
+  backface-visibility: hidden;
+}
+/* forward (older→newer): pivot left */
+#jfy-entry-viewer.ev-flip-in {
+  transform-origin: left center;
+  animation: jfy-flip-in-fwd 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: auto;
+}
+#jfy-entry-viewer.ev-flip-out-fwd {
+  transform-origin: left center;
+  animation: jfy-flip-out-fwd 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: none;
+}
+/* backward (newer→older): pivot right */
+#jfy-entry-viewer.ev-flip-in-bck {
+  transform-origin: right center;
+  animation: jfy-flip-in-bck 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: auto;
+}
+#jfy-entry-viewer.ev-flip-out-bck {
+  transform-origin: right center;
+  animation: jfy-flip-out-bck 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: none;
+}
+#jfy-entry-viewer.visible {
+  opacity: 1; pointer-events: auto; transform: rotateY(0deg);
+}
+#jfy-entry-viewer img {
+  max-width: 88%; max-height: 75%;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  object-fit: contain;
+}
+#jfy-entry-viewer-meta {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px; margin-top: 14px; width: 88%;
+}
+#jfy-entry-viewer-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #c4b49a; text-align: center;
+}
+#jfy-entry-close {
+  background: none; border: none; font-size: 13px; cursor: pointer;
+  color: #bbb; font-family: 'Antonio', sans-serif; letter-spacing: 0.08em;
+  text-transform: uppercase; font-weight: 700; padding: 0;
+}
+#jfy-entry-close:hover { color: #7d3fb8; }
+
+/* Entry viewer action buttons */
+#jfy-entry-viewer-actions {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
+}
+#jfy-entry-viewer-actions button {
+  background: none; border: 1.5px solid #ddd; border-radius: 16px;
+  padding: 5px 14px; font-size: 11px; font-weight: 700;
+  font-family: 'Antonio', sans-serif; letter-spacing: 0.07em;
+  text-transform: uppercase; cursor: pointer; transition: all 0.14s;
+  color: #888;
+}
+#jfy-entry-viewer-actions button:hover { border-color: #9A59C8; color: #9A59C8; }
+#jfy-entry-delete:hover { border-color: #e05! important; color: #e05! important; }
+#jfy-entry-delete { border-color: #f0c0c0 !important; color: #c88 !important; }
+#jfy-entry-delete:hover { border-color: #e03030 !important; color: #e03030 !important; }
+
+/* Caption edit area */
+#jfy-entry-edit-area {
+  width: 88%; margin-top: 12px;
+}
+#jfy-entry-caption {
+  width: 100%; border: 1.5px solid #e0d8cc; border-radius: 8px;
+  padding: 8px 10px; font-family: 'Bad Script', cursive;
+  font-size: 14px; background: #fff; resize: none; color: #3a2510;
+  box-sizing: border-box;
+}
+#jfy-entry-edit-area button {
+  background: none; border: 1.5px solid #ddd; border-radius: 14px;
+  padding: 4px 14px; font-size: 11px; font-weight: 700;
+  font-family: 'Antonio', sans-serif; letter-spacing: 0.07em;
+  text-transform: uppercase; cursor: pointer; color: #888;
+}
+#jfy-entry-edit-save { background: #9A59C8 !important; border-color: #9A59C8 !important; color: #fff !important; }
+#jfy-entry-edit-save:hover { background: #7d3fb8 !important; }
+
+@keyframes jfy-flip-shadow-pulse {
+  0%   { opacity:0; }
+  30%  { opacity:1; }
+  100% { opacity:0; }
+}
+
+/* Nav arrow labels */
+.jfy-entry-nav-label {
+  position: absolute;
+  font-family: 'Antonio', sans-serif;
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #9A59C8; white-space: nowrap;
+  top: calc(100% + 6px);
+  left: 50%; transform: translateX(-50%);
+  opacity: 0; transition: opacity 0.15s;
+  pointer-events: none;
+}
+.jfy-entry-nav:hover .jfy-entry-nav-label { opacity: 1; }
+.jfy-entry-nav { overflow: visible; }
+
+/* ── Notebook right-half overrides (must follow inset:0 base rules, 768px+) ── */
+@media (min-width: 768px) {
+  /* Canvas confined to right half */
+  .jfy-nb-layer {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+  /* Entry viewer confined to right half */
+  #jfy-entry-viewer {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+}
+</style>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   JOURNAL INTRO — opens straight to page 1, no cover step
+══════════════════════════════════════════════════════════════════ */
+(function(){
+  var SLIDES = [
+    { num:'p. 1', body:'<p>this space is yours. slow down, reflect, and spend time with yourself. write freely, follow a prompt, hold onto meaningful moments, or simply leave pieces of your day behind.</p><p>there\'s no right way to fill these pages. this is meant to be entirely your own.</p>' },
+    { num:'p. 2', body:'<p>gather the pieces of your experience in one place.</p><p>you can create pages, reflect on moments you\'ve had throughout the website, respond to something you saw, and build pages that feel personal to you.</p>' },
+    { num:'p. 3', body:'<p>let it become a reflection of the things you want to hold onto and the things that bring joy to your life.</p>' },
+    { num:'p. 4', body:'<h2>Creating A Page</h2><p>drag and drop elements from the workspace into the journal area to apply them.</p><p>if you want to change how something looks, select from the options in the pop-up at the bottom of the journal area.</p>' },
+    { num:'p. 5', body:'<h2>Journal Entries</h2><p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p><p>add entries to "Between Us" to share with the community. get started, and feel free to make this your own.</p>' }
+  ];
+  var TOTAL = SLIDES.length;
+
+  function makeDots(active){
+    return SLIDES.map(function(_,i){
+      return '<span'+(i===active?' class="on"':'')+' data-dot="'+i+'"></span>';
+    }).join('');
+  }
+  function makeSlide(s,i){
+    var isFirst=(i===0), isLast=(i===TOTAL-1);
+    return [
+      '<div class="jfy-islide'+(i===0?' active':'')+'" data-slide="'+i+'">',
+        '<span class="jfy-islide-num">'+s.num+'</span>',
+        '<div class="jfy-islide-body">'+s.body+'</div>',
+        '<div class="jfy-islide-foot">',
+          '<div class="jfy-islide-foot-row1">',
+            '<button class="jfy-islide-back"'+(isFirst?' disabled':'')+'>← back</button>',
+            '<div class="jfy-islide-dots">'+makeDots(i)+'</div>',
+            '<button class="jfy-islide-next">'+(isLast?'begin ↗':'next →')+'</button>',
+          '</div>',
+          '<div class="jfy-islide-foot-row2">',
+            '<button class="jfy-islide-skip">skip intro</button>',
+          '</div>',
+        '</div>',
+      '</div>'
+    ].join('');
+  }
+
+  var gridWrap = document.querySelector('.jfy-grid-wrap');
+  if(!gridWrap) return;
+
+  gridWrap.insertAdjacentHTML('afterbegin', [
+    '<div id="jfy-intro-wrap">',
+      '<div id="jfy-intro-left-page"></div>',
+      '<div id="jfy-intro-pages">',
+        '<div id="jfy-flip-shadow"></div>',
+        SLIDES.map(makeSlide).join(''),
+      '</div>',
+      '<div id="jfy-intro-cover">',
+        '<div id="jfy-cover-title">Your Journal</div>',
+        '<div id="jfy-cover-sub">this is just for you.</div>',
+        '<div id="jfy-cover-open-hint">',
+          '<svg width="20" height="20" viewBox="0 0 22 22" fill="none">',
+            '<path d="M4 8L11 15L18 8" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>',
+          '</svg>',
+          '<span>open</span>',
+        '</div>',
+      '</div>',
+    '</div>'
+  ].join(''));
+
+  document.body.classList.add('jfy-intro-active');
+
+  var current   = 0;
+  var coverOpen = false;
+  var animating = false;
+  var shadow    = document.getElementById('jfy-flip-shadow');
+  var slides    = Array.from(document.querySelectorAll('.jfy-islide'));
+  var leftPage  = document.getElementById('jfy-intro-left-page');
+
+  /* Update left page for tablet two-page spread */
+  function updateLeftPage(idx){
+    if(!leftPage) return;
+    if(idx < 0){
+      /* Inside cover: blank left page */
+      leftPage.innerHTML = '';
+    } else {
+      var s = SLIDES[idx];
+      leftPage.innerHTML =
+        '<span class="jfy-left-page-num">'+s.num+'</span>'+
+        '<div class="jfy-left-page-body">'+s.body+'</div>';
+    }
+  }
+  /* Initialise: cover is closed, show blank inside cover */
+  updateLeftPage(-1);
+
+  function dismiss(){
+    document.body.classList.remove('jfy-intro-active');
+    var wrap = document.getElementById('jfy-intro-wrap');
+    if(wrap) wrap.remove();
+  }
+
+  function isTabletIntro(){
+    return window.matchMedia('(min-width:768px)').matches;
+  }
+
+  function openCover(){
+    if(coverOpen) return;
+    coverOpen = true;
+    var cover = document.getElementById('jfy-intro-cover');
+    var wrap  = document.getElementById('jfy-intro-wrap');
+    if(cover) cover.classList.add('flipped');
+    /* Tablet: expand wrap to two-page spread, reveal spine */
+    if(wrap && isTabletIntro()) wrap.classList.add('cover-open');
+    /* Left page shows blank inside-cover while on slide 0 */
+    updateLeftPage(-1);
+  }
+
+  function flipTo(idx, dir){
+    if(animating || idx===current) return;
+    animating = true;
+    var from=slides[current], to=slides[idx];
+    to.classList.add('active');
+    to.style.zIndex='2'; from.style.zIndex='3';
+    shadow.classList.add('show');
+    var outC = dir==='forward'?'flip-out-fwd':'flip-out-bck';
+    var inC  = dir==='forward'?'flip-in-fwd':'flip-in-bck';
+    from.classList.add(outC); to.classList.add(inC);
+    setTimeout(function(){
+      from.classList.remove('active',outC); to.classList.remove(inC);
+      from.style.zIndex=''; to.style.zIndex='';
+      shadow.classList.remove('show');
+      current=idx; animating=false;
+      /* Tablet: show previous slide on left page */
+      updateLeftPage(current - 1);
+    }, 570);
+  }
+
+  var cover = document.getElementById('jfy-intro-cover');
+  if(cover) cover.addEventListener('click', openCover);
+
+  slides.forEach(function(slide,i){
+    slide.querySelector('.jfy-islide-skip').addEventListener('click', dismiss);
+    slide.querySelector('.jfy-islide-next').addEventListener('click', function(){
+      if(i<TOTAL-1) flipTo(i+1,'forward'); else dismiss();
+    });
+    slide.querySelector('.jfy-islide-back').addEventListener('click', function(){
+      if(i>0) flipTo(i-1,'back');
+    });
+    slide.querySelectorAll('[data-dot]').forEach(function(dot){
+      dot.addEventListener('click', function(){
+        var t=parseInt(dot.dataset.dot,10);
+        if(t!==current) flipTo(t, t>current?'forward':'back');
+      });
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(!document.body.classList.contains('jfy-intro-active')) return;
+    if(e.key==='ArrowRight'||e.key==='Enter'){
+      if(!coverOpen){ openCover(); return; }
+      if(current<TOTAL-1) flipTo(current+1,'forward'); else dismiss();
+    }
+    if(e.key==='ArrowLeft'){
+      if(coverOpen && current>0) flipTo(current-1,'back');
+    }
+    if(e.key==='Escape') dismiss();
+  });
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   JOURNAL ENTRY NAVIGATOR + NEW ENTRY
+   Model: entries[0] = most recent saved. entryIdx = -1 means the
+   live (current/blank) page. ‹ flips back through saved entries;
+   › from a past entry flips forward (toward current). From the live
+   page, ‹ opens the most-recent saved entry.
+══════════════════════════════════════════════════════════════════ */
+(function(){
+  var STORE_JOURNAL = 'jfy_journal';
+
+  /* ── Seed placeholder entries once ── */
+  function makePlaceholderDataUrl(lines, color){
+    var c = document.createElement('canvas'); c.width=600; c.height=420;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle='#f8f4ed'; ctx.fillRect(0,0,600,420);
+    ctx.strokeStyle='rgba(180,160,120,0.22)'; ctx.lineWidth=1;
+    for(var y=60;y<400;y+=28){ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(560,y);ctx.stroke();}
+    ctx.globalAlpha=0.52; ctx.fillStyle=color; ctx.fillRect(210,0,180,20); ctx.globalAlpha=1;
+    ctx.fillStyle='#3a2510'; ctx.font='italic 15px Georgia,serif';
+    lines.forEach(function(l,i){ ctx.fillText(l,48,82+i*32); });
+    return c.toDataURL('image/jpeg',0.88);
+  }
+  var PH=[
+    {color:'#c8a0f0',lines:['today felt quieter than usual.','i made tea twice and forgot to drink it both times.','the light through the window was really something.']},
+    {color:'#ffd6a5',lines:['started a new playlist. it has 4 songs.','i think that\'s enough for now.','some things don\'t need to be finished to be good.']},
+    {color:'#a0d4f0',lines:['called my grandmother. she laughed at everything.','i want to remember that laugh.','also: her chicken soup recipe is somewhere in here.']},
+    {color:'#f0d0a0',lines:['found an old photo. couldn\'t remember the day.','but i remembered the feeling.','that might be enough.']}
+  ];
+  (function seedEntries(){
+    var ex=[]; try{ex=JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]');}catch(e){}
+    if(ex.length>0) return;
+    var seeded=PH.map(function(p,i){
+      var t=Date.now()-(PH.length-i)*3*86400000;
+      return {id:'placeholder_'+i,text:'',time:t,addedAt:t,media:{url:makePlaceholderDataUrl(p.lines,p.color)}};
+    });
+    localStorage.setItem(STORE_JOURNAL,JSON.stringify(seeded));
+  })();
+
+  /* ── DOM injection ── */
+  var notebook = document.querySelector('.jfy-notebook');
+  if(!notebook) return;
+
+  notebook.insertAdjacentHTML('beforeend', [
+    /* Left page panel — tablet two-page spread */
+    '<div id="jfy-notebook-left-page"></div>',
+    '<button class="jfy-entry-nav" id="jfy-entry-prev" aria-label="Previous journal entry">',
+      '‹<span class="jfy-entry-nav-label">older</span>',
+    '</button>',
+    '<button class="jfy-entry-nav" id="jfy-entry-next" aria-label="Newer / current page" style="opacity:0.28;pointer-events:none">',
+      '›<span class="jfy-entry-nav-label">newer</span>',
+    '</button>',
+    '<div id="jfy-entry-viewer" role="region" aria-label="Journal entry">',
+      '<img id="jfy-entry-img" src="" alt="Journal entry">',
+      '<div id="jfy-entry-viewer-meta">',
+        '<span id="jfy-entry-viewer-label"></span>',
+        '<div id="jfy-entry-viewer-actions">',
+          '<button id="jfy-entry-edit" title="Edit caption">✎ edit</button>',
+          '<button id="jfy-entry-delete" title="Delete entry">✕ delete</button>',
+          '<button id="jfy-entry-close">← back</button>',
+        '</div>',
+      '</div>',
+    '</div>'
+  ].join(''));
+
+  var prevBtn    = document.getElementById('jfy-entry-prev');
+  var nextBtn    = document.getElementById('jfy-entry-next');
+  var viewer     = document.getElementById('jfy-entry-viewer');
+  var entryImg   = document.getElementById('jfy-entry-img');
+  var labelEl    = document.getElementById('jfy-entry-viewer-label');
+  var closeBtn   = document.getElementById('jfy-entry-close');
+  var editBtn   = document.getElementById('jfy-entry-edit');
+  var deleteBtn = document.getElementById('jfy-entry-delete');
+  var flipShadow = document.getElementById('jfy-flip-shadow'); // may be gone after intro
+  var nbLeftPage = document.getElementById('jfy-notebook-left-page');
+
+  var entries  = [];
+  var entryIdx = -1; // -1 = live blank page
+
+  function loadEntries(){
+    try{entries=JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]');}catch(e){entries=[];}
+    // Sort newest-created first so ‹ always travels backwards in time
+    entries.sort(function(a,b){
+      return (b.addedAt||b.time||0) - (a.addedAt||a.time||0);
+    });
+  }
+
+  /* ── Tablet left-page management ──
+     isTablet()         → true when 768–1023px
+     updateNbLeftPage() → renders the appropriate content into the left panel
+  ── */
+  function isTablet(){
+    return window.matchMedia('(min-width:768px)').matches;
+  }
+
+  function renderLeftPage(entry, labelText){
+    if(!nbLeftPage) return;
+    if(!entry){
+      nbLeftPage.innerHTML =
+        '<span class="nb-left-empty">your entries<br>will appear here</span>';
+      return;
+    }
+    var url = entry.media && entry.media.url ? entry.media.url : '';
+    var html = '';
+    if(url) html += '<img src="'+url+'" alt="Journal entry">';
+    if(labelText) html += '<span class="nb-left-label">'+labelText+'</span>';
+    nbLeftPage.innerHTML = html;
+  }
+
+  function updateNbLeftPage(){
+    if(!isTablet()) return;
+    loadEntries();
+    if(entryIdx === -1){
+      /* Drawing mode: left page shows most recent saved entry */
+      if(entries.length > 0){
+        var e = entries[0];
+        var d = new Date(e.time||e.addedAt||Date.now());
+        var lbl = 'last entry · '+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        renderLeftPage(e, lbl);
+      } else {
+        renderLeftPage(null, '');
+      }
+    } else {
+      /* Entry-browsing mode: left page shows the next-older entry */
+      var olderIdx = entryIdx + 1;
+      if(olderIdx < entries.length){
+        var e2 = entries[olderIdx];
+        var d2 = new Date(e2.time||e2.addedAt||Date.now());
+        var lbl2 = 'entry '+(entries.length-olderIdx)+' of '+entries.length+
+          ' · '+d2.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        renderLeftPage(e2, lbl2);
+      } else {
+        /* No older entry — show empty left page */
+        renderLeftPage(null, '');
+      }
+    }
+  }
+
+  /* Initialise left page */
+  loadEntries();
+  updateNbLeftPage();
+  /* Re-render on resize (mobile↔tablet crossings) */
+  window.addEventListener('resize', function(){ updateNbLeftPage(); });
+
+  function updateArrows(){
+    var step = isTablet() ? 2 : 1;
+    // ‹ (prev/older): visible when there's an entry at entryIdx+step
+    var hasPrev = entries.length > 0 &&
+      (entryIdx === -1 || entryIdx + step <= entries.length - 1);
+    prevBtn.style.opacity = hasPrev ? '1' : '0.28';
+    prevBtn.style.pointerEvents = hasPrev ? '' : 'none';
+    // › (next/newer): only visible when we're on a past entry
+    var hasNext = entryIdx >= 0;
+    nextBtn.style.opacity = hasNext ? '1' : '0.28';
+    nextBtn.style.pointerEvents = hasNext ? '' : 'none';
+  }
+
+  function doFlip(dir, callback){
+    // Shadow sweep — direction determines which side the gradient comes from
+    var nb = document.querySelector('.jfy-nb-layer');
+    if(nb){
+      var sh = document.createElement('div');
+      var grad = (dir === 'bck')
+        ? 'linear-gradient(270deg,rgba(0,0,0,0.15) 0%,transparent 40%)'
+        : 'linear-gradient(90deg,rgba(0,0,0,0.15) 0%,transparent 40%)';
+      sh.style.cssText = 'position:absolute;inset:0;z-index:100;pointer-events:none;' +
+        'background:'+grad+';animation:jfy-flip-shadow-pulse 0.5s ease forwards;border-radius:18px';
+      nb.appendChild(sh);
+      setTimeout(function(){ sh.remove(); }, 520);
+    }
+    // Animate viewer
+    if(dir === 'in'){
+      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck','visible');
+      viewer.classList.add('ev-flip-in');
+      setTimeout(function(){ viewer.classList.remove('ev-flip-in'); viewer.classList.add('visible'); callback&&callback(); }, 520);
+    } else if(dir === 'in-bck'){
+      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck','visible');
+      viewer.classList.add('ev-flip-in-bck');
+      setTimeout(function(){ viewer.classList.remove('ev-flip-in-bck'); viewer.classList.add('visible'); callback&&callback(); }, 520);
+    } else {
+      viewer.classList.add(dir==='fwd'?'ev-flip-out-fwd':'ev-flip-out-bck');
+      setTimeout(function(){
+        viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck','visible');
+        callback&&callback();
+      }, 520);
+    }
+  }
+
+  function showEntry(idx, animDir){
+    loadEntries();
+    if(!entries.length){ entryIdx=-1; updateArrows(); return; }
+    idx = Math.max(0, Math.min(entries.length-1, idx));
+    var e = entries[idx];
+    var url = e.media&&e.media.url ? e.media.url : '';
+    var d = new Date(e.time||e.addedAt||Date.now());
+    var label = 'entry '+(entries.length-idx)+' of '+entries.length+
+      '  ·  '+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+    var inDir = (animDir === 'back') ? 'in-bck' : 'in';
+
+    // Always set content BEFORE animating so no blank flash mid-flip
+    entryImg.src = url; entryImg.style.display = url?'':'none';
+    labelEl.textContent = label; entryIdx = idx;
+
+    if(!viewer.classList.contains('visible')){
+      // First open: flip in from appropriate side
+      doFlip(inDir, function(){ updateArrows(); updateNbLeftPage(); });
+    } else {
+      // Already showing — swap content instantly, no animation gap
+      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck');
+      viewer.classList.add('visible');
+      updateArrows();
+      updateNbLeftPage();
+    }
+  }
+
+  function closeEntry(){
+    doFlip('fwd', function(){ entryIdx=-1; updateArrows(); updateNbLeftPage(); });
+  }
+
+  /* ── Button wiring ── */
+  prevBtn.addEventListener('click', function(){
+    loadEntries();
+    if(entryIdx===-1){
+      // From live page: auto-save current work, then show most recent entry
+      var nb = window._jfyNotebook;
+      var editId = window._jfyEditingEntryId || null;
+      function goOlder(){
+        loadEntries();
+        if(entries.length > 0){
+          /* Tablet pairs: (canvas,entry0), (entry1,entry2), (entry3,entry4)…
+             First press jumps to idx=1 so entry0 stays on the left page
+             of the live view and entry1 becomes the right-page entry.
+             With only 1 entry, idx=0 so it still shows on the right. */
+          var startIdx = isTablet() ? Math.min(1, entries.length - 1) : 0;
+          showEntry(startIdx, 'fwd');
+        }
+      }
+      if(nb && nb.hasContent()){
+        nb.saveAndClear(editId, function(){
+          if(window._jfyEntryNav) window._jfyEntryNav.resetToLive();
+          goOlder();
+        });
+      } else {
+        // Nothing to save — just clear edit state and navigate
+        if(nb) nb.clearAll();
+        window._jfyEditingEntryId=null; window._jfyEditingEntryIdx=null; window._jfyEditBg=null;
+        goOlder();
+      }
+    } else {
+      var step = isTablet() ? 2 : 1;
+      if(entryIdx + step <= entries.length - 1){
+        showEntry(entryIdx + step, 'fwd'); // go older (by 2 on tablet)
+      }
+    }
+  });
+
+  nextBtn.addEventListener('click', function(){
+    loadEntries();
+    var step = isTablet() ? 2 : 1;
+    if(entryIdx >= step){
+      showEntry(entryIdx - step, 'back'); // go newer (by 2 on tablet)
+    } else if(entryIdx >= 0){
+      // Already at most-recent spread → return to live blank canvas
+      closeEntry();
+      if(window._jfyNotebook) window._jfyNotebook.clearAll();
+    }
+  });
+
+  closeBtn.addEventListener('click', closeEntry);
+
+  editBtn && editBtn.addEventListener('click', function(){
+    if(entryIdx < 0) return;
+    var e = entries[entryIdx];
+    var url = e.media && e.media.url ? e.media.url : '';
+    if(!url) return;
+
+    // Remember which entry is being edited so ♡ save updates it in-place
+    window._jfyEditingEntryId  = e.id;
+    window._jfyEditingEntryIdx = entryIdx;
+
+    // Close viewer first, then restore the editable state
+    viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
+    entryIdx = -1;
+    updateArrows();
+
+    if(e.snapshot && window._jfyNotebook){
+      // Full snapshot available — restore every element exactly as it was
+      window._jfyEditBg = null;          // no flat bg needed
+      window._jfyNotebook.restoreSnapshot(e.snapshot);
+    } else if(url && window._jfyNotebook){
+      // Legacy entry (no snapshot) — load flat image as editable background
+      var img = new Image();
+      img.onload = function(){
+        window._jfyEditBg = { img: img, entryId: e.id };
+        window._jfyNotebook.clearAll();   // clear canvas so bg paints clean
+        window._jfyNotebook.redrawAll();
+      };
+      img.src = url;
+    }
+
+    if(typeof showJfyToast === 'function'){
+      showJfyToast('Editing entry — ♡ save or + new entry when done');
+    }
+  });
+
+  deleteBtn && deleteBtn.addEventListener('click', function(){
+    if(entryIdx < 0) return;
+    if(!confirm('Delete this journal entry? This cannot be undone.')) return;
+    entries.splice(entryIdx, 1);
+    try{ localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries)); }catch(e){}
+    if(entries.length === 0){ closeEntry(); return; }
+    var newIdx = Math.min(entryIdx, entries.length - 1);
+    entryIdx = -1; // reset so showEntry opens fresh
+    viewer.classList.remove('visible','ev-flip-in','ev-flip-out-fwd','ev-flip-out-bck');
+    showEntry(newIdx, 'fwd');
+  });
+
+  /* ── New Entry button in history bar ── */
+  var newEntryBtn = document.getElementById('jfy-new-entry-btn');
+  if(newEntryBtn){
+    newEntryBtn.addEventListener('click', function(){
+      // If currently viewing a past entry, close viewer first
+      if(entryIdx !== -1){ viewer.classList.remove('visible','ev-flip-in','ev-flip-out-fwd','ev-flip-out-bck'); entryIdx=-1; }
+      // The "clear all" logic (mirrors existing clear-all handler in main IIFE)
+      // We fire a custom event that the main IIFE listens to
+      document.dispatchEvent(new CustomEvent('jfy-new-entry'));
+      loadEntries(); updateArrows();
+    });
+  }
+
+  // Listen for external saves so arrows stay current
+  window.addEventListener('storage', function(e){
+    if(e.key===STORE_JOURNAL){ loadEntries(); updateArrows(); }
+  });
+
+  loadEntries(); updateArrows();
+
+  /* Expose for main IIFE to call after save */
+  window._jfyEntryNav = {
+    reload: function(){ loadEntries(); updateArrows(); updateNbLeftPage(); },
+    // Call after editing an entry — forces us back to the live-page state
+    // so ‹/› arrows are correctly disabled/enabled
+    resetToLive: function(){
+      entryIdx = -1;
+      viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
+      loadEntries(); updateArrows(); updateNbLeftPage();
+    }
+  };
+
+})();
 </script>
 </body>
 </html>
