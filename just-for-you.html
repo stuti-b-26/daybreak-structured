@@ -2721,390 +2721,402 @@ document.addEventListener('keydown', function(e){
 </script>
 
 <!-- ════════════════════════════════════════════════════════════════════
-     JOURNAL INTRO OVERLAY
-     Shows on first visit only (localStorage flag: jfy_intro_seen).
-     Cover → 5 intro slides → dismiss (writes blank journal entry page).
+     JOURNAL INTRO — in-page book
+     Replaces the notebook area on first visit.
+     Cover → 5 pages (back/next) → skip anytime → journal workspace.
 ════════════════════════════════════════════════════════════════════ -->
 <style>
-/* ── Overlay shell ── */
-#jfy-intro {
-  position: fixed; inset: 0; z-index: 9000;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(30,18,8,0.72);
-  backdrop-filter: blur(3px);
-  opacity: 1; transition: opacity 0.5s;
-}
-#jfy-intro.jfy-intro-out { opacity: 0; pointer-events: none; }
-
-/* ── Book container ── */
-#jfy-book {
+/* ── Book wrapper: fills same space as .jfy-notebook ── */
+#jfy-intro-wrap {
+  /* mirrors .jfy-notebook position in the grid */
+  grid-column: 2 / 12;
   position: relative;
-  width: min(90vw, 820px);
-  height: min(78vh, 560px);
-  display: flex;
+  height: calc(100dvh - var(--hh) - 40vw);
+  min-height: 260px;
+  display: none;          /* hidden by default; JS shows on first visit */
+  align-items: stretch;
   border-radius: 8px 18px 18px 8px;
-  box-shadow: -6px 0 28px rgba(0,0,0,0.5), 6px 0 40px rgba(0,0,0,0.35);
+  box-shadow: -6px 0 28px rgba(0,0,0,0.38), 4px 4px 40px rgba(0,0,0,0.22);
   overflow: hidden;
+  /* perspective for the cover flip */
+  perspective: 1400px;
+}
+/* when intro is active, grid-wrap shows the book row */
+.jfy-intro-active #jfy-intro-wrap { display: flex; }
+/* hide the real notebook + paper strip + history bar when intro is active */
+.jfy-intro-active .jfy-notebook,
+.jfy-intro-active .jfy-paper-wrap,
+.jfy-intro-active #jfy-history-bar { display: none !important; }
+
+/* tablet / desktop overrides (match .jfy-notebook breakpoints) */
+@media (min-width: 768px) {
+  #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 38vw); }
+}
+@media (min-width: 1024px) {
+  #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 360px); }
 }
 
-/* ── Spine shadow ── */
-#jfy-book::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0; width: 28px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.08) 60%, transparent 100%);
-  z-index: 5; pointer-events: none; border-radius: 8px 0 0 8px;
+/* ── Pages layer (cream background, always visible) ── */
+#jfy-intro-pages {
+  position: absolute; inset: 0;
+  background: #f8f4ed;
+  border-radius: inherit;
 }
 
-/* ── Cover page ── */
-#jfy-cover {
+/* ── Cover (sits on top, flips away on click) ── */
+#jfy-intro-cover {
   position: absolute; inset: 0;
   background-color: #3B1E0E;
+  /* leather grain */
   background-image:
-    repeating-linear-gradient(
-      100deg,
-      rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px,
-      transparent 1px, transparent 6px
-    ),
-    repeating-linear-gradient(
-      10deg,
-      rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1px,
-      transparent 1px, transparent 8px
-    ),
-    radial-gradient(ellipse at 30% 40%, rgba(90,40,10,0.55) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 70%, rgba(20,8,2,0.4) 0%, transparent 55%);
-  border-radius: 8px 18px 18px 8px;
+    repeating-linear-gradient(100deg,
+      rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
+      transparent 1px, transparent 7px),
+    repeating-linear-gradient(10deg,
+      rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px,
+      transparent 1px, transparent 9px),
+    radial-gradient(ellipse at 28% 38%, rgba(90,40,10,0.50) 0%, transparent 60%),
+    radial-gradient(ellipse at 72% 72%, rgba(20,8,2,0.38) 0%, transparent 55%);
+  border-radius: inherit;
   display: flex; flex-direction: column;
   align-items: flex-start; justify-content: flex-end;
-  padding: 10% 9% 9%;
-  z-index: 10; transition: transform 0.9s cubic-bezier(.77,0,.18,1);
+  padding: 9% 8% 8%;
+  cursor: pointer;
+  z-index: 20;
   transform-origin: left center;
-  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(.77,0,.18,1);
 }
-#jfy-cover.open {
-  transform: rotateY(-180deg);
-  pointer-events: none;
-}
-/* leather stitching border */
-#jfy-cover::after {
+/* stitching border */
+#jfy-intro-cover::after {
   content: '';
   position: absolute; inset: 14px;
-  border: 2px dashed rgba(255,255,255,0.10);
+  border: 2px dashed rgba(255,255,255,0.09);
   border-radius: 4px 14px 14px 4px;
+  pointer-events: none;
+}
+/* spine shadow strip */
+#jfy-intro-cover::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 32px;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.10) 60%, transparent 100%);
+  border-radius: 8px 0 0 8px;
+  pointer-events: none;
+}
+#jfy-intro-cover.flipped {
+  transform: rotateY(-180deg);
   pointer-events: none;
 }
 
 #jfy-cover-title {
   font-family: 'Georgia', serif;
-  font-size: clamp(22px, 4.5vw, 42px);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #e8d5b0;
-  line-height: 1.15;
-  margin-bottom: 8px;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  font-size: clamp(20px, 4vw, 40px);
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #e8d5b0;
+  line-height: 1.15; margin-bottom: 8px;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.55);
 }
 #jfy-cover-sub {
   font-family: 'Georgia', serif;
-  font-size: clamp(11px, 1.8vw, 15px);
-  color: rgba(232,213,176,0.65);
+  font-size: clamp(10px, 1.6vw, 14px);
+  color: rgba(232,213,176,0.60);
   letter-spacing: 0.18em;
-  text-transform: lowercase;
 }
-
-/* open-corner prompt */
-#jfy-cover-open {
-  position: absolute; bottom: 28px; right: 28px;
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
-  cursor: pointer; color: rgba(232,213,176,0.55);
-  font-size: 11px; letter-spacing: 0.12em; text-transform: lowercase;
+#jfy-cover-open-hint {
+  position: absolute; bottom: 24px; right: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: rgba(232,213,176,0.50); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: lowercase;
   font-family: 'Georgia', serif;
-  transition: color 0.2s;
+  transition: color 0.2s; pointer-events: none;
 }
-#jfy-cover-open:hover { color: rgba(232,213,176,0.9); }
-#jfy-cover-open svg { animation: jfy-bounce 1.6s ease-in-out infinite; }
-@keyframes jfy-bounce {
+#jfy-intro-cover:hover #jfy-cover-open-hint { color: rgba(232,213,176,0.85); }
+#jfy-cover-open-hint svg { animation: jfy-hint-bounce 1.8s ease-in-out infinite; }
+@keyframes jfy-hint-bounce {
   0%,100% { transform: translateY(0); }
   50%      { transform: translateY(5px); }
 }
 
-/* ── Pages area ── */
-#jfy-pages {
-  position: absolute; inset: 0;
-  background: #f9f5ee;
-  border-radius: 8px 18px 18px 8px;
-  overflow: hidden;
-}
-
-/* ── Individual intro pages (stacked, only current is visible) ── */
-.jfy-intro-page {
+/* ── Individual intro slides ── */
+.jfy-islide {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
-  padding: 7% 8% 6%;
+  padding: clamp(18px, 6%, 48px) clamp(20px, 8%, 64px) clamp(14px, 5%, 36px);
   opacity: 0; pointer-events: none;
-  transition: opacity 0.35s, transform 0.35s;
-  transform: translateX(40px);
+  transition: opacity 0.3s, transform 0.3s;
+  transform: translateX(36px);
 }
-.jfy-intro-page.active {
+.jfy-islide.active {
   opacity: 1; pointer-events: auto; transform: translateX(0);
 }
-.jfy-intro-page.exit-left {
-  opacity: 0; transform: translateX(-40px); pointer-events: none;
+.jfy-islide.exit-left {
+  opacity: 0; transform: translateX(-36px); pointer-events: none;
+}
+.jfy-islide.exit-right {
+  opacity: 0; transform: translateX(36px); pointer-events: none;
 }
 
-/* page number */
-.jfy-ipage-num {
-  font-size: 10px; letter-spacing: 0.14em; color: #bbb;
-  text-transform: uppercase; font-family: inherit; margin-bottom: auto;
+/* page number top-right */
+.jfy-islide-num {
   align-self: flex-end;
-}
-
-/* content area */
-.jfy-ipage-body {
-  flex: 1; display: flex; flex-direction: column;
-  justify-content: center; gap: 16px;
-  padding: 10% 0 6%;
-}
-
-.jfy-ipage-body p {
-  font-size: clamp(13px, 1.6vw, 16px);
-  line-height: 1.75;
-  color: #2a1a0e;
+  font-size: 10px; letter-spacing: 0.14em;
+  color: #c4b49a; text-transform: lowercase;
   font-family: 'Georgia', serif;
-  margin: 0;
+  margin-bottom: 0;
 }
 
-.jfy-ipage-body h2 {
-  font-family: inherit;
-  font-size: clamp(17px, 2.4vw, 26px);
+/* text body */
+.jfy-islide-body {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; gap: 14px;
+  padding: 8% 0 4%;
+}
+.jfy-islide-body h2 {
+  font-family: 'Georgia', serif;
+  font-size: clamp(16px, 2.2vw, 24px);
   font-weight: 700; color: #2a1a0e; margin: 0 0 4px;
 }
-
-/* ── Page-bottom controls ── */
-.jfy-ipage-foot {
-  display: flex; align-items: center; justify-content: space-between;
-  padding-top: 16px;
-  border-top: 1px solid rgba(0,0,0,0.08);
+.jfy-islide-body p {
+  font-family: 'Georgia', serif;
+  font-size: clamp(12px, 1.45vw, 15px);
+  line-height: 1.8; color: #3a2510; margin: 0;
 }
 
-.jfy-ipage-next {
-  background: #9A59C8; color: #fff; border: none;
-  border-radius: 20px; padding: 9px 22px;
-  font-size: 13px; font-weight: 600; font-family: inherit;
+/* ── Footer nav ── */
+.jfy-islide-foot {
+  display: flex; align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.09);
+  flex-wrap: wrap;
+}
+
+/* Skip — prominent pill on the left */
+.jfy-islide-skip {
+  background: #f0e9ff; color: #7d3fb8; border: 1.5px solid #c8a0f0;
+  border-radius: 20px; padding: 7px 16px;
+  font-size: 12px; font-weight: 600; font-family: inherit;
   cursor: pointer; letter-spacing: 0.04em;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.14s, color 0.14s;
+  white-space: nowrap;
 }
-.jfy-ipage-next:hover { background: #7d3fb8; transform: translateY(-1px); }
+.jfy-islide-skip:hover { background: #e3d4ff; color: #5c2d96; }
 
-.jfy-ipage-skip {
-  background: none; border: none; cursor: pointer;
-  font-size: 12px; color: #999; font-family: inherit;
-  text-decoration: underline; padding: 0;
-  transition: color 0.15s;
+/* dots — centred */
+.jfy-islide-dots {
+  flex: 1; display: flex; gap: 7px;
+  align-items: center; justify-content: center;
 }
-.jfy-ipage-skip:hover { color: #555; }
+.jfy-islide-dots span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #ddd; transition: background 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.jfy-islide-dots span.on { background: #9A59C8; transform: scale(1.25); }
 
-/* progress dots */
-.jfy-ipage-dots {
-  display: flex; gap: 6px; align-items: center;
+/* Back + Next */
+.jfy-islide-back {
+  background: transparent; color: #9A59C8;
+  border: 1.5px solid #c8a0f0; border-radius: 20px;
+  padding: 7px 15px; font-size: 12px; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+  transition: background 0.14s;
+  white-space: nowrap;
 }
-.jfy-ipage-dots span {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #ddd; transition: background 0.2s;
-}
-.jfy-ipage-dots span.on { background: #9A59C8; }
+.jfy-islide-back:hover { background: #f0e9ff; }
+.jfy-islide-back:disabled { opacity: 0.3; cursor: default; }
+.jfy-islide-back:disabled:hover { background: transparent; }
 
-/* ── Page-flip shadow during flip ── */
-#jfy-pages.flipping { box-shadow: inset -8px 0 18px rgba(0,0,0,0.12); }
+.jfy-islide-next {
+  background: #9A59C8; color: #fff; border: none;
+  border-radius: 20px; padding: 8px 20px;
+  font-size: 12px; font-weight: 600; font-family: inherit;
+  cursor: pointer; letter-spacing: 0.04em;
+  transition: background 0.14s, transform 0.1s;
+  white-space: nowrap;
+}
+.jfy-islide-next:hover { background: #7d3fb8; transform: translateY(-1px); }
 </style>
 
-<!-- Overlay -->
-<div id="jfy-intro" role="dialog" aria-label="Journal introduction" aria-modal="true">
-  <div id="jfy-book">
-
-    <!-- Pages (rendered beneath cover) -->
-    <div id="jfy-pages">
-
-      <!-- Page 1 -->
-      <div class="jfy-intro-page active" data-page="0">
-        <span class="jfy-ipage-num">p. 1</span>
-        <div class="jfy-ipage-body">
-          <p>this space is yours. slow down, reflect, and spend time with yourself. write freely, follow a prompt, hold onto meaningful moments, or simply leave pieces of your day behind.</p>
-          <p>there's no right way to fill these pages. this is meant to be entirely your own.</p>
-        </div>
-        <div class="jfy-ipage-foot">
-          <button class="jfy-ipage-skip">skip</button>
-          <div class="jfy-ipage-dots">
-            <span class="on"></span><span></span><span></span><span></span><span></span>
-          </div>
-          <button class="jfy-ipage-next">next →</button>
-        </div>
-      </div>
-
-      <!-- Page 2 -->
-      <div class="jfy-intro-page" data-page="1">
-        <span class="jfy-ipage-num">p. 2</span>
-        <div class="jfy-ipage-body">
-          <p>gather the pieces of your experience in one place.</p>
-          <p>you can create pages, reflect on moments you've had throughout the website, respond to something you saw, and build pages that feel personal to you.</p>
-        </div>
-        <div class="jfy-ipage-foot">
-          <button class="jfy-ipage-skip">skip</button>
-          <div class="jfy-ipage-dots">
-            <span></span><span class="on"></span><span></span><span></span><span></span>
-          </div>
-          <button class="jfy-ipage-next">next →</button>
-        </div>
-      </div>
-
-      <!-- Page 3 -->
-      <div class="jfy-intro-page" data-page="2">
-        <span class="jfy-ipage-num">p. 3</span>
-        <div class="jfy-ipage-body">
-          <p>let it become a reflection of the things you want to hold onto and the things that bring joy to your life.</p>
-        </div>
-        <div class="jfy-ipage-foot">
-          <button class="jfy-ipage-skip">skip</button>
-          <div class="jfy-ipage-dots">
-            <span></span><span></span><span class="on"></span><span></span><span></span>
-          </div>
-          <button class="jfy-ipage-next">next →</button>
-        </div>
-      </div>
-
-      <!-- Page 4 — Creating a Page -->
-      <div class="jfy-intro-page" data-page="3">
-        <span class="jfy-ipage-num">p. 4</span>
-        <div class="jfy-ipage-body">
-          <h2>Creating A Page</h2>
-          <p>drag and drop elements from the workspace into the journal area to apply them.</p>
-          <p>if you want to change how something looks, select from the options in the pop-up at the bottom of the journal area.</p>
-        </div>
-        <div class="jfy-ipage-foot">
-          <button class="jfy-ipage-skip">skip</button>
-          <div class="jfy-ipage-dots">
-            <span></span><span></span><span></span><span class="on"></span><span></span>
-          </div>
-          <button class="jfy-ipage-next">next →</button>
-        </div>
-      </div>
-
-      <!-- Page 5 — Journal Entries -->
-      <div class="jfy-intro-page" data-page="4">
-        <span class="jfy-ipage-num">p. 5</span>
-        <div class="jfy-ipage-body">
-          <h2>Journal Entries</h2>
-          <p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p>
-          <p>add entries to "Between Us" to share with the community.</p>
-          <p>get started, and feel free to make this your own.</p>
-        </div>
-        <div class="jfy-ipage-foot">
-          <button class="jfy-ipage-skip">skip</button>
-          <div class="jfy-ipage-dots">
-            <span></span><span></span><span></span><span></span><span class="on"></span>
-          </div>
-          <button class="jfy-ipage-next" id="jfy-intro-begin">begin ↗</button>
-        </div>
-      </div>
-
-    </div><!-- /jfy-pages -->
-
-    <!-- Cover (sits on top, flips away) -->
-    <div id="jfy-cover">
-      <div id="jfy-cover-title">Your Journal</div>
-      <div id="jfy-cover-sub">this is just for you.</div>
-      <div id="jfy-cover-open" role="button" tabindex="0" aria-label="Open journal">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <path d="M4 8 L11 15 L18 8" stroke="currentColor" stroke-width="2.2"
-                stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span>open</span>
-      </div>
-    </div>
-
-  </div><!-- /jfy-book -->
-</div><!-- /jfy-intro -->
-
+<!-- Insert the book into main, inside the grid-wrap -->
 <script>
 (function(){
   var SEEN_KEY = 'jfy_intro_seen';
-  var overlay  = document.getElementById('jfy-intro');
-  if(!overlay) return;
 
-  // If already seen, skip entirely
-  if(localStorage.getItem(SEEN_KEY)){
-    overlay.style.display = 'none';
-    return;
+  // If already seen, nothing to do
+  if(localStorage.getItem(SEEN_KEY)) return;
+
+  /* ── Build the book HTML and inject it into .jfy-grid-wrap ── */
+  var SLIDES = [
+    {
+      num: 'p. 1',
+      body: '<p>this space is yours. slow down, reflect, and spend time with yourself. write freely, follow a prompt, hold onto meaningful moments, or simply leave pieces of your day behind.</p><p>there\'s no right way to fill these pages. this is meant to be entirely your own.</p>'
+    },
+    {
+      num: 'p. 2',
+      body: '<p>gather the pieces of your experience in one place.</p><p>you can create pages, reflect on moments you\'ve had throughout the website, respond to something you saw, and build pages that feel personal to you.</p>'
+    },
+    {
+      num: 'p. 3',
+      body: '<p>let it become a reflection of the things you want to hold onto and the things that bring joy to your life.</p>'
+    },
+    {
+      num: 'p. 4',
+      body: '<h2>Creating A Page</h2><p>drag and drop elements from the workspace into the journal area to apply them.</p><p>if you want to change how something looks, select from the options in the pop-up at the bottom of the journal area.</p>'
+    },
+    {
+      num: 'p. 5',
+      body: '<h2>Journal Entries</h2><p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p><p>add entries to "Between Us" to share with the community.</p><p>get started, and feel free to make this your own.</p>'
+    }
+  ];
+  var TOTAL = SLIDES.length;
+
+  function makeDots(active){
+    return SLIDES.map(function(_,i){
+      return '<span'+(i===active?' class="on"':'')+' data-dot="'+i+'"></span>';
+    }).join('');
   }
 
-  var cover    = document.getElementById('jfy-cover');
-  var pages    = document.getElementById('jfy-pages');
-  var allPages = Array.from(document.querySelectorAll('.jfy-intro-page'));
-  var current  = 0;
+  function makeSlide(s, i){
+    var isFirst = i === 0;
+    var isLast  = i === TOTAL - 1;
+    return [
+      '<div class="jfy-islide'+(i===0?' active':'')+'" data-slide="'+i+'">',
+        '<span class="jfy-islide-num">'+s.num+'</span>',
+        '<div class="jfy-islide-body">'+s.body+'</div>',
+        '<div class="jfy-islide-foot">',
+          '<button class="jfy-islide-skip">skip intro</button>',
+          '<div class="jfy-islide-dots">'+makeDots(i)+'</div>',
+          '<button class="jfy-islide-back"'+(isFirst?' disabled':'')+'>← back</button>',
+          '<button class="jfy-islide-next">'+(isLast?'begin ↗':'next →')+'</button>',
+        '</div>',
+      '</div>'
+    ].join('');
+  }
+
+  var bookHTML = [
+    '<div id="jfy-intro-wrap">',
+      '<div id="jfy-intro-pages">',
+        SLIDES.map(makeSlide).join(''),
+      '</div>',
+      '<div id="jfy-intro-cover">',
+        '<div id="jfy-cover-title">Your Journal</div>',
+        '<div id="jfy-cover-sub">this is just for you.</div>',
+        '<div id="jfy-cover-open-hint">',
+          '<svg width="20" height="20" viewBox="0 0 22 22" fill="none">',
+            '<path d="M4 8L11 15L18 8" stroke="currentColor" stroke-width="2.3"',
+            ' stroke-linecap="round" stroke-linejoin="round"/>',
+          '</svg>',
+          '<span>open</span>',
+        '</div>',
+      '</div>',
+    '</div>'
+  ].join('');
+
+  // Insert into the grid-wrap (before .jfy-notebook)
+  var gridWrap = document.querySelector('.jfy-grid-wrap');
+  if(!gridWrap) return;
+  gridWrap.insertAdjacentHTML('afterbegin', bookHTML);
+
+  // Mark body so CSS can hide the real notebook / toolbar
+  document.body.classList.add('jfy-intro-active');
+
+  /* ── State ── */
+  var current   = 0;
   var coverOpen = false;
+  var animating = false;
 
-  function dismissIntro(){
+  var cover  = document.getElementById('jfy-intro-cover');
+  var slides = Array.from(document.querySelectorAll('.jfy-islide'));
+
+  /* ── Dismiss: show real notebook ── */
+  function dismiss(){
     localStorage.setItem(SEEN_KEY, '1');
-    overlay.classList.add('jfy-intro-out');
-    setTimeout(function(){ overlay.style.display = 'none'; }, 550);
+    document.body.classList.remove('jfy-intro-active');
+    var wrap = document.getElementById('jfy-intro-wrap');
+    if(wrap) wrap.remove();
   }
 
-  function goToPage(idx){
-    var cur = allPages[current];
-    cur.classList.remove('active');
-    cur.classList.add('exit-left');
-    setTimeout(function(){ cur.classList.remove('exit-left'); }, 380);
+  /* ── Navigate between slides ── */
+  function goTo(idx, direction){
+    if(animating || idx === current) return;
+    animating = true;
+    var from = slides[current];
+    var to   = slides[idx];
 
-    current = idx;
-    var next = allPages[current];
-    next.classList.add('active');
+    // exit current
+    from.classList.remove('active');
+    from.classList.add(direction === 'forward' ? 'exit-left' : 'exit-right');
+
+    // prepare incoming (start offscreen opposite side)
+    to.style.transition = 'none';
+    to.classList.remove('exit-left','exit-right','active');
+    to.style.transform = direction === 'forward' ? 'translateX(36px)' : 'translateX(-36px)';
+    to.style.opacity = '0';
+
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        to.style.transition = '';
+        to.style.transform = '';
+        to.style.opacity = '';
+        to.classList.add('active');
+        current = idx;
+        setTimeout(function(){
+          from.classList.remove('exit-left','exit-right');
+          animating = false;
+        }, 330);
+      });
+    });
   }
 
+  /* ── Open cover ── */
   function openCover(){
     if(coverOpen) return;
     coverOpen = true;
-    cover.classList.add('open');
-    // slight delay so cover flip is visible before pages appear
-    setTimeout(function(){
-      allPages[0].classList.add('active');
-    }, 200);
+    cover.classList.add('flipped');
   }
 
-  // Cover click / keyboard
   cover.addEventListener('click', openCover);
-  cover.addEventListener('keydown', function(e){
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openCover(); }
-  });
-  document.getElementById('jfy-cover-open').addEventListener('click', function(e){
-    e.stopPropagation(); openCover();
-  });
 
-  // Next / Skip buttons
-  allPages.forEach(function(page, i){
-    var nextBtn = page.querySelector('.jfy-ipage-next');
-    var skipBtn = page.querySelector('.jfy-ipage-skip');
+  /* ── Wire slide buttons ── */
+  slides.forEach(function(slide, i){
+    slide.querySelector('.jfy-islide-skip').addEventListener('click', dismiss);
 
-    nextBtn && nextBtn.addEventListener('click', function(){
-      if(i < allPages.length - 1){
-        goToPage(i + 1);
-      } else {
-        dismissIntro();
-      }
+    slide.querySelector('.jfy-islide-next').addEventListener('click', function(){
+      if(i < TOTAL - 1) goTo(i + 1, 'forward');
+      else dismiss();
     });
 
-    skipBtn && skipBtn.addEventListener('click', dismissIntro);
+    var backBtn = slide.querySelector('.jfy-islide-back');
+    backBtn.addEventListener('click', function(){
+      if(i > 0) goTo(i - 1, 'back');
+    });
+
+    // dot clicks
+    slide.querySelectorAll('.jfy-islide-dots [data-dot]').forEach(function(dot){
+      dot.addEventListener('click', function(){
+        var target = parseInt(dot.dataset.dot, 10);
+        if(target !== current) goTo(target, target > current ? 'forward' : 'back');
+      });
+    });
   });
 
-  // Keyboard nav while overlay is open
+  /* ── Keyboard ── */
   document.addEventListener('keydown', function(e){
-    if(overlay.style.display === 'none') return;
-    if(e.key === 'ArrowRight' || e.key === 'Enter'){
+    if(!document.body.classList.contains('jfy-intro-active')) return;
+    if(e.key === 'ArrowRight' || (e.key === 'Enter' && !coverOpen)){
       if(!coverOpen){ openCover(); return; }
-      if(current < allPages.length - 1) goToPage(current + 1);
-      else dismissIntro();
+      if(current < TOTAL - 1) goTo(current + 1, 'forward');
+      else dismiss();
     }
-    if(e.key === 'Escape') dismissIntro();
+    if(e.key === 'ArrowLeft' && coverOpen){
+      if(current > 0) goTo(current - 1, 'back');
+    }
+    if(e.key === 'Escape') dismiss();
   });
 
 })();
 </script>
+</body>
+</html>
