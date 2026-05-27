@@ -500,12 +500,42 @@ body.jfy-scissors-active .jfy-scissors {
 @media (min-width: 768px) {
   .jfy-grid-wrap { padding-top: calc(12vw + 54px); padding-bottom: 22vw; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); }
-  .jfy-washi     { top: -10vw; left: -8vw;  width: 28vw; max-width: 200px; }
-  .jfy-frames    { top: -8vw;  right: -6vw; width: 26vw; max-width: 190px; }
-  .jfy-stickers  { bottom: -20vw; left: -12vw; width: 38vw; }
-  .jfy-pen       { bottom: -28vw; width: 26vw; }
-  .jfy-scissors  { bottom: -20vw; right: -12vw; width: 36vw; }
-  .jfy-paper     { width: 110vw; margin-left: -8vw; }
+}
+
+/* ── Tablet prop positions (768–1023px) ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Washi: top-left, overlaps notebook top edge, clips off left */
+  .jfy-washi {
+    top: -6vw; left: -7vw;
+    width: 32vw; max-width: 220px;
+    z-index: 25;
+  }
+  /* Scissors: top-right, overlaps notebook top edge, clips off right */
+  .jfy-scissors {
+    top: -7vw; right: -7vw; left: auto; bottom: auto;
+    width: 30vw; max-width: 210px;
+    z-index: 25;
+  }
+  /* Stickers: top-center-left, slides UNDER the notebook pages */
+  .jfy-stickers {
+    top: 4vw; left: 4vw; bottom: auto; right: auto;
+    width: 34vw; max-width: 240px;
+    z-index: 0; /* below .jfy-nb-layer (z:10) and #jfy-notebook-left-page (z:5) */
+  }
+  /* Pen: top-center-right, sitting outside notebook — no overlap, stays on top */
+  .jfy-pen {
+    top: 2vw; right: -2vw; left: auto; bottom: auto;
+    width: 22vw; max-width: 160px;
+    z-index: 22; /* keep default pen z-index */
+  }
+  /* Frames: bottom-right, outside notebook, no clip */
+  .jfy-frames {
+    bottom: -18vw; right: -2vw; top: auto; left: auto;
+    width: 28vw; max-width: 200px;
+    z-index: 0;
+  }
+  /* Paper: bottom-left, under notebook, clips a little off left */
+  .jfy-paper { width: 80vw; margin-left: -6vw; }
 }
 
 /* ── Tablet notebook two-page spread ── */
