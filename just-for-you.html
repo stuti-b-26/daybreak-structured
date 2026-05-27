@@ -624,12 +624,14 @@ body.jfy-scissors-active .jfy-scissors {
     width: 195px; max-width: none;
     z-index: 22;
   }
-  /* Scissors: notebook top is fixed at 294px (64px header + 230px grid padding).
-     top: -200px → scissors top from viewport = 94px, safely below the header.
-     Slightly scaled up from tablet (20vw vs 28vw tablet, proportionally larger).
-     right: 0 keeps them fully within the viewport right edge. */
+  /* Scissors: position:fixed anchors to viewport right edge at any desktop width.
+     top: calc(var(--hh) + 10px) = 74px sits just below the header.
+     right: -10px clips the handle tip slightly off the viewport right edge.
+     Width 20vw scales proportionally. */
   .jfy-scissors {
-    top: -200px; right: 0; left: auto; bottom: auto;
+    position: fixed;
+    top: calc(var(--hh) + 10px);
+    right: -10px; left: auto; bottom: auto;
     width: 20vw; max-width: none;
     z-index: 25;
   }
