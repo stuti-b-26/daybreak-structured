@@ -284,16 +284,17 @@ img{display:block;max-width:100%}
   .float-label--life-hard{top:0;left:10%}
   .float-label--everyone{top:148.58vw;left:67%;right:auto;width:auto}
 
-  /* Decorative SVGs — top/left pixel values scaled the same way */
-  #break-intro-top{top:clamp(35px,3.5vw,48px);left:14%;width:clamp(300px,38%,500px)}
-  #silly-to-mess{top:60vw;right:10.83vw;width:clamp(200px,40%,380px)}
-  #mess-btn-to-self{top:46.42vw;left:-3.33vw;width:clamp(240px,45%,440px)}
+  /* Decorative SVGs — all positions and sizes in vw so they scale with the viewport */
+  #break-intro-top{top:3.5vw;left:14%;width:38%}
+  #silly-to-mess{top:60vw;right:10.83vw;width:40%}
+  #mess-btn-to-self{top:46.42vw;left:-3.33vw;width:45%}
   #green-swish-long{top:29.17vw;left:-26.67vw;width:80vw}
-  #orange-shape{top:29.17vw;left:calc(91% + 1.67vw);width:clamp(80px,12%,142px)}
-  #yellow-scribble{top:85vw;left:-1.67vw;width:clamp(140px,28%,300px)}
-  #break-bubble-middle{top:123.33vw;left:calc(55% - 16.67vw);width:clamp(220px,40%,420px)}
-  #between-to-sticker{top:167.5vw;left:10.83vw;width:clamp(180px,32%,320px)}
-  #sticker-to-you{top:216.67vw}
+  #orange-shape{top:29.17vw;left:calc(91% + 1.67vw);width:12%}
+  #yellow-scribble{top:85vw;left:-1.67vw;width:28%}
+  #break-bubble-middle{top:123.33vw;left:calc(55% - 16.67vw);width:40%}
+  #between-to-sticker{top:167.5vw;left:10.83vw;width:32%}
+  #sticker-to-you{top:216.67vw;right:0;width:92%;height:32vw}
+  #you-to-end{top:244.17vw;left:1%;width:50%}
 
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
