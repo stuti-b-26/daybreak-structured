@@ -317,10 +317,10 @@ img{display:block;max-width:100%}
   .card--shh .card-btn{bottom:2vw;left:1.67vw;right:auto}
 
   /* Override inline styles on buttons with large fixed padding/font-size/position */
-  .card--mess-hall .card-btn{padding:4.33vw 3.33vw !important;font-size:1.58vw !important}
-  .card--selfless .card-btn{padding:2.17vw 5.33vw !important;font-size:1.58vw !important;left:-16.67vw !important}
-  .card--shh .card-btn{padding:3.33vw 3vw !important;font-size:1.58vw !important}
-  .card--sticker-maker .card-btn{padding:3.33vw 3.67vw !important;font-size:1.58vw !important}
+  .card--mess-hall .card-btn{padding:1.5vw 2vw !important;font-size:1.33vw !important}
+  .card--selfless .card-btn{padding:1.33vw 3vw !important;font-size:1.33vw !important;left:-10vw !important}
+  .card--shh .card-btn{padding:1.5vw 2vw !important;font-size:1.33vw !important}
+  .card--sticker-maker .card-btn{padding:1.5vw 2vw !important;font-size:1.33vw !important}
 
   /* Mission — pull up so you-to-end line meets green circle center */
   #mission{margin-top:8vw}
