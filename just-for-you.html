@@ -541,18 +541,6 @@ body.jfy-scissors-active .jfy-scissors {
     line-height: 1.7;
   }
 
-  /* Canvas: right half only */
-  .jfy-nb-layer {
-    left: 50%;
-    border-radius: 0 18px 18px 0;
-  }
-
-  /* Entry viewer: right half only */
-  #jfy-entry-viewer {
-    left: 50%;
-    border-radius: 0 18px 18px 0;
-  }
-
   /* Center spine on notebook */
   .jfy-notebook::after {
     content: '';
@@ -563,6 +551,8 @@ body.jfy-scissors-active .jfy-scissors {
     z-index: 15; pointer-events: none;
   }
 }
+/* NOTE: .jfy-nb-layer and #jfy-entry-viewer tablet overrides live in the
+   second <style> block below so they come after the inset:0 base rules. */
 
 /* ── Desktop ── */
 @media (min-width: 1024px) {
@@ -3468,6 +3458,20 @@ window._jfyNotebook = {
 }
 .jfy-entry-nav:hover .jfy-entry-nav-label { opacity: 1; }
 .jfy-entry-nav { overflow: visible; }
+
+/* ── Tablet: notebook right-half overrides (must follow inset:0 base rules) ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Canvas confined to right half */
+  .jfy-nb-layer {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+  /* Entry viewer confined to right half */
+  #jfy-entry-viewer {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+}
 </style>
 
 <script>
@@ -3859,7 +3863,14 @@ window._jfyNotebook = {
       var editId = window._jfyEditingEntryId || null;
       function goOlder(){
         loadEntries();
-        if(entries.length > 0) showEntry(0, 'fwd');
+        if(entries.length > 0){
+          /* Tablet pairs: (canvas,entry0), (entry1,entry2), (entry3,entry4)…
+             First press jumps to idx=1 so entry0 stays on the left page
+             of the live view and entry1 becomes the right-page entry.
+             With only 1 entry, idx=0 so it still shows on the right. */
+          var startIdx = isTablet() ? Math.min(1, entries.length - 1) : 0;
+          showEntry(startIdx, 'fwd');
+        }
       }
       if(nb && nb.hasContent()){
         nb.saveAndClear(editId, function(){
