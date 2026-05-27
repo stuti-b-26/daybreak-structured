@@ -316,16 +316,16 @@ img{display:block;max-width:100%}
   .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:0;padding:0;align-items:center;overflow:visible}
 
   /* Hide all decorative SVGs on mobile */
-  #green-swish-long{display:none}
-  #break-intro-top{display:none}
-  #silly-to-mess{display:none}
-  #mess-btn-to-self{display:none}
-  #orange-shape{display:none}
-  #yellow-scribble{display:none}
-  #between-to-sticker{display:none}
-  #break-bubble-middle{display:none}
-  #sticker-to-you{display:none}
-  #you-to-end{display:none}
+  #green-swish-long{display:none !important}
+  #break-intro-top{display:none !important}
+  #silly-to-mess{display:none !important}
+  #mess-btn-to-self{display:none !important}
+  #orange-shape{display:none !important}
+  #yellow-scribble{display:none !important}
+  #between-to-sticker{display:none !important}
+  #break-bubble-middle{display:none !important}
+  #sticker-to-you{display:none !important}
+  #you-to-end{display:none !important}
 
   /* ── Card reorder: Group 1 → divider → Group 2 ── */
   .float-label--life-hard{order:10;align-self:center;text-align:center}
