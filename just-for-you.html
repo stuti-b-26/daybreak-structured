@@ -3038,10 +3038,35 @@ window._jfyNotebook = {
 
 /* ── Tablet two-page spread ── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Cover stays full-width — flips open like a real book cover */
-  /* (no override needed; cover uses inset:0 and transform-origin:left by default) */
+  /* Portrait cover: narrow, centered */
+  #jfy-intro-wrap {
+    grid-column: 1 / 13;           /* span full grid so centering works */
+    justify-self: center;
+    width: min(42%, 320px);        /* portrait book width */
+    border-radius: 10px 14px 14px 10px;
+    transition: width 0.75s cubic-bezier(.77,0,.18,1),
+                border-radius 0.75s cubic-bezier(.77,0,.18,1);
+  }
+  /* Expanded: full two-page spread after cover opens */
+  #jfy-intro-wrap.cover-open {
+    width: 100%;
+    border-radius: 8px 18px 18px 8px;
+  }
 
-  /* Pages occupy only the right half */
+  /* Spine shadow — only visible after cover opens */
+  #jfy-intro-wrap::before {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    left: calc(50% - 1px); width: 2px;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 100%);
+    z-index: 25; pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s 0.5s; /* fades in after expand finishes */
+  }
+  #jfy-intro-wrap.cover-open::before { opacity: 1; }
+
+  /* Pages occupy only the right half (visible once cover-open) */
   #jfy-intro-pages {
     left: 50%;
     border-radius: 0 18px 18px 0;
@@ -3082,17 +3107,6 @@ window._jfyNotebook = {
     font-family: 'Bad Script', cursive;
     font-size: clamp(13px, 1.55vw, 16px);
     line-height: 1.85; color: #3a2510; margin: 0;
-  }
-
-  /* Center spine shadow */
-  #jfy-intro-wrap::before {
-    content: '';
-    position: absolute; top: 0; bottom: 0;
-    left: calc(50% - 1px); width: 2px;
-    background: linear-gradient(180deg,
-      rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 100%);
-    z-index: 25; pointer-events: none;
-    border-radius: 0;
   }
 }
 
@@ -3549,12 +3563,19 @@ window._jfyNotebook = {
     if(wrap) wrap.remove();
   }
 
+  function isTabletIntro(){
+    return window.matchMedia('(min-width:768px) and (max-width:1023px)').matches;
+  }
+
   function openCover(){
     if(coverOpen) return;
     coverOpen = true;
     var cover = document.getElementById('jfy-intro-cover');
+    var wrap  = document.getElementById('jfy-intro-wrap');
     if(cover) cover.classList.add('flipped');
-    /* Tablet: left page shows inside-cover blank while on slide 0 */
+    /* Tablet: expand wrap to two-page spread, reveal spine */
+    if(wrap && isTabletIntro()) wrap.classList.add('cover-open');
+    /* Left page shows blank inside-cover while on slide 0 */
     updateLeftPage(-1);
   }
 
@@ -3754,8 +3775,10 @@ window._jfyNotebook = {
   window.addEventListener('resize', function(){ updateNbLeftPage(); });
 
   function updateArrows(){
-    // ‹ (prev/older): visible when entries exist AND we're not at the oldest
-    var hasPrev = entries.length > 0 && (entryIdx === -1 || entryIdx < entries.length-1);
+    var step = isTablet() ? 2 : 1;
+    // ‹ (prev/older): visible when there's an entry at entryIdx+step
+    var hasPrev = entries.length > 0 &&
+      (entryIdx === -1 || entryIdx + step <= entries.length - 1);
     prevBtn.style.opacity = hasPrev ? '1' : '0.28';
     prevBtn.style.pointerEvents = hasPrev ? '' : 'none';
     // › (next/newer): only visible when we're on a past entry
@@ -3849,19 +3872,22 @@ window._jfyNotebook = {
         window._jfyEditingEntryId=null; window._jfyEditingEntryIdx=null; window._jfyEditBg=null;
         goOlder();
       }
-    } else if(entryIdx < entries.length-1){
-      showEntry(entryIdx+1, 'fwd'); // go older
+    } else {
+      var step = isTablet() ? 2 : 1;
+      if(entryIdx + step <= entries.length - 1){
+        showEntry(entryIdx + step, 'fwd'); // go older (by 2 on tablet)
+      }
     }
   });
 
   nextBtn.addEventListener('click', function(){
     loadEntries();
-    if(entryIdx > 0){
-      showEntry(entryIdx-1, 'back');   // go newer entry
-    } else {
-      // At most-recent entry (or already live): go to blank new-entry page
+    var step = isTablet() ? 2 : 1;
+    if(entryIdx >= step){
+      showEntry(entryIdx - step, 'back'); // go newer (by 2 on tablet)
+    } else if(entryIdx >= 0){
+      // Already at most-recent spread → return to live blank canvas
       closeEntry();
-      // Ensure notebook is clear for a fresh entry
       if(window._jfyNotebook) window._jfyNotebook.clearAll();
     }
   });
