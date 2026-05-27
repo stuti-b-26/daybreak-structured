@@ -30,7 +30,7 @@ img{display:block;max-width:100%}
 
 /* ── HEADER ── */
 #site-header{
-  position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:1000;
+  position:fixed;top:0;left:0;right:0;height:var(--hh);z-index:9100;
   background:#fff;display:grid;grid-template-columns:repeat(12,1fr);column-gap:var(--col-gap);isolation:isolate;
 }
 .header-inner{grid-column:2/12;display:flex;align-items:center;height:100%}
@@ -84,7 +84,7 @@ img{display:block;max-width:100%}
 
 .mobile-menu-panel{
   position:fixed;top:var(--hh);left:0;right:0;background:var(--yellow);
-  z-index:999;padding:28px 24px 32px;
+  z-index:9090;padding:28px 24px 32px;
   display:grid;grid-template-columns:50% 50%;gap:28px 16px;
   transform:translateY(-8px);opacity:0;pointer-events:none;
   transition:opacity .25s,transform .25s;
