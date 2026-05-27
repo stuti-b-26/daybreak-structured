@@ -1721,44 +1721,72 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 
   function init(){
     items = [];
+    var scrollY = window.scrollY;
     ids.forEach(function(id){
       var svg = document.getElementById(id);
-      if (!svg) return;
+      if(!svg) return;
+      var rect = svg.getBoundingClientRect();
+      var svgTop    = scrollY + rect.top;
+      var svgBottom = svgTop + rect.height;
       var pathData = [];
       svg.querySelectorAll('path,line,polyline,circle,ellipse').forEach(function(p){
         var len;
         try { len = p.getTotalLength(); } catch(e){ return; }
-        p.style.strokeDasharray = len;
+        p.style.strokeDasharray  = len;
         p.style.strokeDashoffset = len;
         p.style.transition = 'none';
-        pathData.push({path:p, length:len});
+        // Record each path's top Y on the page so we can sort top-to-bottom
+        var pr   = p.getBoundingClientRect();
+        var topY = scrollY + pr.top;
+        pathData.push({path:p, length:len, topY:topY});
       });
-      if (pathData.length) items.push({svg:svg, paths:pathData});
+      if(!pathData.length) return;
+      // Sort paths within this SVG from top to bottom
+      pathData.sort(function(a,b){ return a.topY - b.topY; });
+      items.push({svg:svg, paths:pathData, svgTop:svgTop, svgBottom:svgBottom});
     });
+    // Sort SVGs from top to bottom by their page position
+    items.sort(function(a,b){ return a.svgTop - b.svgTop; });
     update();
   }
 
   function update(){
+    if(!items.length) return;
     var scrollY = window.scrollY;
-    var vh = window.innerHeight;
-    items.forEach(function(item){
-      var rect = item.svg.getBoundingClientRect();
-      var svgTop = scrollY + rect.top;
-      var svgBottom = svgTop + (rect.height || item.svg.offsetHeight);
-      // Draw starts when SVG top enters viewport bottom, finishes when SVG is fully in viewport
-      var drawStart = svgTop - vh;
-      var drawEnd = svgBottom - vh * 0.5;
-      var range = drawEnd - drawStart;
-      var progress = range > 0 ? Math.max(0, Math.min(1, (scrollY - drawStart) / range)) : 0;
-      item.paths.forEach(function(pd){
-        pd.path.style.strokeDashoffset = pd.length * (1 - progress);
+    var vh      = window.innerHeight;
+    var n       = items.length;
+
+    // Global draw window: starts when the first SVG enters the viewport,
+    // ends when the last SVG has scrolled to mid-viewport.
+    var drawStart = items[0].svgTop    - vh;
+    var drawEnd   = items[n-1].svgBottom - vh * 0.4;
+    var range     = drawEnd - drawStart;
+    var globalProg = range > 0 ? Math.max(0, Math.min(1, (scrollY - drawStart) / range)) : 0;
+
+    // Each SVG gets an equal slice of the global progress.
+    // Within each SVG, paths draw sequentially top-to-bottom.
+    items.forEach(function(item, si){
+      var svgStart = si       / n;
+      var svgEnd   = (si + 1) / n;
+      var svgProg  = svgEnd > svgStart
+        ? Math.max(0, Math.min(1, (globalProg - svgStart) / (svgEnd - svgStart)))
+        : 1;
+
+      var m = item.paths.length;
+      item.paths.forEach(function(pd, pi){
+        var pStart = pi       / m;
+        var pEnd   = (pi + 1) / m;
+        var pProg  = pEnd > pStart
+          ? Math.max(0, Math.min(1, (svgProg - pStart) / (pEnd - pStart)))
+          : 1;
+        pd.path.style.strokeDashoffset = pd.length * (1 - pProg);
       });
     });
   }
 
   window.addEventListener('scroll', update, {passive:true});
   window.addEventListener('resize', init);
-  if (document.readyState === 'loading') {
+  if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
