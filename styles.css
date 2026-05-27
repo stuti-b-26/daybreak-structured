@@ -144,6 +144,7 @@ img{display:block;max-width:100%}
 #you-to-end{position:absolute;top:2930px;left:1%;width:clamp(350px,50%,600px);height:auto;pointer-events:none;z-index:1}
 #green-circle{display:block;margin:0 auto 16px;width:128px;height:auto}
 #green-scribble{position:absolute;top:2520px;right:0;width:clamp(260px,36%,420px);height:auto;pointer-events:none;z-index:1}
+.sticker-card-deco{display:none;position:absolute;height:auto;pointer-events:none;z-index:0}
 
 /* ── CARDS ── */
 #cards{background:#fff;padding-top:48px;padding-bottom:0;position:relative}
@@ -372,9 +373,13 @@ img{display:block;max-width:100%}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:block;position:absolute !important;bottom:0;left:50%;transform:translateX(-50%);width:72%;height:auto;z-index:1}
-  /* teal-bw-us and green-scribble hidden on mobile — height:auto flex container causes them to extend scroll area */
+  /* teal-bw-us and green-scribble hidden on mobile — originals outside card extend scroll area */
   #teal-bw-us{display:none !important}
   #green-scribble{display:none !important}
+  /* Mobile copies live inside the sticker-maker card so they're clipped to it */
+  .sticker-card-deco{display:block}
+  .sticker-card-deco--teal{top:0;left:0;width:55%}
+  .sticker-card-deco--green{bottom:0;right:0;width:40%}
 
   /* ── Absolutely positioned connectors ── */
   /* break-intro-top: circles "break." in the float-label and flows into silly decisions */
