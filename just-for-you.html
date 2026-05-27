@@ -2942,10 +2942,7 @@ document.addEventListener('keydown', function(e){
 <!-- Insert the book into main, inside the grid-wrap -->
 <script>
 (function(){
-  var SEEN_KEY = 'jfy_intro_seen';
-
-  // If already seen, nothing to do
-  if(localStorage.getItem(SEEN_KEY)) return;
+  // Intro opens every page load
 
   /* ── Build the book HTML and inject it into .jfy-grid-wrap ── */
   var SLIDES = [
@@ -3032,7 +3029,6 @@ document.addEventListener('keydown', function(e){
 
   /* ── Dismiss: show real notebook ── */
   function dismiss(){
-    localStorage.setItem(SEEN_KEY, '1');
     document.body.classList.remove('jfy-intro-active');
     var wrap = document.getElementById('jfy-intro-wrap');
     if(wrap) wrap.remove();
