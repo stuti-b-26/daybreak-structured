@@ -508,6 +508,62 @@ body.jfy-scissors-active .jfy-scissors {
   .jfy-paper     { width: 110vw; margin-left: -8vw; }
 }
 
+/* ── Tablet notebook two-page spread ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Left page of the open notebook */
+  #jfy-notebook-left-page {
+    display: flex;
+    position: absolute;
+    inset: 0 50% 0 0;
+    background: #f8f4ed;
+    border-radius: 18px 0 0 18px;
+    overflow: hidden;
+    z-index: 5;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  #jfy-notebook-left-page img {
+    max-width: 88%; max-height: 78%;
+    border-radius: 6px;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.14);
+    object-fit: contain;
+  }
+  #jfy-notebook-left-page .nb-left-label {
+    font-family: 'Antonio', sans-serif;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #c4b49a; text-align: center; margin-top: 10px;
+  }
+  #jfy-notebook-left-page .nb-left-empty {
+    font-family: 'Bad Script', cursive;
+    font-size: 14px; color: #ccc; text-align: center;
+    line-height: 1.7;
+  }
+
+  /* Canvas: right half only */
+  .jfy-nb-layer {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+
+  /* Entry viewer: right half only */
+  #jfy-entry-viewer {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+
+  /* Center spine on notebook */
+  .jfy-notebook::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    left: calc(50% - 1px); width: 2px;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.05) 100%);
+    z-index: 15; pointer-events: none;
+  }
+}
+
 /* ── Desktop ── */
 @media (min-width: 1024px) {
   .jfy-grid-wrap { padding-top: 164px; padding-bottom: 180px; }
@@ -2982,19 +3038,8 @@ window._jfyNotebook = {
 
 /* ── Tablet two-page spread ── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Cover only covers left half */
-  #jfy-intro-cover {
-    right: 50%;
-    border-radius: 8px 0 0 8px;
-    transform-origin: left center;
-  }
-  #jfy-intro-cover::after {
-    border-radius: 4px 0 0 4px;
-    right: 0; /* re-anchor the dashed border to left-half bounds */
-  }
-  #jfy-intro-cover::before {
-    border-radius: 8px 0 0 8px;
-  }
+  /* Cover stays full-width — flips open like a real book cover */
+  /* (no override needed; cover uses inset:0 and transform-origin:left by default) */
 
   /* Pages occupy only the right half */
   #jfy-intro-pages {
@@ -3048,10 +3093,6 @@ window._jfyNotebook = {
       rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 100%);
     z-index: 25; pointer-events: none;
     border-radius: 0;
-  }
-  /* Left-edge shadow stripe — remove the cover's left::before at tablet */
-  #jfy-intro-cover::before {
-    display: none;
   }
 }
 
@@ -3612,6 +3653,8 @@ window._jfyNotebook = {
   if(!notebook) return;
 
   notebook.insertAdjacentHTML('beforeend', [
+    /* Left page panel — tablet two-page spread */
+    '<div id="jfy-notebook-left-page"></div>',
     '<button class="jfy-entry-nav" id="jfy-entry-prev" aria-label="Previous journal entry">',
       '‹<span class="jfy-entry-nav-label">older</span>',
     '</button>',
@@ -3640,6 +3683,7 @@ window._jfyNotebook = {
   var editBtn   = document.getElementById('jfy-entry-edit');
   var deleteBtn = document.getElementById('jfy-entry-delete');
   var flipShadow = document.getElementById('jfy-flip-shadow'); // may be gone after intro
+  var nbLeftPage = document.getElementById('jfy-notebook-left-page');
 
   var entries  = [];
   var entryIdx = -1; // -1 = live blank page
@@ -3651,6 +3695,63 @@ window._jfyNotebook = {
       return (b.addedAt||b.time||0) - (a.addedAt||a.time||0);
     });
   }
+
+  /* ── Tablet left-page management ──
+     isTablet()         → true when 768–1023px
+     updateNbLeftPage() → renders the appropriate content into the left panel
+  ── */
+  function isTablet(){
+    return window.matchMedia('(min-width:768px) and (max-width:1023px)').matches;
+  }
+
+  function renderLeftPage(entry, labelText){
+    if(!nbLeftPage) return;
+    if(!entry){
+      nbLeftPage.innerHTML =
+        '<span class="nb-left-empty">your entries<br>will appear here</span>';
+      return;
+    }
+    var url = entry.media && entry.media.url ? entry.media.url : '';
+    var html = '';
+    if(url) html += '<img src="'+url+'" alt="Journal entry">';
+    if(labelText) html += '<span class="nb-left-label">'+labelText+'</span>';
+    nbLeftPage.innerHTML = html;
+  }
+
+  function updateNbLeftPage(){
+    if(!isTablet()) return;
+    loadEntries();
+    if(entryIdx === -1){
+      /* Drawing mode: left page shows most recent saved entry */
+      if(entries.length > 0){
+        var e = entries[0];
+        var d = new Date(e.time||e.addedAt||Date.now());
+        var lbl = 'last entry · '+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        renderLeftPage(e, lbl);
+      } else {
+        renderLeftPage(null, '');
+      }
+    } else {
+      /* Entry-browsing mode: left page shows the next-older entry */
+      var olderIdx = entryIdx + 1;
+      if(olderIdx < entries.length){
+        var e2 = entries[olderIdx];
+        var d2 = new Date(e2.time||e2.addedAt||Date.now());
+        var lbl2 = 'entry '+(entries.length-olderIdx)+' of '+entries.length+
+          ' · '+d2.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+        renderLeftPage(e2, lbl2);
+      } else {
+        /* No older entry — show empty left page */
+        renderLeftPage(null, '');
+      }
+    }
+  }
+
+  /* Initialise left page */
+  loadEntries();
+  updateNbLeftPage();
+  /* Re-render on resize (mobile↔tablet crossings) */
+  window.addEventListener('resize', function(){ updateNbLeftPage(); });
 
   function updateArrows(){
     // ‹ (prev/older): visible when entries exist AND we're not at the oldest
@@ -3712,17 +3813,18 @@ window._jfyNotebook = {
 
     if(!viewer.classList.contains('visible')){
       // First open: flip in from appropriate side
-      doFlip(inDir, function(){ updateArrows(); });
+      doFlip(inDir, function(){ updateArrows(); updateNbLeftPage(); });
     } else {
       // Already showing — swap content instantly, no animation gap
       viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck');
       viewer.classList.add('visible');
       updateArrows();
+      updateNbLeftPage();
     }
   }
 
   function closeEntry(){
-    doFlip('fwd', function(){ entryIdx=-1; updateArrows(); });
+    doFlip('fwd', function(){ entryIdx=-1; updateArrows(); updateNbLeftPage(); });
   }
 
   /* ── Button wiring ── */
@@ -3835,13 +3937,13 @@ window._jfyNotebook = {
 
   /* Expose for main IIFE to call after save */
   window._jfyEntryNav = {
-    reload: function(){ loadEntries(); updateArrows(); },
+    reload: function(){ loadEntries(); updateArrows(); updateNbLeftPage(); },
     // Call after editing an entry — forces us back to the live-page state
     // so ‹/› arrows are correctly disabled/enabled
     resetToLive: function(){
       entryIdx = -1;
       viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
-      loadEntries(); updateArrows();
+      loadEntries(); updateArrows(); updateNbLeftPage();
     }
   };
 
