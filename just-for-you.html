@@ -35,6 +35,13 @@ body.page-jfy #yellow-blob { display: none; }
 /* Purple overrides: nav sun, mobile menu, profile btn, dropdown active */
 body.page-jfy .nav-sun { background: #9A59C8; }
 
+/* Tracked logo pill: purple at desktop to match logo sun */
+@media (min-width: 1024px) {
+  body.page-jfy #sun-rect,
+  body.page-jfy #sun-circle-left,
+  body.page-jfy #sun-circle-right { fill: #9A59C8; }
+}
+
 /* Seek: persistent selected state — tablet/desktop only */
 @media (min-width: 768px) {
   body.page-jfy .nav-item[data-nav="seek"] .nav-sun { opacity: 1; }
