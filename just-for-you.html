@@ -3,7 +3,7 @@
 <head>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Antonio:wght@700&family=Bad+Script&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://use.typekit.net/gdm5amj.css">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -2720,54 +2720,204 @@ document.addEventListener('keydown', function(e){
 })();
 </script>
 
+
 <!-- ════════════════════════════════════════════════════════════════════
      JOURNAL INTRO — in-page book
-     Replaces the notebook area on first visit.
-     Cover → 5 pages (back/next) → skip anytime → journal workspace.
+     Cover → 5 pages (back/next/page-flip) → skip anytime → journal.
 ════════════════════════════════════════════════════════════════════ -->
 <style>
-/* ── Book wrapper: fills same space as .jfy-notebook ── */
+/* ── Intro font assignments ── */
+#jfy-intro-wrap,
+#jfy-intro-wrap h2,
+#jfy-intro-wrap .jfy-islide-num,
+#jfy-cover-title { font-family: 'Antonio', sans-serif; }
+
+#jfy-intro-wrap p,
+#jfy-cover-sub   { font-family: 'Bad Script', cursive; }
+
+/* ── Book wrapper ── */
 #jfy-intro-wrap {
-  /* mirrors .jfy-notebook position in the grid */
   grid-column: 2 / 12;
   position: relative;
   height: calc(100dvh - var(--hh) - 40vw);
   min-height: 260px;
-  display: none;          /* hidden by default; JS shows on first visit */
+  display: none;
   align-items: stretch;
   border-radius: 8px 18px 18px 8px;
   box-shadow: -6px 0 28px rgba(0,0,0,0.38), 4px 4px 40px rgba(0,0,0,0.22);
   overflow: hidden;
-  /* perspective for the cover flip */
-  perspective: 1400px;
+  perspective: 1600px;
 }
-/* when intro is active, grid-wrap shows the book row */
 .jfy-intro-active #jfy-intro-wrap { display: flex; }
-/* hide the real notebook + paper strip + history bar when intro is active */
 .jfy-intro-active .jfy-notebook,
 .jfy-intro-active .jfy-paper-wrap,
 .jfy-intro-active #jfy-history-bar { display: none !important; }
 
-/* tablet / desktop overrides (match .jfy-notebook breakpoints) */
-@media (min-width: 768px) {
-  #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 38vw); }
-}
-@media (min-width: 1024px) {
-  #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 360px); }
-}
+@media (min-width: 768px) { #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 38vw); } }
+@media (min-width: 1024px){ #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 360px); } }
 
-/* ── Pages layer (cream background, always visible) ── */
+/* ── Pages layer ── */
 #jfy-intro-pages {
   position: absolute; inset: 0;
   background: #f8f4ed;
   border-radius: inherit;
+  overflow: hidden;         /* clips the flip panels */
 }
 
-/* ── Cover (sits on top, flips away on click) ── */
+/* ── Page flip stage ── */
+/* Each slide sits in a "leaf" – when flipping, a half-width curtain
+   folds over it from the right edge to reveal the next slide.        */
+.jfy-islide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: clamp(16px,5%,44px) clamp(18px,7%,60px) clamp(12px,4%,32px);
+  background: #f8f4ed;
+  /* backface hidden so the "back" of the flip doesn't show this slide */
+  backface-visibility: hidden;
+  z-index: 1;
+}
+/* Only the active slide is pointer-interactive */
+.jfy-islide:not(.active):not(.flipping-out) { pointer-events: none; }
+
+/* Flip animation — the leaving slide folds away like a page turning */
+@keyframes jfy-flip-out-fwd {
+  0%   { transform: rotateY(0deg);      z-index: 3; }
+  100% { transform: rotateY(-180deg);   z-index: 3; }
+}
+@keyframes jfy-flip-in-fwd {
+  0%   { transform: rotateY(180deg);    z-index: 2; }
+  100% { transform: rotateY(0deg);      z-index: 2; }
+}
+@keyframes jfy-flip-out-bck {
+  0%   { transform: rotateY(0deg);      z-index: 3; }
+  100% { transform: rotateY(180deg);    z-index: 3; }
+}
+@keyframes jfy-flip-in-bck {
+  0%   { transform: rotateY(-180deg);   z-index: 2; }
+  100% { transform: rotateY(0deg);      z-index: 2; }
+}
+
+.jfy-islide.flip-out-fwd {
+  transform-origin: left center;
+  animation: jfy-flip-out-fwd 0.55s cubic-bezier(.6,0,.4,1) forwards;
+}
+.jfy-islide.flip-in-fwd {
+  transform-origin: left center;
+  animation: jfy-flip-in-fwd 0.55s cubic-bezier(.6,0,.4,1) forwards;
+}
+.jfy-islide.flip-out-bck {
+  transform-origin: left center;
+  animation: jfy-flip-out-bck 0.55s cubic-bezier(.6,0,.4,1) forwards;
+}
+.jfy-islide.flip-in-bck {
+  transform-origin: left center;
+  animation: jfy-flip-in-bck 0.55s cubic-bezier(.6,0,.4,1) forwards;
+}
+
+/* Slide-shadow strip that appears during any flip (shows depth) */
+#jfy-flip-shadow {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 0;
+  pointer-events: none; z-index: 4;
+  background: linear-gradient(90deg,
+    rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.04) 40%, transparent 100%);
+  transition: width 0s;
+  border-radius: 0;
+  opacity: 0;
+}
+#jfy-flip-shadow.show {
+  width: 32px; opacity: 1;
+}
+
+/* ── Slide internals ── */
+.jfy-islide-num {
+  align-self: flex-end;
+  font-size: 11px; letter-spacing: 0.16em;
+  color: #c4b49a; text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+.jfy-islide-body {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; gap: 14px;
+  padding: 6% 0 3%;
+}
+.jfy-islide-body h2 {
+  font-family: 'Antonio', sans-serif;
+  font-size: clamp(18px, 2.6vw, 28px);
+  font-weight: 700; color: #2a1a0e; margin: 0 0 4px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.jfy-islide-body p {
+  font-family: 'Bad Script', cursive;
+  font-size: clamp(13px, 1.55vw, 16px);
+  line-height: 1.85; color: #3a2510; margin: 0;
+}
+
+/* ── Footer nav — two rows ──
+   Row 1: [← back]  [dots]  [next →]
+   Row 2: (centred)  skip intro
+── */
+.jfy-islide-foot {
+  display: flex; flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.09);
+}
+.jfy-islide-foot-row1 {
+  display: flex; align-items: center; gap: 10px;
+}
+.jfy-islide-foot-row2 {
+  display: flex; justify-content: center;
+}
+
+/* progress dots */
+.jfy-islide-dots {
+  flex: 1; display: flex; gap: 7px;
+  align-items: center; justify-content: center;
+}
+.jfy-islide-dots span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #ddd; transition: background 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.jfy-islide-dots span.on { background: #9A59C8; transform: scale(1.28); }
+
+/* Back */
+.jfy-islide-back {
+  background: transparent; color: #9A59C8;
+  border: 1.5px solid #c8a0f0; border-radius: 20px;
+  padding: 7px 16px; font-size: 12px; font-weight: 700;
+  font-family: 'Antonio', sans-serif; letter-spacing: 0.06em;
+  cursor: pointer; transition: background 0.14s; white-space: nowrap;
+}
+.jfy-islide-back:hover { background: #f0e9ff; }
+.jfy-islide-back:disabled { opacity: 0.28; cursor: default; }
+.jfy-islide-back:disabled:hover { background: transparent; }
+
+/* Next */
+.jfy-islide-next {
+  background: #9A59C8; color: #fff; border: none;
+  border-radius: 20px; padding: 8px 22px;
+  font-size: 12px; font-weight: 700; font-family: 'Antonio', sans-serif;
+  letter-spacing: 0.08em;
+  cursor: pointer; transition: background 0.14s; white-space: nowrap;
+}
+.jfy-islide-next:hover { background: #7d3fb8; }
+
+/* Skip — prominent, centred below */
+.jfy-islide-skip {
+  background: #f0e9ff; color: #7d3fb8; border: 1.5px solid #c8a0f0;
+  border-radius: 20px; padding: 6px 20px;
+  font-size: 11px; font-weight: 700; font-family: 'Antonio', sans-serif;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.14s, color 0.14s;
+}
+.jfy-islide-skip:hover { background: #e3d4ff; color: #5c2d96; }
+
+/* ── Cover ── */
 #jfy-intro-cover {
   position: absolute; inset: 0;
   background-color: #3B1E0E;
-  /* leather grain */
   background-image:
     repeating-linear-gradient(100deg,
       rgba(255,255,255,0.022) 0px, rgba(255,255,255,0.022) 1px,
@@ -2787,7 +2937,6 @@ document.addEventListener('keydown', function(e){
   transform-style: preserve-3d;
   transition: transform 0.9s cubic-bezier(.77,0,.18,1);
 }
-/* stitching border */
 #jfy-intro-cover::after {
   content: '';
   position: absolute; inset: 14px;
@@ -2795,7 +2944,6 @@ document.addEventListener('keydown', function(e){
   border-radius: 4px 14px 14px 4px;
   pointer-events: none;
 }
-/* spine shadow strip */
 #jfy-intro-cover::before {
   content: '';
   position: absolute; left: 0; top: 0; bottom: 0; width: 32px;
@@ -2804,147 +2952,88 @@ document.addEventListener('keydown', function(e){
   border-radius: 8px 0 0 8px;
   pointer-events: none;
 }
-#jfy-intro-cover.flipped {
-  transform: rotateY(-180deg);
-  pointer-events: none;
-}
+#jfy-intro-cover.flipped { transform: rotateY(-180deg); pointer-events: none; }
 
 #jfy-cover-title {
-  font-family: 'Georgia', serif;
-  font-size: clamp(20px, 4vw, 40px);
+  font-family: 'Antonio', sans-serif;
+  font-size: clamp(22px, 4.5vw, 46px);
   font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.08em; color: #e8d5b0;
-  line-height: 1.15; margin-bottom: 8px;
+  letter-spacing: 0.09em; color: #e8d5b0;
+  line-height: 1.1; margin-bottom: 10px;
   text-shadow: 0 2px 14px rgba(0,0,0,0.55);
 }
 #jfy-cover-sub {
-  font-family: 'Georgia', serif;
-  font-size: clamp(10px, 1.6vw, 14px);
+  font-family: 'Bad Script', cursive;
+  font-size: clamp(12px, 1.8vw, 17px);
   color: rgba(232,213,176,0.60);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.06em;
 }
 #jfy-cover-open-hint {
   position: absolute; bottom: 24px; right: 24px;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   color: rgba(232,213,176,0.50); font-size: 10px;
   letter-spacing: 0.12em; text-transform: lowercase;
-  font-family: 'Georgia', serif;
+  font-family: 'Antonio', sans-serif;
   transition: color 0.2s; pointer-events: none;
 }
-#jfy-intro-cover:hover #jfy-cover-open-hint { color: rgba(232,213,176,0.85); }
+#jfy-intro-cover:hover #jfy-cover-open-hint { color: rgba(232,213,176,0.9); }
 #jfy-cover-open-hint svg { animation: jfy-hint-bounce 1.8s ease-in-out infinite; }
 @keyframes jfy-hint-bounce {
   0%,100% { transform: translateY(0); }
   50%      { transform: translateY(5px); }
 }
 
-/* ── Individual intro slides ── */
-.jfy-islide {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  padding: clamp(18px, 6%, 48px) clamp(20px, 8%, 64px) clamp(14px, 5%, 36px);
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s, transform 0.3s;
-  transform: translateX(36px);
+/* ── Journal page-flip nav arrows (on real notebook) ── */
+.jfy-entry-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 50; background: rgba(255,255,255,0.85);
+  border: none; border-radius: 50%; width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+  transition: background 0.14s, transform 0.14s;
+  font-size: 16px; color: #9A59C8;
 }
-.jfy-islide.active {
-  opacity: 1; pointer-events: auto; transform: translateX(0);
-}
-.jfy-islide.exit-left {
-  opacity: 0; transform: translateX(-36px); pointer-events: none;
-}
-.jfy-islide.exit-right {
-  opacity: 0; transform: translateX(36px); pointer-events: none;
-}
-
-/* page number top-right */
-.jfy-islide-num {
-  align-self: flex-end;
-  font-size: 10px; letter-spacing: 0.14em;
-  color: #c4b49a; text-transform: lowercase;
-  font-family: 'Georgia', serif;
-  margin-bottom: 0;
+.jfy-entry-nav:hover { background: #f0e9ff; transform: translateY(-50%) scale(1.08); }
+#jfy-entry-prev { left: -48px; }
+#jfy-entry-next { right: -48px; }
+@media (max-width: 767px) {
+  #jfy-entry-prev { left: -32px; width: 28px; height: 28px; font-size: 13px; }
+  #jfy-entry-next { right: -32px; width: 28px; height: 28px; font-size: 13px; }
 }
 
-/* text body */
-.jfy-islide-body {
-  flex: 1; display: flex; flex-direction: column;
-  justify-content: center; gap: 14px;
-  padding: 8% 0 4%;
-}
-.jfy-islide-body h2 {
-  font-family: 'Georgia', serif;
-  font-size: clamp(16px, 2.2vw, 24px);
-  font-weight: 700; color: #2a1a0e; margin: 0 0 4px;
-}
-.jfy-islide-body p {
-  font-family: 'Georgia', serif;
-  font-size: clamp(12px, 1.45vw, 15px);
-  line-height: 1.8; color: #3a2510; margin: 0;
-}
-
-/* ── Footer nav ── */
-.jfy-islide-foot {
-  display: flex; align-items: center;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(0,0,0,0.09);
-  flex-wrap: wrap;
-}
-
-/* Skip — prominent pill on the left */
-.jfy-islide-skip {
-  background: #f0e9ff; color: #7d3fb8; border: 1.5px solid #c8a0f0;
-  border-radius: 20px; padding: 7px 16px;
-  font-size: 12px; font-weight: 600; font-family: inherit;
-  cursor: pointer; letter-spacing: 0.04em;
-  transition: background 0.14s, color 0.14s;
-  white-space: nowrap;
-}
-.jfy-islide-skip:hover { background: #e3d4ff; color: #5c2d96; }
-
-/* dots — centred */
-.jfy-islide-dots {
-  flex: 1; display: flex; gap: 7px;
+/* Entry viewer overlay inside notebook */
+#jfy-entry-viewer {
+  position: absolute; inset: 0; z-index: 30;
+  background: #f8f4ed;
+  border-radius: 18px;
+  display: none;
+  flex-direction: column;
   align-items: center; justify-content: center;
 }
-.jfy-islide-dots span {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: #ddd; transition: background 0.2s, transform 0.2s;
-  cursor: pointer;
+#jfy-entry-viewer.open { display: flex; }
+#jfy-entry-viewer img {
+  max-width: 90%; max-height: 80%;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  object-fit: contain;
 }
-.jfy-islide-dots span.on { background: #9A59C8; transform: scale(1.25); }
-
-/* Back + Next */
-.jfy-islide-back {
-  background: transparent; color: #9A59C8;
-  border: 1.5px solid #c8a0f0; border-radius: 20px;
-  padding: 7px 15px; font-size: 12px; font-weight: 600;
-  font-family: inherit; cursor: pointer;
-  transition: background 0.14s;
-  white-space: nowrap;
+#jfy-entry-viewer-label {
+  font-family: 'Antonio', sans-serif;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: #c4b49a; margin-top: 14px;
 }
-.jfy-islide-back:hover { background: #f0e9ff; }
-.jfy-islide-back:disabled { opacity: 0.3; cursor: default; }
-.jfy-islide-back:disabled:hover { background: transparent; }
-
-.jfy-islide-next {
-  background: #9A59C8; color: #fff; border: none;
-  border-radius: 20px; padding: 8px 20px;
-  font-size: 12px; font-weight: 600; font-family: inherit;
-  cursor: pointer; letter-spacing: 0.04em;
-  transition: background 0.14s, transform 0.1s;
-  white-space: nowrap;
+#jfy-entry-close {
+  position: absolute; top: 14px; right: 14px;
+  background: none; border: none; font-size: 18px; cursor: pointer; color: #aaa;
 }
-.jfy-islide-next:hover { background: #7d3fb8; transform: translateY(-1px); }
+#jfy-entry-close:hover { color: #555; }
 </style>
 
-<!-- Insert the book into main, inside the grid-wrap -->
 <script>
+/* ══════════════════════════════════════════════════════════════════
+   JOURNAL INTRO — fires every page load
+══════════════════════════════════════════════════════════════════ */
 (function(){
-  // Intro opens every page load
-
-  /* ── Build the book HTML and inject it into .jfy-grid-wrap ── */
   var SLIDES = [
     {
       num: 'p. 1',
@@ -2964,7 +3053,7 @@ document.addEventListener('keydown', function(e){
     },
     {
       num: 'p. 5',
-      body: '<h2>Journal Entries</h2><p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p><p>add entries to "Between Us" to share with the community.</p><p>get started, and feel free to make this your own.</p>'
+      body: '<h2>Journal Entries</h2><p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p><p>add entries to "Between Us" to share with the community. get started, and feel free to make this your own.</p>'
     }
   ];
   var TOTAL = SLIDES.length;
@@ -2976,17 +3065,20 @@ document.addEventListener('keydown', function(e){
   }
 
   function makeSlide(s, i){
-    var isFirst = i === 0;
-    var isLast  = i === TOTAL - 1;
+    var isFirst = (i === 0), isLast = (i === TOTAL - 1);
     return [
       '<div class="jfy-islide'+(i===0?' active':'')+'" data-slide="'+i+'">',
         '<span class="jfy-islide-num">'+s.num+'</span>',
         '<div class="jfy-islide-body">'+s.body+'</div>',
         '<div class="jfy-islide-foot">',
-          '<button class="jfy-islide-skip">skip intro</button>',
-          '<div class="jfy-islide-dots">'+makeDots(i)+'</div>',
-          '<button class="jfy-islide-back"'+(isFirst?' disabled':'')+'>← back</button>',
-          '<button class="jfy-islide-next">'+(isLast?'begin ↗':'next →')+'</button>',
+          '<div class="jfy-islide-foot-row1">',
+            '<button class="jfy-islide-back"'+(isFirst?' disabled':'')+'>← back</button>',
+            '<div class="jfy-islide-dots">'+makeDots(i)+'</div>',
+            '<button class="jfy-islide-next">'+(isLast?'begin ↗':'next →')+'</button>',
+          '</div>',
+          '<div class="jfy-islide-foot-row2">',
+            '<button class="jfy-islide-skip">skip intro</button>',
+          '</div>',
         '</div>',
       '</div>'
     ].join('');
@@ -2995,6 +3087,7 @@ document.addEventListener('keydown', function(e){
   var bookHTML = [
     '<div id="jfy-intro-wrap">',
       '<div id="jfy-intro-pages">',
+        '<div id="jfy-flip-shadow"></div>',
         SLIDES.map(makeSlide).join(''),
       '</div>',
       '<div id="jfy-intro-cover">',
@@ -3002,8 +3095,7 @@ document.addEventListener('keydown', function(e){
         '<div id="jfy-cover-sub">this is just for you.</div>',
         '<div id="jfy-cover-open-hint">',
           '<svg width="20" height="20" viewBox="0 0 22 22" fill="none">',
-            '<path d="M4 8L11 15L18 8" stroke="currentColor" stroke-width="2.3"',
-            ' stroke-linecap="round" stroke-linejoin="round"/>',
+            '<path d="M4 8L11 15L18 8" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>',
           '</svg>',
           '<span>open</span>',
         '</div>',
@@ -3011,62 +3103,57 @@ document.addEventListener('keydown', function(e){
     '</div>'
   ].join('');
 
-  // Insert into the grid-wrap (before .jfy-notebook)
   var gridWrap = document.querySelector('.jfy-grid-wrap');
   if(!gridWrap) return;
   gridWrap.insertAdjacentHTML('afterbegin', bookHTML);
-
-  // Mark body so CSS can hide the real notebook / toolbar
   document.body.classList.add('jfy-intro-active');
 
-  /* ── State ── */
   var current   = 0;
   var coverOpen = false;
   var animating = false;
+  var cover     = document.getElementById('jfy-intro-cover');
+  var shadow    = document.getElementById('jfy-flip-shadow');
+  var slides    = Array.from(document.querySelectorAll('.jfy-islide'));
 
-  var cover  = document.getElementById('jfy-intro-cover');
-  var slides = Array.from(document.querySelectorAll('.jfy-islide'));
-
-  /* ── Dismiss: show real notebook ── */
   function dismiss(){
     document.body.classList.remove('jfy-intro-active');
     var wrap = document.getElementById('jfy-intro-wrap');
     if(wrap) wrap.remove();
   }
 
-  /* ── Navigate between slides ── */
-  function goTo(idx, direction){
+  function flipTo(idx, direction){
     if(animating || idx === current) return;
     animating = true;
+
     var from = slides[current];
     var to   = slides[idx];
 
-    // exit current
-    from.classList.remove('active');
-    from.classList.add(direction === 'forward' ? 'exit-left' : 'exit-right');
+    // Make sure 'to' is visible but behind
+    to.classList.add('active');
+    to.style.zIndex = '2';
+    from.style.zIndex = '3';
 
-    // prepare incoming (start offscreen opposite side)
-    to.style.transition = 'none';
-    to.classList.remove('exit-left','exit-right','active');
-    to.style.transform = direction === 'forward' ? 'translateX(36px)' : 'translateX(-36px)';
-    to.style.opacity = '0';
+    // Show spine shadow
+    shadow.classList.add('show');
 
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        to.style.transition = '';
-        to.style.transform = '';
-        to.style.opacity = '';
-        to.classList.add('active');
-        current = idx;
-        setTimeout(function(){
-          from.classList.remove('exit-left','exit-right');
-          animating = false;
-        }, 330);
-      });
-    });
+    var outClass = direction === 'forward' ? 'flip-out-fwd' : 'flip-out-bck';
+    var inClass  = direction === 'forward' ? 'flip-in-fwd'  : 'flip-in-bck';
+
+    from.classList.add(outClass);
+    to.classList.add(inClass);
+
+    var DURATION = 570;
+    setTimeout(function(){
+      from.classList.remove('active', outClass);
+      to.classList.remove(inClass);
+      from.style.zIndex = '';
+      to.style.zIndex   = '';
+      shadow.classList.remove('show');
+      current = idx;
+      animating = false;
+    }, DURATION);
   }
 
-  /* ── Open cover ── */
   function openCover(){
     if(coverOpen) return;
     coverOpen = true;
@@ -3075,42 +3162,192 @@ document.addEventListener('keydown', function(e){
 
   cover.addEventListener('click', openCover);
 
-  /* ── Wire slide buttons ── */
   slides.forEach(function(slide, i){
     slide.querySelector('.jfy-islide-skip').addEventListener('click', dismiss);
 
     slide.querySelector('.jfy-islide-next').addEventListener('click', function(){
-      if(i < TOTAL - 1) goTo(i + 1, 'forward');
+      if(i < TOTAL - 1) flipTo(i + 1, 'forward');
       else dismiss();
     });
 
     var backBtn = slide.querySelector('.jfy-islide-back');
     backBtn.addEventListener('click', function(){
-      if(i > 0) goTo(i - 1, 'back');
+      if(i > 0) flipTo(i - 1, 'back');
     });
 
-    // dot clicks
-    slide.querySelectorAll('.jfy-islide-dots [data-dot]').forEach(function(dot){
+    slide.querySelectorAll('[data-dot]').forEach(function(dot){
       dot.addEventListener('click', function(){
         var target = parseInt(dot.dataset.dot, 10);
-        if(target !== current) goTo(target, target > current ? 'forward' : 'back');
+        if(target !== current) flipTo(target, target > current ? 'forward' : 'back');
       });
     });
   });
 
-  /* ── Keyboard ── */
   document.addEventListener('keydown', function(e){
     if(!document.body.classList.contains('jfy-intro-active')) return;
-    if(e.key === 'ArrowRight' || (e.key === 'Enter' && !coverOpen)){
-      if(!coverOpen){ openCover(); return; }
-      if(current < TOTAL - 1) goTo(current + 1, 'forward');
-      else dismiss();
-    }
-    if(e.key === 'ArrowLeft' && coverOpen){
-      if(current > 0) goTo(current - 1, 'back');
-    }
+    if(!coverOpen && (e.key === 'ArrowRight' || e.key === 'Enter')){ openCover(); return; }
+    if(e.key === 'ArrowRight'){ if(current < TOTAL-1) flipTo(current+1,'forward'); else dismiss(); }
+    if(e.key === 'ArrowLeft' && current > 0) flipTo(current-1,'back');
     if(e.key === 'Escape') dismiss();
   });
+
+})();
+
+/* ══════════════════════════════════════════════════════════════════
+   JOURNAL ENTRY NAVIGATOR
+   Seeds placeholder entries if none exist, then wires left/right
+   flip arrows on the notebook sides.
+══════════════════════════════════════════════════════════════════ */
+(function(){
+  var STORE_JOURNAL = 'jfy_journal';
+
+  /* ── Placeholder entries (canvas-rendered cream pages with text) ── */
+  function makePlaceholderDataUrl(lines, color){
+    var c = document.createElement('canvas');
+    c.width = 600; c.height = 420;
+    var ctx = c.getContext('2d');
+    // cream page
+    ctx.fillStyle = '#f8f4ed';
+    ctx.fillRect(0, 0, 600, 420);
+    // faint ruled lines
+    ctx.strokeStyle = 'rgba(180,160,120,0.25)';
+    ctx.lineWidth = 1;
+    for(var y = 60; y < 400; y += 28){ ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(560,y); ctx.stroke(); }
+    // washi tape strip decoration
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = color;
+    ctx.fillRect(220, 0, 160, 22);
+    ctx.globalAlpha = 1;
+    // text
+    ctx.fillStyle = '#3a2510';
+    ctx.font = 'italic 15px Georgia, serif';
+    lines.forEach(function(line, i){
+      ctx.fillText(line, 48, 80 + i * 32);
+    });
+    return c.toDataURL('image/jpeg', 0.88);
+  }
+
+  var PLACEHOLDERS = [
+    {
+      lines: [
+        'today felt quieter than usual.',
+        'i made tea twice and forgot to drink it both times.',
+        'the light through the window was really something.'
+      ],
+      color: '#c8a0f0'
+    },
+    {
+      lines: [
+        'started a new playlist. it has 4 songs.',
+        'i think that\'s enough for now.',
+        'some things don\'t need to be finished to be good.'
+      ],
+      color: '#ffd6a5'
+    },
+    {
+      lines: [
+        'called my grandmother. she laughed at everything.',
+        'i want to remember that laugh.',
+        'also: her chicken soup recipe is somewhere in here.'
+      ],
+      color: '#a0d4f0'
+    },
+    {
+      lines: [
+        'found an old photo. couldn\'t remember the day.',
+        'but i remembered the feeling.',
+        'that might be enough.'
+      ],
+      color: '#f0d0a0'
+    }
+  ];
+
+  function seedEntries(){
+    var existing = [];
+    try { existing = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){}
+    if(existing.length > 0) return; // already have entries
+
+    var seeded = PLACEHOLDERS.map(function(p, i){
+      var daysAgo = (PLACEHOLDERS.length - i) * 3;
+      var t = Date.now() - daysAgo * 86400000;
+      return {
+        id: 'placeholder_' + i,
+        text: '',
+        time: t,
+        addedAt: t,
+        media: { url: makePlaceholderDataUrl(p.lines, p.color) }
+      };
+    });
+    localStorage.setItem(STORE_JOURNAL, JSON.stringify(seeded));
+  }
+  seedEntries();
+
+  /* ── Wire flip arrows on the notebook ── */
+  var notebook = document.querySelector('.jfy-notebook');
+  if(!notebook) return;
+
+  // Inject nav arrows and entry viewer
+  notebook.insertAdjacentHTML('beforeend', [
+    '<button class="jfy-entry-nav" id="jfy-entry-prev" title="Previous entry" aria-label="Previous journal entry">‹</button>',
+    '<button class="jfy-entry-nav" id="jfy-entry-next" title="Next entry" aria-label="Next journal entry">›</button>',
+    '<div id="jfy-entry-viewer" role="dialog" aria-label="Journal entry">',
+      '<button id="jfy-entry-close" aria-label="Close entry">✕</button>',
+      '<img id="jfy-entry-img" src="" alt="Journal entry">',
+      '<div id="jfy-entry-viewer-label"></div>',
+    '</div>'
+  ].join(''));
+
+  var prevBtn  = document.getElementById('jfy-entry-prev');
+  var nextBtn  = document.getElementById('jfy-entry-next');
+  var viewer   = document.getElementById('jfy-entry-viewer');
+  var entryImg = document.getElementById('jfy-entry-img');
+  var label    = document.getElementById('jfy-entry-viewer-label');
+  var closeBtn = document.getElementById('jfy-entry-close');
+
+  var entries = [];
+  var entryIdx = -1; // -1 = showing blank journal
+
+  function loadEntries(){
+    try { entries = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){ entries = []; }
+  }
+
+  function showEntry(idx){
+    loadEntries();
+    if(!entries.length){ viewer.classList.remove('open'); entryIdx = -1; return; }
+    idx = Math.max(0, Math.min(entries.length - 1, idx));
+    entryIdx = idx;
+    var e = entries[idx];
+    var url = e.media && e.media.url ? e.media.url : '';
+    entryImg.src = url;
+    entryImg.style.display = url ? '' : 'none';
+    var d = new Date(e.time || e.addedAt || Date.now());
+    label.textContent = 'entry ' + (entries.length - idx) + ' of ' + entries.length +
+      '  ·  ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    viewer.classList.add('open');
+    // update arrow states
+    prevBtn.style.opacity = idx > 0 ? '1' : '0.3';
+    nextBtn.style.opacity = idx < entries.length - 1 ? '1' : '0.3';
+  }
+
+  function closeEntry(){
+    viewer.classList.remove('open');
+    entryIdx = -1;
+    prevBtn.style.opacity = '1';
+    nextBtn.style.opacity = '1';
+  }
+
+  prevBtn.addEventListener('click', function(){
+    if(entryIdx === -1) showEntry(0);          // open at first/most-recent
+    else showEntry(entryIdx - 1);
+  });
+
+  nextBtn.addEventListener('click', function(){
+    if(entryIdx === -1) showEntry(0);
+    else if(entryIdx < entries.length - 1) showEntry(entryIdx + 1);
+    else closeEntry();                         // past last entry → close
+  });
+
+  closeBtn.addEventListener('click', closeEntry);
 
 })();
 </script>
