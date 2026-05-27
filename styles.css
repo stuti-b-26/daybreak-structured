@@ -313,7 +313,7 @@ img{display:block;max-width:100%}
   .mobile-nav{display:flex;align-items:center;width:100%}
   #hero-headline{font-size:8em}
   .intro-text{text-align:center;font-size:clamp(28px,8vw,44px)}
-  .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:24px;padding:0 var(--gutter)}
+  .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:16px;padding:0;align-items:flex-start;overflow:visible}
 
   #silly-to-mess{display:none}
   #break-intro-top{display:none}
@@ -324,10 +324,22 @@ img{display:block;max-width:100%}
   #break-bubble-middle{display:none}
   #between-to-sticker{display:none}
   #sticker-to-you{display:none}
-  .card-item{position:relative !important;width:100% !important;left:auto !important;top:auto !important;transform:none !important}
+  .card-item{position:relative !important;width:78% !important;left:auto !important;top:auto !important;transform:rotate(var(--card-rotate,0deg)) !important}
+  .card--silly-decisions{margin-left:20% !important}
+  .card--mess-hall{width:86% !important;margin-left:0 !important}
+  .card--selfless{margin-left:18% !important}
+  .card--shh{width:86% !important;margin-left:0 !important}
+  .card--just-for-you{margin-left:16% !important}
+  .card--sticker-maker{width:86% !important;margin-left:0 !important}
   .card--selfless .card-btn{left:16px !important;right:auto !important;top:auto !important;bottom:24px !important;transform:rotate(-2deg) !important}
-  .card--silly-decisions .card-btn{right:16px !important;left:auto !important;top:auto !important;bottom:24px !important;transform:none !important}
+  .card--silly-decisions .card-btn{right:-20px !important;left:auto !important;top:calc(50% - 60px) !important;bottom:auto !important}
+  .card--mess-hall .card-btn{top:40px !important;left:14px !important;bottom:auto !important;right:auto !important;padding:36px 28px !important;font-size:16px !important}
+  .card--shh .card-btn{bottom:20px !important;right:14px !important;left:auto !important;top:auto !important}
+  .card--just-for-you .card-btn{bottom:20px !important;right:-20px !important;left:auto !important;top:auto !important}
+  .card--sticker-maker .card-btn{bottom:20px !important;right:14px !important;left:auto !important;top:auto !important}
   .float-label{position:relative !important;top:auto !important;left:auto !important;right:auto !important;display:inline-block;margin:4px 0}
+  .float-label--life-hard{font-size:clamp(15px,4.5vw,20px);max-width:60%}
+  .float-label--everyone{font-size:clamp(18px,5vw,24px);margin:8px 0}
   .cta-text{font-size:clamp(22px,7vw,38px)}
   #site-footer .footer-desktop{display:none}
   .footer-mobile{display:block;padding:28px 20px 0}
