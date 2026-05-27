@@ -1183,7 +1183,6 @@ var S = {
 };
 
 var drawCmds = []; // { type:'washi'|'doodle', ... }
-window._jfyDrawCmdsRef = drawCmds; // expose so navigator can clear on edit
 
 /* ── canvas init / resize ── */
 function initCanvas(){
@@ -2461,7 +2460,7 @@ document.getElementById('jfy-clear-btn').addEventListener('click', function(){
   if(!confirm('Clear everything on the notebook page?')) return;
   pushHistory();
   Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
-  drawCmds = []; redrawAll(); updateHistoryButtons();
+  drawCmds.length = 0; redrawAll(); updateHistoryButtons();
 });
 
 // "New entry" — auto-saves current canvas (including any edit background)
@@ -2782,6 +2781,12 @@ document.addEventListener('keydown', function(e){
     document.getElementById('jfy-redo-btn').click();
   }
 });
+
+// Expose internals so the navigator IIFE (loaded after this) can drive them
+window._jfyNotebook = {
+  redrawAll: function(){ redrawAll(); },
+  clearDrawCmds: function(){ drawCmds = []; }
+};
 
 })();
 </script>
@@ -3499,13 +3504,13 @@ document.addEventListener('keydown', function(e){
     // Load entry image as a persistent background that survives redrawAll()
     var img = new Image();
     img.onload = function(){
-      // Set the global background — redrawAll() will paint this first
+      // Set the global background — redrawAll() paints this first on every call
       window._jfyEditBg = { img: img, entryId: e.id };
-      // Clear any strokes from the previous session so the user starts
-      // fresh on top of the restored entry
-      window._jfyDrawCmdsRef && (window._jfyDrawCmdsRef.length = 0);
-      // Trigger a redraw so the entry image is visible immediately
-      if(typeof redrawAll === 'function') redrawAll();
+      // Clear any existing strokes so the user starts fresh on top of the entry
+      if(window._jfyNotebook){
+        window._jfyNotebook.clearDrawCmds();
+        window._jfyNotebook.redrawAll();  // paints the bg image immediately
+      }
     };
     img.src = url;
 
