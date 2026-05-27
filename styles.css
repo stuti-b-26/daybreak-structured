@@ -72,6 +72,11 @@ img{display:block;max-width:100%}
 .dropdown-link:hover{color:#fff}
 .dropdown-link.active{color:var(--yellow);font-weight:700}
 
+/* "about" is a plain label in the desktop nav — not clickable; dropdown opens on hover */
+.desktop-nav .nav-item[data-nav="about"] .nav-btn{pointer-events:none;cursor:default}
+.desktop-nav .nav-item[data-nav="about"]:hover .dropdown{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+.desktop-nav .nav-item[data-nav="about"]:hover .nav-sun{opacity:1}
+
 .tablet-nav{display:none}
 .mobile-nav{display:none}
 .mobile-menu-btn{
