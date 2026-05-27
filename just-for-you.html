@@ -509,8 +509,11 @@ body.jfy-scissors-active .jfy-scissors {
      reliably overflows the viewport left edge across the full tablet range.
      At 768px: -(100+69)=-169px, notebook-left≈164px → overflows ~5px.
      At 1023px: -(100+92)=-192px, notebook-left≈185px → overflows ~7px. */
+  /* Washi: positioned relative to notebook (~164px from viewport left at 768px).
+     left: -20vw = -154px at 768px → washi left edge ≈ 10px into viewport (slight clip).
+     left: -20vw = -205px at 1023px → washi left edge ≈ -20px (clips ~20px off edge). */
   .jfy-washi {
-    top: -18vw; left: -5vw;
+    top: -18vw; left: -20vw;
     width: 24vw;
     z-index: 25;
   }
