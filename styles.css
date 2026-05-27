@@ -317,7 +317,7 @@ img{display:block;max-width:100%}
   .card--shh .card-btn{bottom:2vw;left:1.67vw;right:auto}
 
   /* Mission — pull up so you-to-end line meets green circle center */
-  #mission{margin-top:-5vw}
+  #mission{margin-top:8vw}
   #green-circle{width:10.67vw}
 
   #site-footer .footer-desktop{display:none}
