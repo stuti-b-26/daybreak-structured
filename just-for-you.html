@@ -499,7 +499,7 @@ body.jfy-scissors-active .jfy-scissors {
 }
 @media (min-width: 768px) {
   /* padding-top accounts for props that extend ~18vw above notebook */
-  .jfy-grid-wrap { padding-top: calc(20vw + 54px); padding-bottom: 28vw; }
+  .jfy-grid-wrap { padding-top: calc(20vw + 54px); padding-bottom: 18vw; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); min-height: 520px; }
 }
 
@@ -529,7 +529,7 @@ body.jfy-scissors-active .jfy-scissors {
   }
   /* Frames: bottom-right, level with paper, no overlap, no clip */
   .jfy-frames {
-    bottom: -26vw; right: 0; top: auto; left: auto;
+    bottom: -16vw; right: 0; top: auto; left: auto;
     width: 30vw; max-width: 230px;
     z-index: 0;
   }
@@ -538,8 +538,8 @@ body.jfy-scissors-active .jfy-scissors {
   /* Pull the paper-wrap up so paper sits alongside the frames without scrolling */
   .jfy-paper-wrap {
     position: relative;
-    top: -20vw;
-    margin-bottom: -20vw; /* collapse the space it would have occupied */
+    top: -10vw;
+    margin-bottom: -10vw; /* collapse the space it would have occupied */
   }
 }
 
@@ -586,11 +586,12 @@ body.jfy-scissors-active .jfy-scissors {
     z-index: 15; pointer-events: none;
   }
 
-  /* Paper: pulled up to sit alongside the frames, clips slightly left */
+  /* Paper: pulled up closer to notebook bottom so paper+frames sit mostly
+     in-viewport without scrolling */
   .jfy-paper-wrap {
     position: relative;
-    top: -20vw;
-    margin-bottom: -20vw;
+    top: -10vw;
+    margin-bottom: -10vw;
   }
   .jfy-paper { width: 58vw; margin-left: -5vw; }
 }
@@ -600,11 +601,11 @@ body.jfy-scissors-active .jfy-scissors {
 /* ── Desktop prop positions + layout (1024px and up) ── */
 @media (min-width: 1024px) {
   /* Padding scaled from tablet vw→px; props extend ~190px above notebook */
-  .jfy-grid-wrap { padding-top: 230px; padding-bottom: 300px; }
+  .jfy-grid-wrap { padding-top: 230px; padding-bottom: 200px; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); min-height: 540px; }
 
-  /* Paper-wrap: pulled up further so fan is mostly visible in initial viewport */
-  .jfy-paper-wrap { top: -300px; margin-bottom: -300px; }
+  /* Paper-wrap: pulled up so paper+frames are mostly visible in initial viewport */
+  .jfy-paper-wrap { top: -180px; margin-bottom: -180px; }
   .jfy-paper { width: 520px; margin-left: -50px; }
 
   /* Washi: slightly bigger than tablet max (~245px) but fixed px so it doesn't
@@ -637,7 +638,7 @@ body.jfy-scissors-active .jfy-scissors {
   }
   /* Frames: bottom-right, no overlap, no clip */
   .jfy-frames {
-    bottom: -250px; right: 0; top: auto; left: auto;
+    bottom: -160px; right: 0; top: auto; left: auto;
     width: 280px; max-width: none;
     z-index: 0;
   }
