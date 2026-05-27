@@ -371,11 +371,10 @@ img{display:block;max-width:100%}
   .card--just-for-you{order:80;margin-top:-80px !important}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
-  #you-to-end{display:block;position:absolute !important;bottom:-15vw;left:50%;transform:translateX(-50%);width:72%;height:auto;z-index:1}
-  /* teal-bw-us: top-left behind sticker-maker — absolutely positioned so it doesn't affect flex flow */
-  #teal-bw-us{display:block !important;position:absolute !important;top:330vw;left:0;width:50%;height:auto;z-index:1}
-  /* green-scribble: bottom-right behind sticker-maker — absolutely positioned */
-  #green-scribble{display:block !important;position:absolute !important;top:385vw;right:0;width:35%;height:auto;z-index:1}
+  #you-to-end{display:block;position:absolute !important;bottom:0;left:50%;transform:translateX(-50%);width:72%;height:auto;z-index:1}
+  /* teal-bw-us and green-scribble hidden on mobile — height:auto flex container causes them to extend scroll area */
+  #teal-bw-us{display:none !important}
+  #green-scribble{display:none !important}
 
   /* ── Absolutely positioned connectors ── */
   /* break-intro-top: circles "break." in the float-label and flows into silly decisions */
