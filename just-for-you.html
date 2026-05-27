@@ -2473,17 +2473,20 @@ function jfyNewEntry(){
 
   function doSaveAndClear(dataUrl){
     if(dataUrl){
+      var snap = snapshotNbLayer();
       var STORE_JOURNAL = 'jfy_journal';
       var saved = [];
       try{ saved = JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]'); }catch(e){}
       if(editId){
-        // Update the existing entry in-place
         for(var i=0; i<saved.length; i++){
-          if(saved[i].id === editId){ saved[i].media={url:dataUrl}; saved[i].time=Date.now(); break; }
+          if(saved[i].id === editId){
+            saved[i].media={url:dataUrl}; saved[i].snapshot=snap; saved[i].time=Date.now(); break;
+          }
         }
       } else {
         var now = Date.now();
-        saved.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now, media:{url:dataUrl} });
+        saved.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now,
+                        media:{url:dataUrl}, snapshot:snap });
       }
       localStorage.setItem(STORE_JOURNAL, JSON.stringify(saved));
     }
@@ -2720,35 +2723,33 @@ document.getElementById('jfy-share-btn').addEventListener('click', function(){
 document.getElementById('jfy-save-btn').addEventListener('click', function(){
   captureNotebook(0.88, function(dataUrl){
     if(!dataUrl){ showJfyToast('Nothing to save yet!'); return; }
+    var snap = snapshotNbLayer(); // full editable state
     var STORE_JOURNAL = 'jfy_journal';
     var entries = [];
     try { entries = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){}
 
-    // If editing an existing entry, update it in-place
     var editId = window._jfyEditingEntryId;
     if(editId){
-      var found = false;
       for(var i=0; i<entries.length; i++){
         if(entries[i].id === editId){
-          entries[i].media = { url: dataUrl };
-          entries[i].time  = Date.now();
-          found = true; break;
+          entries[i].media    = { url: dataUrl };
+          entries[i].snapshot = snap;
+          entries[i].time     = Date.now();
+          break;
         }
       }
-      if(found){
-        localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
-        showJfyToast('Entry updated ♡');
-        window._jfyEditingEntryId  = null;
-        window._jfyEditingEntryIdx = null;
-        window._jfyEditBg          = null;
-        if(window._jfyEntryNav) window._jfyEntryNav.reload();
-        return;
-      }
+      localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
+      showJfyToast('Entry updated ♡');
+      window._jfyEditingEntryId  = null;
+      window._jfyEditingEntryIdx = null;
+      window._jfyEditBg          = null;
+      if(window._jfyEntryNav) window._jfyEntryNav.reload();
+      return;
     }
 
-    // Otherwise create new entry
     var now = Date.now();
-    entries.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now, media:{url:dataUrl} });
+    entries.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now,
+                      media:{url:dataUrl}, snapshot:snap });
     localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
     showJfyToast('Saved to your journal ♡');
     if(window._jfyEntryNav) window._jfyEntryNav.reload();
@@ -2787,8 +2788,13 @@ document.addEventListener('keydown', function(e){
 
 // Expose internals so the navigator IIFE (loaded after this) can drive them
 window._jfyNotebook = {
-  redrawAll: function(){ redrawAll(); },
-  clearDrawCmds: function(){ drawCmds = []; }
+  redrawAll:       function(){ redrawAll(); },
+  clearDrawCmds:   function(){ drawCmds.length = 0; },
+  restoreSnapshot: function(snap){ restoreSnapshot(snap); },
+  clearAll: function(){
+    Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+    drawCmds.length = 0; redrawAll();
+  }
 };
 
 })();
@@ -3504,23 +3510,25 @@ window._jfyNotebook = {
     window._jfyEditingEntryId  = e.id;
     window._jfyEditingEntryIdx = entryIdx;
 
-    // Load entry image as a persistent background that survives redrawAll()
-    var img = new Image();
-    img.onload = function(){
-      // Set the global background — redrawAll() paints this first on every call
-      window._jfyEditBg = { img: img, entryId: e.id };
-      // Clear any existing strokes so the user starts fresh on top of the entry
-      if(window._jfyNotebook){
-        window._jfyNotebook.clearDrawCmds();
-        window._jfyNotebook.redrawAll();  // paints the bg image immediately
-      }
-    };
-    img.src = url;
-
-    // Close viewer and return to live notebook
+    // Close viewer first, then restore the editable state
     viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
     entryIdx = -1;
     updateArrows();
+
+    if(e.snapshot && window._jfyNotebook){
+      // Full snapshot available — restore every element exactly as it was
+      window._jfyEditBg = null;          // no flat bg needed
+      window._jfyNotebook.restoreSnapshot(e.snapshot);
+    } else if(url && window._jfyNotebook){
+      // Legacy entry (no snapshot) — load flat image as editable background
+      var img = new Image();
+      img.onload = function(){
+        window._jfyEditBg = { img: img, entryId: e.id };
+        window._jfyNotebook.clearAll();   // clear canvas so bg paints clean
+        window._jfyNotebook.redrawAll();
+      };
+      img.src = url;
+    }
 
     if(typeof showJfyToast === 'function'){
       showJfyToast('Editing entry — ♡ save or + new entry when done');
