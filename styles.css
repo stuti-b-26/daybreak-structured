@@ -301,11 +301,11 @@ img{display:block;max-width:100%}
   #sticker-to-you{top:216.67vw;right:0;width:92%;height:32vw}
   #you-to-end{top:244.17vw;left:1%;width:50%;height:auto}
 
-  /* Buttons — all values in vw so they scale proportionally with cards (baseline 1200px) */
-  .card-btn{font-size:1.33vw;padding:1.33vw 2.33vw;border-width:0.17vw;box-shadow:0.67vw 0.67vw 0 0 #000}
+  /* Buttons — font, padding, shadow scale with viewport */
+  .card-btn{font-size:clamp(12px,1.5vw,16px);padding:clamp(10px,1.4vw,16px) clamp(16px,2.4vw,28px);border-width:2px;box-shadow:0.67vw 0.67vw 0 0 #000}
   .card-btn--rect{border-radius:1.33vw}
-  .card-btn--tall-rect{border-radius:1.67vw;padding:2vw 2.83vw;font-size:1.42vw}
-  .card-btn--circle{border-radius:50%;width:14.17vw;height:14.17vw;font-size:1.33vw;padding:1.33vw}
+  .card-btn--tall-rect{border-radius:1.67vw;padding:clamp(16px,2vw,24px) clamp(20px,2.8vw,34px);font-size:clamp(13px,1.6vw,17px)}
+  .card-btn--circle{border-radius:50%;width:clamp(100px,14vw,170px);height:clamp(100px,14vw,170px);font-size:clamp(12px,1.4vw,16px);padding:1.33vw}
   .card-btn--centered{bottom:1.67vw}
   .card--shh .card-btn{max-width:21.67vw}
 
