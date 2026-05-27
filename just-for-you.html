@@ -2393,16 +2393,77 @@ _eraseBtn.addEventListener('click', function(){
 
 nbLayer.addEventListener('click', function(e){
   if(!_eraseActive) return;
+
+  // 1. Try DOM placed elements first (stickers, paper, polaroid, text)
   var target = getPlacedAt(e.clientX, e.clientY);
-  if(!target || !nbLayer.contains(target)) return;
-  e.stopPropagation();
-  e.preventDefault();
-  pushHistory();
-  // Remove associated cut-edge SVG overlay if present
-  var svgId = target.dataset && target.dataset.cutEdge;
-  if(svgId){ var edgeSvg = document.getElementById(svgId); if(edgeSvg) edgeSvg.remove(); }
-  target.remove();
+  if(target && nbLayer.contains(target)){
+    e.stopPropagation(); e.preventDefault();
+    pushHistory();
+    var svgId = target.dataset && target.dataset.cutEdge;
+    if(svgId){ var edgeSvg = document.getElementById(svgId); if(edgeSvg) edgeSvg.remove(); }
+    target.remove();
+    return;
+  }
+
+  // 2. Try canvas strokes (washi tape, doodle) — hit-test via offscreen canvas
+  var cr = canvas.getBoundingClientRect();
+  var cssX = e.clientX - cr.left;
+  var cssY = e.clientY - cr.top;
+  var hitIdx = getDrawCmdAt(cssX, cssY);
+  if(hitIdx !== -1){
+    e.stopPropagation(); e.preventDefault();
+    pushHistory();
+    drawCmds.splice(hitIdx, 1);
+    redrawAll();
+  }
 }, true);
+
+// Returns the index of the topmost drawCmd stroke at CSS-pixel position (x, y), or -1.
+function getDrawCmdAt(cssX, cssY){
+  var HIT_RADIUS = 8; // px tolerance for doodle strokes
+  // Iterate newest-first so topmost stroke is found first
+  for(var i = drawCmds.length - 1; i >= 0; i--){
+    var cmd = drawCmds[i];
+    if(cmd.type === 'washi'){
+      if(pointInWashi(cssX, cssY, cmd)) return i;
+    } else if(cmd.type === 'doodle'){
+      if(pointNearDoodle(cssX, cssY, cmd, HIT_RADIUS)) return i;
+    }
+  }
+  return -1;
+}
+
+function pointInWashi(x, y, cmd){
+  var dx = cmd.x2 - cmd.x1, dy = cmd.y2 - cmd.y1;
+  var len = Math.sqrt(dx*dx + dy*dy);
+  if(len < 1) return false;
+  var ux = dx/len, uy = dy/len;  // along tape
+  var nx = -uy,   ny =  ux;      // perpendicular
+  var hw = (cmd.w || 28) / 2;
+  // Project (x,y) onto tape axes
+  var relX = x - cmd.x1, relY = y - cmd.y1;
+  var along = relX*ux + relY*uy;
+  var perp  = relX*nx + relY*ny;
+  return along >= 0 && along <= len && Math.abs(perp) <= hw;
+}
+
+function pointNearDoodle(x, y, cmd, radius){
+  var pts = cmd.pts;
+  var r2  = (radius + (cmd.size || 3) / 2);
+  r2 = r2 * r2;
+  for(var i = 0; i < pts.length - 1; i++){
+    if(distToSegmentSq(x, y, pts[i].x, pts[i].y, pts[i+1].x, pts[i+1].y) <= r2) return true;
+  }
+  return false;
+}
+
+function distToSegmentSq(px, py, ax, ay, bx, by){
+  var dx = bx-ax, dy = by-ay;
+  var lenSq = dx*dx + dy*dy;
+  var t = lenSq > 0 ? Math.max(0, Math.min(1, ((px-ax)*dx + (py-ay)*dy) / lenSq)) : 0;
+  var ex = ax + t*dx - px, ey = ay + t*dy - py;
+  return ex*ex + ey*ey;
+}
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e){
