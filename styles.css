@@ -322,16 +322,16 @@ img{display:block;max-width:100%}
   .card--silly-decisions{order:20}
   #orange-shape{order:25;display:block;position:relative !important;width:48px;height:auto;align-self:flex-end;margin-right:6%;margin-top:-20px;z-index:5}
   /* All Group 1 cards overlap each other */
-  .card--mess-hall{order:30;margin-top:-140px !important}
+  .card--mess-hall{order:30;margin-top:-220px !important}
   #yellow-scribble{order:35;display:block;position:relative !important;width:70px;height:auto;align-self:flex-start;margin-left:4%;margin-top:-12px;z-index:2}
-  .card--selfless{order:40;margin-top:-140px !important}
+  .card--selfless{order:40;margin-top:-220px !important}
   /* Divider — large centered space with SVG circle around text */
   .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin:60px 0 !important}
   /* Group 2 — all overlap each other */
   .card--shh{order:60}
   #between-to-sticker{order:65;display:block;position:relative !important;width:38%;height:auto;align-self:flex-start;margin-left:6%}
-  .card--sticker-maker{order:70;margin-top:-140px !important}
-  .card--just-for-you{order:80;margin-top:-140px !important}
+  .card--sticker-maker{order:70;margin-top:-220px !important}
+  .card--just-for-you{order:80;margin-top:-220px !important}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:block;position:absolute !important;bottom:-60px;left:50%;transform:translateX(-50%);width:72%;height:auto;z-index:1}
