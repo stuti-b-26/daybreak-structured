@@ -316,34 +316,38 @@ img{display:block;max-width:100%}
   .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:16px;padding:0;align-items:center;overflow:visible}
 
   #green-swish-long{display:none}
-  #you-to-end{display:none}
 
   /* ── Card reorder: Group 1 → divider → Group 2 ── */
   .float-label--life-hard{order:10;align-self:center;text-align:center}
   .card--silly-decisions{order:20}
   #orange-shape{order:25;display:block;position:relative !important;width:48px;height:auto;align-self:flex-end;margin-right:6%;margin-top:-20px;z-index:5}
+  /* All Group 1 cards overlap each other */
   .card--mess-hall{order:30;margin-top:-40px !important}
   #yellow-scribble{order:35;display:block;position:relative !important;width:70px;height:auto;align-self:flex-start;margin-left:4%;margin-top:-12px;z-index:2}
-  .card--selfless{order:40}
-  /* Divider — centered between groups */
-  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin:12px 0}
-  /* Group 2 */
+  .card--selfless{order:40;margin-top:-40px !important}
+  /* Divider — large centered space with SVG circle around text */
+  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin:60px 0 !important}
+  /* Group 2 — all overlap each other */
   .card--shh{order:60}
   #between-to-sticker{order:65;display:block;position:relative !important;width:38%;height:auto;align-self:flex-start;margin-left:6%}
-  .card--sticker-maker{order:70}
-  #break-bubble-middle{order:75;display:block;position:relative !important;width:82%;height:auto;align-self:center;margin-top:-28px}
-  .card--just-for-you{order:80}
-  #sticker-to-you{order:90;display:block;position:relative !important;width:86%;height:auto;align-self:center;margin-top:-20px}
+  .card--sticker-maker{order:70;margin-top:-40px !important}
+  .card--just-for-you{order:80;margin-top:-40px !important}
+  /* Trailing connectors */
+  #sticker-to-you{order:88;display:block;position:relative !important;width:86%;height:auto;align-self:center;margin-top:-20px}
+  #you-to-end{order:92;display:block;position:relative !important;width:78%;height:auto;align-self:center;margin-top:-20px;margin-bottom:-80px;z-index:1}
 
   /* ── Absolutely positioned connectors ── */
-  /* break-intro-top: circles "break." (line 3 of float-label, ~50px from top) and flows into silly decisions */
+  /* break-intro-top: circles "break." in the float-label and flows into silly decisions */
   #break-intro-top{display:block;position:absolute;top:38px;left:50%;transform:translateX(-20%);width:72%;height:auto;z-index:5}
-  /* mess-btn-to-self: between mess hall and selfless */
-  #mess-btn-to-self{display:block;position:absolute;top:185vw;left:-4%;width:44%;height:auto;z-index:1}
   /* silly-to-mess: right of silly decisions button, sweeps down to mess hall */
   #silly-to-mess{display:block;position:absolute;top:50vw;right:-6%;width:52%;height:auto;z-index:3}
+  /* mess-btn-to-self: top-left of mess hall card, from button down to selfless less */
+  #mess-btn-to-self{display:block;position:absolute;top:106vw;left:0;width:48%;height:auto;z-index:1}
+  /* break-bubble-middle: absolute — circle around "everyone needs a break" text,
+     spanning from bottom-right of selfless to top-left of between-us */
+  #break-bubble-middle{display:block;position:absolute;top:245vw;left:5%;width:90%;height:auto;z-index:2}
 
-  /* Card base — all centered, no stagger */
+  /* Card base — all centered */
   .card-item{position:relative !important;width:78% !important;left:auto !important;top:auto !important;transform:rotate(var(--card-rotate,0deg)) !important}
   .card--mess-hall{width:86% !important}
   .card--shh{width:86% !important}
