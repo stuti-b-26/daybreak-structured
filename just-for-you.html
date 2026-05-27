@@ -605,14 +605,16 @@ body.jfy-scissors-active .jfy-scissors {
   .jfy-grid-wrap { padding-top: 230px; padding-bottom: 300px; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); }
 
-  /* Paper-wrap: keep relative pull-up in px terms */
-  .jfy-paper-wrap { top: -200px; margin-bottom: -200px; }
+  /* Paper-wrap: pulled up further so fan is mostly visible in initial viewport */
+  .jfy-paper-wrap { top: -300px; margin-bottom: -300px; }
   .jfy-paper { width: 520px; margin-left: -50px; }
 
-  /* Washi: top-left, overlaps corner, clips left — scaled from tablet */
+  /* Washi: vw-based so it always overflows left viewport edge at any width.
+     At 1024px: left=-22vw≈-225px, notebook-left≈185px → clips ≈40px off viewport.
+     Scales proportionally beyond 1024px. */
   .jfy-washi {
-    top: -190px; left: -50px;
-    width: 210px; max-width: none;
+    top: -190px; left: -22vw;
+    width: 26vw; max-width: none;
     z-index: 25;
   }
   /* Stickers: top-center-left near spine, under page content */
@@ -627,10 +629,10 @@ body.jfy-scissors-active .jfy-scissors {
     width: 195px; max-width: none;
     z-index: 22;
   }
-  /* Scissors: top-right, overlaps corner, clips right */
+  /* Scissors: scaled up, does not need to clip off edge */
   .jfy-scissors {
-    top: -170px; right: -50px; left: auto; bottom: auto;
-    width: 245px; max-width: none;
+    top: -170px; right: -30px; left: auto; bottom: auto;
+    width: 300px; max-width: none;
     z-index: 25;
   }
   /* Frames: bottom-right, no overlap, no clip */
