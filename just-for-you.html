@@ -505,17 +505,9 @@ body.jfy-scissors-active .jfy-scissors {
 
 /* ── Tablet prop positions (768–1023px) ── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Washi: left uses calc to account for 120px gutter + 1 column so it
-     reliably overflows the viewport left edge across the full tablet range.
-     At 768px: -(100+69)=-169px, notebook-left≈164px → overflows ~5px.
-     At 1023px: -(100+92)=-192px, notebook-left≈185px → overflows ~7px. */
-  /* Washi: positioned relative to notebook (~164px from viewport left at 768px).
-     left: -20vw = -154px at 768px → washi left edge ≈ 10px into viewport (slight clip).
-     left: -20vw = -205px at 1023px → washi left edge ≈ -20px (clips ~20px off edge). */
+  /* Washi: width only — position/left/top set in shared viewport-relative block below */
   .jfy-washi {
-    top: -18vw; left: -20vw;
     width: 24vw;
-    z-index: 25;
   }
   /* Stickers: top-center-left near the spine, slides UNDER notebook page content */
   .jfy-stickers {
@@ -615,13 +607,9 @@ body.jfy-scissors-active .jfy-scissors {
   .jfy-paper-wrap { top: -300px; margin-bottom: -300px; }
   .jfy-paper { width: 520px; margin-left: -50px; }
 
-  /* Washi: vw-based so it always overflows left viewport edge at any width.
-     At 1024px: left=-22vw≈-225px, notebook-left≈185px → clips ≈40px off viewport.
-     Scales proportionally beyond 1024px. */
+  /* Washi: width only — position/left/top set in shared viewport-relative block below */
   .jfy-washi {
-    top: -190px; left: -22vw;
     width: 26vw; max-width: none;
-    z-index: 25;
   }
   /* Stickers: top-center-left near spine, under page content */
   .jfy-stickers {
@@ -652,6 +640,21 @@ body.jfy-scissors-active .jfy-scissors {
     bottom: -250px; right: 0; top: auto; left: auto;
     width: 280px; max-width: none;
     z-index: 0;
+  }
+}
+
+/* ── Washi: fixed viewport-relative positioning (tablet + desktop) ── */
+/* position:fixed removes it from notebook stacking context entirely —
+   top/left are now pure viewport coordinates so the same rule works
+   at any width ≥ 768px without recalculating notebook offsets.
+   top: calc(var(--hh) + 56px) ≈ 120px sits just above where the
+   notebook top meets the header; left: -10px clips the left edge by ~10px. */
+@media (min-width: 768px) {
+  .jfy-washi {
+    position: fixed;
+    top: calc(var(--hh) + 56px);
+    left: -10px;
+    z-index: 25;
   }
 }
 </style>
