@@ -607,9 +607,10 @@ body.jfy-scissors-active .jfy-scissors {
   .jfy-paper-wrap { top: -300px; margin-bottom: -300px; }
   .jfy-paper { width: 520px; margin-left: -50px; }
 
-  /* Washi: width only — position/left/top set in shared viewport-relative block below */
+  /* Washi: slightly bigger than tablet max (~245px) but fixed px so it doesn't
+     balloon at wider viewports. position/left/top in shared block below. */
   .jfy-washi {
-    width: 26vw; max-width: none;
+    width: 200px; max-width: none;
   }
   /* Stickers: top-center-left near spine, under page content */
   .jfy-stickers {
@@ -623,16 +624,13 @@ body.jfy-scissors-active .jfy-scissors {
     width: 195px; max-width: none;
     z-index: 22;
   }
-  /* Scissors: 18vw keeps them at a corner-overlap size at any desktop width.
-     27vw was too large (≈370px at 1366px, covering half the right page).
-     right: -3vw clips the handle tip off the right edge proportionally. */
-  /* Scissors: vw-based width scales with viewport. top: -24vw ensures scissors
-     sit entirely above the notebook at any desktop width (scissors height ≈ 18vw,
-     so bottom edge = -24vw + 18vw = -6vw, still above the notebook top).
-     right: -6vw clips the handle tip off the right edge without overlapping the page. */
+  /* Scissors: notebook top is fixed at 294px (64px header + 230px grid padding).
+     top: -200px → scissors top from viewport = 94px, safely below the header.
+     Slightly scaled up from tablet (20vw vs 28vw tablet, proportionally larger).
+     right: 0 keeps them fully within the viewport right edge. */
   .jfy-scissors {
-    top: -24vw; right: -6vw; left: auto; bottom: auto;
-    width: 18vw; max-width: none;
+    top: -200px; right: 0; left: auto; bottom: auto;
+    width: 20vw; max-width: none;
     z-index: 25;
   }
   /* Frames: bottom-right, no overlap, no clip */
