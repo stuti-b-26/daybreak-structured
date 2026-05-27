@@ -263,7 +263,7 @@ img{display:block;max-width:100%}
   display:flex;
   align-items:flex-end;
   justify-content:flex-end;
-  padding:0 24px;
+  padding:0;
   pointer-events:none;
   opacity:0;
   transition:opacity .25s ease;
@@ -271,9 +271,8 @@ img{display:block;max-width:100%}
 #mood-overlay.open{opacity:1;pointer-events:auto}
 #mood-popup{
   background:#000;
-  border-radius:24px;
+  border-radius:0;
   padding:36px 40px 32px;
-  max-width:780px;
   width:100%;
   box-shadow:0 24px 80px rgba(0,0,0,.5);
   outline:2px solid rgba(255,255,255,.25);
@@ -310,7 +309,7 @@ img{display:block;max-width:100%}
 .mood-sug-name{font-family:var(--font-body);font-size:15px;font-weight:700;color:#fff;margin:0 0 6px;display:block}
 .mood-sug-desc{font-family:var(--font-body);font-size:13px;color:rgba(255,255,255,.55);line-height:1.5;margin:0}
 @media(max-width:767px){
-  #mood-overlay{padding:0 12px;bottom:calc(20px + 60px + 12px)}
+  #mood-overlay{padding:0;bottom:calc(20px + 60px + 12px)}
   #mood-popup{padding:24px 16px 20px;border-radius:18px}
   .mood-chip{padding:10px 14px;font-size:13px}
 }
