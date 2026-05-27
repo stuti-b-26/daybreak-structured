@@ -299,7 +299,7 @@ img{display:block;max-width:100%}
   #break-bubble-middle{top:133vw;left:48%;width:40%}
   #between-to-sticker{top:167.5vw;left:10.83vw;width:32%}
   #sticker-to-you{top:216.67vw;right:0;width:92%;height:32vw}
-  #you-to-end{top:244.17vw;left:1%;width:50%}
+  #you-to-end{top:244.17vw;left:1%;width:50%;height:auto}
 
   /* Buttons — font, padding, shadow scale with viewport */
   .card-btn{font-size:clamp(12px,1.5vw,16px);padding:clamp(10px,1.4vw,16px) clamp(16px,2.4vw,28px);border-width:2px;box-shadow:0.67vw 0.67vw 0 0 #000}
@@ -315,6 +315,10 @@ img{display:block;max-width:100%}
   .card--just-for-you .card-btn{bottom:1.67vw;right:1.67vw}
   .card--sticker-maker .card-btn{bottom:1.67vw;right:1.67vw}
   .card--shh .card-btn{bottom:2vw;left:1.67vw;right:auto}
+
+  /* Mission — pull up so you-to-end line meets green circle center */
+  #mission{margin-top:-8vw}
+  #green-circle{width:10.67vw}
 
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
