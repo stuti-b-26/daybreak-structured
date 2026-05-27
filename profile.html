@@ -245,11 +245,15 @@
 /* Bubble visualization */
 .mood-bubbles{position:relative;width:100%;aspect-ratio:1.2/1;min-height:220px}
 .mood-bubble{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-weight:700;color:#000;font-size:clamp(11px,1.1vw,14px);text-align:center;line-height:1.2;cursor:default;transition:width .5s cubic-bezier(.34,1.56,.64,1),height .5s cubic-bezier(.34,1.56,.64,1),top .5s cubic-bezier(.34,1.56,.64,1),left .5s cubic-bezier(.34,1.56,.64,1),font-size .5s ease;user-select:none}
-.mood-bubble.playful{background:#5dde60;top:25%;left:30%}
-.mood-bubble.tired{background:#7de8f5;top:18%;left:5%}
-.mood-bubble.curious{background:#e8a8f0;top:38%;left:2%}
-.mood-bubble.hopeful{background:var(--yellow);top:20%;left:55%}
-.mood-bubble.restless{background:#f5a04a;top:55%;left:35%}
+.mood-bubble.overwhelmed{background:#f5a04a}
+.mood-bubble.anxious{background:#e8a8f0}
+.mood-bubble.lonely{background:#a8d8f0}
+.mood-bubble.tired{background:#7de8f5}
+.mood-bubble.restless{background:#f5c8a8}
+.mood-bubble.unsure{background:#c4b8f5}
+.mood-bubble.curious{background:#a8f0bc}
+.mood-bubble.playful{background:#c8f08c}
+.mood-bubble.hopeful{background:var(--yellow,#ffd400)}
 
 /* Empty mood state */
 .mood-empty{display:none;text-align:center;padding:40px 24px;border:2px dashed rgba(0,0,0,.2);border-radius:20px}
@@ -477,32 +481,15 @@
                 <button class="mood-filter-btn" data-period="90">last 3 months</button>
               </div>
 
-              <div class="mood-bubbles" id="mood-bubbles" aria-label="Mood bubble visualization">
-                <div class="mood-bubble playful" data-mood="playful" style="width:130px;height:130px;left:28%;top:20%">playful</div>
-                <div class="mood-bubble tired" data-mood="tired" style="width:72px;height:72px;left:6%;top:22%">tired</div>
-                <div class="mood-bubble curious" data-mood="curious" style="width:84px;height:84px;left:3%;top:52%">curious</div>
-                <div class="mood-bubble hopeful" data-mood="hopeful" style="width:100px;height:100px;left:56%;top:18%">hopeful</div>
-                <div class="mood-bubble restless" data-mood="restless" style="width:66px;height:66px;left:52%;top:62%">restless</div>
-              </div>
+              <div class="mood-bubbles" id="mood-bubbles" aria-label="Mood bubble visualization"></div>
 
-              <div class="mood-empty" id="mood-empty">
-                <p>no mood data yet! head to the sticker maker to express how you're feeling, or pick a mood to discover a curated page.</p>
-                <a href="sticker-maker.html">go to sticker maker →</a>
+              <div class="mood-empty show" id="mood-empty">
+                <p>no mood data yet — use the button in the corner to find a page that matches how you're feeling.</p>
               </div>
             </div>
             <div class="mood-right">
-              <p class="mood-remark" id="mood-remark">
-                looks like you were <strong>mostly playful</strong> this past week.<br><br>
-                good emotions came out on top.<br><br>
-                hope we were to blame :)
-              </p>
-              <div class="mood-legend" aria-label="Mood colour key">
-                <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#5dde60"></span>playful</div>
-                <div class="mood-legend-item"><span class="mood-legend-dot" style="background:var(--yellow)"></span>hopeful</div>
-                <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#7de8f5"></span>tired</div>
-                <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#e8a8f0"></span>curious</div>
-                <div class="mood-legend-item"><span class="mood-legend-dot" style="background:#f5a04a"></span>restless</div>
-              </div>
+              <p class="mood-remark" id="mood-remark"></p>
+              <div class="mood-legend" id="mood-legend" aria-label="Mood colour key"></div>
             </div>
           </div>
 
@@ -796,35 +783,94 @@
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();});
 })();
 
-/* mood filter */
+/* mood tracker — driven by localStorage entries saved by the FAB */
 (function(){
+  var COLORS={
+    overwhelmed:'#f5a04a',anxious:'#e8a8f0',lonely:'#a8d8f0',
+    tired:'#7de8f5',restless:'#f5c8a8',unsure:'#c4b8f5',
+    curious:'#a8f0bc',playful:'#c8f08c',hopeful:'#ffd400'
+  };
+  /* bubble positions for up to 5 slots */
+  var SLOTS=[
+    {top:'20%',left:'28%'},{top:'18%',left:'5%'},
+    {top:'52%',left:'3%'},{top:'15%',left:'56%'},
+    {top:'58%',left:'40%'}
+  ];
+
+  function getEntries(){
+    try{return JSON.parse(localStorage.getItem('daybreak_moods')||'[]')}catch(e){return[]}
+  }
+
+  function render(days){
+    var now=Date.now();
+    var cutoff=now-days*86400000;
+    var entries=getEntries().filter(function(e){return e.ts>=cutoff});
+
+    var bubbles=document.getElementById('mood-bubbles');
+    var empty=document.getElementById('mood-empty');
+    var remark=document.getElementById('mood-remark');
+    var legend=document.getElementById('mood-legend');
+    if(!bubbles)return;
+
+    bubbles.innerHTML='';
+    legend.innerHTML='';
+    remark.innerHTML='';
+
+    if(!entries.length){
+      empty.classList.add('show');
+      bubbles.style.display='none';
+      return;
+    }
+    empty.classList.remove('show');
+    bubbles.style.display='';
+
+    /* count each mood */
+    var counts={};
+    entries.forEach(function(e){counts[e.mood]=(counts[e.mood]||0)+1});
+
+    /* sort by count desc, take top 5 */
+    var sorted=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a]}).slice(0,5);
+    var max=counts[sorted[0]];
+    var MIN_R=48,MAX_R=130;
+
+    sorted.forEach(function(mood,i){
+      var pos=SLOTS[i];
+      var r=Math.round(MIN_R+(counts[mood]/max)*(MAX_R-MIN_R));
+      var div=document.createElement('div');
+      div.className='mood-bubble '+mood;
+      div.style.cssText='width:'+r+'px;height:'+r+'px;top:'+pos.top+';left:'+pos.left+';background:'+(COLORS[mood]||'#eee');
+      div.textContent=mood;
+      bubbles.appendChild(div);
+
+      /* legend item */
+      var li=document.createElement('div');
+      li.className='mood-legend-item';
+      li.innerHTML='<span class="mood-legend-dot" style="background:'+(COLORS[mood]||'#eee')+'"></span>'+mood;
+      legend.appendChild(li);
+    });
+
+    /* remark */
+    var top=sorted[0];
+    var positiveSet=['curious','playful','hopeful'];
+    var isPositive=positiveSet.indexOf(top)!==-1;
+    remark.innerHTML='looks like you\'ve been feeling <strong>'+top+'</strong> lately.<br><br>'+(isPositive?'good things are clearly happening.<br><br>hope we had something to do with it :)':'that\'s okay — we\'re here for it.<br><br>keep exploring and see what helps.');
+  }
+
   var btns=document.querySelectorAll('.mood-filter-btn');
-  var periods={
-    '7':[130,72,84,100,66],
-    '30':[110,90,100,115,80],
-    '90':[150,60,70,90,55]
-  };
-  var remarks={
-    '7':'looks like you were <strong>mostly playful</strong> this past week.<br><br>good emotions came out on top.<br><br>hope we were to blame :)',
-    '30':'you\'ve been leaning <strong>hopeful</strong> this month.<br><br>something good\'s clearly been brewing.<br><br>we love that for you :)',
-    '90':'the last 3 months tell a story of someone <strong>mostly playful and hopeful.</strong><br><br>growth looks good on you.'
-  };
-  var moods=['playful','tired','curious','hopeful','restless'];
+  var current=7;
   btns.forEach(function(btn){
     btn.addEventListener('click',function(){
       btns.forEach(function(b){b.classList.remove('active')});
       btn.classList.add('active');
-      var p=btn.dataset.period;
-      moods.forEach(function(m,i){
-        var el=document.querySelector('.mood-bubble.'+m);
-        if(!el)return;
-        var s=periods[p][i];
-        el.style.width=s+'px';el.style.height=s+'px';
-      });
-      var remark=document.getElementById('mood-remark');
-      if(remark)remark.innerHTML=remarks[p];
+      current=parseInt(btn.dataset.period,10);
+      render(current);
     });
   });
+
+  render(current);
+
+  /* re-render if page regains focus (user navigated away and came back) */
+  window.addEventListener('focus',function(){render(current)});
 })();
 
 /* ── happiness modal ── */
@@ -1214,6 +1260,13 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
         var a=document.createElement('a');
         a.className='mood-sug-item';a.href=p.href;
         a.innerHTML='<span class="mood-sug-dot" style="background:'+p.color+'"></span><span class="mood-sug-name">'+p.name+'</span><p class="mood-sug-desc">'+p.desc+'</p>';
+        a.addEventListener('click',function(){
+          try{
+            var entries=JSON.parse(localStorage.getItem('daybreak_moods')||'[]');
+            entries.push({mood:mood,ts:Date.now()});
+            localStorage.setItem('daybreak_moods',JSON.stringify(entries));
+          }catch(e){}
+        });
         sugList.appendChild(a);
       });
       sugPanel.classList.add('show');
