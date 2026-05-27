@@ -1183,6 +1183,7 @@ var S = {
 };
 
 var drawCmds = []; // { type:'washi'|'doodle', ... }
+window._jfyDrawCmdsRef = drawCmds; // expose so navigator can clear on edit
 
 /* ── canvas init / resize ── */
 function initCanvas(){
@@ -1296,9 +1297,19 @@ function drawDoodle(pts,color,size){
   ctx.restore();
 }
 
+// When editing a saved entry, this holds the entry image so redrawAll
+// always repaints it under new strokes (survives undo/redo/clear cycles).
+var _jfyEditBg = null;  // { img: HTMLImageElement, entryId: string }
+
 function redrawAll(){
   var W = canvas.offsetWidth, H = canvas.offsetHeight;
   ctx.clearRect(0,0,W,H);
+  // Paint the edit-mode background first so strokes draw on top of it
+  if(_jfyEditBg && _jfyEditBg.img.complete){
+    ctx.save();
+    ctx.drawImage(_jfyEditBg.img, 0, 0, W, H);
+    ctx.restore();
+  }
   drawCmds.forEach(function(cmd){
     if(cmd.type==='washi') drawWashi(cmd.x1,cmd.y1,cmd.x2,cmd.y2,cmd.col,false,cmd.w);
     else if(cmd.type==='doodle') drawDoodle(cmd.pts,cmd.color,cmd.size);
@@ -2453,29 +2464,41 @@ document.getElementById('jfy-clear-btn').addEventListener('click', function(){
   drawCmds = []; redrawAll(); updateHistoryButtons();
 });
 
-// "New entry" — auto-saves current canvas then clears for a fresh page
+// "New entry" — auto-saves current canvas (including any edit background)
+// then clears everything for a brand-new blank page.
 function jfyNewEntry(){
-  // Auto-capture and save before clearing
-  if(typeof captureNotebook === 'function'){
-    captureNotebook(0.88, function(dataUrl){
-      if(dataUrl){
-        var STORE_JOURNAL = 'jfy_journal';
-        var saved = [];
-        try{ saved = JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]'); }catch(e){}
+  var editId = window._jfyEditingEntryId; // non-null if we were editing
+
+  function doSaveAndClear(dataUrl){
+    if(dataUrl){
+      var STORE_JOURNAL = 'jfy_journal';
+      var saved = [];
+      try{ saved = JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]'); }catch(e){}
+      if(editId){
+        // Update the existing entry in-place
+        for(var i=0; i<saved.length; i++){
+          if(saved[i].id === editId){ saved[i].media={url:dataUrl}; saved[i].time=Date.now(); break; }
+        }
+      } else {
         var now = Date.now();
         saved.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now, media:{url:dataUrl} });
-        localStorage.setItem(STORE_JOURNAL, JSON.stringify(saved));
       }
-      pushHistory();
-      Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
-      drawCmds = []; redrawAll(); updateHistoryButtons();
-      if(window._jfyEntryNav) window._jfyEntryNav.reload();
-    });
-  } else {
+      localStorage.setItem(STORE_JOURNAL, JSON.stringify(saved));
+    }
+    // Clear edit state
+    window._jfyEditingEntryId  = null;
+    window._jfyEditingEntryIdx = null;
+    window._jfyEditBg          = null;
     pushHistory();
     Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
-    drawCmds = []; redrawAll(); updateHistoryButtons();
+    drawCmds.length = 0; redrawAll(); updateHistoryButtons();
     if(window._jfyEntryNav) window._jfyEntryNav.reload();
+  }
+
+  if(typeof captureNotebook === 'function'){
+    captureNotebook(0.88, doSaveAndClear);
+  } else {
+    doSaveAndClear(null);
   }
 }
 document.addEventListener('jfy-new-entry', jfyNewEntry);
@@ -2715,6 +2738,7 @@ document.getElementById('jfy-save-btn').addEventListener('click', function(){
         showJfyToast('Entry updated ♡');
         window._jfyEditingEntryId  = null;
         window._jfyEditingEntryIdx = null;
+        window._jfyEditBg          = null;
         if(window._jfyEntryNav) window._jfyEntryNav.reload();
         return;
       }
@@ -3468,39 +3492,30 @@ document.addEventListener('keydown', function(e){
     var url = e.media && e.media.url ? e.media.url : '';
     if(!url) return;
 
-    // Store which entry we're editing so ♡ save updates it in-place
-    window._jfyEditingEntryId = e.id;
+    // Remember which entry is being edited so ♡ save updates it in-place
+    window._jfyEditingEntryId  = e.id;
     window._jfyEditingEntryIdx = entryIdx;
 
-    // Load entry image onto the main notebook canvas as a background
-    var nbCanvas = document.getElementById('jfy-canvas');
-    if(nbCanvas){
-      var img = new Image();
-      img.onload = function(){
-        var ctx2 = nbCanvas.getContext('2d');
-        var dpr = window.devicePixelRatio || 1;
-        // Clear canvas first
-        ctx2.save();
-        ctx2.setTransform(1,0,0,1,0,0);
-        ctx2.clearRect(0,0,nbCanvas.width,nbCanvas.height);
-        ctx2.restore();
-        // Draw entry image scaled to fill canvas
-        ctx2.save();
-        ctx2.setTransform(1,0,0,1,0,0);
-        ctx2.drawImage(img, 0, 0, nbCanvas.width, nbCanvas.height);
-        ctx2.restore();
-      };
-      img.src = url;
-    }
+    // Load entry image as a persistent background that survives redrawAll()
+    var img = new Image();
+    img.onload = function(){
+      // Set the global background — redrawAll() will paint this first
+      window._jfyEditBg = { img: img, entryId: e.id };
+      // Clear any strokes from the previous session so the user starts
+      // fresh on top of the restored entry
+      window._jfyDrawCmdsRef && (window._jfyDrawCmdsRef.length = 0);
+      // Trigger a redraw so the entry image is visible immediately
+      if(typeof redrawAll === 'function') redrawAll();
+    };
+    img.src = url;
 
     // Close viewer and return to live notebook
     viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
     entryIdx = -1;
     updateArrows();
 
-    // Show a toast hint
     if(typeof showJfyToast === 'function'){
-      showJfyToast('Editing entry — use ♡ save when done');
+      showJfyToast('Editing entry — ♡ save or + new entry when done');
     }
   });
 
