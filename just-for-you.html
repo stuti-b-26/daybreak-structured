@@ -500,7 +500,7 @@ body.jfy-scissors-active .jfy-scissors {
 @media (min-width: 768px) {
   /* padding-top accounts for props that extend ~18vw above notebook */
   .jfy-grid-wrap { padding-top: calc(20vw + 54px); padding-bottom: 28vw; }
-  .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); min-height: 520px; }
 }
 
 /* ── Tablet prop positions (768–1023px) ── */
@@ -601,7 +601,7 @@ body.jfy-scissors-active .jfy-scissors {
 @media (min-width: 1024px) {
   /* Padding scaled from tablet vw→px; props extend ~190px above notebook */
   .jfy-grid-wrap { padding-top: 230px; padding-bottom: 300px; }
-  .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); }
+  .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); min-height: 540px; }
 
   /* Paper-wrap: pulled up further so fan is mostly visible in initial viewport */
   .jfy-paper-wrap { top: -300px; margin-bottom: -300px; }
@@ -3102,8 +3102,8 @@ window._jfyNotebook = {
 .jfy-intro-active .jfy-paper-wrap,
 .jfy-intro-active #jfy-history-bar { display: none !important; }
 
-@media (min-width: 768px) { #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 38vw); } }
-@media (min-width: 1024px){ #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 360px); } }
+@media (min-width: 768px)  { #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 38vw);  min-height: 520px; } }
+@media (min-width: 1024px) { #jfy-intro-wrap { height: calc(100dvh - var(--hh) - 360px); min-height: 540px; } }
 
 /* ── Pages layer ── */
 #jfy-intro-pages {
