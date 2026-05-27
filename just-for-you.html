@@ -2424,8 +2424,11 @@ function rewirePolaroid(pol){
 }
 
 function restoreSnapshot(snap){
-  // Restore stroke list so redrawAll() stays in sync with the canvas
-  drawCmds = snap.drawCmds ? snap.drawCmds.slice() : [];
+  // Restore stroke list — strip out legacy washi entries (now DOM elements)
+  // and keep only doodle strokes in drawCmds
+  var allCmds = snap.drawCmds ? snap.drawCmds.slice() : [];
+  var legacyWashi = allCmds.filter(function(c){ return c.type==='washi'; });
+  drawCmds = allCmds.filter(function(c){ return c.type!=='washi'; });
 
   // snap.html was captured WITHOUT the main canvas, so we can set innerHTML
   // directly — no duplicate #jfy-canvas element will be created.
@@ -2482,6 +2485,8 @@ function restoreSnapshot(snap){
   nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(el){
     rewireWashi(el);
   });
+  // Migrate legacy washi drawCmds → draggable DOM elements
+  legacyWashi.forEach(function(cmd){ placeWashiElement(cmd); });
 }
 
 function pushHistory(){
@@ -3486,6 +3491,10 @@ window._jfyNotebook = {
 
   function loadEntries(){
     try{entries=JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]');}catch(e){entries=[];}
+    // Sort newest-created first so ‹ always travels backwards in time
+    entries.sort(function(a,b){
+      return (b.addedAt||b.time||0) - (a.addedAt||a.time||0);
+    });
   }
 
   function updateArrows(){
