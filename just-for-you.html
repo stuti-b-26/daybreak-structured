@@ -247,6 +247,14 @@ body.jfy-scissors-active .jfy-scissors {
 #jfy-history-bar .hbar-sep {
   width: 1px; background: #e5e5e5; margin: 4px 2px; border-radius: 1px;
 }
+/* Toast notification */
+#jfy-toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #333; color: #fff; font-size: 13px; padding: 9px 18px;
+  border-radius: 20px; pointer-events: none; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s; z-index: 9999; white-space: nowrap;
+}
+#jfy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 /* wider panels: lay contents out in a row */
 .jfy-tool-panel .jfy-color-swatches { flex-wrap: wrap; max-width: 400px; }
 .jfy-tool-panel h3 {
@@ -757,7 +765,12 @@ body.jfy-scissors-active .jfy-scissors {
   <button id="jfy-erase-btn" title="Erase mode">⌫ erase</button>
   <div class="hbar-sep"></div>
   <button id="jfy-clear-btn" title="Clear all">✕ clear all</button>
+  <div class="hbar-sep"></div>
+  <button id="jfy-share-btn" title="Share to Between Us">↗ share</button>
+  <button id="jfy-save-btn" title="Save to journal">♡ save</button>
+  <button id="jfy-export-btn" title="Export as image">↓ export</button>
 </div>
+<div id="jfy-toast"></div>
 
 <!-- FOOTER -->
 <footer id="site-footer">
@@ -2503,6 +2516,141 @@ function distToSegmentSq(px, py, ax, ay, bx, by){
   var ex = ax + t*dx - px, ey = ay + t*dy - py;
   return ex*ex + ey*ey;
 }
+
+// ── Toast helper ──────────────────────────────────────────────────────────────
+var _toastTimer = null;
+function showJfyToast(msg){
+  var t = document.getElementById('jfy-toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// ── Notebook capture ──────────────────────────────────────────────────────────
+// Composites the full notebook area to a single off-screen canvas and returns
+// a JPEG data-URL via callback(dataUrl).
+function captureNotebook(quality, callback){
+  quality = quality || 0.92;
+  var nb = document.querySelector('.jfy-notebook');
+  if(!nb){ callback && callback(null); return; }
+  var rect = nb.getBoundingClientRect();
+  var w = Math.round(rect.width), h = Math.round(rect.height);
+  var out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  var octx = out.getContext('2d');
+  // White background
+  octx.fillStyle = '#fff';
+  octx.fillRect(0, 0, w, h);
+
+  // Helper: draw an element's rendered pixels onto out-canvas using its
+  // bounding rect relative to the notebook rect.
+  function blitElement(el){
+    var er = el.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    octx.drawImage(el, 0, 0, el.width, el.height, ox, oy, er.width, er.height);
+  }
+
+  // 1. Placed papers (canvas elements), bottom-up z-order (DOM order)
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
+    blitElement(pc);
+  });
+
+  // 2. Main doodle/washi canvas
+  blitElement(canvas);
+
+  // 3. Polaroids (img inside .jfy-polaroid)
+  nbLayer.querySelectorAll('.jfy-polaroid').forEach(function(pol){
+    var er = pol.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    // Use html2canvas-style approach: just draw the img child
+    var img = pol.querySelector('img');
+    if(img){
+      var ir = img.getBoundingClientRect();
+      octx.fillStyle = '#fff';
+      octx.fillRect(ox, oy, er.width, er.height);
+      octx.drawImage(img, ir.left - rect.left, ir.top - rect.top, ir.width, ir.height);
+    }
+  });
+
+  // 4. Stickers (text nodes)
+  nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
+    var er = node.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    octx.font = (er.height * 0.8) + 'px serif';
+    octx.textBaseline = 'middle';
+    octx.fillText(node.textContent, ox, oy + er.height / 2);
+  });
+
+  // 5. Text boxes
+  nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
+    var er = wrap.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    var ta = wrap.querySelector('textarea');
+    if(!ta) return;
+    var cs = window.getComputedStyle(ta);
+    octx.font = cs.fontSize + ' ' + cs.fontFamily;
+    octx.fillStyle = cs.color || '#333';
+    octx.textBaseline = 'top';
+    var lineH = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.4;
+    ta.value.split('\n').forEach(function(line, i){
+      octx.fillText(line, ox + 4, oy + 4 + i * lineH);
+    });
+  });
+
+  callback(out.toDataURL('image/jpeg', quality));
+}
+
+// ── Share / Save / Export ─────────────────────────────────────────────────────
+document.getElementById('jfy-share-btn').addEventListener('click', function(){
+  captureNotebook(0.88, function(dataUrl){
+    if(!dataUrl){ showJfyToast('Nothing to share yet!'); return; }
+    var STORE_KEY = 'bw_posts_v5';
+    var posts = [];
+    try { posts = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e){}
+    posts.unshift({
+      id: 'jfy_' + Date.now(),
+      text: '',
+      time: Date.now(),
+      media: { url: dataUrl }
+    });
+    localStorage.setItem(STORE_KEY, JSON.stringify(posts));
+    showJfyToast('Shared to Between Us ↗');
+  });
+});
+
+document.getElementById('jfy-save-btn').addEventListener('click', function(){
+  captureNotebook(0.88, function(dataUrl){
+    if(!dataUrl){ showJfyToast('Nothing to save yet!'); return; }
+    var STORE_JOURNAL = 'jfy_journal';
+    var entries = [];
+    try { entries = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){}
+    var now = Date.now();
+    entries.unshift({
+      id: 'jfy_' + now,
+      text: '',
+      time: now,
+      addedAt: now,
+      media: { url: dataUrl }
+    });
+    localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
+    showJfyToast('Saved to your journal ♡');
+  });
+});
+
+document.getElementById('jfy-export-btn').addEventListener('click', function(){
+  captureNotebook(0.95, function(dataUrl){
+    if(!dataUrl){ showJfyToast('Nothing to export yet!'); return; }
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'just-for-you-' + new Date().toISOString().slice(0,10) + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showJfyToast('Exported ↓');
+  });
+});
 
 // Keyboard shortcuts
 document.addEventListener('keydown', function(e){
