@@ -315,15 +315,19 @@ img{display:block;max-width:100%}
   .intro-text{text-align:center;font-size:clamp(28px,8vw,44px)}
   .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:16px;padding:0;align-items:flex-start;overflow:visible}
 
-  #silly-to-mess{display:none}
-  #break-intro-top{display:none}
-  #mess-btn-to-self{display:none}
   #green-swish-long{display:none}
-  #orange-shape{display:none}
-  #yellow-scribble{display:none}
-  #break-bubble-middle{display:none}
-  #between-to-sticker{display:none}
-  #sticker-to-you{display:none}
+
+  /* Absolutely positioned connectors (early in DOM, need to visually appear between cards) */
+  #break-intro-top{display:block;position:absolute;top:8vw;right:-4%;width:65%;height:auto;z-index:5}
+  #silly-to-mess{display:block;position:absolute;top:100vw;right:1%;width:50%;height:auto;z-index:1}
+  #mess-btn-to-self{display:block;position:absolute;top:190vw;left:-4%;width:44%;height:auto;z-index:1}
+
+  /* In-flow connectors (DOM order matches visual order — flow between cards naturally) */
+  #orange-shape{display:block;position:relative !important;width:48px;height:auto;align-self:flex-end;margin-right:8%;margin-top:-20px;z-index:5}
+  #yellow-scribble{display:block;position:relative !important;width:70px;height:auto;align-self:flex-start;margin-left:4%;margin-top:-12px;z-index:2}
+  #between-to-sticker{display:block;position:relative !important;width:38%;height:auto;align-self:flex-start;margin-left:6%}
+  #break-bubble-middle{display:block;position:relative !important;width:82%;height:auto;align-self:center;margin-top:-28px}
+  #sticker-to-you{display:block;position:relative !important;width:86%;height:auto;align-self:center;margin-top:-20px}
   .card-item{position:relative !important;width:78% !important;left:auto !important;top:auto !important;transform:rotate(var(--card-rotate,0deg)) !important}
   .card--silly-decisions{margin-left:20% !important}
   .card--mess-hall{width:86% !important;margin-left:0 !important}
