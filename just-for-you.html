@@ -166,6 +166,14 @@ body.jfy-scissors-active .jfy-scissors {
   cursor: move;
   pointer-events: auto;
 }
+.jfy-placed-washi {
+  position: absolute;
+  z-index: 12;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+.jfy-placed-washi:active { cursor: grabbing; }
 
 /* paper pattern/size picker */
 .jfy-size-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
@@ -1278,6 +1286,72 @@ function drawWashi(x1,y1,x2,y2,col,preview,tapeW){
   }
 }
 
+/* ── WASHI DOM ELEMENT HELPERS ── */
+function renderWashiOnCtx(C, x1, y1, x2, y2, col, tapeW, offX, offY){
+  offX = offX||0; offY = offY||0;
+  x1-=offX; y1-=offY; x2-=offX; y2-=offY;
+  var dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  if(len<2) return;
+  tapeW = tapeW || washibWidth;
+  var ux=dx/len, uy=dy/len, nx=-uy, ny=ux, hw=tapeW/2;
+  var c0x=x1+nx*hw, c0y=y1+ny*hw;
+  var c1x=x1-nx*hw, c1y=y1-ny*hw;
+  var c2x=x2-nx*hw, c2y=y2-ny*hw;
+  var c3x=x2+nx*hw, c3y=y2+ny*hw;
+  function bp(){ C.beginPath(); C.moveTo(c0x,c0y); C.lineTo(c3x,c3y); C.lineTo(c2x,c2y); C.lineTo(c1x,c1y); C.closePath(); }
+  C.save(); bp(); C.fillStyle=col.rgba; C.fill();
+  C.save(); bp(); C.clip();
+  C.strokeStyle=col.rgba.replace(/[\d.]+\)$/,'0.25)'); C.lineWidth=1.5;
+  var span=len+tapeW*2;
+  for(var i=-tapeW;i<span;i+=WASHI_STRIPE_SPACING){
+    var ax=x1+ux*i+nx*(hw+2), ay=y1+uy*i+ny*(hw+2);
+    var bx=x1+ux*i-nx*(hw+2), by=y1+uy*i-ny*(hw+2);
+    C.beginPath(); C.moveTo(ax,ay); C.lineTo(bx,by); C.stroke();
+  }
+  C.restore(); C.restore();
+}
+
+function _washiBbox(x1,y1,x2,y2,tapeW){
+  var dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+  if(len<2) return null;
+  tapeW = tapeW || washibWidth;
+  var ux=dx/len, uy=dy/len, nx=-uy, ny=ux, hw=tapeW/2;
+  var pad=6;
+  var xs=[x1+nx*hw,x1-nx*hw,x2-nx*hw,x2+nx*hw];
+  var ys=[y1+ny*hw,y1-ny*hw,y2-ny*hw,y2+ny*hw];
+  return {
+    minX:Math.min.apply(null,xs)-pad, minY:Math.min.apply(null,ys)-pad,
+    maxX:Math.max.apply(null,xs)+pad, maxY:Math.max.apply(null,ys)+pad
+  };
+}
+
+function placeWashiElement(cmd){
+  var x1=cmd.x1, y1=cmd.y1, x2=cmd.x2, y2=cmd.y2, col=cmd.col, tapeW=cmd.w||washibWidth;
+  var bb=_washiBbox(x1,y1,x2,y2,tapeW);
+  if(!bb) return;
+  var W=Math.ceil(bb.maxX-bb.minX), H=Math.ceil(bb.maxY-bb.minY);
+  var el=document.createElement('canvas');
+  el.className='jfy-placed-washi';
+  el.width=W; el.height=H;
+  el.style.cssText='position:absolute;left:'+bb.minX+'px;top:'+bb.minY+'px;cursor:grab;touch-action:none;';
+  el.dataset.washi=JSON.stringify({x1:x1,y1:y1,x2:x2,y2:y2,col:col,w:tapeW});
+  var C=el.getContext('2d');
+  renderWashiOnCtx(C,x1,y1,x2,y2,col,tapeW,bb.minX,bb.minY);
+  nbLayer.appendChild(el);
+  makeDraggable(el,el);
+}
+
+function rewireWashi(el){
+  var data; try{ data=JSON.parse(el.dataset.washi||'{}'); }catch(e){ return; }
+  if(!data.x1 && data.x1!==0) return;
+  var bb=_washiBbox(data.x1,data.y1,data.x2,data.y2,data.w);
+  if(!bb) return;
+  var C=el.getContext('2d');
+  C.clearRect(0,0,el.width,el.height);
+  renderWashiOnCtx(C,data.x1,data.y1,data.x2,data.y2,data.col,data.w,bb.minX,bb.minY);
+  makeDraggable(el,el);
+}
+
 function drawDoodle(pts,color,size){
   if(pts.length<2) return;
   ctx.save();
@@ -1313,8 +1387,7 @@ function redrawAll(){
     ctx.restore();
   }
   drawCmds.forEach(function(cmd){
-    if(cmd.type==='washi') drawWashi(cmd.x1,cmd.y1,cmd.x2,cmd.y2,cmd.col,false,cmd.w);
-    else if(cmd.type==='doodle') drawDoodle(cmd.pts,cmd.color,cmd.size);
+    if(cmd.type==='doodle') drawDoodle(cmd.pts,cmd.color,cmd.size);
   });
 }
 
@@ -1566,7 +1639,7 @@ function getPaperAt(clientX, clientY){
 // Returns the topmost placed notebook element at a point (any type)
 function getPlacedAt(clientX, clientY){
   var els = document.elementsFromPoint(clientX, clientY);
-  var selectors = ['.jfy-placed-paper','.jfy-text-node-wrap','.jfy-polaroid','.jfy-sticker-node'];
+  var selectors = ['.jfy-placed-paper','.jfy-text-node-wrap','.jfy-polaroid','.jfy-sticker-node','.jfy-placed-washi'];
   for(var i=0;i<els.length;i++){
     for(var s=0;s<selectors.length;s++){
       var found = els[i].classList && els[i].classList.contains(selectors[s].slice(1))
@@ -1629,8 +1702,8 @@ function finishDraw(e){
     S.dragging=false;
     var dx=pos.x-S.dStart.x, dy=pos.y-S.dStart.y;
     if(Math.sqrt(dx*dx+dy*dy)>4){
-      drawCmds.push({type:'washi',x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor,w:washibWidth});
-      redrawAll();
+      placeWashiElement({x1:S.dStart.x,y1:S.dStart.y,x2:pos.x,y2:pos.y,col:S.wasbiColor,w:washibWidth});
+      redrawAll(); // clears preview stroke
       pushHistory();
     } else {
       redrawAll(); // clear any preview without saving
@@ -1681,7 +1754,8 @@ nbLayer.addEventListener('click', function(e){
   if(e.target.closest('.jfy-text-node-wrap') ||
      e.target.closest('.jfy-polaroid') ||
      e.target.closest('.jfy-sticker-node') ||
-     e.target.closest('.jfy-placed-paper')) return;
+     e.target.closest('.jfy-placed-paper') ||
+     e.target.closest('.jfy-placed-washi')) return;
   if(S.tool==='write')         placeTextBox(e);
   else if(S.tool==='frames')   placePolaroid(e);
   else if(S.tool==='stickers') placeSticker(e);
@@ -2404,6 +2478,9 @@ function restoreSnapshot(snap){
   });
   nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
     makeDraggable(node, node);
+  });
+  nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(el){
+    rewireWashi(el);
   });
 }
 
