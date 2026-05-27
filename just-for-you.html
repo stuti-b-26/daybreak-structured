@@ -3224,6 +3224,7 @@ window._jfyNotebook = {
   position: absolute; inset: 0; z-index: 30;
   background: #f8f4ed;
   border-radius: 18px;
+  overflow: hidden;
   display: flex;        /* always in DOM, controlled by opacity+pointer-events */
   flex-direction: column;
   align-items: center; justify-content: center;
@@ -3263,12 +3264,13 @@ window._jfyNotebook = {
   object-fit: contain;
 }
 #jfy-entry-viewer-meta {
-  display: flex; align-items: center; gap: 16px; margin-top: 14px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px; margin-top: 14px; width: 88%;
 }
 #jfy-entry-viewer-label {
   font-family: 'Antonio', sans-serif;
   font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #c4b49a;
+  color: #c4b49a; text-align: center;
 }
 #jfy-entry-close {
   background: none; border: none; font-size: 13px; cursor: pointer;
@@ -3279,7 +3281,7 @@ window._jfyNotebook = {
 
 /* Entry viewer action buttons */
 #jfy-entry-viewer-actions {
-  display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; justify-content: center;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center;
 }
 #jfy-entry-viewer-actions button {
   background: none; border: 1.5px solid #ddd; border-radius: 16px;
@@ -3602,17 +3604,15 @@ window._jfyNotebook = {
 
     var inDir = (animDir === 'back') ? 'in-bck' : 'in';
 
+    // Always set content BEFORE animating so no blank flash mid-flip
+    entryImg.src = url; entryImg.style.display = url?'':'none';
+    labelEl.textContent = label; entryIdx = idx;
+
     if(!viewer.classList.contains('visible')){
-      // Viewer not open: flip in from appropriate side
-      entryImg.src = url; entryImg.style.display = url?'':'none';
-      labelEl.textContent = label; entryIdx = idx;
       doFlip(inDir, function(){ updateArrows(); });
     } else {
-      // Viewer open: flip out (matching direction) then flip in
       var outDir = (animDir === 'back') ? 'bck' : 'fwd';
       doFlip(outDir, function(){
-        entryImg.src = url; entryImg.style.display = url?'':'none';
-        labelEl.textContent = label; entryIdx = idx;
         doFlip(inDir, function(){ updateArrows(); });
       });
     }
