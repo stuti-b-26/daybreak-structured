@@ -305,12 +305,12 @@ img{display:block;max-width:100%}
 #mood-suggestions{display:none;border-top:1px solid rgba(255,255,255,.15);padding-top:20px;flex:1;overflow-y:auto;min-height:0}
 #mood-suggestions.show{display:flex;flex-direction:column}
 .mood-sug-label{font-family:var(--font-body);font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px}
-.mood-sug-list{display:flex;flex-direction:column;gap:12px}
-.mood-sug-item{display:flex;align-items:flex-start;gap:16px;text-decoration:none;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.06);transition:background .12s ease}
+.mood-sug-list{display:flex;flex-direction:row;gap:12px;overflow-x:auto}
+.mood-sug-item{display:flex;flex-direction:column;gap:10px;text-decoration:none;padding:16px 18px;border-radius:14px;background:rgba(255,255,255,.06);transition:background .12s ease;flex:1;min-width:180px}
 .mood-sug-item:hover{background:rgba(255,255,255,.12)}
-.mood-sug-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.mood-sug-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .mood-sug-info{}
-.mood-sug-name{font-family:var(--font-body);font-size:15px;font-weight:700;color:#fff;margin:0 0 3px}
+.mood-sug-name{font-family:var(--font-body);font-size:15px;font-weight:700;color:#fff;margin:0 0 6px;display:block}
 .mood-sug-desc{font-family:var(--font-body);font-size:13px;color:rgba(255,255,255,.55);line-height:1.5;margin:0}
 @media(max-width:767px){
   #mood-overlay{padding:0 12px;bottom:calc(20px + 60px + 12px)}
