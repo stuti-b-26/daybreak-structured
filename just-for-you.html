@@ -50,9 +50,9 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   column-gap: var(--col-gap);
-  /* top: clears fixed header + space for above-notebook props
+  /* top: clears fixed header + two-row history bar (mobile) + above-notebook props
      bottom: space for stickers/pen/scissors */
-  padding: 18vw var(--gutter) 48vw;
+  padding: calc(18vw + 56px) var(--gutter) 48vw;
 }
 
 /* Notebook: center 10 of 12 columns */
@@ -213,26 +213,39 @@ body.jfy-scissors-active .jfy-scissors {
 }
 .jfy-tool-panel.open { display: block; }
 
-/* ── History toolbar (undo / redo / clear / erase) ── */
+/* ── History toolbar (undo / redo / clear / erase / share / save / export) ── */
+:root { --hbar-h: 46px; }        /* single-row height; overridden on mobile */
 #jfy-history-bar {
   position: fixed;
-  top: calc(var(--hh) + 10px);
-  left: 50%;
-  transform: translateX(-50%);
+  top: calc(var(--hh) + 8px);
+  left: 8px;
+  right: 8px;
   display: flex;
-  gap: 4px;
+  flex-wrap: wrap;              /* wraps to two rows on narrow screens */
+  gap: 3px;
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 4px 18px rgba(0,0,0,0.14);
-  padding: 6px 8px;
+  padding: 5px 7px;
   z-index: 3500;
   user-select: none;
+  justify-content: center;
+}
+@media (min-width: 640px) {
+  #jfy-history-bar {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    flex-wrap: nowrap;
+  }
 }
 #jfy-history-bar button {
   border: none;
   background: transparent;
   border-radius: 9px;
-  padding: 5px 10px;
+  padding: 5px 9px;
   font-size: 12px;
   font-family: inherit;
   font-weight: 600;
@@ -240,21 +253,33 @@ body.jfy-scissors-active .jfy-scissors {
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 #jfy-history-bar button:hover { background: #f3eafa; color: #9A59C8; }
 #jfy-history-bar button:disabled { opacity: 0.32; cursor: default; }
 #jfy-history-bar button:disabled:hover { background: transparent; color: #555; }
 #jfy-history-bar .hbar-sep {
-  width: 1px; background: #e5e5e5; margin: 4px 2px; border-radius: 1px;
+  width: 1px; background: #e5e5e5; margin: 3px 1px; border-radius: 1px; flex-shrink: 0;
+}
+/* On mobile the bar wraps to ~2 rows; hide the separators that end up at
+   start-of-row to avoid orphaned lines. We just hide all seps on mobile
+   and rely on the button grouping being visually clear. */
+@media (max-width: 639px) {
+  #jfy-history-bar .hbar-sep { display: none; }
 }
 /* Toast notification */
 #jfy-toast {
   position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
   background: #333; color: #fff; font-size: 13px; padding: 9px 18px;
   border-radius: 20px; pointer-events: none; opacity: 0;
-  transition: opacity 0.25s, transform 0.25s; z-index: 9999; white-space: nowrap;
+  transition: opacity 0.25s, transform 0.25s; z-index: 9999;
+  white-space: nowrap; display: flex; align-items: center; gap: 10px;
 }
-#jfy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#jfy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+#jfy-toast-undo {
+  font-size: 12px; font-weight: 700; color: #c8a0f0; cursor: pointer;
+  text-decoration: underline; background: none; border: none; padding: 0; font-family: inherit;
+}
 /* wider panels: lay contents out in a row */
 .jfy-tool-panel .jfy-color-swatches { flex-wrap: wrap; max-width: 400px; }
 .jfy-tool-panel h3 {
@@ -460,8 +485,12 @@ body.jfy-scissors-active .jfy-scissors {
 }
 
 /* ── Tablet ── */
+@media (min-width: 640px) {
+  /* single-row bar — only needs its own ~46px */
+  .jfy-grid-wrap { padding-top: calc(12vw + 54px); }
+}
 @media (min-width: 768px) {
-  .jfy-grid-wrap { padding-top: 12vw; padding-bottom: 22vw; }
+  .jfy-grid-wrap { padding-top: calc(12vw + 54px); padding-bottom: 22vw; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 38vw); }
   .jfy-washi     { top: -10vw; left: -8vw;  width: 28vw; max-width: 200px; }
   .jfy-frames    { top: -8vw;  right: -6vw; width: 26vw; max-width: 190px; }
@@ -473,7 +502,7 @@ body.jfy-scissors-active .jfy-scissors {
 
 /* ── Desktop ── */
 @media (min-width: 1024px) {
-  .jfy-grid-wrap { padding-top: 110px; padding-bottom: 180px; }
+  .jfy-grid-wrap { padding-top: 164px; padding-bottom: 180px; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); }
   .jfy-washi     { top: -85px;  left: -95px;  width: 210px; }
   .jfy-frames    { top: -90px;  right: -65px; width: 200px; }
@@ -770,7 +799,7 @@ body.jfy-scissors-active .jfy-scissors {
   <button id="jfy-save-btn" title="Save to journal">♡ save</button>
   <button id="jfy-export-btn" title="Export as image">↓ export</button>
 </div>
-<div id="jfy-toast"></div>
+<div id="jfy-toast"><span id="jfy-toast-msg"></span><button id="jfy-toast-undo" style="display:none"></button></div>
 
 <!-- FOOTER -->
 <footer id="site-footer">
@@ -2519,13 +2548,28 @@ function distToSegmentSq(px, py, ax, ay, bx, by){
 
 // ── Toast helper ──────────────────────────────────────────────────────────────
 var _toastTimer = null;
-function showJfyToast(msg){
-  var t = document.getElementById('jfy-toast');
+// opts: { undoLabel: string, onUndo: fn }
+function showJfyToast(msg, opts){
+  var t   = document.getElementById('jfy-toast');
+  var msgEl = document.getElementById('jfy-toast-msg');
+  var undoBtn = document.getElementById('jfy-toast-undo');
   if(!t) return;
-  t.textContent = msg;
+  msgEl.textContent = msg;
+  if(opts && opts.onUndo){
+    undoBtn.textContent = opts.undoLabel || 'undo';
+    undoBtn.style.display = '';
+    undoBtn.onclick = function(){
+      opts.onUndo();
+      t.classList.remove('show');
+      if(_toastTimer){ clearTimeout(_toastTimer); _toastTimer = null; }
+    };
+  } else {
+    undoBtn.style.display = 'none';
+    undoBtn.onclick = null;
+  }
   t.classList.add('show');
   if(_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+  _toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3400);
 }
 
 // ── Notebook capture ──────────────────────────────────────────────────────────
@@ -2607,16 +2651,20 @@ document.getElementById('jfy-share-btn').addEventListener('click', function(){
   captureNotebook(0.88, function(dataUrl){
     if(!dataUrl){ showJfyToast('Nothing to share yet!'); return; }
     var STORE_KEY = 'bw_posts_v5';
+    var postId = 'jfy_' + Date.now();
     var posts = [];
     try { posts = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e){}
-    posts.unshift({
-      id: 'jfy_' + Date.now(),
-      text: '',
-      time: Date.now(),
-      media: { url: dataUrl }
-    });
+    posts.unshift({ id: postId, text: '', time: Date.now(), media: { url: dataUrl } });
     localStorage.setItem(STORE_KEY, JSON.stringify(posts));
-    showJfyToast('Shared to Between Us ↗');
+    showJfyToast('Shared to Between Us ↗', {
+      undoLabel: 'remove',
+      onUndo: function(){
+        var saved = [];
+        try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e){}
+        saved = saved.filter(function(p){ return p.id !== postId; });
+        localStorage.setItem(STORE_KEY, JSON.stringify(saved));
+      }
+    });
   });
 });
 
