@@ -2719,5 +2719,392 @@ document.addEventListener('keydown', function(e){
 
 })();
 </script>
-</body>
-</html>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     JOURNAL INTRO OVERLAY
+     Shows on first visit only (localStorage flag: jfy_intro_seen).
+     Cover → 5 intro slides → dismiss (writes blank journal entry page).
+════════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── Overlay shell ── */
+#jfy-intro {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(30,18,8,0.72);
+  backdrop-filter: blur(3px);
+  opacity: 1; transition: opacity 0.5s;
+}
+#jfy-intro.jfy-intro-out { opacity: 0; pointer-events: none; }
+
+/* ── Book container ── */
+#jfy-book {
+  position: relative;
+  width: min(90vw, 820px);
+  height: min(78vh, 560px);
+  display: flex;
+  border-radius: 8px 18px 18px 8px;
+  box-shadow: -6px 0 28px rgba(0,0,0,0.5), 6px 0 40px rgba(0,0,0,0.35);
+  overflow: hidden;
+}
+
+/* ── Spine shadow ── */
+#jfy-book::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 28px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.38) 0%, rgba(0,0,0,0.08) 60%, transparent 100%);
+  z-index: 5; pointer-events: none; border-radius: 8px 0 0 8px;
+}
+
+/* ── Cover page ── */
+#jfy-cover {
+  position: absolute; inset: 0;
+  background-color: #3B1E0E;
+  background-image:
+    repeating-linear-gradient(
+      100deg,
+      rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px,
+      transparent 1px, transparent 6px
+    ),
+    repeating-linear-gradient(
+      10deg,
+      rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1px,
+      transparent 1px, transparent 8px
+    ),
+    radial-gradient(ellipse at 30% 40%, rgba(90,40,10,0.55) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 70%, rgba(20,8,2,0.4) 0%, transparent 55%);
+  border-radius: 8px 18px 18px 8px;
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: flex-end;
+  padding: 10% 9% 9%;
+  z-index: 10; transition: transform 0.9s cubic-bezier(.77,0,.18,1);
+  transform-origin: left center;
+  transform: rotateY(0deg);
+}
+#jfy-cover.open {
+  transform: rotateY(-180deg);
+  pointer-events: none;
+}
+/* leather stitching border */
+#jfy-cover::after {
+  content: '';
+  position: absolute; inset: 14px;
+  border: 2px dashed rgba(255,255,255,0.10);
+  border-radius: 4px 14px 14px 4px;
+  pointer-events: none;
+}
+
+#jfy-cover-title {
+  font-family: 'Georgia', serif;
+  font-size: clamp(22px, 4.5vw, 42px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e8d5b0;
+  line-height: 1.15;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+#jfy-cover-sub {
+  font-family: 'Georgia', serif;
+  font-size: clamp(11px, 1.8vw, 15px);
+  color: rgba(232,213,176,0.65);
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+}
+
+/* open-corner prompt */
+#jfy-cover-open {
+  position: absolute; bottom: 28px; right: 28px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; color: rgba(232,213,176,0.55);
+  font-size: 11px; letter-spacing: 0.12em; text-transform: lowercase;
+  font-family: 'Georgia', serif;
+  transition: color 0.2s;
+}
+#jfy-cover-open:hover { color: rgba(232,213,176,0.9); }
+#jfy-cover-open svg { animation: jfy-bounce 1.6s ease-in-out infinite; }
+@keyframes jfy-bounce {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(5px); }
+}
+
+/* ── Pages area ── */
+#jfy-pages {
+  position: absolute; inset: 0;
+  background: #f9f5ee;
+  border-radius: 8px 18px 18px 8px;
+  overflow: hidden;
+}
+
+/* ── Individual intro pages (stacked, only current is visible) ── */
+.jfy-intro-page {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: 7% 8% 6%;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s, transform 0.35s;
+  transform: translateX(40px);
+}
+.jfy-intro-page.active {
+  opacity: 1; pointer-events: auto; transform: translateX(0);
+}
+.jfy-intro-page.exit-left {
+  opacity: 0; transform: translateX(-40px); pointer-events: none;
+}
+
+/* page number */
+.jfy-ipage-num {
+  font-size: 10px; letter-spacing: 0.14em; color: #bbb;
+  text-transform: uppercase; font-family: inherit; margin-bottom: auto;
+  align-self: flex-end;
+}
+
+/* content area */
+.jfy-ipage-body {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: center; gap: 16px;
+  padding: 10% 0 6%;
+}
+
+.jfy-ipage-body p {
+  font-size: clamp(13px, 1.6vw, 16px);
+  line-height: 1.75;
+  color: #2a1a0e;
+  font-family: 'Georgia', serif;
+  margin: 0;
+}
+
+.jfy-ipage-body h2 {
+  font-family: inherit;
+  font-size: clamp(17px, 2.4vw, 26px);
+  font-weight: 700; color: #2a1a0e; margin: 0 0 4px;
+}
+
+/* ── Page-bottom controls ── */
+.jfy-ipage-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+.jfy-ipage-next {
+  background: #9A59C8; color: #fff; border: none;
+  border-radius: 20px; padding: 9px 22px;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  cursor: pointer; letter-spacing: 0.04em;
+  transition: background 0.15s, transform 0.1s;
+}
+.jfy-ipage-next:hover { background: #7d3fb8; transform: translateY(-1px); }
+
+.jfy-ipage-skip {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: #999; font-family: inherit;
+  text-decoration: underline; padding: 0;
+  transition: color 0.15s;
+}
+.jfy-ipage-skip:hover { color: #555; }
+
+/* progress dots */
+.jfy-ipage-dots {
+  display: flex; gap: 6px; align-items: center;
+}
+.jfy-ipage-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #ddd; transition: background 0.2s;
+}
+.jfy-ipage-dots span.on { background: #9A59C8; }
+
+/* ── Page-flip shadow during flip ── */
+#jfy-pages.flipping { box-shadow: inset -8px 0 18px rgba(0,0,0,0.12); }
+</style>
+
+<!-- Overlay -->
+<div id="jfy-intro" role="dialog" aria-label="Journal introduction" aria-modal="true">
+  <div id="jfy-book">
+
+    <!-- Pages (rendered beneath cover) -->
+    <div id="jfy-pages">
+
+      <!-- Page 1 -->
+      <div class="jfy-intro-page active" data-page="0">
+        <span class="jfy-ipage-num">p. 1</span>
+        <div class="jfy-ipage-body">
+          <p>this space is yours. slow down, reflect, and spend time with yourself. write freely, follow a prompt, hold onto meaningful moments, or simply leave pieces of your day behind.</p>
+          <p>there's no right way to fill these pages. this is meant to be entirely your own.</p>
+        </div>
+        <div class="jfy-ipage-foot">
+          <button class="jfy-ipage-skip">skip</button>
+          <div class="jfy-ipage-dots">
+            <span class="on"></span><span></span><span></span><span></span><span></span>
+          </div>
+          <button class="jfy-ipage-next">next →</button>
+        </div>
+      </div>
+
+      <!-- Page 2 -->
+      <div class="jfy-intro-page" data-page="1">
+        <span class="jfy-ipage-num">p. 2</span>
+        <div class="jfy-ipage-body">
+          <p>gather the pieces of your experience in one place.</p>
+          <p>you can create pages, reflect on moments you've had throughout the website, respond to something you saw, and build pages that feel personal to you.</p>
+        </div>
+        <div class="jfy-ipage-foot">
+          <button class="jfy-ipage-skip">skip</button>
+          <div class="jfy-ipage-dots">
+            <span></span><span class="on"></span><span></span><span></span><span></span>
+          </div>
+          <button class="jfy-ipage-next">next →</button>
+        </div>
+      </div>
+
+      <!-- Page 3 -->
+      <div class="jfy-intro-page" data-page="2">
+        <span class="jfy-ipage-num">p. 3</span>
+        <div class="jfy-ipage-body">
+          <p>let it become a reflection of the things you want to hold onto and the things that bring joy to your life.</p>
+        </div>
+        <div class="jfy-ipage-foot">
+          <button class="jfy-ipage-skip">skip</button>
+          <div class="jfy-ipage-dots">
+            <span></span><span></span><span class="on"></span><span></span><span></span>
+          </div>
+          <button class="jfy-ipage-next">next →</button>
+        </div>
+      </div>
+
+      <!-- Page 4 — Creating a Page -->
+      <div class="jfy-intro-page" data-page="3">
+        <span class="jfy-ipage-num">p. 4</span>
+        <div class="jfy-ipage-body">
+          <h2>Creating A Page</h2>
+          <p>drag and drop elements from the workspace into the journal area to apply them.</p>
+          <p>if you want to change how something looks, select from the options in the pop-up at the bottom of the journal area.</p>
+        </div>
+        <div class="jfy-ipage-foot">
+          <button class="jfy-ipage-skip">skip</button>
+          <div class="jfy-ipage-dots">
+            <span></span><span></span><span></span><span class="on"></span><span></span>
+          </div>
+          <button class="jfy-ipage-next">next →</button>
+        </div>
+      </div>
+
+      <!-- Page 5 — Journal Entries -->
+      <div class="jfy-intro-page" data-page="4">
+        <span class="jfy-ipage-num">p. 5</span>
+        <div class="jfy-ipage-body">
+          <h2>Journal Entries</h2>
+          <p>log in to save the entries to your profile, or export the page into an image or PDF file directly onto your device.</p>
+          <p>add entries to "Between Us" to share with the community.</p>
+          <p>get started, and feel free to make this your own.</p>
+        </div>
+        <div class="jfy-ipage-foot">
+          <button class="jfy-ipage-skip">skip</button>
+          <div class="jfy-ipage-dots">
+            <span></span><span></span><span></span><span></span><span class="on"></span>
+          </div>
+          <button class="jfy-ipage-next" id="jfy-intro-begin">begin ↗</button>
+        </div>
+      </div>
+
+    </div><!-- /jfy-pages -->
+
+    <!-- Cover (sits on top, flips away) -->
+    <div id="jfy-cover">
+      <div id="jfy-cover-title">Your Journal</div>
+      <div id="jfy-cover-sub">this is just for you.</div>
+      <div id="jfy-cover-open" role="button" tabindex="0" aria-label="Open journal">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 8 L11 15 L18 8" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>open</span>
+      </div>
+    </div>
+
+  </div><!-- /jfy-book -->
+</div><!-- /jfy-intro -->
+
+<script>
+(function(){
+  var SEEN_KEY = 'jfy_intro_seen';
+  var overlay  = document.getElementById('jfy-intro');
+  if(!overlay) return;
+
+  // If already seen, skip entirely
+  if(localStorage.getItem(SEEN_KEY)){
+    overlay.style.display = 'none';
+    return;
+  }
+
+  var cover    = document.getElementById('jfy-cover');
+  var pages    = document.getElementById('jfy-pages');
+  var allPages = Array.from(document.querySelectorAll('.jfy-intro-page'));
+  var current  = 0;
+  var coverOpen = false;
+
+  function dismissIntro(){
+    localStorage.setItem(SEEN_KEY, '1');
+    overlay.classList.add('jfy-intro-out');
+    setTimeout(function(){ overlay.style.display = 'none'; }, 550);
+  }
+
+  function goToPage(idx){
+    var cur = allPages[current];
+    cur.classList.remove('active');
+    cur.classList.add('exit-left');
+    setTimeout(function(){ cur.classList.remove('exit-left'); }, 380);
+
+    current = idx;
+    var next = allPages[current];
+    next.classList.add('active');
+  }
+
+  function openCover(){
+    if(coverOpen) return;
+    coverOpen = true;
+    cover.classList.add('open');
+    // slight delay so cover flip is visible before pages appear
+    setTimeout(function(){
+      allPages[0].classList.add('active');
+    }, 200);
+  }
+
+  // Cover click / keyboard
+  cover.addEventListener('click', openCover);
+  cover.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openCover(); }
+  });
+  document.getElementById('jfy-cover-open').addEventListener('click', function(e){
+    e.stopPropagation(); openCover();
+  });
+
+  // Next / Skip buttons
+  allPages.forEach(function(page, i){
+    var nextBtn = page.querySelector('.jfy-ipage-next');
+    var skipBtn = page.querySelector('.jfy-ipage-skip');
+
+    nextBtn && nextBtn.addEventListener('click', function(){
+      if(i < allPages.length - 1){
+        goToPage(i + 1);
+      } else {
+        dismissIntro();
+      }
+    });
+
+    skipBtn && skipBtn.addEventListener('click', dismissIntro);
+  });
+
+  // Keyboard nav while overlay is open
+  document.addEventListener('keydown', function(e){
+    if(overlay.style.display === 'none') return;
+    if(e.key === 'ArrowRight' || e.key === 'Enter'){
+      if(!coverOpen){ openCover(); return; }
+      if(current < allPages.length - 1) goToPage(current + 1);
+      else dismissIntro();
+    }
+    if(e.key === 'Escape') dismissIntro();
+  });
+
+})();
+</script>
