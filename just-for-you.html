@@ -3612,18 +3612,10 @@ window._jfyNotebook = {
       // First open: flip in from appropriate side
       doFlip(inDir, function(){ updateArrows(); });
     } else {
-      // Already showing an entry — skip the flip-out entirely to avoid blank gap.
-      // Just reset the animation and play flip-in with the already-updated content.
-      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck','visible');
-      var animClass = (inDir === 'in-bck') ? 'ev-flip-in-bck' : 'ev-flip-in';
-      // Force a style recalc so the class removal is committed before adding new anim
-      void viewer.offsetWidth;
-      viewer.classList.add(animClass);
-      setTimeout(function(){
-        viewer.classList.remove('ev-flip-in','ev-flip-in-bck');
-        viewer.classList.add('visible');
-        updateArrows();
-      }, 520);
+      // Already showing — swap content instantly, no animation gap
+      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck');
+      viewer.classList.add('visible');
+      updateArrows();
     }
   }
 
