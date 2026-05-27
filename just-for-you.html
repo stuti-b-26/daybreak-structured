@@ -53,6 +53,7 @@ body.page-jfy .dropdown-link.active { color: #9A59C8; }
   /* top: clears fixed header + two-row history bar (mobile) + above-notebook props
      bottom: space for stickers/pen/scissors */
   padding: calc(18vw + 56px) var(--gutter) 48vw;
+  position: relative; /* positioning context for washi + scissors */
 }
 
 /* Notebook: center 10 of 12 columns */
@@ -436,8 +437,12 @@ body.jfy-scissors-active .jfy-scissors {
 /* ── ABOVE ── */
 /* Washi tape: top-left, partially off-screen */
 .jfy-washi {
-  top: -12vw;
-  left: -14vw;
+  /* now a child of .jfy-grid-wrap (position:relative), not .jfy-notebook.
+     mobile: grid-wrap padding-top=calc(18vw+56px), notebook starts there.
+     top = (18vw+56px) - 12vw above notebook = calc(6vw+56px).
+     left = notebook is ~11vw from grid-wrap left on mobile; -14vw+11vw = -3vw */
+  top: calc(6vw + 56px);
+  left: -3vw;
   width: 40vw;
   max-width: 160px;
   transform: rotate(-8deg);
@@ -470,9 +475,12 @@ body.jfy-scissors-active .jfy-scissors {
   width: 38vw;
   z-index: 4;
 }
-/* Scissors: right, bleeds off right edge */
+/* Scissors: right, bleeds off right edge.
+   now child of .jfy-grid-wrap; convert bottom-of-notebook to top-of-grid-wrap.
+   notebook top=calc(18vw+56px), notebook height≈calc(100dvh-var(--hh)-40vw),
+   scissors was bottom:-26vw from notebook → top≈calc(100dvh - var(--hh) - 48vw + 56px) */
 .jfy-scissors {
-  bottom: -26vw;
+  top: calc(100dvh - var(--hh) - 48vw + 56px);
   right: -18vw;
   width: 52vw;
   transform: rotate(18deg);
@@ -505,9 +513,13 @@ body.jfy-scissors-active .jfy-scissors {
 
 /* ── Tablet prop positions (768–1023px) ── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Washi: width only — position/left/top set in shared viewport-relative block below */
+  /* Washi: absolute on grid-wrap (full viewport width), clips left edge.
+     top = grid-wrap padding-top(20vw+54px) minus 18vw above notebook = calc(2vw+54px) */
   .jfy-washi {
+    position: absolute;
+    top: calc(2vw + 54px); left: -10px; right: auto; bottom: auto;
     width: 24vw;
+    z-index: 25;
   }
   /* Stickers: top-center-left near the spine, slides UNDER notebook page content */
   .jfy-stickers {
@@ -522,8 +534,11 @@ body.jfy-scissors-active .jfy-scissors {
     z-index: 22;
   }
   /* Scissors: vw only, no cap — scales freely at any tablet width */
+  /* Scissors: absolute on grid-wrap, clips right edge.
+     top = grid-wrap padding-top(20vw+54px) minus 16vw above notebook = calc(4vw+54px) */
   .jfy-scissors {
-    top: -16vw; right: -5vw; left: auto; bottom: auto;
+    position: absolute;
+    top: calc(4vw + 54px); right: -5vw; left: auto; bottom: auto;
     width: 28vw;
     z-index: 25;
   }
@@ -607,10 +622,12 @@ body.jfy-scissors-active .jfy-scissors {
   .jfy-paper-wrap { top: -230px; margin-bottom: -230px; }
   .jfy-paper { width: 520px; margin-left: -50px; }
 
-  /* Washi: slightly bigger than tablet max (~245px) but fixed px so it doesn't
-     balloon at wider viewports. position/left/top in shared block below. */
+  /* Washi: absolute on grid-wrap. top = 230px padding-top minus 190px above notebook = 40px */
   .jfy-washi {
+    position: absolute;
+    top: 40px; left: -10px; right: auto; bottom: auto;
     width: 200px; max-width: none;
+    z-index: 25;
   }
   /* Stickers: top-center-left near spine, under page content */
   .jfy-stickers {
@@ -624,14 +641,10 @@ body.jfy-scissors-active .jfy-scissors {
     width: 195px; max-width: none;
     z-index: 22;
   }
-  /* Scissors: position:fixed anchors to viewport right edge at any desktop width.
-     top: calc(var(--hh) + 10px) = 74px sits just below the header.
-     right: -10px clips the handle tip slightly off the viewport right edge.
-     Width 20vw scales proportionally. */
+  /* Scissors: absolute on grid-wrap. top = 230px padding-top minus 200px above notebook = 30px */
   .jfy-scissors {
-    position: fixed;
-    top: calc(var(--hh) + 10px);
-    right: -10px; left: auto; bottom: auto;
+    position: absolute;
+    top: 30px; right: -10px; left: auto; bottom: auto;
     width: 20vw; max-width: none;
     z-index: 25;
   }
@@ -643,20 +656,6 @@ body.jfy-scissors-active .jfy-scissors {
   }
 }
 
-/* ── Washi: fixed viewport-relative positioning (tablet + desktop) ── */
-/* position:fixed removes it from notebook stacking context entirely —
-   top/left are now pure viewport coordinates so the same rule works
-   at any width ≥ 768px without recalculating notebook offsets.
-   top: calc(var(--hh) + 56px) ≈ 120px sits just above where the
-   notebook top meets the header; left: -10px clips the left edge by ~10px. */
-@media (min-width: 768px) {
-  .jfy-washi {
-    position: fixed;
-    top: calc(var(--hh) + 56px);
-    left: -10px;
-    z-index: 25;
-  }
-}
 </style>
 </head>
 <body class="page-jfy">
@@ -912,14 +911,16 @@ body.jfy-scissors-active .jfy-scissors {
 <!-- MAIN CONTENT -->
 <main id="page-main" class="jfy-main">
   <div class="jfy-grid-wrap">
+      <!-- washi + scissors sit outside the notebook so they scroll with the page
+           and can be anchored to the viewport edges via position:absolute on grid-wrap -->
+      <img class="jfy-washi"    src="washi tape.svg" alt="washi tape tool" id="jfy-washi-prop">
+      <img class="jfy-scissors" src="scissors2.svg"  alt="scissors tool"  id="jfy-scissors-prop">
     <div class="jfy-notebook">
       <!-- above the page -->
-      <img class="jfy-washi"    src="washi tape.svg" alt="washi tape tool" id="jfy-washi-prop">
       <img class="jfy-frames"   src="frames.svg"     alt="frames tool"     id="jfy-frames-prop">
-      <!-- below the page: stickers left, pen center, scissors right -->
+      <!-- below the page: stickers left, pen center -->
       <img class="jfy-stickers" src="stickers.svg"   alt="stickers tool"   id="jfy-stickers-prop">
       <img class="jfy-pen"      src="pen.svg"        alt="pen tool"        id="jfy-pen-prop">
-      <img class="jfy-scissors" src="scissors2.svg" alt="scissors tool" id="jfy-scissors-prop">
       <!-- interactive drawing layer -->
       <div class="jfy-nb-layer" id="jfy-nb-layer">
         <canvas id="jfy-canvas"></canvas>
