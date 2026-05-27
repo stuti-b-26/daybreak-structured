@@ -225,6 +225,31 @@
   <canvas id="fab-canvas" width="60" height="60"></canvas>
 </button>
 
+<!-- MOOD POPUP -->
+<div id="mood-overlay" role="dialog" aria-modal="true" aria-label="How are you feeling?">
+  <div id="mood-popup" style="position:relative">
+    <button class="mood-popup-close" id="mood-close" aria-label="Close">close</button>
+    <p class="mood-popup-q">how are you feeling right now?</p>
+    <p class="mood-popup-sub">no need to overthink, just choose what feels closest and see what we recommend for you.</p>
+    <div class="mood-emotions" role="group" aria-label="Emotions">
+      <button class="mood-chip mood-chip--orange" data-mood="overwhelmed">overwhelmed</button>
+      <button class="mood-chip mood-chip--pink" data-mood="anxious">anxious</button>
+      <button class="mood-chip mood-chip--blue" data-mood="lonely">lonely</button>
+      <button class="mood-chip mood-chip--teal" data-mood="tired">tired</button>
+      <button class="mood-chip mood-chip--peach" data-mood="restless">restless</button>
+      <button class="mood-chip mood-chip--lavender" data-mood="unsure">unsure</button>
+      <button class="mood-chip mood-chip--green" data-mood="curious">curious</button>
+      <button class="mood-chip mood-chip--lime" data-mood="playful">playful</button>
+      <button class="mood-chip mood-chip--yellow" data-mood="hopeful">hopeful</button>
+    </div>
+    <div id="mood-suggestions">
+      <p class="mood-sug-label">suggested for you</p>
+      <div class="mood-sug-list" id="mood-sug-list"></div>
+    </div>
+  </div>
+</div>
+
+
 <script>
 'use strict';
 function easeOut(t){return 1-Math.pow(1-t,3)}
@@ -411,6 +436,63 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   window.addEventListener('load',update);
 })();
 
+
+/* MOOD POPUP */
+(function(){
+  var PAGES = {
+    'mess-hall':     {name:'mess hall',     href:'mess-hall.html',     color:'#a8f0bc', desc:'explore a feast of small, funny, tactile, and creative activities — no rules, no wrong answers, no skill required. just play.'},
+    'silly-decisions':{name:'silly decisions',href:'silly-decisions.html',color:'#f5a04a',desc:'celebrates the idea that happiness can come from not taking yourself too seriously — silly choices to temporarily disconnect from reality.'},
+    'sticker-maker': {name:'sticker maker', href:'sticker-maker.html', color:'#e8a8f0', desc:'layer in personality with a little emoji, a doodle or a phrase. picking one should feel like choosing a mood, not making a decision.'},
+    'between-us':    {name:'between us',    href:'between-us.html',    color:'#7de8f5', desc:'share short stories that capture little pockets of happiness in your life, or moments you\'re still hoping to reach.'},
+    'just-for-you':  {name:'just for you',  href:'just-for-you.html',  color:'#ffd400', desc:'a personal, protected place where you can create your own world by choosing what you want to keep, create, and design.'},
+    'selfless-less': {name:'selfless less',  href:'selfless-less.html', color:'#c4b8f5', desc:'explores how people-pleasing habits can quietly distance us from our own happiness — recognizing when we say "i\'m fine" when we\'re not.'}
+  };
+  var MAP = {
+    overwhelmed:   ['mess-hall','silly-decisions','sticker-maker'],
+    anxious:       ['mess-hall','selfless-less','sticker-maker'],
+    lonely:        ['between-us','just-for-you','mess-hall'],
+    tired:         ['mess-hall','sticker-maker','just-for-you'],
+    restless:      ['silly-decisions','mess-hall','between-us'],
+    unsure:        ['selfless-less','just-for-you','between-us'],
+    curious:       ['between-us','just-for-you','silly-decisions'],
+    playful:       ['silly-decisions','sticker-maker','mess-hall'],
+    hopeful:       ['just-for-you','between-us','sticker-maker']
+  };
+  var fab = document.getElementById('fab') || document.getElementById('fab-btn');
+  var overlay = document.getElementById('mood-overlay');
+  var closeBtn = document.getElementById('mood-close');
+  var sugPanel = document.getElementById('mood-suggestions');
+  var sugList = document.getElementById('mood-sug-list');
+  if(!fab||!overlay)return;
+  function openPopup(){overlay.classList.add('open')}
+  function closePopup(){
+    overlay.classList.remove('open');
+    sugPanel.classList.remove('show');
+    sugList.innerHTML='';
+    document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('selected')});
+  }
+  fab.addEventListener('click',function(e){e.stopPropagation();overlay.classList.contains('open')?closePopup():openPopup()});
+  closeBtn.addEventListener('click',closePopup);
+  overlay.addEventListener('click',function(e){if(e.target===overlay)closePopup()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closePopup()});
+  document.querySelectorAll('.mood-chip').forEach(function(chip){
+    chip.addEventListener('click',function(){
+      document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('selected')});
+      chip.classList.add('selected');
+      var mood=chip.dataset.mood;
+      var pages=MAP[mood]||[];
+      sugList.innerHTML='';
+      pages.forEach(function(key){
+        var p=PAGES[key];if(!p)return;
+        var a=document.createElement('a');
+        a.className='mood-sug-item';a.href=p.href;
+        a.innerHTML='<span class="mood-sug-dot" style="background:'+p.color+'"></span><span class="mood-sug-info"><span class="mood-sug-name">'+p.name+'</span><p class="mood-sug-desc">'+p.desc+'</p></span>';
+        sugList.appendChild(a);
+      });
+      sugPanel.classList.add('show');
+    });
+  });
+})();
 </script>
 </body>
 </html>
