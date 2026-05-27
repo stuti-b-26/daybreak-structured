@@ -535,11 +535,11 @@ body.jfy-scissors-active .jfy-scissors {
   }
   /* Paper: bottom-left, pulled up to sit level with frames, clips slightly left */
   .jfy-paper { width: 58vw; margin-left: -5vw; }
-  /* Pull the paper-wrap up so paper sits alongside the frames without scrolling */
+  /* Pull the paper-wrap up to slightly overlap notebook bottom edge */
   .jfy-paper-wrap {
     position: relative;
-    top: -10vw;
-    margin-bottom: -10vw; /* collapse the space it would have occupied */
+    top: -16vw;
+    margin-bottom: -16vw;
   }
 }
 
@@ -586,12 +586,11 @@ body.jfy-scissors-active .jfy-scissors {
     z-index: 15; pointer-events: none;
   }
 
-  /* Paper: pulled up closer to notebook bottom so paper+frames sit mostly
-     in-viewport without scrolling */
+  /* Paper: pulled up to slightly overlap notebook bottom edge */
   .jfy-paper-wrap {
     position: relative;
-    top: -10vw;
-    margin-bottom: -10vw;
+    top: -16vw;
+    margin-bottom: -16vw;
   }
   .jfy-paper { width: 58vw; margin-left: -5vw; }
 }
@@ -604,8 +603,8 @@ body.jfy-scissors-active .jfy-scissors {
   .jfy-grid-wrap { padding-top: 230px; padding-bottom: 200px; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); min-height: 540px; }
 
-  /* Paper-wrap: pulled up so paper+frames are mostly visible in initial viewport */
-  .jfy-paper-wrap { top: -180px; margin-bottom: -180px; }
+  /* Paper-wrap: pulled up to slightly overlap notebook bottom edge */
+  .jfy-paper-wrap { top: -230px; margin-bottom: -230px; }
   .jfy-paper { width: 520px; margin-left: -50px; }
 
   /* Washi: slightly bigger than tablet max (~245px) but fixed px so it doesn't
