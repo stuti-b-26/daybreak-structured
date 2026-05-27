@@ -1022,6 +1022,40 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   window.addEventListener('resize',function(){resize();update()});
   update();
 })();
+
+/* ABOUT PAGE: scroll-spy — highlight the active section in the About dropdown */
+(function(){
+  /* map each section id to the href used in the dropdown links */
+  var sections=[
+    {id:'our-mission',  href:'#'},
+    {id:'our-approach', href:'#our-approach'},
+    {id:'meet-the-team',href:'#meet-the-team'}
+  ];
+
+  function setActive(href){
+    document.querySelectorAll('#dropdown-about .dropdown-link, #dropdown-about-t .dropdown-link').forEach(function(link){
+      link.classList.toggle('active', link.getAttribute('href')===href);
+    });
+  }
+
+  /* Use IntersectionObserver with a top-biased rootMargin so whichever
+     section is in the top half of the viewport wins */
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(!entry.isIntersecting)return;
+      var match=sections.find(function(s){return s.id===entry.target.id});
+      if(match)setActive(match.href);
+    });
+  },{rootMargin:'-10% 0px -60% 0px',threshold:0});
+
+  sections.forEach(function(s){
+    var el=document.getElementById(s.id);
+    if(el)io.observe(el);
+  });
+
+  /* default: our mission active on load */
+  setActive('#');
+})();
 </script>
 </body>
 </html>
