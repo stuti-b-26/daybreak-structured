@@ -2698,14 +2698,31 @@ document.getElementById('jfy-save-btn').addEventListener('click', function(){
     var STORE_JOURNAL = 'jfy_journal';
     var entries = [];
     try { entries = JSON.parse(localStorage.getItem(STORE_JOURNAL) || '[]'); } catch(e){}
+
+    // If editing an existing entry, update it in-place
+    var editId = window._jfyEditingEntryId;
+    if(editId){
+      var found = false;
+      for(var i=0; i<entries.length; i++){
+        if(entries[i].id === editId){
+          entries[i].media = { url: dataUrl };
+          entries[i].time  = Date.now();
+          found = true; break;
+        }
+      }
+      if(found){
+        localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
+        showJfyToast('Entry updated ♡');
+        window._jfyEditingEntryId  = null;
+        window._jfyEditingEntryIdx = null;
+        if(window._jfyEntryNav) window._jfyEntryNav.reload();
+        return;
+      }
+    }
+
+    // Otherwise create new entry
     var now = Date.now();
-    entries.unshift({
-      id: 'jfy_' + now,
-      text: '',
-      time: now,
-      addedAt: now,
-      media: { url: dataUrl }
-    });
+    entries.unshift({ id:'jfy_'+now, text:'', time:now, addedAt:now, media:{url:dataUrl} });
     localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries));
     showJfyToast('Saved to your journal ♡');
     if(window._jfyEntryNav) window._jfyEntryNav.reload();
@@ -2806,39 +2823,44 @@ document.addEventListener('keydown', function(e){
   z-index: 2;
 }
 
-/* Flip animation — the leaving slide folds away like a page turning */
+/* Flip animation — forward: pivot left edge (page turns left)
+                    backward: pivot right edge (page turns right) */
 @keyframes jfy-flip-out-fwd {
-  0%   { transform: rotateY(0deg);      z-index: 3; }
-  100% { transform: rotateY(-180deg);   z-index: 3; }
+  0%   { transform: rotateY(0deg);    }
+  100% { transform: rotateY(-180deg); }
 }
 @keyframes jfy-flip-in-fwd {
-  0%   { transform: rotateY(180deg);    z-index: 2; }
-  100% { transform: rotateY(0deg);      z-index: 2; }
+  0%   { transform: rotateY(180deg);  }
+  100% { transform: rotateY(0deg);    }
 }
 @keyframes jfy-flip-out-bck {
-  0%   { transform: rotateY(0deg);      z-index: 3; }
-  100% { transform: rotateY(180deg);    z-index: 3; }
+  0%   { transform: rotateY(0deg);    }
+  100% { transform: rotateY(180deg);  }
 }
 @keyframes jfy-flip-in-bck {
-  0%   { transform: rotateY(-180deg);   z-index: 2; }
-  100% { transform: rotateY(0deg);      z-index: 2; }
+  0%   { transform: rotateY(-180deg); }
+  100% { transform: rotateY(0deg);    }
 }
 
 .jfy-islide.flip-out-fwd {
   transform-origin: left center;
   animation: jfy-flip-out-fwd 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 3;
 }
 .jfy-islide.flip-in-fwd {
   transform-origin: left center;
   animation: jfy-flip-in-fwd 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 2;
 }
 .jfy-islide.flip-out-bck {
-  transform-origin: left center;
+  transform-origin: right center;
   animation: jfy-flip-out-bck 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 3;
 }
 .jfy-islide.flip-in-bck {
-  transform-origin: left center;
+  transform-origin: right center;
   animation: jfy-flip-in-bck 0.55s cubic-bezier(.6,0,.4,1) forwards;
+  z-index: 2;
 }
 
 /* Slide-shadow strip that appears during any flip (shows depth) */
@@ -3038,15 +3060,25 @@ document.addEventListener('keydown', function(e){
   transform-origin: left center;
   backface-visibility: hidden;
 }
+/* forward (older→newer): pivot left */
 #jfy-entry-viewer.ev-flip-in {
+  transform-origin: left center;
   animation: jfy-flip-in-fwd 0.52s cubic-bezier(.6,0,.4,1) forwards;
   pointer-events: auto;
 }
 #jfy-entry-viewer.ev-flip-out-fwd {
+  transform-origin: left center;
   animation: jfy-flip-out-fwd 0.52s cubic-bezier(.6,0,.4,1) forwards;
   pointer-events: none;
 }
+/* backward (newer→older): pivot right */
+#jfy-entry-viewer.ev-flip-in-bck {
+  transform-origin: right center;
+  animation: jfy-flip-in-bck 0.52s cubic-bezier(.6,0,.4,1) forwards;
+  pointer-events: auto;
+}
 #jfy-entry-viewer.ev-flip-out-bck {
+  transform-origin: right center;
   animation: jfy-flip-out-bck 0.52s cubic-bezier(.6,0,.4,1) forwards;
   pointer-events: none;
 }
@@ -3321,13 +3353,6 @@ document.addEventListener('keydown', function(e){
           '<button id="jfy-entry-close">← back</button>',
         '</div>',
       '</div>',
-      '<div id="jfy-entry-edit-area" style="display:none">',
-        '<textarea id="jfy-entry-caption" placeholder="add a note to this entry..." rows="3"></textarea>',
-        '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">',
-          '<button id="jfy-entry-edit-cancel">cancel</button>',
-          '<button id="jfy-entry-edit-save">save note</button>',
-        '</div>',
-      '</div>',
     '</div>'
   ].join(''));
 
@@ -3337,12 +3362,8 @@ document.addEventListener('keydown', function(e){
   var entryImg   = document.getElementById('jfy-entry-img');
   var labelEl    = document.getElementById('jfy-entry-viewer-label');
   var closeBtn   = document.getElementById('jfy-entry-close');
-  var editBtn    = document.getElementById('jfy-entry-edit');
-  var deleteBtn  = document.getElementById('jfy-entry-delete');
-  var editArea   = document.getElementById('jfy-entry-edit-area');
-  var captionTA  = document.getElementById('jfy-entry-caption');
-  var editCancel = document.getElementById('jfy-entry-edit-cancel');
-  var editSave   = document.getElementById('jfy-entry-edit-save');
+  var editBtn   = document.getElementById('jfy-entry-edit');
+  var deleteBtn = document.getElementById('jfy-entry-delete');
   var flipShadow = document.getElementById('jfy-flip-shadow'); // may be gone after intro
 
   var entries  = [];
@@ -3364,25 +3385,31 @@ document.addEventListener('keydown', function(e){
   }
 
   function doFlip(dir, callback){
-    /* Quick shadow pulse since we don't have intro-pages context */
+    // Shadow sweep — direction determines which side the gradient comes from
     var nb = document.querySelector('.jfy-nb-layer');
     if(nb){
       var sh = document.createElement('div');
+      var grad = (dir === 'bck')
+        ? 'linear-gradient(270deg,rgba(0,0,0,0.15) 0%,transparent 40%)'
+        : 'linear-gradient(90deg,rgba(0,0,0,0.15) 0%,transparent 40%)';
       sh.style.cssText = 'position:absolute;inset:0;z-index:100;pointer-events:none;' +
-        'background:linear-gradient(90deg,rgba(0,0,0,0.15) 0%,transparent 40%);' +
-        'animation:jfy-flip-shadow-pulse 0.5s ease forwards;border-radius:18px';
+        'background:'+grad+';animation:jfy-flip-shadow-pulse 0.5s ease forwards;border-radius:18px';
       nb.appendChild(sh);
       setTimeout(function(){ sh.remove(); }, 520);
     }
     // Animate viewer
     if(dir === 'in'){
-      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','visible');
+      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck','visible');
       viewer.classList.add('ev-flip-in');
       setTimeout(function(){ viewer.classList.remove('ev-flip-in'); viewer.classList.add('visible'); callback&&callback(); }, 520);
+    } else if(dir === 'in-bck'){
+      viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck','visible');
+      viewer.classList.add('ev-flip-in-bck');
+      setTimeout(function(){ viewer.classList.remove('ev-flip-in-bck'); viewer.classList.add('visible'); callback&&callback(); }, 520);
     } else {
       viewer.classList.add(dir==='fwd'?'ev-flip-out-fwd':'ev-flip-out-bck');
       setTimeout(function(){
-        viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','visible');
+        viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck','visible');
         callback&&callback();
       }, 520);
     }
@@ -3398,21 +3425,20 @@ document.addEventListener('keydown', function(e){
     var label = 'entry '+(entries.length-idx)+' of '+entries.length+
       '  ·  '+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
+    var inDir = (animDir === 'back') ? 'in-bck' : 'in';
+
     if(!viewer.classList.contains('visible')){
-      // Viewer not open: flip it in
-      entryImg.src = url;
-      entryImg.style.display = url?'':'none';
-      labelEl.textContent = label;
-      entryIdx = idx;
-      doFlip('in', function(){ updateArrows(); });
+      // Viewer not open: flip in from appropriate side
+      entryImg.src = url; entryImg.style.display = url?'':'none';
+      labelEl.textContent = label; entryIdx = idx;
+      doFlip(inDir, function(){ updateArrows(); });
     } else {
-      // Viewer already open: flip out then in
-      doFlip(animDir==='back'?'bck':'fwd', function(){
-        entryImg.src = url;
-        entryImg.style.display = url?'':'none';
-        labelEl.textContent = label;
-        entryIdx = idx;
-        doFlip('in', function(){ updateArrows(); });
+      // Viewer open: flip out (matching direction) then flip in
+      var outDir = (animDir === 'back') ? 'bck' : 'fwd';
+      doFlip(outDir, function(){
+        entryImg.src = url; entryImg.style.display = url?'':'none';
+        labelEl.textContent = label; entryIdx = idx;
+        doFlip(inDir, function(){ updateArrows(); });
       });
     }
   }
@@ -3439,24 +3465,43 @@ document.addEventListener('keydown', function(e){
   editBtn && editBtn.addEventListener('click', function(){
     if(entryIdx < 0) return;
     var e = entries[entryIdx];
-    captionTA.value = e.text || '';
-    editArea.style.display = '';
-    captionTA.focus();
-  });
+    var url = e.media && e.media.url ? e.media.url : '';
+    if(!url) return;
 
-  editCancel && editCancel.addEventListener('click', function(){
-    editArea.style.display = 'none';
-  });
+    // Store which entry we're editing so ♡ save updates it in-place
+    window._jfyEditingEntryId = e.id;
+    window._jfyEditingEntryIdx = entryIdx;
 
-  editSave && editSave.addEventListener('click', function(){
-    if(entryIdx < 0) return;
-    entries[entryIdx].text = captionTA.value;
-    try{ localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries)); }catch(e){}
-    editArea.style.display = 'none';
-    // Update label if caption changed
-    var d = new Date(entries[entryIdx].time||entries[entryIdx].addedAt||Date.now());
-    labelEl.textContent = 'entry '+(entries.length-entryIdx)+' of '+entries.length+
-      '  ·  '+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    // Load entry image onto the main notebook canvas as a background
+    var nbCanvas = document.getElementById('jfy-canvas');
+    if(nbCanvas){
+      var img = new Image();
+      img.onload = function(){
+        var ctx2 = nbCanvas.getContext('2d');
+        var dpr = window.devicePixelRatio || 1;
+        // Clear canvas first
+        ctx2.save();
+        ctx2.setTransform(1,0,0,1,0,0);
+        ctx2.clearRect(0,0,nbCanvas.width,nbCanvas.height);
+        ctx2.restore();
+        // Draw entry image scaled to fill canvas
+        ctx2.save();
+        ctx2.setTransform(1,0,0,1,0,0);
+        ctx2.drawImage(img, 0, 0, nbCanvas.width, nbCanvas.height);
+        ctx2.restore();
+      };
+      img.src = url;
+    }
+
+    // Close viewer and return to live notebook
+    viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
+    entryIdx = -1;
+    updateArrows();
+
+    // Show a toast hint
+    if(typeof showJfyToast === 'function'){
+      showJfyToast('Editing entry — use ♡ save when done');
+    }
   });
 
   deleteBtn && deleteBtn.addEventListener('click', function(){
