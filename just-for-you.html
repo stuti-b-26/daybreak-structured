@@ -545,9 +545,9 @@ body.jfy-scissors-active .jfy-scissors {
   }
 }
 
-/* ── Tablet notebook two-page spread ── */
-@media (min-width: 768px) and (max-width: 1023px) {
-  /* Left page of the open notebook */
+/* ── Two-page notebook spread (768px and up) ── */
+@media (min-width: 768px) {
+  /* Left page panel */
   #jfy-notebook-left-page {
     display: flex;
     position: absolute;
@@ -578,7 +578,7 @@ body.jfy-scissors-active .jfy-scissors {
     line-height: 1.7;
   }
 
-  /* Center spine on notebook */
+  /* Center spine */
   .jfy-notebook::after {
     content: '';
     position: absolute; top: 0; bottom: 0;
@@ -587,20 +587,58 @@ body.jfy-scissors-active .jfy-scissors {
       rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.05) 100%);
     z-index: 15; pointer-events: none;
   }
+
+  /* Paper: pulled up to sit alongside the frames, clips slightly left */
+  .jfy-paper-wrap {
+    position: relative;
+    top: -20vw;
+    margin-bottom: -20vw;
+  }
+  .jfy-paper { width: 58vw; margin-left: -5vw; }
 }
-/* NOTE: .jfy-nb-layer and #jfy-entry-viewer tablet overrides live in the
+/* NOTE: .jfy-nb-layer and #jfy-entry-viewer right-half overrides live in the
    second <style> block below so they come after the inset:0 base rules. */
 
-/* ── Desktop ── */
+/* ── Desktop prop positions + layout (1024px and up) ── */
 @media (min-width: 1024px) {
-  .jfy-grid-wrap { padding-top: 164px; padding-bottom: 180px; }
+  /* Padding scaled from tablet vw→px; props extend ~190px above notebook */
+  .jfy-grid-wrap { padding-top: 230px; padding-bottom: 300px; }
   .jfy-notebook  { height: calc(100dvh - var(--hh) - 360px); }
-  .jfy-washi     { top: -85px;  left: -95px;  width: 210px; }
-  .jfy-frames    { top: -90px;  right: -65px; width: 200px; }
-  .jfy-stickers  { bottom: -220px; left: -120px; width: 420px; }
-  .jfy-pen       { bottom: -320px; width: 280px; max-width: 280px; }
-  .jfy-scissors  { bottom: -210px; right: -130px; width: 390px; }
-  .jfy-paper     { width: 1100px; margin-left: -80px; }
+
+  /* Paper-wrap: keep relative pull-up in px terms */
+  .jfy-paper-wrap { top: -200px; margin-bottom: -200px; }
+  .jfy-paper { width: 520px; margin-left: -50px; }
+
+  /* Washi: top-left, overlaps corner, clips left — scaled from tablet */
+  .jfy-washi {
+    top: -190px; left: -50px;
+    width: 210px; max-width: none;
+    z-index: 25;
+  }
+  /* Stickers: top-center-left near spine, under page content */
+  .jfy-stickers {
+    top: -170px; left: 18vw; bottom: auto; right: auto;
+    width: 260px; max-width: none;
+    z-index: 0;
+  }
+  /* Pen: angled, top-center-right, no overlap */
+  .jfy-pen {
+    top: -170px; right: 17vw; left: auto; bottom: auto;
+    width: 195px; max-width: none;
+    z-index: 22;
+  }
+  /* Scissors: top-right, overlaps corner, clips right */
+  .jfy-scissors {
+    top: -170px; right: -50px; left: auto; bottom: auto;
+    width: 245px; max-width: none;
+    z-index: 25;
+  }
+  /* Frames: bottom-right, no overlap, no clip */
+  .jfy-frames {
+    bottom: -250px; right: 0; top: auto; left: auto;
+    width: 280px; max-width: none;
+    z-index: 0;
+  }
 }
 </style>
 </head>
@@ -3063,7 +3101,7 @@ window._jfyNotebook = {
   display: none; /* hidden on mobile */
 }
 
-/* ── Tablet two-page spread ── */
+/* ── Two-page spread: intro (768px and up) ── */
 @media (min-width: 768px) and (max-width: 1023px) {
   /* Portrait cover: narrow, centered */
   #jfy-intro-wrap {
@@ -3134,6 +3172,48 @@ window._jfyNotebook = {
     font-family: 'Bad Script', cursive;
     font-size: clamp(13px, 1.55vw, 16px);
     line-height: 1.85; color: #3a2510; margin: 0;
+  }
+}
+
+/* ── Desktop intro spread (1024px and up) — same layout, wider cover ── */
+@media (min-width: 1024px) {
+  #jfy-intro-wrap {
+    grid-column: 1 / 13;
+    justify-self: center;
+    width: min(38%, 480px);
+    border-radius: 10px 14px 14px 10px;
+    transition: width 0.75s cubic-bezier(.77,0,.18,1),
+                border-radius 0.75s cubic-bezier(.77,0,.18,1);
+  }
+  #jfy-intro-wrap.cover-open {
+    width: 100%;
+    border-radius: 8px 18px 18px 8px;
+  }
+  #jfy-intro-wrap::before {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    left: calc(50% - 1px); width: 2px;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 100%);
+    z-index: 25; pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s 0.5s;
+  }
+  #jfy-intro-wrap.cover-open::before { opacity: 1; }
+  #jfy-intro-pages {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+  #jfy-intro-left-page {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    inset: 0 50% 0 0;
+    background: #f8f4ed;
+    border-radius: 8px 0 0 8px;
+    padding: clamp(16px,5%,44px) clamp(18px,7%,60px) clamp(12px,4%,32px);
+    z-index: 0;
+    overflow: hidden;
   }
 }
 
@@ -3496,8 +3576,8 @@ window._jfyNotebook = {
 .jfy-entry-nav:hover .jfy-entry-nav-label { opacity: 1; }
 .jfy-entry-nav { overflow: visible; }
 
-/* ── Tablet: notebook right-half overrides (must follow inset:0 base rules) ── */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* ── Notebook right-half overrides (must follow inset:0 base rules, 768px+) ── */
+@media (min-width: 768px) {
   /* Canvas confined to right half */
   .jfy-nb-layer {
     left: 50%;
@@ -3605,7 +3685,7 @@ window._jfyNotebook = {
   }
 
   function isTabletIntro(){
-    return window.matchMedia('(min-width:768px) and (max-width:1023px)').matches;
+    return window.matchMedia('(min-width:768px)').matches;
   }
 
   function openCover(){
@@ -3763,7 +3843,7 @@ window._jfyNotebook = {
      updateNbLeftPage() → renders the appropriate content into the left panel
   ── */
   function isTablet(){
-    return window.matchMedia('(min-width:768px) and (max-width:1023px)').matches;
+    return window.matchMedia('(min-width:768px)').matches;
   }
 
   function renderLeftPage(entry, labelText){
