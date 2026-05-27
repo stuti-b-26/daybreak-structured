@@ -2975,6 +2975,86 @@ window._jfyNotebook = {
   overflow: hidden;         /* clips the flip panels */
 }
 
+/* ── Left page panel (tablet two-page spread) ── */
+#jfy-intro-left-page {
+  display: none; /* hidden on mobile */
+}
+
+/* ── Tablet two-page spread ── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Cover only covers left half */
+  #jfy-intro-cover {
+    right: 50%;
+    border-radius: 8px 0 0 8px;
+    transform-origin: left center;
+  }
+  #jfy-intro-cover::after {
+    border-radius: 4px 0 0 4px;
+    right: 0; /* re-anchor the dashed border to left-half bounds */
+  }
+  #jfy-intro-cover::before {
+    border-radius: 8px 0 0 8px;
+  }
+
+  /* Pages occupy only the right half */
+  #jfy-intro-pages {
+    left: 50%;
+    border-radius: 0 18px 18px 0;
+  }
+
+  /* Left page visible underneath cover & pages */
+  #jfy-intro-left-page {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    inset: 0 50% 0 0;
+    background: #f8f4ed;
+    border-radius: 8px 0 0 8px;
+    padding: clamp(16px,5%,44px) clamp(18px,7%,60px) clamp(12px,4%,32px);
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  /* Left page inner body */
+  .jfy-left-page-num {
+    align-self: flex-end;
+    font-family: 'Antonio', sans-serif;
+    font-size: 11px; letter-spacing: 0.16em;
+    color: #c4b49a; text-transform: uppercase;
+  }
+  .jfy-left-page-body {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; gap: 14px;
+    padding: 6% 0 3%;
+  }
+  .jfy-left-page-body h2 {
+    font-family: 'Antonio', sans-serif;
+    font-size: clamp(18px, 2.6vw, 28px);
+    font-weight: 700; color: #2a1a0e; margin: 0 0 4px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .jfy-left-page-body p {
+    font-family: 'Bad Script', cursive;
+    font-size: clamp(13px, 1.55vw, 16px);
+    line-height: 1.85; color: #3a2510; margin: 0;
+  }
+
+  /* Center spine shadow */
+  #jfy-intro-wrap::before {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    left: calc(50% - 1px); width: 2px;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0.13) 0%, rgba(0,0,0,0.06) 100%);
+    z-index: 25; pointer-events: none;
+    border-radius: 0;
+  }
+  /* Left-edge shadow stripe — remove the cover's left::before at tablet */
+  #jfy-intro-cover::before {
+    display: none;
+  }
+}
+
 /* ── Page flip stage ── */
 /* Each slide sits in a "leaf" – when flipping, a half-width curtain
    folds over it from the right edge to reveal the next slide.        */
@@ -3379,6 +3459,7 @@ window._jfyNotebook = {
 
   gridWrap.insertAdjacentHTML('afterbegin', [
     '<div id="jfy-intro-wrap">',
+      '<div id="jfy-intro-left-page"></div>',
       '<div id="jfy-intro-pages">',
         '<div id="jfy-flip-shadow"></div>',
         SLIDES.map(makeSlide).join(''),
@@ -3403,6 +3484,23 @@ window._jfyNotebook = {
   var animating = false;
   var shadow    = document.getElementById('jfy-flip-shadow');
   var slides    = Array.from(document.querySelectorAll('.jfy-islide'));
+  var leftPage  = document.getElementById('jfy-intro-left-page');
+
+  /* Update left page for tablet two-page spread */
+  function updateLeftPage(idx){
+    if(!leftPage) return;
+    if(idx < 0){
+      /* Inside cover: blank left page */
+      leftPage.innerHTML = '';
+    } else {
+      var s = SLIDES[idx];
+      leftPage.innerHTML =
+        '<span class="jfy-left-page-num">'+s.num+'</span>'+
+        '<div class="jfy-left-page-body">'+s.body+'</div>';
+    }
+  }
+  /* Initialise: cover is closed, show blank inside cover */
+  updateLeftPage(-1);
 
   function dismiss(){
     document.body.classList.remove('jfy-intro-active');
@@ -3415,6 +3513,8 @@ window._jfyNotebook = {
     coverOpen = true;
     var cover = document.getElementById('jfy-intro-cover');
     if(cover) cover.classList.add('flipped');
+    /* Tablet: left page shows inside-cover blank while on slide 0 */
+    updateLeftPage(-1);
   }
 
   function flipTo(idx, dir){
@@ -3432,6 +3532,8 @@ window._jfyNotebook = {
       from.style.zIndex=''; to.style.zIndex='';
       shadow.classList.remove('show');
       current=idx; animating=false;
+      /* Tablet: show previous slide on left page */
+      updateLeftPage(current - 1);
     }, 570);
   }
 
