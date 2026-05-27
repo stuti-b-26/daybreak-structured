@@ -2736,9 +2736,20 @@ function captureNotebook(quality, callback){
     blitElement(pc);
   });
 
-  // 2. Washi tape DOM-canvas elements (placed above papers, below doodles)
+  // 2. Washi tape — redraw from data-washi + current drag position
+  //    (more reliable than blitElement for absolute-positioned canvases)
   nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(wc){
-    blitElement(wc);
+    var data; try{ data=JSON.parse(wc.dataset.washi||'{}'); }catch(e){ return; }
+    if(!data.col) return;
+    var bb = _washiBbox(data.x1, data.y1, data.x2, data.y2, data.w);
+    if(!bb) return;
+    var dragLeft = parseFloat(wc.style.left)||0;
+    var dragTop  = parseFloat(wc.style.top)||0;
+    var dx = dragLeft - bb.minX, dy = dragTop - bb.minY;
+    renderWashiOnCtx(octx,
+      data.x1+dx, data.y1+dy,
+      data.x2+dx, data.y2+dy,
+      data.col, data.w||washibWidth, 0, 0);
   });
 
   // 2b. Main doodle canvas
@@ -2882,6 +2893,40 @@ window._jfyNotebook = {
   clearAll: function(){
     Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
     drawCmds.length = 0; redrawAll();
+  },
+  // Returns true if the notebook has any drawn/placed content
+  hasContent: function(){
+    if(drawCmds.length > 0) return true;
+    var kids = nbLayer.children;
+    for(var i=0; i<kids.length; i++){
+      if(kids[i] !== canvas) return true;
+    }
+    return false;
+  },
+  // Capture current notebook, save to journal, then clear — calls cb when done
+  saveAndClear: function(editId, cb){
+    captureNotebook(0.88, function(dataUrl){
+      if(dataUrl){
+        var snap = snapshotNbLayer();
+        var STORE_JOURNAL = 'jfy_journal';
+        var saved=[]; try{ saved=JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]'); }catch(e){}
+        if(editId){
+          for(var i=0;i<saved.length;i++){
+            if(saved[i].id===editId){
+              saved[i].media={url:dataUrl}; saved[i].snapshot=snap; saved[i].time=Date.now(); break;
+            }
+          }
+        } else {
+          var now=Date.now();
+          saved.unshift({id:'jfy_'+now,text:'',time:now,addedAt:now,media:{url:dataUrl},snapshot:snap});
+        }
+        localStorage.setItem(STORE_JOURNAL, JSON.stringify(saved));
+      }
+      window._jfyEditingEntryId=null; window._jfyEditingEntryIdx=null; window._jfyEditBg=null;
+      Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+      drawCmds.length=0; redrawAll(); pushHistory(); updateHistoryButtons();
+      cb && cb();
+    });
   }
 };
 
@@ -3580,14 +3625,40 @@ window._jfyNotebook = {
   /* ── Button wiring ── */
   prevBtn.addEventListener('click', function(){
     loadEntries();
-    if(entryIdx===-1) showEntry(0,'fwd');               // live page → most recent
-    else if(entryIdx<entries.length-1) showEntry(entryIdx+1,'fwd'); // go older
+    if(entryIdx===-1){
+      // From live page: auto-save current work, then show most recent entry
+      var nb = window._jfyNotebook;
+      var editId = window._jfyEditingEntryId || null;
+      function goOlder(){
+        loadEntries();
+        if(entries.length > 0) showEntry(0, 'fwd');
+      }
+      if(nb && nb.hasContent()){
+        nb.saveAndClear(editId, function(){
+          if(window._jfyEntryNav) window._jfyEntryNav.resetToLive();
+          goOlder();
+        });
+      } else {
+        // Nothing to save — just clear edit state and navigate
+        if(nb) nb.clearAll();
+        window._jfyEditingEntryId=null; window._jfyEditingEntryIdx=null; window._jfyEditBg=null;
+        goOlder();
+      }
+    } else if(entryIdx < entries.length-1){
+      showEntry(entryIdx+1, 'fwd'); // go older
+    }
   });
 
   nextBtn.addEventListener('click', function(){
     loadEntries();
-    if(entryIdx>0) showEntry(entryIdx-1,'back');        // go newer entry
-    else closeEntry();                                   // entryIdx===0 → back to live
+    if(entryIdx > 0){
+      showEntry(entryIdx-1, 'back');   // go newer entry
+    } else {
+      // At most-recent entry (or already live): go to blank new-entry page
+      closeEntry();
+      // Ensure notebook is clear for a fresh entry
+      if(window._jfyNotebook) window._jfyNotebook.clearAll();
+    }
   });
 
   closeBtn.addEventListener('click', closeEntry);
