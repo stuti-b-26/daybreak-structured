@@ -372,8 +372,10 @@ img{display:block;max-width:100%}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:block;position:absolute !important;bottom:-15vw;left:50%;transform:translateX(-50%);width:72%;height:auto;z-index:1}
-  #teal-bw-us{display:none}
-  #green-scribble{display:none}
+  /* teal-bw-us: top-left behind sticker-maker — sits just before it in flex order so sticker-maker overlaps it */
+  #teal-bw-us{display:block !important;order:68;position:relative !important;width:50%;align-self:flex-start;margin-left:0;z-index:1}
+  /* green-scribble: bottom-right behind sticker-maker — sits just after, pulled up with negative margin */
+  #green-scribble{display:block !important;order:71;position:relative !important;width:35%;align-self:flex-end;margin-top:-38vw;z-index:1}
 
   /* ── Absolutely positioned connectors ── */
   /* break-intro-top: circles "break." in the float-label and flows into silly decisions */
