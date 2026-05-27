@@ -295,6 +295,17 @@ img{display:block;max-width:100%}
   #between-to-sticker{top:167.5vw;left:10.83vw;width:clamp(180px,32%,320px)}
   #sticker-to-you{top:216.67vw}
 
+  /* Hide decorative SVGs on tablet too */
+  #green-swish-long{display:none !important}
+  #break-intro-top{display:none !important}
+  #silly-to-mess{display:none !important}
+  #mess-btn-to-self{display:none !important}
+  #orange-shape{display:none !important}
+  #yellow-scribble{display:none !important}
+  #between-to-sticker{display:none !important}
+  #break-bubble-middle{display:none !important}
+  #sticker-to-you{display:none !important}
+  #you-to-end{display:none !important}
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
   .footer-tablet .ft-nav{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:28px}
