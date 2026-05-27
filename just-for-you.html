@@ -505,9 +505,12 @@ body.jfy-scissors-active .jfy-scissors {
 
 /* ── Tablet prop positions (768–1023px) ── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Washi: vw only, no cap — overflows left edge and scales freely */
+  /* Washi: left uses calc to account for 120px gutter + 1 column so it
+     reliably overflows the viewport left edge across the full tablet range.
+     At 768px: -(100+69)=-169px, notebook-left≈164px → overflows ~5px.
+     At 1023px: -(100+92)=-192px, notebook-left≈185px → overflows ~7px. */
   .jfy-washi {
-    top: -18vw; left: -5vw;
+    top: -18vw; left: calc(-100px - 9vw);
     width: 24vw;
     z-index: 25;
   }
@@ -629,10 +632,12 @@ body.jfy-scissors-active .jfy-scissors {
     width: 195px; max-width: none;
     z-index: 22;
   }
-  /* Scissors: vw-based, scales with viewport like washi — no cap */
+  /* Scissors: 18vw keeps them at a corner-overlap size at any desktop width.
+     27vw was too large (≈370px at 1366px, covering half the right page).
+     right: -3vw clips the handle tip off the right edge proportionally. */
   .jfy-scissors {
-    top: -170px; right: -4vw; left: auto; bottom: auto;
-    width: 27vw; max-width: none;
+    top: -170px; right: -3vw; left: auto; bottom: auto;
+    width: 18vw; max-width: none;
     z-index: 25;
   }
   /* Frames: bottom-right, no overlap, no clip */
