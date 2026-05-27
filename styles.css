@@ -309,6 +309,12 @@ img{display:block;max-width:100%}
   .card-btn--centered{bottom:1.67vw}
   .card--shh .card-btn{max-width:21.67vw}
 
+  /* Override inline padding/font-size on specific buttons so they scale with viewport */
+  .card--mess-hall .card-btn{padding:1.5vw 2vw !important;font-size:1.33vw !important}
+  .card--selfless .card-btn{padding:1.33vw 3vw !important;font-size:1.33vw !important;left:-10vw !important}
+  .card--shh .card-btn{padding:1.5vw 2vw !important;font-size:1.33vw !important}
+  .card--sticker-maker .card-btn{padding:1.5vw 2vw !important;font-size:1.33vw !important}
+
   /* Button positions within cards — convert 20px/24px offsets to vw */
   .card--selfless .card-btn{bottom:1.67vw;right:1.67vw}
   .card--mess-hall .card-btn{bottom:1.67vw;right:1.67vw}
