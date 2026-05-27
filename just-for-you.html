@@ -1298,15 +1298,18 @@ function drawDoodle(pts,color,size){
 
 // When editing a saved entry, this holds the entry image so redrawAll
 // always repaints it under new strokes (survives undo/redo/clear cycles).
-var _jfyEditBg = null;  // { img: HTMLImageElement, entryId: string }
+// Edit background lives on window so the navigator IIFE can set it
+// and redrawAll() (inside this IIFE) reads the same object.
+window._jfyEditBg = window._jfyEditBg || null;
 
 function redrawAll(){
   var W = canvas.offsetWidth, H = canvas.offsetHeight;
   ctx.clearRect(0,0,W,H);
   // Paint the edit-mode background first so strokes draw on top of it
-  if(_jfyEditBg && _jfyEditBg.img.complete){
+  var bg = window._jfyEditBg;
+  if(bg && bg.img && bg.img.complete){
     ctx.save();
-    ctx.drawImage(_jfyEditBg.img, 0, 0, W, H);
+    ctx.drawImage(bg.img, 0, 0, W, H);
     ctx.restore();
   }
   drawCmds.forEach(function(cmd){
