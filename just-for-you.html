@@ -2206,10 +2206,24 @@ function makeDraggable(handle, mover){
 var _hist = { stack: [], cursor: -1, maxSize: 40 };
 
 function snapshotNbLayer(){
-  return {
-    html:     nbLayer.innerHTML,
-    drawCmds: drawCmds.slice()
-  };
+  // Save placed-paper pixel data before innerHTML capture.
+  // Canvas pixels are NOT serialized by innerHTML, so we store them separately.
+  var paperData = {};
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc, i){
+    // Give each paper a stable ID so we can match it after restore
+    if(!pc.dataset.paperId){
+      pc.dataset.paperId = 'p' + Date.now() + '_' + i;
+    }
+    paperData[pc.dataset.paperId] = pc.toDataURL();
+  });
+
+  // Temporarily remove the main drawing canvas so it doesn't appear in the
+  // HTML string (avoids a duplicate #jfy-canvas being recreated on restore).
+  nbLayer.removeChild(canvas);
+  var html = nbLayer.innerHTML;
+  nbLayer.insertBefore(canvas, nbLayer.firstChild);
+
+  return { html: html, drawCmds: drawCmds.slice(), paperData: paperData };
 }
 
 function rewirePolaroid(pol){
@@ -2240,16 +2254,34 @@ function rewirePolaroid(pol){
 }
 
 function restoreSnapshot(snap){
-  // Restore stroke list so redrawAll() stays in sync with the canvas pixels
+  // Restore stroke list so redrawAll() stays in sync with the canvas
   drawCmds = snap.drawCmds ? snap.drawCmds.slice() : [];
 
-  // Pull canvas out before innerHTML wipe so the module-level `canvas` var
-  // keeps pointing at the live element (canvas content is not in HTML).
+  // snap.html was captured WITHOUT the main canvas, so we can set innerHTML
+  // directly — no duplicate #jfy-canvas element will be created.
   nbLayer.removeChild(canvas);
   nbLayer.innerHTML = snap.html;
   nbLayer.insertBefore(canvas, nbLayer.firstChild);
 
-  // Redraw strokes from commands — avoids DPR mismatch of pixel-snapshot restore
+  // Restore placed-paper pixel data (innerHTML gives blank <canvas> elements)
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
+    var id = pc.dataset.paperId;
+    var dataUrl = snap.paperData && id && snap.paperData[id];
+    if(!dataUrl) return;
+    var img = new Image();
+    img.onload = function(){
+      var pctx = pc.getContext('2d');
+      // Use identity transform so we write physical pixels 1-to-1
+      pctx.save();
+      pctx.setTransform(1, 0, 0, 1, 0, 0);
+      pctx.clearRect(0, 0, pc.width, pc.height);
+      pctx.drawImage(img, 0, 0);
+      pctx.restore();
+    };
+    img.src = dataUrl;
+  });
+
+  // Redraw canvas strokes from commands (correct DPR transform always applies)
   redrawAll();
 
   // Re-attach all placed-element interactivity
@@ -2334,13 +2366,12 @@ document.getElementById('jfy-redo-btn').addEventListener('click', function(){
 document.getElementById('jfy-clear-btn').addEventListener('click', function(){
   if(!confirm('Clear everything on the notebook page?')) return;
   pushHistory();
-  // Remove all placed elements (keep the canvas element itself)
+  // Remove all placed elements (keep the drawing canvas itself)
   Array.from(nbLayer.children).forEach(function(el){
     if(el !== canvas) el.remove();
   });
-  // Clear drawing canvas
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawCmds = [];
+  redrawAll();
   updateHistoryButtons();
 });
 
