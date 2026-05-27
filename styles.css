@@ -331,7 +331,7 @@ img{display:block;max-width:100%}
   .card--shh{order:60}
   #between-to-sticker{order:65;display:block;position:relative !important;width:38%;height:auto;align-self:flex-start;margin-left:6%}
   .card--sticker-maker{order:70;margin-top:-220px !important}
-  .card--just-for-you{order:80;margin-top:-220px !important}
+  .card--just-for-you{order:80;margin-top:-80px !important}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:block;position:absolute !important;bottom:-60px;left:50%;transform:translateX(-50%);width:72%;height:auto;z-index:1}
