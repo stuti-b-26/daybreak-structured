@@ -1717,75 +1717,119 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 (function(){
   'use strict';
   var ids = ['mess-btn-to-self','silly-to-mess','between-to-sticker','break-bubble-middle','break-intro-top','sticker-to-you','you-to-end'];
-  var items = [];
+  var items      = [];
+  var drawIndex  = 0;   // which SVG is currently drawing
+  var pathIndex  = 0;   // which path within that SVG
+  var animating  = false;
+  var pathStart  = null;
+  var raf        = null;
+  var PATH_MS    = 500; // ms to draw each individual path
 
   function init(){
-    items = [];
+    if(raf){ cancelAnimationFrame(raf); raf = null; }
+    items     = [];
+    drawIndex = 0;
+    pathIndex = 0;
+    animating = false;
+    pathStart = null;
+
     var scrollY = window.scrollY;
+
     ids.forEach(function(id){
       var svg = document.getElementById(id);
       if(!svg) return;
-      var rect = svg.getBoundingClientRect();
-      var svgTop    = scrollY + rect.top;
-      var svgBottom = svgTop + rect.height;
+      if(getComputedStyle(svg).display === 'none') return;
+
+      var rect   = svg.getBoundingClientRect();
+      var svgTop = scrollY + rect.top;
       var pathData = [];
+
       svg.querySelectorAll('path,line,polyline,circle,ellipse').forEach(function(p){
         var len;
-        try { len = p.getTotalLength(); } catch(e){ return; }
+        try{ len = p.getTotalLength(); }catch(e){ return; }
+        if(!len) return;
         p.style.strokeDasharray  = len;
         p.style.strokeDashoffset = len;
-        p.style.transition = 'none';
-        // Record each path's top Y on the page so we can sort top-to-bottom
+        p.style.transition       = 'none';
         var pr   = p.getBoundingClientRect();
         var topY = scrollY + pr.top;
         pathData.push({path:p, length:len, topY:topY});
       });
+
       if(!pathData.length) return;
-      // Sort paths within this SVG from top to bottom
+      // Sort paths within each SVG from top to bottom
       pathData.sort(function(a,b){ return a.topY - b.topY; });
-      items.push({svg:svg, paths:pathData, svgTop:svgTop, svgBottom:svgBottom});
+      items.push({svg:svg, paths:pathData, svgTop:svgTop});
     });
-    // Sort SVGs from top to bottom by their page position
+
+    // Sort SVGs from top to bottom by page position
     items.sort(function(a,b){ return a.svgTop - b.svgTop; });
-    update();
+
+    // Any SVG already fully above the viewport on load → draw instantly
+    while(drawIndex < items.length){
+      var r = items[drawIndex].svg.getBoundingClientRect();
+      if(r.bottom < 0){
+        items[drawIndex].paths.forEach(function(pd){ pd.path.style.strokeDashoffset = 0; });
+        drawIndex++;
+      } else { break; }
+    }
+
+    checkTrigger();
   }
 
-  function update(){
-    if(!items.length) return;
-    var scrollY = window.scrollY;
-    var vh      = window.innerHeight;
-    var n       = items.length;
-
-    // Global draw window: starts when the first SVG enters the viewport,
-    // ends when the last SVG has scrolled to mid-viewport.
-    var drawStart = items[0].svgTop    - vh;
-    var drawEnd   = items[n-1].svgBottom - vh * 0.4;
-    var range     = drawEnd - drawStart;
-    var globalProg = range > 0 ? Math.max(0, Math.min(1, (scrollY - drawStart) / range)) : 0;
-
-    // Each SVG gets an equal slice of the global progress.
-    // Within each SVG, paths draw sequentially top-to-bottom.
-    items.forEach(function(item, si){
-      var svgStart = si       / n;
-      var svgEnd   = (si + 1) / n;
-      var svgProg  = svgEnd > svgStart
-        ? Math.max(0, Math.min(1, (globalProg - svgStart) / (svgEnd - svgStart)))
-        : 1;
-
-      var m = item.paths.length;
-      item.paths.forEach(function(pd, pi){
-        var pStart = pi       / m;
-        var pEnd   = (pi + 1) / m;
-        var pProg  = pEnd > pStart
-          ? Math.max(0, Math.min(1, (svgProg - pStart) / (pEnd - pStart)))
-          : 1;
-        pd.path.style.strokeDashoffset = pd.length * (1 - pProg);
-      });
-    });
+  // Called on every scroll — start next SVG when its top crosses vh midpoint
+  function checkTrigger(){
+    if(animating) return;
+    if(drawIndex >= items.length) return;
+    var rect = items[drawIndex].svg.getBoundingClientRect();
+    var vh   = window.innerHeight;
+    if(rect.top <= vh * 0.5){
+      startDrawing();
+    }
   }
 
-  window.addEventListener('scroll', update, {passive:true});
+  function startDrawing(){
+    if(animating) return;
+    animating = true;
+    pathStart = null;
+    raf = requestAnimationFrame(drawStep);
+  }
+
+  function drawStep(ts){
+    if(drawIndex >= items.length){ animating = false; return; }
+
+    var item = items[drawIndex];
+
+    // Current SVG finished — advance to next
+    if(pathIndex >= item.paths.length){
+      drawIndex++;
+      pathIndex = 0;
+      animating = false;
+      pathStart = null;
+      checkTrigger(); // next SVG may already be at midpoint
+      return;
+    }
+
+    var pd = item.paths[pathIndex];
+    if(!pathStart) pathStart = ts;
+    var elapsed  = ts - pathStart;
+    var progress = Math.min(1, elapsed / PATH_MS);
+
+    pd.path.style.strokeDashoffset = pd.length * (1 - progress);
+
+    if(progress < 1){
+      raf = requestAnimationFrame(drawStep);
+    } else {
+      pd.path.style.strokeDashoffset = 0;
+      pathIndex++;
+      pathStart = null;
+      raf = requestAnimationFrame(drawStep); // immediately start next path
+    }
+  }
+
+  window.addEventListener('scroll', checkTrigger, {passive:true});
   window.addEventListener('resize', init);
+
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', init);
   } else {
