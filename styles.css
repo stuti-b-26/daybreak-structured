@@ -376,10 +376,6 @@ img{display:block;max-width:100%}
   /* teal-bw-us and green-scribble hidden on mobile — originals outside card extend scroll area */
   #teal-bw-us{display:none !important}
   #green-scribble{display:none !important}
-  /* Mobile copies live inside the sticker-maker card so they're clipped to it */
-  .sticker-card-deco{display:block}
-  .sticker-card-deco--teal{top:0;left:0;width:55%}
-  .sticker-card-deco--green{bottom:0;right:0;width:40%}
 
   /* ── Absolutely positioned connectors ── */
   /* break-intro-top: circles "break." in the float-label and flows into silly decisions */
