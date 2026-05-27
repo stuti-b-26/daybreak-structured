@@ -99,7 +99,7 @@
   margin-top:clamp(36px,4.5vw,60px);
 }
 .approach-page--flip{flex-direction:row-reverse}
-.approach-page-info{flex:1;min-width:0}
+.approach-page-info{flex:0 0 38%;min-width:0}
 .approach-page-name{
   font-family:var(--font-body);font-size:clamp(17px,1.7vw,22px);
   font-weight:700;margin-bottom:10px;
@@ -109,7 +109,7 @@
   line-height:1.7;color:#000;
 }
 .approach-page-cta{
-  flex:0 0 auto;
+  flex:1;
   display:flex;align-items:center;justify-content:center;
   padding-top:4px;
 }
@@ -124,8 +124,8 @@
   line-height:1.2;
 }
 .approach-cta-btn:active{box-shadow:3px 3px 0 0 #000!important;transform:scale(.93)!important}
-.approach-cta-pill{border-radius:999px;padding:14px 28px}
-.approach-cta-rect{border-radius:16px;padding:16px 28px;max-width:220px}
+.approach-cta-pill{border-radius:999px;padding:14px 40px}
+.approach-cta-rect{border-radius:16px;padding:16px 40px;max-width:300px}
 .approach-cta-circle{
   border-radius:50%;width:160px;height:160px;padding:16px;font-size:15px;
 }
@@ -137,10 +137,10 @@
 .approach-cta--purple{background:#c3a8f5}
 
 /* selfless-less: CTA stacks below text */
-.approach-page--cta-btm{flex-wrap:wrap}
-.approach-page--cta-btm .approach-page-info{flex:0 0 55%;order:0}
+.approach-page--cta-btm{flex-wrap:nowrap}
+.approach-page--cta-btm .approach-page-info{flex:0 0 38%;order:0}
 .approach-page--cta-btm .approach-page-cta{
-  flex:0 0 auto;order:1;align-self:flex-end;
+  flex:1;order:1;align-self:center;
 }
 
 /* ── MEET THE TEAM ── */
