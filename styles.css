@@ -269,10 +269,10 @@ img{display:block;max-width:100%}
   #hero-headline{font-size:20em}
   .intro-text{text-align:left;font-size:clamp(30px,5.5vw,56px)}
 
-  /* Cards stage — height scaled proportionally (desktop 3900px at ~1200px wide = 325vw) */
-  .cards-stage{width:100%;height:325vw;margin-left:0}
+  /* Cards stage — height scaled proportionally (desktop 3640px / 12 = 303.33vw) */
+  .cards-stage{width:100%;height:303.33vw;margin-left:0}
 
-  /* Card tops — desktop px / 12 = vw equivalent; width/left stay as desktop percentages */
+  /* Card tops — desktop px / 12 = vw; widths/lefts are already % so scale automatically */
   .card--silly-decisions{top:17.75vw}
   .card--mess-hall{top:36.17vw}
   .card--selfless{top:83.58vw}
@@ -280,9 +280,14 @@ img{display:block;max-width:100%}
   .card--just-for-you{top:170.42vw}
   .card--sticker-maker{top:205.25vw}
 
+  /* Card shape — scale border-radius with viewport */
+  .card-item{border-radius:1.67vw}
+  .card-img{border-radius:1.17vw;min-height:0}
+
   /* Float labels */
-  .float-label--life-hard{top:0;left:10%}
-  .float-label--everyone{top:148.58vw;left:67%;right:auto;width:auto}
+  .float-label{font-size:clamp(9px,1vw,14px)}
+  .float-label--life-hard{top:0;left:10%;font-size:clamp(12px,1.4vw,20px);max-width:21.67vw}
+  .float-label--everyone{top:148.58vw;left:67%;right:auto;width:auto;font-size:clamp(16px,2.2vw,26px)}
 
   /* Decorative SVGs — all positions and sizes in vw so they scale with the viewport */
   #break-intro-top{top:3.5vw;left:14%;width:38%}
@@ -296,10 +301,20 @@ img{display:block;max-width:100%}
   #sticker-to-you{top:216.67vw;right:0;width:92%;height:32vw}
   #you-to-end{top:244.17vw;left:1%;width:50%}
 
-  /* Buttons — scale proportionally with viewport width */
-  .card-btn{font-size:clamp(12px,1.5vw,16px);padding:clamp(10px,1.4vw,16px) clamp(16px,2.4vw,28px);border-width:2px;box-shadow:clamp(4px,0.6vw,8px) clamp(4px,0.6vw,8px) 0 0 #000}
-  .card-btn--tall-rect{padding:clamp(16px,2vw,24px) clamp(20px,2.8vw,34px);font-size:clamp(13px,1.6vw,17px)}
-  .card-btn--circle{width:clamp(100px,14vw,170px);height:clamp(100px,14vw,170px);font-size:clamp(12px,1.4vw,16px);padding:clamp(10px,1.2vw,16px)}
+  /* Buttons — font, padding, shadow scale with viewport */
+  .card-btn{font-size:clamp(12px,1.5vw,16px);padding:clamp(10px,1.4vw,16px) clamp(16px,2.4vw,28px);border-width:2px;box-shadow:0.67vw 0.67vw 0 0 #000}
+  .card-btn--rect{border-radius:1.33vw}
+  .card-btn--tall-rect{border-radius:1.67vw;padding:clamp(16px,2vw,24px) clamp(20px,2.8vw,34px);font-size:clamp(13px,1.6vw,17px)}
+  .card-btn--circle{border-radius:50%;width:clamp(100px,14vw,170px);height:clamp(100px,14vw,170px);font-size:clamp(12px,1.4vw,16px);padding:1.33vw}
+  .card-btn--centered{bottom:1.67vw}
+  .card--shh .card-btn{max-width:21.67vw}
+
+  /* Button positions within cards — convert 20px/24px offsets to vw */
+  .card--selfless .card-btn{bottom:1.67vw;right:1.67vw}
+  .card--mess-hall .card-btn{bottom:1.67vw;right:1.67vw}
+  .card--just-for-you .card-btn{bottom:1.67vw;right:1.67vw}
+  .card--sticker-maker .card-btn{bottom:1.67vw;right:1.67vw}
+  .card--shh .card-btn{bottom:2vw;left:1.67vw;right:auto}
 
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
