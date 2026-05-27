@@ -296,6 +296,11 @@ img{display:block;max-width:100%}
   #sticker-to-you{top:216.67vw;right:0;width:92%;height:32vw}
   #you-to-end{top:244.17vw;left:1%;width:50%}
 
+  /* Buttons — scale proportionally with viewport width */
+  .card-btn{font-size:clamp(12px,1.5vw,16px);padding:clamp(10px,1.4vw,16px) clamp(16px,2.4vw,28px);border-width:2px;box-shadow:clamp(4px,0.6vw,8px) clamp(4px,0.6vw,8px) 0 0 #000}
+  .card-btn--tall-rect{padding:clamp(16px,2vw,24px) clamp(20px,2.8vw,34px);font-size:clamp(13px,1.6vw,17px)}
+  .card-btn--circle{width:clamp(100px,14vw,170px);height:clamp(100px,14vw,170px);font-size:clamp(12px,1.4vw,16px);padding:clamp(10px,1.2vw,16px)}
+
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
   .footer-tablet .ft-nav{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:28px}
