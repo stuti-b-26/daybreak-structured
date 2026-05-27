@@ -505,38 +505,44 @@ body.jfy-scissors-active .jfy-scissors {
 
 /* ── Tablet prop positions (768–1023px) ── */
 @media (min-width: 768px) and (max-width: 1023px) {
-  /* Washi: top-left, tall stack, overlaps top-left corner of notebook, clips off left screen */
+  /* Washi: top-left, overlaps top-left corner, clips off left screen — scaled up */
   .jfy-washi {
     top: -18vw; left: -5vw;
-    width: 17vw; max-width: 140px;
+    width: 24vw; max-width: 185px;
     z-index: 25;
   }
   /* Stickers: top-center-left near the spine, slides UNDER notebook page content */
   .jfy-stickers {
     top: -16vw; left: 18vw; bottom: auto; right: auto;
     width: 28vw; max-width: 210px;
-    z-index: 0; /* below .jfy-nb-layer (z:10) and #jfy-notebook-left-page (z:5) */
+    z-index: 0;
   }
-  /* Pen: angled, top-center-right, fully outside the notebook — no overlap */
+  /* Pen: angled, top-center-right, fully outside notebook — scaled up */
   .jfy-pen {
-    top: -14vw; right: 20vw; left: auto; bottom: auto;
-    width: 15vw; max-width: 120px;
+    top: -16vw; right: 16vw; left: auto; bottom: auto;
+    width: 22vw; max-width: 170px;
     z-index: 22;
   }
-  /* Scissors: top-right corner, overlaps top-right of notebook, clips off right screen */
+  /* Scissors: top-right, overlaps top-right corner, clips right screen — scaled up */
   .jfy-scissors {
-    top: -14vw; right: -5vw; left: auto; bottom: auto;
-    width: 20vw; max-width: 158px;
+    top: -16vw; right: -5vw; left: auto; bottom: auto;
+    width: 28vw; max-width: 215px;
     z-index: 25;
   }
-  /* Frames: bottom-right, below notebook, no overlap, no clip */
+  /* Frames: bottom-right, level with paper, no overlap, no clip */
   .jfy-frames {
     bottom: -26vw; right: 0; top: auto; left: auto;
     width: 30vw; max-width: 230px;
     z-index: 0;
   }
-  /* Paper: bottom-left, fan of cards, clips slightly off left edge */
+  /* Paper: bottom-left, pulled up to sit level with frames, clips slightly left */
   .jfy-paper { width: 58vw; margin-left: -5vw; }
+  /* Pull the paper-wrap up so paper sits alongside the frames without scrolling */
+  .jfy-paper-wrap {
+    position: relative;
+    top: -20vw;
+    margin-bottom: -20vw; /* collapse the space it would have occupied */
+  }
 }
 
 /* ── Tablet notebook two-page spread ── */
