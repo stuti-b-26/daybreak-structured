@@ -656,6 +656,10 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
     var sun=btn.closest('.nav-item')&&btn.closest('.nav-item').querySelector('.nav-sun');
     if(sun)sun.classList.add('visible');
   });
+  /* mark "between us" link as the current page in all dropdowns */
+  document.querySelectorAll('.dropdown-link[href="between-us.html"]').forEach(function(link){
+    link.classList.add('active');
+  });
 })();
 
 /* 3. MOBILE MENU */
