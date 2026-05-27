@@ -316,34 +316,49 @@ img{display:block;max-width:100%}
   .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:16px;padding:0;align-items:flex-start;overflow:visible}
 
   #green-swish-long{display:none}
+  #you-to-end{display:none}
 
-  /* Absolutely positioned connectors (early in DOM, need to visually appear between cards) */
+  /* ── Card reorder: Group 1 → divider → Group 2 ── */
+  .float-label--life-hard{order:10}
+  .card--silly-decisions{order:20;margin-left:20% !important}
+  #orange-shape{order:25;display:block;position:relative !important;width:48px;height:auto;align-self:flex-end;margin-right:8%;margin-top:-20px;z-index:5}
+  .card--mess-hall{order:30;width:86% !important;margin-left:0 !important}
+  #yellow-scribble{order:35;display:block;position:relative !important;width:70px;height:auto;align-self:flex-start;margin-left:4%;margin-top:-12px;z-index:2}
+  .card--selfless{order:40;margin-left:18% !important}
+  /* Divider — centered between groups */
+  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin:12px 0}
+  /* Group 2 */
+  .card--shh{order:60;width:86% !important;margin-left:0 !important}
+  #between-to-sticker{order:65;display:block;position:relative !important;width:38%;height:auto;align-self:flex-start;margin-left:6%}
+  .card--sticker-maker{order:70;width:86% !important;margin-left:0 !important}
+  #break-bubble-middle{order:75;display:block;position:relative !important;width:82%;height:auto;align-self:center;margin-top:-28px}
+  .card--just-for-you{order:80;margin-left:16% !important}
+  #sticker-to-you{order:90;display:block;position:relative !important;width:86%;height:auto;align-self:center;margin-top:-20px}
+
+  /* Absolutely positioned connectors (early in DOM, visually appear between cards) */
   #break-intro-top{display:block;position:absolute;top:8vw;right:-4%;width:65%;height:auto;z-index:5}
-  #silly-to-mess{display:block;position:absolute;top:100vw;right:1%;width:50%;height:auto;z-index:1}
-  #mess-btn-to-self{display:block;position:absolute;top:190vw;left:-4%;width:44%;height:auto;z-index:1}
+  #silly-to-mess{display:block;position:absolute;top:95vw;right:1%;width:50%;height:auto;z-index:1}
+  #mess-btn-to-self{display:block;position:absolute;top:185vw;left:-4%;width:44%;height:auto;z-index:1}
 
-  /* In-flow connectors (DOM order matches visual order — flow between cards naturally) */
-  #orange-shape{display:block;position:relative !important;width:48px;height:auto;align-self:flex-end;margin-right:8%;margin-top:-20px;z-index:5}
-  #yellow-scribble{display:block;position:relative !important;width:70px;height:auto;align-self:flex-start;margin-left:4%;margin-top:-12px;z-index:2}
-  #between-to-sticker{display:block;position:relative !important;width:38%;height:auto;align-self:flex-start;margin-left:6%}
-  #break-bubble-middle{display:block;position:relative !important;width:82%;height:auto;align-self:center;margin-top:-28px}
-  #sticker-to-you{display:block;position:relative !important;width:86%;height:auto;align-self:center;margin-top:-20px}
+  /* Card base */
   .card-item{position:relative !important;width:78% !important;left:auto !important;top:auto !important;transform:rotate(var(--card-rotate,0deg)) !important}
-  .card--silly-decisions{margin-left:20% !important}
-  .card--mess-hall{width:86% !important;margin-left:0 !important}
-  .card--selfless{margin-left:18% !important}
-  .card--shh{width:86% !important;margin-left:0 !important}
-  .card--just-for-you{margin-left:16% !important}
-  .card--sticker-maker{width:86% !important;margin-left:0 !important}
-  .card--selfless .card-btn{left:16px !important;right:auto !important;top:auto !important;bottom:24px !important;transform:rotate(-2deg) !important}
-  .card--silly-decisions .card-btn{right:-20px !important;left:auto !important;top:calc(50% - 60px) !important;bottom:auto !important}
-  .card--mess-hall .card-btn{top:40px !important;left:14px !important;bottom:auto !important;right:auto !important;padding:36px 28px !important;font-size:16px !important}
-  .card--shh .card-btn{bottom:20px !important;right:14px !important;left:auto !important;top:auto !important}
-  .card--just-for-you .card-btn{bottom:20px !important;right:-20px !important;left:auto !important;top:auto !important}
-  .card--sticker-maker .card-btn{bottom:20px !important;right:14px !important;left:auto !important;top:auto !important}
+
+  /* ── Button scaling: proportional to viewport ── */
+  .card-btn{font-size:clamp(11px,3vw,14px) !important;border-width:2px !important;box-shadow:4px 4px 0 0 #000 !important;padding:clamp(8px,2.5vw,14px) clamp(12px,4vw,20px) !important}
+  .card-btn--circle{width:clamp(76px,20vw,100px) !important;height:clamp(76px,20vw,100px) !important;font-size:clamp(10px,2.6vw,12px) !important;padding:8px !important}
+
+  /* Per-card button positions */
+  .card--silly-decisions .card-btn{right:-14px !important;left:auto !important;top:calc(50% - 48px) !important;bottom:auto !important}
+  .card--mess-hall .card-btn{top:28px !important;left:12px !important;bottom:auto !important;right:auto !important;padding:clamp(18px,5.5vw,32px) clamp(14px,4.5vw,26px) !important;font-size:clamp(12px,3.5vw,16px) !important}
+  .card--selfless .card-btn{left:14px !important;right:auto !important;top:auto !important;bottom:20px !important;transform:rotate(-2deg) !important;padding:clamp(10px,3vw,16px) clamp(16px,5vw,28px) !important}
+  .card--shh .card-btn{bottom:18px !important;right:12px !important;left:auto !important;top:auto !important}
+  .card--just-for-you .card-btn{bottom:18px !important;right:-14px !important;left:auto !important;top:auto !important}
+  .card--sticker-maker .card-btn{bottom:18px !important;right:12px !important;left:auto !important;top:auto !important;padding:clamp(18px,5vw,30px) clamp(18px,5vw,30px) !important;font-size:clamp(12px,3.5vw,16px) !important}
+
+  /* Float labels */
   .float-label{position:relative !important;top:auto !important;left:auto !important;right:auto !important;display:inline-block;margin:4px 0}
   .float-label--life-hard{font-size:clamp(15px,4.5vw,20px);max-width:60%}
-  .float-label--everyone{font-size:clamp(18px,5vw,24px);margin:8px 0}
+  .float-label--everyone{font-size:clamp(18px,5vw,24px)}
   .cta-text{font-size:clamp(22px,7vw,38px)}
   #site-footer .footer-desktop{display:none}
   .footer-mobile{display:block;padding:28px 20px 0}
