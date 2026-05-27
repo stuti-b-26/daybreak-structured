@@ -70,7 +70,7 @@ img{display:block;max-width:100%}
   color:rgba(255,255,255,.7);padding:6px 14px;border-radius:999px;transition:color .15s;cursor:pointer;
 }
 .dropdown-link:hover{color:#fff}
-.dropdown-link.active{color:var(--yellow);font-weight:600}
+.dropdown-link.active{color:var(--yellow);font-weight:700}
 
 .tablet-nav{display:none}
 .mobile-nav{display:none}
