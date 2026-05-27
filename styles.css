@@ -148,8 +148,11 @@ img{display:block;max-width:100%}
 /* ── CARDS ── */
 #cards{background:#fff;padding-top:48px;padding-bottom:0;position:relative}
 .cards-stage{position:relative;width:100%;height:3640px}
+.cards-col{display:flex;flex-direction:column;gap:40px;padding-top:24px;position:relative}
+.cards-col--left{grid-column:2/7;padding-top:80px}
+.cards-col--right{grid-column:7/12}
 .card-item{
-  position:absolute;border-radius:20px;overflow:visible;
+  position:relative;border-radius:20px;overflow:visible;
   transform:rotate(var(--card-rotate,0deg));transform-origin:center center;
 }
 .card-img{
@@ -191,17 +194,13 @@ img{display:block;max-width:100%}
   font-weight:500;color:#000;line-height:1.4;z-index:6;
 }
 .label-underline{text-decoration:underline}
-.float-label--life-hard{top:0;left:10%;font-size:clamp(15px,1.4vw,20px);font-weight:700;max-width:260px}
-.float-label--everyone{
-  top:1783px;left:67%;right:auto;width:auto;font-size:clamp(20px,2.2vw,26px);font-weight:700;text-align:center;line-height:1.3;
-}
+.float-label--life-hard{position:relative;top:auto;left:auto;font-size:clamp(15px,1.4vw,20px);font-weight:700;max-width:260px}
+.float-label--everyone{position:relative;top:auto;left:auto;right:auto;font-size:clamp(15px,1.4vw,20px);font-weight:700}
 
-.card--silly-decisions{width:43%;left:48%;top:213px;--card-rotate:-4deg;z-index:3}
-.card--mess-hall{width:59%;left:-2%;top:434px;--card-rotate:5deg;z-index:4}
-.card--selfless{width:55%;left:33%;top:1003px;--card-rotate:-6deg;z-index:2}
-.card--shh{width:59%;left:-2%;top:1484px;--card-rotate:2deg;z-index:1}
-.card--just-for-you{width:44%;left:38%;top:2045px;--card-rotate:4deg;z-index:4}
-.card--sticker-maker{width:58%;left:-2%;top:2463px;--card-rotate:-5deg;z-index:5}
+.card--silly-decisions,.card--mess-hall,.card--selfless,.card--shh,.card--just-for-you,.card--sticker-maker{position:relative;width:100%;left:auto;top:auto}
+
+#orange-shape,#yellow-scribble{position:relative;display:block;max-width:100%}
+#teal-bw-us,#green-scribble,#break-bubble-middle{position:relative;display:block;max-width:100%}
 
 .cards-deco{position:absolute;pointer-events:none;z-index:0}
 
@@ -269,31 +268,8 @@ img{display:block;max-width:100%}
   #hero-headline{font-size:20em}
   .intro-text{text-align:left;font-size:clamp(30px,5.5vw,56px)}
 
-  /* Cards stage — height scaled proportionally (desktop 3900px at ~1200px wide = 325vw) */
-  .cards-stage{width:100%;height:325vw;margin-left:0}
-
-  /* Card tops — desktop px / 12 = vw equivalent; width/left stay as desktop percentages */
-  .card--silly-decisions{top:17.75vw}
-  .card--mess-hall{top:36.17vw}
-  .card--selfless{top:83.58vw}
-  .card--shh{top:123.67vw}
-  .card--just-for-you{top:170.42vw}
-  .card--sticker-maker{top:205.25vw}
-
-  /* Float labels */
-  .float-label--life-hard{top:0;left:10%}
-  .float-label--everyone{top:148.58vw;left:67%;right:auto;width:auto}
-
-  /* Decorative SVGs — top/left pixel values scaled the same way */
-  #break-intro-top{top:clamp(35px,3.5vw,48px);left:14%;width:clamp(300px,38%,500px)}
-  #silly-to-mess{top:60vw;right:10.83vw;width:clamp(200px,40%,380px)}
-  #mess-btn-to-self{top:46.42vw;left:-3.33vw;width:clamp(240px,45%,440px)}
+  /* Decorative SVGs */
   #green-swish-long{top:29.17vw;left:-26.67vw;width:80vw}
-  #orange-shape{top:29.17vw;left:calc(91% + 1.67vw);width:clamp(80px,12%,142px)}
-  #yellow-scribble{top:85vw;left:-1.67vw;width:clamp(140px,28%,300px)}
-  #break-bubble-middle{top:123.33vw;left:calc(55% - 16.67vw);width:clamp(220px,40%,420px)}
-  #between-to-sticker{top:167.5vw;left:10.83vw;width:clamp(180px,32%,320px)}
-  #sticker-to-you{top:216.67vw}
 
   #site-footer .footer-desktop{display:none}
   .footer-tablet{display:block;padding:40px 32px 0}
@@ -314,6 +290,7 @@ img{display:block;max-width:100%}
   #hero-headline{font-size:8em}
   .intro-text{text-align:center;font-size:clamp(28px,8vw,44px)}
   .cards-stage{position:relative;width:100%;height:auto;margin-left:0;display:flex;flex-direction:column;gap:24px;padding:0 var(--gutter)}
+  .cards-col--left,.cards-col--right{grid-column:1/-1}
 
   #silly-to-mess{display:none}
   #break-intro-top{display:none}
