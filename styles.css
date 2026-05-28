@@ -396,9 +396,10 @@ img{display:block;max-width:100%}
   .card--sticker-maker .card-btn{bottom:1.67vw;right:1.67vw}
   .card--shh .card-btn{bottom:2vw;left:1.67vw;right:auto}
 
-  /* Mission section decorative SVGs — scale fixed widths proportionally */
-  #orange-scrib{width:19.6vw}
-  #teal-scrib{width:40vw}
+  /* Mission section decorative SVGs — scale fixed widths and positions proportionally */
+  #green-circle{width:14vw;height:auto}
+  #orange-scrib{width:19.6vw;top:-8.67vw}
+  #teal-scrib{width:40vw;top:-8vw}
 
   /* Mission — pull up so you-to-end line meets green circle center */
   #mission{margin-top:-76vw}
