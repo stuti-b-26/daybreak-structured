@@ -398,8 +398,8 @@ img{display:block;max-width:100%}
 
   /* Mission section decorative SVGs — scale fixed widths and positions proportionally */
   #green-circle{width:14vw;height:auto}
-  #orange-scrib{width:19.6vw;top:-8.67vw}
-  #teal-scrib{width:40vw;top:-8vw}
+  #orange-scrib{width:19.6vw;top:-8.67vw;left:0}
+  #teal-scrib{width:40vw;top:-8vw;right:0;left:auto}
 
   /* Mission — pull up so you-to-end line meets green circle center */
   #mission{margin-top:-76vw}
