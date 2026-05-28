@@ -665,6 +665,19 @@ body.jfy-scissors-active .jfy-scissors {
     font-size: 14px; color: #ccc; text-align: center;
     line-height: 1.7;
   }
+  .nb-left-actions {
+    display: flex; gap: 8px; margin-top: 10px;
+  }
+  .nb-left-actions button {
+    font-family: 'Antonio', sans-serif; font-size: 10px; letter-spacing: 0.10em;
+    text-transform: uppercase; background: transparent;
+    border: 1.5px solid rgba(0,0,0,0.18); border-radius: 999px;
+    padding: 4px 14px; cursor: pointer; color: #7a6a56;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nb-left-actions button:hover { background: rgba(0,0,0,0.07); }
+  .nb-left-actions .nb-left-delete { border-color: rgba(160,48,48,0.3); color: #a83030; }
+  .nb-left-actions .nb-left-delete:hover { background: rgba(160,48,48,0.08); }
 
   /* Center spine */
   .jfy-notebook::after {
@@ -4171,7 +4184,7 @@ window._jfyNotebook = {
     return window.matchMedia('(min-width:768px)').matches;
   }
 
-  function renderLeftPage(entry, labelText){
+  function renderLeftPage(entry, labelText, entryIndex){
     if(!nbLeftPage) return;
     if(!entry){
       nbLeftPage.innerHTML =
@@ -4179,17 +4192,75 @@ window._jfyNotebook = {
       return;
     }
     var url = entry.media && entry.media.url ? entry.media.url : '';
-    var html = '';
-    if(url) html += '<img src="'+url+'" alt="Journal entry">';
-    if(labelText) html += '<span class="nb-left-label">'+labelText+'</span>';
-    nbLeftPage.innerHTML = html;
+    nbLeftPage.innerHTML = '';
+    if(url){
+      var img = document.createElement('img');
+      img.src = url; img.alt = 'Journal entry';
+      nbLeftPage.appendChild(img);
+    }
+    if(labelText){
+      var lbl = document.createElement('span');
+      lbl.className = 'nb-left-label';
+      lbl.textContent = labelText;
+      nbLeftPage.appendChild(lbl);
+    }
+    // Action buttons — only when browsing past entries (entryIndex is defined)
+    if(entryIndex !== undefined && entryIndex >= 0){
+      var actions = document.createElement('div');
+      actions.className = 'nb-left-actions';
+
+      var editB = document.createElement('button');
+      editB.textContent = '✎ edit';
+      editB.addEventListener('click', function(){
+        loadEntries();
+        var e = entries[entryIndex];
+        if(!e) return;
+        window._jfyEditingEntryId  = e.id;
+        window._jfyEditingEntryIdx = entryIndex;
+        viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
+        entryIdx = -1; updateArrows();
+        if(e.snapshot && window._jfyNotebook){
+          window._jfyEditBg = null;
+          window._jfyNotebook.restoreSnapshot(e.snapshot);
+        } else if(e.media && e.media.url && window._jfyNotebook){
+          var bg = new Image();
+          bg.onload = function(){
+            window._jfyEditBg = { img: bg, entryId: e.id };
+            window._jfyNotebook.clearAll();
+            window._jfyNotebook.redrawAll();
+          };
+          bg.src = e.media.url;
+        }
+        if(typeof showJfyToast === 'function')
+          showJfyToast('Editing entry — ♡ save or + new entry when done');
+      });
+
+      var delB = document.createElement('button');
+      delB.textContent = '✕ delete';
+      delB.className = 'nb-left-delete';
+      delB.addEventListener('click', function(){
+        loadEntries();
+        if(!confirm('Delete this journal entry? This cannot be undone.')) return;
+        entries.splice(entryIndex, 1);
+        try{ localStorage.setItem(STORE_JOURNAL, JSON.stringify(entries)); }catch(e2){}
+        if(entries.length === 0){ closeEntry(); return; }
+        var newIdx = Math.min(entryIdx >= 0 ? entryIdx : 0, entries.length - 1);
+        entryIdx = -1;
+        viewer.classList.remove('visible','ev-flip-in','ev-flip-out-fwd','ev-flip-out-bck');
+        showEntry(newIdx, 'fwd');
+      });
+
+      actions.appendChild(editB);
+      actions.appendChild(delB);
+      nbLeftPage.appendChild(actions);
+    }
   }
 
   function updateNbLeftPage(){
     if(!isTablet()) return;
     loadEntries();
     if(entryIdx === -1){
-      /* Drawing mode: left page shows most recent saved entry */
+      /* Drawing mode: left page shows most recent saved entry (no edit actions — user is live) */
       if(entries.length > 0){
         var e = entries[0];
         var d = new Date(e.time||e.addedAt||Date.now());
@@ -4199,14 +4270,14 @@ window._jfyNotebook = {
         renderLeftPage(null, '');
       }
     } else {
-      /* Entry-browsing mode: left page shows the next-older entry */
+      /* Entry-browsing mode: left page shows the next-older entry with edit actions */
       var olderIdx = entryIdx + 1;
       if(olderIdx < entries.length){
         var e2 = entries[olderIdx];
         var d2 = new Date(e2.time||e2.addedAt||Date.now());
         var lbl2 = 'entry '+(entries.length-olderIdx)+' of '+entries.length+
           ' · '+d2.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-        renderLeftPage(e2, lbl2);
+        renderLeftPage(e2, lbl2, olderIdx);
       } else {
         /* No older entry — show empty left page */
         renderLeftPage(null, '');
@@ -4283,8 +4354,11 @@ window._jfyNotebook = {
     if(!viewer.classList.contains('visible')){
       // First open: flip in from appropriate side
       doFlip(inDir, function(){ updateArrows(); updateNbLeftPage(); });
+    } else if(!isTablet()){
+      // Mobile: animate every page turn so it feels like flipping one page at a time
+      doFlip(animDir === 'back' ? 'in-bck' : 'in', function(){ updateArrows(); updateNbLeftPage(); });
     } else {
-      // Already showing — swap content instantly, no animation gap
+      // Desktop/tablet: already showing both pages — swap content instantly
       viewer.classList.remove('ev-flip-out-fwd','ev-flip-out-bck','ev-flip-in','ev-flip-in-bck');
       viewer.classList.add('visible');
       updateArrows();
