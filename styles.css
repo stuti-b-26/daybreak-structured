@@ -443,11 +443,11 @@ img{display:block;max-width:100%}
   #bw-us-mob{display:block;width:100%;height:auto;position:relative}
   .bw-us-mob-btn{display:block !important;position:absolute;bottom:-5%;left:-4%;transform:rotate(4deg) !important;font-size:clamp(14px,4vw,19px) !important;padding:5vw 7vw !important;white-space:nowrap}
   #between-to-sticker{display:none !important}
-  .card--sticker-maker{order:70;margin-top:-8vw !important;z-index:5 !important}
+  .card-item.card--sticker-maker{order:70;margin-top:-8vw !important;z-index:3 !important}
   .card--just-for-you{display:none !important}
   #just-for-you-mob-wrap{display:flex;order:80;width:70vw;align-self:center;margin-top:-20px;position:relative;z-index:10;flex-direction:column;align-items:center}
   #just-for-you-mob{display:block;width:100%;height:auto;position:relative}
-  .jfw-mob-btn{display:block !important;position:absolute;bottom:8%;left:50%;transform:translateX(-50%) rotate(-2deg) !important;white-space:nowrap}
+  .jfw-mob-btn{display:flex !important;align-items:center;justify-content:center;text-align:center;position:absolute;bottom:-8%;right:-4%;transform:rotate(-2deg) !important;white-space:nowrap}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:none !important}
