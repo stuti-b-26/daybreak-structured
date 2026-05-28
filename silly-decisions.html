@@ -12,16 +12,8 @@
   <link rel="stylesheet" href="silly-decisions.css">
   <style>
     /* ── Silly Decisions page-specific header/footer theme ── */
-    :root { --yellow: #EAFF00; }
     #site-header { background: #9AEDFE; }
     #site-footer { background: #9AEDFE; }
-    /* logo sun path (SVG presentation attr overridden by CSS) */
-    #logo-sun { fill: #EAFF00; }
-    /* sun-stretch hover shapes */
-    #sun-rect, #sun-circle-left, #sun-circle-right { fill: #EAFF00; }
-    /* footer logo yellow paths */
-    .footer-logo-svg path[fill="#fdd306"],
-    .footer-logo-svg path[fill="#FFD400"] { fill: #EAFF00; }
   </style>
 </head>
 <body>
@@ -777,7 +769,7 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   function blobs(ph,t){switch(ph){case 0:{var e=easeIO(t),bY=CY+10,aY=bY-e*18;return [{x:CX,y:aY,r:20-e*4},{x:CX,y:bY,r:20-e*3}]}case 1:{var e=easeOut(t);return [{x:CX+Math.sin(t*Math.PI)*3,y:CY-8-e*20,r:14+e*4},{x:CX-Math.sin(t*Math.PI)*2,y:CY+10+e*4,r:16+e*3}]}case 2:{var a=t*Math.PI*2,r2=16,rb=14+Math.sin(t*Math.PI*4)*2;return [{x:CX+Math.cos(a)*r2,y:CY-2+Math.sin(a)*r2*.7,r:rb},{x:CX+Math.cos(a+Math.PI)*r2,y:CY-2+Math.sin(a+Math.PI)*r2*.7,r:rb}]}case 3:{var e=easeIO(t),r2=16*(1-e),rb=14+(1-e)*4;return [{x:CX+Math.cos(0)*r2,y:CY-2+Math.sin(0)*r2*.7,r:rb},{x:CX+Math.cos(Math.PI)*r2,y:CY-2+Math.sin(Math.PI)*r2*.7,r:rb}]}case 4:{var p=Math.sin(t*Math.PI)*3,r=20+p,y=CY+2-Math.sin(t*Math.PI)*4;return [{x:CX,y:y,r:r},{x:CX,y:y,r:r}]}}}
   function field(px,py,bs){var f=0;for(var i=0;i<bs.length;i++){var d2=(px-bs[i].x)*(px-bs[i].x)+(py-bs[i].y)*(py-bs[i].y)||.0001;f+=bs[i].r*bs[i].r/d2}return f}
   var img=ctx.createImageData(S,S);var buf=img.data;
-  function render(bs){var THRESH=phase===1?1.05:1.0;for(var y=0;y<S;y++)for(var x=0;x<S;x++){var i=(y*S+x)*4,dx=x-CX,dy=y-CY;if(dx*dx+dy*dy>CR*CR){buf[i]=buf[i+1]=buf[i+2]=buf[i+3]=0;continue}if(field(x,y,bs)>=THRESH){buf[i]=234;buf[i+1]=255;buf[i+2]=0;buf[i+3]=255}else{buf[i]=buf[i+1]=buf[i+2]=0;buf[i+3]=255}}ctx.putImageData(img,0,0);}
+  function render(bs){var THRESH=phase===1?1.05:1.0;for(var y=0;y<S;y++)for(var x=0;x<S;x++){var i=(y*S+x)*4,dx=x-CX,dy=y-CY;if(dx*dx+dy*dy>CR*CR){buf[i]=buf[i+1]=buf[i+2]=buf[i+3]=0;continue}if(field(x,y,bs)>=THRESH){buf[i]=255;buf[i+1]=212;buf[i+2]=0;buf[i+3]=255}else{buf[i]=buf[i+1]=buf[i+2]=0;buf[i+3]=255}}ctx.putImageData(img,0,0);}
   function animate(ts){if(!last)last=ts;var dt=ts-last;last=ts;phaseT+=dt/DUR[phase];if(phaseT>=1){phaseT=0;phase=(phase+1)%5}render(blobs(phase,phaseT));requestAnimationFrame(animate)}
   requestAnimationFrame(animate);
 })();
