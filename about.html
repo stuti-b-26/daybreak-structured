@@ -285,12 +285,15 @@
   .approach-sub{grid-column:2/span 8}
   .approach-sub+.approach-sub{padding-top:48px}
   .approach-sub-title{font-size:clamp(24px,6vw,36px)}
-  .approach-page,.approach-page--flip{flex-direction:column}
-  .approach-page--flip{flex-direction:column}
-  .approach-page-cta{width:100%;justify-content:flex-start;margin-top:16px;padding-top:0}
-  .approach-cta-circle{width:130px;height:130px;font-size:13px}
-  .approach-page--cta-btm .approach-page-info{flex:0 0 100%}
-  .approach-page--cta-btm .approach-page-cta{align-self:flex-start}
+  .approach-page,.approach-page--flip{flex-direction:row;align-items:center}
+  .approach-page--flip{flex-direction:row-reverse}
+  .approach-page-info{flex:0 0 55%}
+  .approach-page-cta{flex:1;justify-content:flex-end;padding-top:0}
+  .approach-cta-circle{width:100px;height:100px;font-size:12px}
+  .approach-cta-rect,.approach-cta-pill{padding:12px 18px;font-size:14px;max-width:none}
+  .approach-page--cta-btm{flex-wrap:nowrap}
+  .approach-page--cta-btm .approach-page-info{flex:0 0 55%}
+  .approach-page--cta-btm .approach-page-cta{flex:1;justify-content:flex-end;align-self:center}
   #meet-the-team{padding-top:48px}
   .team-label{grid-column:2/span 8;font-size:clamp(28px,8vw,44px)}
   .team-intro-p{grid-column:2/span 8}
