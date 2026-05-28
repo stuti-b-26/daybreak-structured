@@ -422,23 +422,22 @@ img{display:block;max-width:100%}
   .float-label--life-hard{order:10;align-self:center;text-align:center}
   .card--silly-decisions{order:20}
   #orange-shape{order:25;display:block;position:relative !important;width:12vw;height:auto;align-self:flex-end;margin-right:6%;margin-top:-5vw;z-index:5}
-  /* All Group 1 cards overlap each other */
-  .card--mess-hall{order:30;margin-top:-20vw !important}
-  #yellow-scribble{display:none !important}
-  .card--selfless{order:40;margin-top:-20vw !important}
-  /* ── Mobile connector SVGs ── */
-  #top-bubble-mob{display:block;order:15;width:32vw;height:auto;align-self:flex-start;margin-left:48vw;margin-top:-8vw;margin-bottom:-10vw;position:relative;pointer-events:none;z-index:5}
-  #silly-mess-mob{display:block;order:25;width:22vw;height:auto;align-self:flex-end;margin-top:-10vw;position:relative;pointer-events:none;z-index:3}
-  #mess-self-mob{display:block;order:35;width:31vw;height:auto;align-self:flex-start;margin-left:4%;margin-top:-8vw;position:relative;pointer-events:none;z-index:2}
-  #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:2}
+  /* ── Mobile connector SVGs — layer under cards (z-index:1) ── */
+  #top-bubble-mob{display:block;order:15;width:32vw;height:auto;align-self:flex-start;margin-left:48vw;margin-top:-8vw;margin-bottom:-10vw;position:relative;pointer-events:none;z-index:1}
+  #silly-mess-mob{display:block;order:25;width:22vw;height:auto;align-self:flex-end;margin-top:-10vw;position:relative;pointer-events:none;z-index:1}
+  #mess-self-mob{display:block;order:35;width:31vw;height:auto;align-self:flex-start;margin-left:4%;margin-top:-8vw;position:relative;pointer-events:none;z-index:1}
+  #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:1}
   /* Divider — float-label overlaps the SVG so its text lands on the circle center (~54% down the SVG) */
-  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin-top:-55vw !important;margin-bottom:0 !important;position:relative;z-index:3}
-  /* Group 2 — all overlap each other */
-  .card--shh{order:60}
-  #between-to-sticker{display:none !important}
-  .card--sticker-maker{order:70;margin-top:-8vw !important}
-  .card--just-for-you{order:80;margin-top:-80px !important}
+  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin-top:-55vw !important;margin-bottom:0 !important;position:relative;z-index:2}
   #you-end-mob{display:block;order:82;width:32vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:1}
+  /* All cards overlap and sit above connector SVGs */
+  .card--mess-hall{order:30;margin-top:-220px !important}
+  #yellow-scribble{display:none !important}
+  .card--selfless{order:40;margin-top:-220px !important}
+  .card--shh{order:60;margin-top:-220px !important}
+  #between-to-sticker{display:none !important}
+  .card--sticker-maker{order:70;margin-top:-220px !important}
+  .card--just-for-you{order:80;margin-top:-80px !important}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:none !important}
@@ -452,8 +451,8 @@ img{display:block;max-width:100%}
   #mess-btn-to-self{display:none !important}
   #break-bubble-middle{display:none !important}
 
-  /* Card base — all centered */
-  .card-item{position:relative !important;width:78% !important;left:auto !important;top:auto !important;transform:rotate(var(--card-rotate,0deg)) !important}
+  /* Card base — all centered, z-index above connector SVGs */
+  .card-item{position:relative !important;width:78% !important;left:auto !important;top:auto !important;transform:rotate(var(--card-rotate,0deg)) !important;z-index:10 !important}
   .card--mess-hall{width:86% !important}
   .card--shh{width:86% !important}
   .card--sticker-maker{width:86% !important}
