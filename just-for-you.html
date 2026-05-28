@@ -3136,20 +3136,106 @@ function captureNotebook(quality, callback){
     octx.fillText(node.textContent, ox, oy + er.height / 2);
   });
 
-  // 5. Text boxes
+  // 5. Text boxes (contentEditable divs, not textareas)
   nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
     var er = wrap.getBoundingClientRect();
     var ox = er.left - rect.left, oy = er.top - rect.top;
-    var ta = wrap.querySelector('textarea');
-    if(!ta) return;
-    var cs = window.getComputedStyle(ta);
-    octx.font = cs.fontSize + ' ' + cs.fontFamily;
-    octx.fillStyle = cs.color || '#333';
+    var txt = wrap.querySelector('.jfy-text-node');
+    if(!txt) return;
+    var cs = window.getComputedStyle(txt);
+    var fontSize = parseFloat(cs.fontSize) || 15;
+    var fontWeight = cs.fontWeight || 'normal';
+    var fontFamily = cs.fontFamily || 'sans-serif';
+    octx.font = fontWeight + ' ' + fontSize + 'px ' + fontFamily;
+    octx.fillStyle = txt.style.color || cs.color || '#333';
     octx.textBaseline = 'top';
-    var lineH = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.4;
-    ta.value.split('\n').forEach(function(line, i){
-      octx.fillText(line, ox + 4, oy + 4 + i * lineH);
+    var lineH = parseFloat(cs.lineHeight) || fontSize * 1.4;
+    var maxW = er.width - 8;
+    var curY = oy + 4;
+    txt.innerText.split('\n').forEach(function(para){
+      if(!para){ curY += lineH; return; }
+      var words = para.split(' ');
+      var line = '';
+      words.forEach(function(word){
+        var test = line ? line + ' ' + word : word;
+        if(octx.measureText(test).width > maxW && line){
+          octx.fillText(line, ox + 4, curY);
+          curY += lineH;
+          line = word;
+        } else {
+          line = test;
+        }
+      });
+      if(line){ octx.fillText(line, ox + 4, curY); curY += lineH; }
     });
+  });
+
+  // 6. Saved between-us post cards
+  nbLayer.querySelectorAll('.jfy-bw-card').forEach(function(card){
+    var er = card.getBoundingClientRect();
+    var ox = er.left - rect.left, oy = er.top - rect.top;
+    var pad = 12, r = 14;
+    // rounded rect fill
+    octx.save();
+    octx.beginPath();
+    octx.moveTo(ox + r, oy);
+    octx.lineTo(ox + er.width - r, oy);
+    octx.quadraticCurveTo(ox + er.width, oy, ox + er.width, oy + r);
+    octx.lineTo(ox + er.width, oy + er.height - r);
+    octx.quadraticCurveTo(ox + er.width, oy + er.height, ox + er.width - r, oy + er.height);
+    octx.lineTo(ox + r, oy + er.height);
+    octx.quadraticCurveTo(ox, oy + er.height, ox, oy + er.height - r);
+    octx.lineTo(ox, oy + r);
+    octx.quadraticCurveTo(ox, oy, ox + r, oy);
+    octx.closePath();
+    octx.fillStyle = card.classList.contains('jfy-bw-card--blank') ? '#f5f2ee' : '#fdf8f0';
+    octx.fill();
+    octx.strokeStyle = card.classList.contains('jfy-bw-card--blank') ? '#d4cfc9' : '#7dd6c8';
+    octx.lineWidth = 3;
+    octx.stroke();
+    octx.restore();
+    if(card.classList.contains('jfy-bw-card--blank')){
+      octx.font = 'italic 11px sans-serif';
+      octx.fillStyle = '#b0a89e';
+      octx.textBaseline = 'middle';
+      octx.fillText('post removed', ox + pad, oy + er.height / 2);
+      return;
+    }
+    // teal accent bar
+    octx.fillStyle = '#7dd6c8';
+    octx.fillRect(ox + pad, oy + pad, 28, 3);
+    var contentY = oy + pad + 11;
+    // image or text
+    var img = card.querySelector('img');
+    if(img && img.complete && img.naturalWidth){
+      var iw = er.width - pad * 2, ih = Math.min(iw * 0.75, er.height - contentY + oy - pad);
+      octx.save();
+      octx.beginPath();
+      octx.rect(ox + pad, contentY, iw, ih);
+      octx.clip();
+      octx.drawImage(img, ox + pad, contentY, iw, ih);
+      octx.restore();
+    } else {
+      var p = card.querySelector('p');
+      var textContent = p ? p.textContent : card.textContent;
+      octx.font = '11.5px Nunito, sans-serif';
+      octx.fillStyle = '#2a1f14';
+      octx.textBaseline = 'top';
+      var maxW2 = er.width - pad * 2;
+      var lineH2 = 17;
+      var curY2 = contentY;
+      textContent.split('\n').forEach(function(para){
+        var words = para.split(' ');
+        var line = '';
+        words.forEach(function(word){
+          var test = line ? line + ' ' + word : word;
+          if(octx.measureText(test).width > maxW2 && line){
+            octx.fillText(line, ox + pad, curY2); curY2 += lineH2; line = word;
+          } else { line = test; }
+        });
+        if(line){ octx.fillText(line, ox + pad, curY2); curY2 += lineH2; }
+      });
+    }
   });
 
   callback(out.toDataURL('image/jpeg', quality));
