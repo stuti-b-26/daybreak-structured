@@ -427,7 +427,7 @@ img{display:block;max-width:100%}
   #yellow-scribble{display:none !important}
   .card--selfless{order:40;margin-top:-20vw !important}
   /* ── Mobile connector SVGs ── */
-  #top-bubble-mob{display:block;order:15;width:43vw;height:auto;align-self:center;margin-top:-8vw;position:relative;pointer-events:none;z-index:5}
+  #top-bubble-mob{display:block;order:15;width:32vw;height:auto;align-self:flex-start;margin-left:48vw;margin-top:-8vw;margin-bottom:-10vw;position:relative;pointer-events:none;z-index:5}
   #silly-mess-mob{display:block;order:25;width:22vw;height:auto;align-self:flex-end;margin-top:-10vw;position:relative;pointer-events:none;z-index:3}
   #mess-self-mob{display:block;order:35;width:31vw;height:auto;align-self:flex-start;margin-left:4%;margin-top:-8vw;position:relative;pointer-events:none;z-index:2}
   #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:2}
