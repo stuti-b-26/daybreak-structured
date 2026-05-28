@@ -162,10 +162,12 @@ body{background:#EEE0CC}
 .bw-write-actions{display:flex;gap:12px}
 .bw-btn{font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;padding:11px 24px;border-radius:999px;border:2.5px solid #000;cursor:pointer;transition:background .15s,color .15s,box-shadow .08s,transform .08s;box-shadow:3px 3px 0 0 rgba(0,0,0,.2)}
 .bw-btn:active{box-shadow:1px 1px 0 0 rgba(0,0,0,.1);transform:scale(.95)}
-.bw-btn--save{background:transparent;color:#000}
-.bw-btn--save:hover{background:rgba(0,0,0,.08)}
-.bw-btn--share{background:#000;color:#EEE0CC}
-.bw-btn--share:hover{background:#222}
+.bw-btn--anon{background:#000;color:#EEE0CC}
+.bw-btn--anon:hover{background:#222}
+.bw-btn--share{background:transparent;color:#000}
+.bw-btn--share:hover{background:rgba(0,0,0,.08)}
+.bw-btn--save{background:transparent;color:#888;border-color:#aaa}
+.bw-btn--save:hover{background:rgba(0,0,0,.05)}
 .bw-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#000;color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;padding:12px 24px;border-radius:999px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:9999;white-space:nowrap}
 .bw-toast.bw-toast--show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -455,8 +457,9 @@ body{background:#EEE0CC}
         <div class="bw-write-footer">
           <span class="bw-char-count" id="bw-char-count">280</span>
           <div class="bw-write-actions">
-            <button class="bw-btn bw-btn--save" id="bw-save-btn">save it</button>
+            <button class="bw-btn bw-btn--anon" id="bw-anon-btn">share anonymously</button>
             <button class="bw-btn bw-btn--share" id="bw-share-btn">share</button>
+            <button class="bw-btn bw-btn--save" id="bw-save-btn">save it</button>
           </div>
         </div>
       </div>
@@ -923,7 +926,7 @@ function loadPosts(){
   try{
     var d=localStorage.getItem(STORE_KEY);
     var p=d?JSON.parse(d):[];
-    var userPosts=p.filter(function(x){return x.own===true});
+    var userPosts=p.filter(function(x){return x.own===true||x.anon===true});
     return userPosts.concat(SEED_POSTS);
   }
   catch(e){return SEED_POSTS.slice()}
@@ -967,7 +970,9 @@ function renderCard(post, isOwn, idx, showJournal, context){
 
   var tileSrc='moss-tile-'+(fc+1)+'.svg';
 
-  var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>';
+  var isAnon=post.anon===true;
+  var tagLabel=isOwn?'you':'anonymous';
+  var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(tagLabel)+'</div>';
   var mediaEl='';
   if(post.media && post.media.url){
     mediaEl='<img class="bw-post-media" src="'+escHtml(post.media.url)+'" alt="">';
@@ -975,11 +980,12 @@ function renderCard(post, isOwn, idx, showJournal, context){
   var textEl='<p class="bw-post-text">'+escHtml(post.text)+'</p>';
   var saved=loadSaved();
   var isSaved=saved.some(function(p){return p.id===post.id});
-  var inJournal=showJournal&&!isOwn&&loadJournal().some(function(e){return e.id===post.id});
-  var journalBtn=(showJournal&&!isOwn)
+  var canDelete=isOwn||isAnon;
+  var inJournal=showJournal&&!canDelete&&loadJournal().some(function(e){return e.id===post.id});
+  var journalBtn=(showJournal&&!canDelete)
     ?'<button class="bw-post-journal-btn'+(inJournal?' bw-in-journal':'')+'" data-id="'+post.id+'" aria-label="Add to journal">'+(inJournal?'in journal':'+ journal')+'</button>'
     :'';
-  var deleteBtn=isOwn
+  var deleteBtn=canDelete
     ?'<button class="bw-post-delete-btn" data-id="'+post.id+'" aria-label="Delete post">remove</button>'
     :'';
   var footerEl='<div class="bw-post-footer">'+
@@ -1008,12 +1014,12 @@ function renderCard(post, isOwn, idx, showJournal, context){
     renderFeed();
   });
 
-  if(isOwn){
+  if(canDelete){
     var dBtn=card.querySelector('.bw-post-delete-btn');
     if(dBtn)dBtn.addEventListener('click',function(e){
       e.stopPropagation();
       var posts=loadPosts();
-      savePosts(posts.filter(function(x){return x.own===true&&x.id!==post.id}));
+      savePosts(posts.filter(function(x){return (x.own===true||x.anon===true)&&x.id!==post.id}));
       var savedList=loadSaved();
       saveSaved(savedList.filter(function(x){return x.id!==post.id}));
       showToast('post deleted');
@@ -1102,6 +1108,8 @@ function renderLightboxCard(){
   var post=_lbPosts[_lbIdx];
   if(!post)return;
   var isOwn=post.own;
+  var isAnon=post.anon===true;
+  var canDelete=isOwn||isAnon;
   var saved=loadSaved();
   var isSaved=saved.some(function(p){return p.id===post.id});
 
@@ -1111,13 +1119,13 @@ function renderLightboxCard(){
   var saveBtn=document.getElementById('bw-lb-save');
   saveBtn.className='bw-lb-btn bw-lb-btn--save'+(isSaved?' bw-bookmarked':'');
   saveBtn.textContent=isSaved?'★ saved':'☆ save';
-  var inJournal=!isOwn&&loadJournal().some(function(e){return e.id===post.id});
+  var inJournal=!canDelete&&loadJournal().some(function(e){return e.id===post.id});
   var journalBtn=document.getElementById('bw-lb-journal');
-  journalBtn.style.display=isOwn?'none':'';
+  journalBtn.style.display=canDelete?'none':'';
   journalBtn.className='bw-lb-btn bw-lb-btn--journal'+(inJournal?' bw-in-journal':'');
   journalBtn.textContent=inJournal?'✓ in journal':'+ journal';
   var deleteBtn=document.getElementById('bw-lb-delete');
-  deleteBtn.style.display=isOwn?'':'none';
+  deleteBtn.style.display=canDelete?'':'none';
   document.getElementById('bw-lb-counter').textContent=(_lbIdx+1)+' / '+_lbPosts.length;
 
   var mediaEl=document.getElementById('bw-lb-media');
@@ -1178,9 +1186,9 @@ function initLightbox(){
 
   document.getElementById('bw-lb-delete').addEventListener('click',function(){
     var post=_lbPosts[_lbIdx];
-    if(!post.own)return;
+    if(!post.own&&!post.anon)return;
     var posts=loadPosts();
-    savePosts(posts.filter(function(x){return x.own===true&&x.id!==post.id}));
+    savePosts(posts.filter(function(x){return (x.own===true||x.anon===true)&&x.id!==post.id}));
     var savedList=loadSaved();
     saveSaved(savedList.filter(function(x){return x.id!==post.id}));
     showToast('post deleted');
@@ -1342,14 +1350,14 @@ if(textarea&&counter){
   });
 }
 
-document.getElementById('bw-save-btn')&&document.getElementById('bw-save-btn').addEventListener('click',function(){
+function _clearTextarea(){if(textarea)textarea.value='';if(counter)counter.textContent='280';}
+
+document.getElementById('bw-anon-btn')&&document.getElementById('bw-anon-btn').addEventListener('click',function(){
   var text=(textarea&&textarea.value.trim())||'';
   if(!text){showToast('write something first :)');return;}
-  var post={id:'own'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,own:true};
-  var saved=loadSaved();
-  saved.unshift(post);saveSaved(saved);
-  if(textarea)textarea.value='';if(counter)counter.textContent='280';
-  renderSaved();showToast('saved privately!');
+  var post={id:'anon'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,anon:true};
+  var posts=loadPosts().filter(function(x){return x.own===true});posts.unshift(post);savePosts(posts);
+  _clearTextarea();renderFeed();showToast('shared anonymously!');
 });
 
 document.getElementById('bw-share-btn')&&document.getElementById('bw-share-btn').addEventListener('click',function(){
@@ -1357,8 +1365,15 @@ document.getElementById('bw-share-btn')&&document.getElementById('bw-share-btn')
   if(!text){showToast('write something first :)');return;}
   var post={id:'own'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,own:true};
   var posts=loadPosts().filter(function(x){return x.own===true});posts.unshift(post);savePosts(posts);
-  if(textarea)textarea.value='';if(counter)counter.textContent='280';
-  renderFeed();showToast('shared with the community!');
+  _clearTextarea();renderFeed();showToast('shared with the community!');
+});
+
+document.getElementById('bw-save-btn')&&document.getElementById('bw-save-btn').addEventListener('click',function(){
+  var text=(textarea&&textarea.value.trim())||'';
+  if(!text){showToast('write something first :)');return;}
+  var post={id:'sv'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:true};
+  var saved=loadSaved();saved.unshift(post);saveSaved(saved);
+  _clearTextarea();renderSaved();showToast('saved privately!');
 });
 
 initLightbox();
