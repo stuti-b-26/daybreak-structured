@@ -43,7 +43,7 @@ h1
 .nav-links a
 {
 	color: darkblue;
-	text-decoration: none; 
+	text-decoration: none;
 }
 
 /*********hide checkbox**********/
@@ -70,7 +70,7 @@ h1
 	background: #3312BE;
 	border-radius: 2px;
 	transition: transform 0.3s ease, opacity 0.3s ease;
-	
+
 }
 
 /*********mobile stylesr**********/
@@ -81,7 +81,7 @@ h1
 		display: flex;
 
 	}
-	
+
 	.nav-links
 	{
 		position: absolute;
@@ -94,17 +94,13 @@ h1
 		transform: translateY(-10px);
 		pointer-events: none;
 		transition: opacity 0.3s ease, transform 0.3s ease;
-		
-	
+
+
 	}
-	
+
 	.nav-links a
 	{
 		padding: 0.6em 0;
-		
+
 	}
 }
-
-
-
-
