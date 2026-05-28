@@ -2923,7 +2923,22 @@ document.getElementById('jfy-clear-btn').addEventListener('click', function(){
 // "New entry" — auto-saves current canvas (including any edit background)
 // then clears everything for a brand-new blank page.
 function jfyNewEntry(){
-  var editId = window._jfyEditingEntryId; // non-null if we were editing
+  var editId = window._jfyEditingEntryId; // non-null only when editing an old entry
+  var nb = window._jfyNotebook;
+  var hasContent = nb && nb.hasContent();
+
+  function clearCanvas(){
+    window._jfyEditingEntryId  = null;
+    window._jfyEditingEntryIdx = null;
+    window._jfyEditBg          = null;
+    Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
+    drawCmds.length = 0; redrawAll(); pushHistory(); updateHistoryButtons();
+    if(editId && window._jfyEntryNav) window._jfyEntryNav.resetToLive();
+    else if(window._jfyEntryNav) window._jfyEntryNav.reload();
+  }
+
+  // Nothing on canvas — just clear and start fresh, no save needed
+  if(!hasContent && !editId){ clearCanvas(); return; }
 
   function doSaveAndClear(dataUrl){
     if(dataUrl){
@@ -2932,9 +2947,10 @@ function jfyNewEntry(){
       var saved = [];
       try{ saved = JSON.parse(localStorage.getItem(STORE_JOURNAL)||'[]'); }catch(e){}
       if(editId){
+        // Updating an existing entry — preserve original time/date
         for(var i=0; i<saved.length; i++){
           if(saved[i].id === editId){
-            saved[i].media={url:dataUrl}; saved[i].snapshot=snap; saved[i].time=Date.now(); break;
+            saved[i].media = {url:dataUrl}; saved[i].snapshot = snap; break;
           }
         }
       } else {
@@ -2944,15 +2960,7 @@ function jfyNewEntry(){
       }
       localStorage.setItem(STORE_JOURNAL, JSON.stringify(saved));
     }
-    // Clear edit state
-    window._jfyEditingEntryId  = null;
-    window._jfyEditingEntryIdx = null;
-    window._jfyEditBg          = null;
-    pushHistory();
-    Array.from(nbLayer.children).forEach(function(el){ if(el!==canvas) el.remove(); });
-    drawCmds.length = 0; redrawAll(); updateHistoryButtons();
-    if(editId && window._jfyEntryNav) window._jfyEntryNav.resetToLive();
-    else if(window._jfyEntryNav) window._jfyEntryNav.reload();
+    clearCanvas();
   }
 
   if(typeof captureNotebook === 'function'){
@@ -3361,7 +3369,7 @@ window._jfyNotebook = {
         if(editId){
           for(var i=0;i<saved.length;i++){
             if(saved[i].id===editId){
-              saved[i].media={url:dataUrl}; saved[i].snapshot=snap; saved[i].time=Date.now(); break;
+              saved[i].media={url:dataUrl}; saved[i].snapshot=snap; break;
             }
           }
         } else {
@@ -4501,12 +4509,23 @@ window._jfyNotebook = {
   var newEntryBtn = document.getElementById('jfy-new-entry-btn');
   if(newEntryBtn){
     newEntryBtn.addEventListener('click', function(){
-      // If currently viewing a past entry, close viewer first
-      if(entryIdx !== -1){ viewer.classList.remove('visible','ev-flip-in','ev-flip-out-fwd','ev-flip-out-bck'); entryIdx=-1; }
-      // The "clear all" logic (mirrors existing clear-all handler in main IIFE)
-      // We fire a custom event that the main IIFE listens to
-      document.dispatchEvent(new CustomEvent('jfy-new-entry'));
-      loadEntries(); updateArrows();
+      if(entryIdx !== -1){
+        // Viewing mode (not editing) — entry is already saved.
+        // Just close the viewer and give the user a blank canvas.
+        viewer.classList.remove('visible','ev-flip-in','ev-flip-in-bck','ev-flip-out-fwd','ev-flip-out-bck');
+        entryIdx = -1;
+        // Clear canvas without saving (nothing new to save)
+        var nb = window._jfyNotebook;
+        if(nb) nb.clearAll();
+        window._jfyEditingEntryId = null;
+        window._jfyEditingEntryIdx = null;
+        window._jfyEditBg = null;
+        loadEntries(); updateArrows(); updateNbLeftPage();
+      } else {
+        // Live canvas or editing mode — save if there's content, then clear
+        document.dispatchEvent(new CustomEvent('jfy-new-entry'));
+        loadEntries(); updateArrows();
+      }
     });
   }
 
