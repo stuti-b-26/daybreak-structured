@@ -145,6 +145,8 @@ img{display:block;max-width:100%}
 #top-bubble-mob,#silly-mess-mob,#mess-self-mob,#middle-break-mob,#you-end-mob,#bw-us-mob,#just-for-you-mob{display:none}
 #bw-us-mob-wrap{display:none}
 .bw-us-mob-btn{display:none}
+#just-for-you-mob-wrap{display:none}
+.jfw-mob-btn{display:none}
 #green-circle{display:block;margin:0 auto 16px;width:128px;height:auto}
 #green-scribble{position:absolute;top:2520px;right:0;width:clamp(260px,36%,420px);height:auto;pointer-events:none;z-index:1}
 .sticker-card-deco{display:none;position:absolute;height:auto;pointer-events:none;z-index:0}
@@ -441,9 +443,11 @@ img{display:block;max-width:100%}
   #bw-us-mob{display:block;width:100%;height:auto;position:relative}
   .bw-us-mob-btn{display:block !important;position:absolute;bottom:-5%;left:-4%;transform:rotate(4deg) !important;font-size:clamp(14px,4vw,19px) !important;padding:5vw 7vw !important;white-space:nowrap}
   #between-to-sticker{display:none !important}
-  .card--sticker-maker{order:70;margin-top:-18vw !important}
+  .card--sticker-maker{order:70;margin-top:-8vw !important;z-index:5 !important}
   .card--just-for-you{display:none !important}
-  #just-for-you-mob{display:block;order:80;width:70vw;height:auto;align-self:center;margin-top:-20px;position:relative;z-index:10}
+  #just-for-you-mob-wrap{display:flex;order:80;width:70vw;align-self:center;margin-top:-20px;position:relative;z-index:10;flex-direction:column;align-items:center}
+  #just-for-you-mob{display:block;width:100%;height:auto;position:relative}
+  .jfw-mob-btn{display:block !important;position:absolute;bottom:8%;left:50%;transform:translateX(-50%) rotate(-2deg) !important;white-space:nowrap}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:none !important}
