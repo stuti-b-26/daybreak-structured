@@ -457,9 +457,9 @@ body{background:#EEE0CC}
         <div class="bw-write-footer">
           <span class="bw-char-count" id="bw-char-count">280</span>
           <div class="bw-write-actions">
-            <button class="bw-btn bw-btn--anon" id="bw-anon-btn">share anonymously</button>
-            <button class="bw-btn bw-btn--share" id="bw-share-btn">share</button>
-            <button class="bw-btn bw-btn--save" id="bw-save-btn">save it</button>
+            <button class="bw-btn bw-btn--anon" onclick="bwShareAnon()">share anonymously</button>
+            <button class="bw-btn bw-btn--share" onclick="bwShare()">share</button>
+            <button class="bw-btn bw-btn--save" onclick="bwSaveIt()">save it</button>
           </div>
         </div>
       </div>
@@ -492,8 +492,6 @@ body{background:#EEE0CC}
   </section>
 
 </main>
-
-<div class="bw-toast" id="bw-toast"></div>
 
 <div class="bw-toast" id="bw-toast"></div>
 
@@ -1350,31 +1348,34 @@ if(textarea&&counter){
   });
 }
 
+function _getWriteText(){return textarea?textarea.value.trim():'';}
 function _clearTextarea(){if(textarea)textarea.value='';if(counter)counter.textContent='280';}
 
-document.getElementById('bw-anon-btn')&&document.getElementById('bw-anon-btn').addEventListener('click',function(){
-  var text=(textarea&&textarea.value.trim())||'';
+window.bwShareAnon=function(){
+  var text=_getWriteText();
   if(!text){showToast('write something first :)');return;}
   var post={id:'anon'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,anon:true};
-  var posts=loadPosts().filter(function(x){return x.own===true});posts.unshift(post);savePosts(posts);
+  var posts=loadPosts().filter(function(x){return x.own===true||x.anon===true});
+  posts.unshift(post);savePosts(posts);
   _clearTextarea();renderFeed();showToast('shared anonymously!');
-});
+};
 
-document.getElementById('bw-share-btn')&&document.getElementById('bw-share-btn').addEventListener('click',function(){
-  var text=(textarea&&textarea.value.trim())||'';
+window.bwShare=function(){
+  var text=_getWriteText();
   if(!text){showToast('write something first :)');return;}
   var post={id:'own'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,own:true};
-  var posts=loadPosts().filter(function(x){return x.own===true});posts.unshift(post);savePosts(posts);
+  var posts=loadPosts().filter(function(x){return x.own===true||x.anon===true});
+  posts.unshift(post);savePosts(posts);
   _clearTextarea();renderFeed();showToast('shared with the community!');
-});
+};
 
-document.getElementById('bw-save-btn')&&document.getElementById('bw-save-btn').addEventListener('click',function(){
-  var text=(textarea&&textarea.value.trim())||'';
+window.bwSaveIt=function(){
+  var text=_getWriteText();
   if(!text){showToast('write something first :)');return;}
   var post={id:'sv'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:true};
   var saved=loadSaved();saved.unshift(post);saveSaved(saved);
   _clearTextarea();renderSaved();showToast('saved privately!');
-});
+};
 
 initLightbox();
 renderFeed();
