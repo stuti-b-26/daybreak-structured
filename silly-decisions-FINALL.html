@@ -1,0 +1,970 @@
+<!doctype html>
+<html><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>silly decisions</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+
+    /* ══════════════════════════════════════════════════
+       CSS CUSTOM PROPERTIES
+    ══════════════════════════════════════════════════ */
+    :root {
+      --col: calc(100% / 12);          /* one column unit */
+      --content-width: calc(var(--col) * 10);   /* 10 of 12 columns */
+      --content-margin: var(--col);    /* 1 col on each side */
+      --page-bg: #fdf8f0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--page-bg);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID WRAPPER — all sections sit inside this ── */
+    /* use on every section to keep things in 10-col centre */
+    .grid-wrap {
+      width: var(--content-width);
+      margin-left: var(--content-margin);
+      margin-right: var(--content-margin);
+    }
+
+    /* ══════════════════════════════════════════════════
+       MAIN TITLE — animated letter PNGs
+       To change size → .title-letter width
+       To change letter gap → .main-title-letters gap
+       To change space above → .main-title-section padding-top
+       To change space below → .main-title-section padding-bottom
+       To change word gap → .title-space width
+    ══════════════════════════════════════════════════ */
+    /* ── MAIN TITLE — two 5-column divs inside 12-col grid ──
+       padding-top/bottom controls space above and below
+       The 1-col gap between divs is set by .title-col gap below
+    ── */
+    .main-title-section {
+      padding-top: 60px;       /* ← space ABOVE title */
+      padding-bottom: 40px;    /* ← space BELOW title */
+      /* use same 10-col centred layout as rest of page */
+      width: calc(var(--col) * 10);
+      margin-left: var(--content-margin);
+      margin-right: var(--content-margin);
+    }
+    .main-title-letters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0px;        /* ← change this to control space between words */
+      width: 100%;
+    }
+	  
+    /* each half — centres its PNG and fills the column */
+    .title-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .title-word {
+      width: 100%;             /* fills its column */
+      height: auto;            /* height scales naturally with width */
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      animation: letterWobble 3s ease-in-out infinite;
+    }
+    .title-word:nth-child(1) { animation-delay: 0s; }
+    .title-word:nth-child(2) { animation-delay: 0.3s; }
+    @keyframes letterWobble {
+      0%   { transform: translateY(0px)   rotate(0deg);   }
+      20%  { transform: translateY(-6px)  rotate(-2deg);  }
+      40%  { transform: translateY(-10px) rotate(1.5deg); }
+      60%  { transform: translateY(-5px)  rotate(-1deg);  }
+      80%  { transform: translateY(-8px)  rotate(2deg);   }
+      100% { transform: translateY(0px)   rotate(0deg);   }
+    }
+    /* title-space no longer needed but kept in case */
+    .title-space { width: 20px; display: inline-block; flex-shrink: 0; }
+
+    /* ══════════════════════════════════════════════════
+       INTRO TEXT SECTION
+    ══════════════════════════════════════════════════ */
+    .intro-wrap {
+      padding-top: 80px;
+      padding-bottom: 0;
+    }
+    .intro-body {
+      font-size: 3.125rem; /* 50px */
+      font-weight: 400;
+      color: #1a1a1a;
+      line-height: 1.4;
+      margin-bottom: 60px;
+    }
+    .squiggle {
+      background-image: url('squiggle.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 8px 12px;
+      display: inline-block;
+    }
+    .intro-handwrite {
+      display: block;
+      width: 150px;
+      margin-left: auto;
+      margin-right: 500px;
+      margin-top: -70px;
+    }
+    .intro-spacer { height: 100px; }
+
+    /* scroll fade animation */
+    .squiggle, .intro-handwrite {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1.6s ease, transform 1.6s ease;
+    }
+    .squiggle.visible, .intro-handwrite.visible { opacity: 1; transform: translateY(0); }
+    .intro-handwrite { transition-delay: 0.14s; }
+
+    /* ══════════════════════════════════════════════════
+       GAME BOX
+    ══════════════════════════════════════════════════ */
+    #game-box {
+      position: relative;
+      width: 90%;
+	  margin: 0 auto;    /* ← centres it */
+      height: 780px;
+      
+      background: #ffffff;
+      border: 2px solid #1a1a1a;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 25px 25px 0 #FBE172;
+    }
+    #head-img    { position: absolute; bottom: 0; left: 60px; width: 380px; pointer-events: none; }
+    #window-img  { position: absolute; top: 80px; right: 200px; width: 320px; pointer-events: none; }
+    #trash-img   { position: absolute; bottom: 0; right: 100px; width: 190px; pointer-events: none; transition: right 1s ease; }
+    #trash-img.visible { right: 60px; }
+    #trash-text  { position: absolute; bottom: 230px; right: -300px; font-size: 2.125rem; font-weight: 600; text-align: center; width: 300px; transition: right 1s ease 0.3s; }
+    #trash-text.visible { right: 20px; }
+    #raccoon-popup { position: absolute; top: 150px; right: 270px; text-align: center; display: none; width: 200px; }
+    #raccoon-popup.visible { display: block; }
+    #raccoon-popup img { width: 160px; }
+    #raccoon-popup p   { font-size: 0.875rem; font-weight: 600; margin-top: 6px; color: #1a1a1a; }
+    #brain { position: absolute; width: 200px; top: 60px; left: 160px; cursor: grab; user-select: none; transition: none; }
+    #brain:active { cursor: grabbing; }
+    #success-msg { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+    #success-msg p { font-size: 1.875rem; font-weight: 600; margin-top: 12px; }
+    #brain-in-trash { width: 100px; }
+    #brain-intro-text { position: absolute; top: 70px; left: 70px; font-size: 2.375rem; font-weight: 600; color: #1a1a1a; line-height: 1.4; }
+
+    /* ══════════════════════════════════════════════════
+       QUIZ TITLE SECTION
+    ══════════════════════════════════════════════════ */
+    .quiz-spacer-top    { height: 150px; }
+    .quiz-spacer-bottom { height: 40px; }
+    .quiz-title-wrap { text-align: center; }
+    .quiz-title { font-size: 3.25rem; font-weight: 700; color: #1a1a1a; display: inline-block; }
+    .circle-scribble { background-image: url('circle-scribble.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 20px 40px; display: inline-block; }
+    .quiz-subtitle { display: block; margin: 2px auto 0; width: 470px; max-width: 100%; }
+
+    /* ══════════════════════════════════════════════════
+       QUESTION SECTIONS
+    ══════════════════════════════════════════════════ */
+    .q-wrap { padding: 3rem 0; }
+    .q-title { font-size: 1.625rem; font-weight: 700; color: #1a1a1a; margin-bottom: 1.5rem; }
+    .q-prompt { display: flex; align-items: center; gap: 15px; font-size: 1.5rem; font-weight: 600; color: #1a1a1a; margin-bottom: 1.5rem; }
+    .q-arrow  { font-size: 1.875rem; color: black; letter-spacing: -4px; }
+    .options  { display: flex; flex-direction: column; gap: 14px; max-width: 100%; position: relative; }
+    .opt {
+      position: relative;
+      overflow: visible;
+      padding: 18px 22px;
+      border: 1.5px solid #ccc;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 400;
+      color: #1a1a1a;
+      background: #f0eeea;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: left;
+      width: 100%;
+    }
+    .opt.selected { font-weight: 600; }
+    .opt.selected::before { content: ''; }
+
+    /* title highlights */
+    .title-highlight   { background-image: url('title-bg.png');   background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 19px; display: inline-block; }
+    .title-highlight-2 { background-image: url('title-bg-2.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 19px; display: inline-block; }
+    .title-highlight-3 { background-image: url('title-bg-3.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 19px; display: inline-block; }
+    .title-highlight-4 { background-image: url('title-bg-4.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 19px; display: inline-block; }
+    .title-highlight-5 { background-image: url('title-bg-5.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 19px; display: inline-block; }
+    .title-highlight-6 { background-image: url('title-bg-6.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 19px; display: inline-block; }
+    .title-highlight-7 { background-image: url('title-bg-7.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 19px; display: inline-block; }
+
+    /* hover / selected colours */
+    .opt-1:hover, .opt-1.selected { background: #C3F481; border-color: #8ab800; color: #1a2e00; }
+    .opt-2:hover, .opt-2.selected { background: #FF9945; border-color: #cc6600; color: #3d1f00; }
+    .opt-3:hover, .opt-3.selected { background: #58C6FF; border-color: #3a8fd4; color: #002d5a; }
+    .opt-4:hover, .opt-4.selected { background: #FBE172; border-color: #706203; color: #2E2201; }
+    .opt-5:hover, .opt-5.selected { background: #FF98D0; border-color: #741A4B; color: #741A4B; }
+    .opt-6:hover, .opt-6.selected { background: #A7F5EC; border-color: #155B53; color: #155B53; }
+    .opt-7:hover, .opt-7.selected { background: #D5A8FF; border-color: #2C1045; color: #2C1045; }
+
+    /* ── STICKERS — desktop ── */
+    .sticker { display: none; position: absolute; top: -400px; right: 200px; width: 600px; pointer-events: none; }
+    .opt:hover .sticker, .opt.selected .sticker { display: block; z-index: 999; }
+
+    .sticker-1a { width: 400px; top: -220px; right: 400px; }
+    .sticker-1b { width: 400px; top: -220px; right: 100px; }
+    .sticker-1c { width: 590px; top: -500px; right: -90px; }
+    .sticker-1d { width: 300px; top: -220px; right: 300px; }
+    .sticker-1e { width: 300px; top: -220px; right: 700px; }
+    .sticker-2a { width: 300px; top: -220px; right: 300px; }
+    .sticker-2b { width: 400px; top: -220px; right: 400px; }
+    .sticker-2c { width: 400px; top: -220px; right: 500px; }
+    .sticker-2d { width: 400px; top: -220px; right: 300px; }
+    .sticker-2e { width: 350px; top: -450px; right: 250px; }
+    .sticker-3a { width: 500px; top: -220px; right: 100px; }
+    .sticker-3b { width: 500px; top: -220px; right: 300px; }
+    .sticker-3c { width: 220px; top: -420px; right: 50px; }
+    .sticker-3d { width: 600px; top: -220px; right: 400px; }
+    .sticker-3e { width: 200px; top: -220px; right: 5s00px; }
+    .sticker-4a { width: 400px; top: -220px; right: 100px; }
+    .sticker-4b { width: 400px; top: -220px; right: 500px; }
+    .sticker-4c { width: 500px; top: -220px; right: 400px; }
+    .sticker-4d { width: 500px; top: -500px; left: 370px; }
+    .sticker-4e { width: 400px; top: -220px; right: 400px; }
+    .sticker-5a { width: 300px; top: -220px; right: 400px; }
+    .sticker-5b { width: 500px; top: 80px; left: 170px; }
+    .sticker-5c { width: 400px; top: -220px; right: 300px; }
+    .sticker-5d { width: 300px; top: -220px; right: 200px; }
+    .sticker-5e { width: 300px; top: -220px; right: 300px; }
+    .sticker-6a { width: 400px; top: -120px; right: 100px; }
+    .sticker-6b { width: 300px; top: -100px; left: 370px; }
+    .sticker-6c { width: 300px; top: -120px; right: 400px; }
+    .sticker-6d { width: 300px; top: -120px; right: 600px; }
+    .sticker-6e { width: 300px; top: -120px; right: 400px; }
+    .sticker-7a { width: 400px; top: -120px; right: 300px; }
+    .sticker-7b { width: 400px; top: -120px; right: 300px; }
+    .sticker-7c { width: 300px; top: -400px; left: 870px; }
+    .sticker-7d { width: 300px; top: -220px; right: 300px; }
+    .sticker-7e { width: 400px; top: -110px; right: 100px; }
+
+    
+
+    /* question divider */
+    .q-divider { display: block; width: 100%; margin: 80px 0; }  /* ← change 80px to adjust spacing above and below the line */
+
+    /* ══════════════════════════════════════════════════
+       LOADING SCREEN
+    ══════════════════════════════════════════════════ */
+    #loading-screen {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background: var(--page-bg);
+      z-index: 9999; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    #loading-screen.active { display: flex; }
+    .loading-title { font-size: 1.75rem; font-weight: 700; color: #1a1a1a; margin-bottom: 50px; text-align: center; padding: 0 20px; }
+    .sticker-parade { display: flex; gap: 40px; align-items: center; justify-content: center; flex-wrap: wrap; max-width: 900px; margin-bottom: 50px; padding: 0 20px; }
+    .parade-sticker { width: 100px; opacity: 0; transform: translateY(60px) rotate(-10deg); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+    .parade-sticker.pop { opacity: 1; transform: translateY(0); }
+    .parade-sticker:nth-child(1).pop { transform: rotate(-6deg); }
+    .parade-sticker:nth-child(2).pop { transform: rotate(4deg); }
+    .parade-sticker:nth-child(3).pop { transform: rotate(-3deg); }
+    .parade-sticker:nth-child(4).pop { transform: rotate(7deg); }
+    .parade-sticker:nth-child(5).pop { transform: rotate(-5deg); }
+    .parade-sticker:nth-child(6).pop { transform: rotate(3deg); }
+    .parade-sticker:nth-child(7).pop { transform: rotate(-8deg); }
+    .loading-bar-wrap { width: min(400px, 80vw); height: 12px; background: #e8e2d6; border-radius: 999px; border: 2px solid #1a1a1a; overflow: hidden; }
+    .loading-bar-fill { height: 100%; width: 0%; background: #C3F481; border-radius: 999px; transition: width 3.5s ease; }
+    .loading-bar-fill.go { width: 100%; }
+    .loading-label { font-size: 0.875rem; color: #888; margin-top: 12px; }
+
+    /* ══════════════════════════════════════════════════
+       RESULTS SECTION
+    ══════════════════════════════════════════════════ */
+    #results-section { display: none; padding: 80px 0 120px; }
+    /* results inner wrapper — matches game box width */
+    #results-section .grid-wrap,
+    #final-advice .grid-wrap {
+      width: 70%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #results-section.visible { display: block; }
+    .results-title-wrap { text-align: center; margin-bottom: 16px; }
+    .results-title { font-size: 3.25rem; font-weight: 700; color: #1a1a1a; display: inline-block; }
+    .results-subtitle { text-align: center; font-size: 1.25rem; font-weight: 600; color: #444; margin-bottom: 60px; }
+
+    .result-main-card {
+      background: #fff; border: 2px solid #1a1a1a;
+      border-radius: 24px; box-shadow: 20px 20px 0 #FBE172;
+      padding: 50px; display: flex; align-items: center;
+      justify-content: space-between; gap: 40px; margin-bottom: 30px;
+    }
+    .result-main-left { flex: 1; }
+    .result-descriptor { font-size: 1.25rem; font-weight: 400; color: #888; margin-bottom: 6px; font-style: italic; }
+    .result-name-png { display: block; width: 320px; margin-bottom: 20px; }
+    .result-underline { width: 200px; height: 3px; background: #1a1a1a; margin-bottom: 24px; }
+    .result-description { font-size: 1.0625rem; font-style: italic; color: #444; line-height: 1.6; max-width: 340px; }
+    .result-main-sticker { width: 360px; flex-shrink: 0; }
+
+    .trait-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 80px; }
+    .trait-card { background: #fff; border: 2px solid #1a1a1a; border-radius: 20px; padding: 32px; box-shadow: 8px 8px 0 #FBE172; }
+    .trait-heading-png { background-size: 100% 100%; background-repeat: no-repeat; padding: 6px 16px; display: inline-block; font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; }
+    .trait-heading-png.core   { background-image: url('title-bg-4.png'); }
+    .trait-heading-png.secret { background-image: url('title-bg.png'); }
+    .trait-heading-png.weak   { background-image: url('title-bg-2.png'); }
+    .trait-card ul { list-style: disc; padding-left: 20px; font-size: 1rem; line-height: 1.8; color: #333; }
+    .trait-card p  { font-size: 1rem; line-height: 1.7; color: #333; }
+
+    /* ══════════════════════════════════════════════════
+       FINAL ADVICE SECTION
+    ══════════════════════════════════════════════════ */
+    #final-advice { display: none; padding-bottom: 120px; }
+    .advice-title-wrap { text-align: center; margin-bottom: 50px; }
+    .advice-title { font-size: 3.25rem; font-weight: 700; display: inline-block; }
+    .circle-scribble-advice { background-image: url('circle-scribble.png'); background-size: 100% 100%; background-repeat: no-repeat; padding: 20px 40px; display: inline-block; }
+    .advice-text { text-align: center; font-size: 1.25rem; line-height: 1.8; color: #333; margin-bottom: 60px; }
+
+    #advice-box { position: relative; width: 100%; height: 500px; background: #fff; border: 2px solid #1a1a1a; border-radius: 24px; box-shadow: 20px 20px 0 #FBE172; overflow: hidden; }
+    #advice-head  { position: absolute; bottom: 0; left: 60px; width: 320px; pointer-events: none; }
+    #advice-trash { position: absolute; bottom: 0; right: 80px; width: 160px; pointer-events: none; }
+    /* brain starts hidden inside the trash area */
+    #advice-brain {
+      position: absolute;
+      width: 140px;
+      bottom: 20px;
+      right: 100px;       /* starts near the trash */
+      pointer-events: none;
+      opacity: 0;          /* hidden until scroll triggers it */
+    }
+
+    /* slow bounce from trash (right) to face (left)
+       total duration: 5s — slow and satisfying
+       the brain bounces twice along the way */
+    @keyframes brainJourney {
+      /* start — sitting in/near trash, fades in */
+      0%   { right: 100px; bottom: 20px;  opacity: 0; transform: rotate(0deg) scale(0.8); }
+      8%   { right: 100px; bottom: 20px;  opacity: 1; transform: rotate(-5deg) scale(1); }
+
+      /* first bounce up */
+      20%  { right: 180px; bottom: 160px; transform: rotate(-15deg) scale(1.05); }
+      30%  { right: 280px; bottom: 20px;  transform: rotate(8deg) scale(1); }
+
+      /* second bounce — higher, more dramatic */
+      42%  { right: 360px; bottom: 220px; transform: rotate(-10deg) scale(1.1); }
+      54%  { right: 450px; bottom: 20px;  transform: rotate(5deg) scale(1); }
+
+      /* third bounce — smaller, slowing down near the face */
+      64%  { right: 510px; bottom: 100px; transform: rotate(-6deg) scale(1.05); }
+      72%  { right: 560px; bottom: 20px;  transform: rotate(3deg) scale(1); }
+
+      /* lands near the face — small final settle */
+      82%  { right: 590px; bottom: 50px;  transform: rotate(-4deg) scale(1.02); }
+      90%  { right: 600px; bottom: 30px;  transform: rotate(2deg) scale(1); }
+
+      /* rests gently near the face */
+      100% { right: 600px; bottom: 35px;  opacity: 1; transform: rotate(0deg) scale(1); }
+    }
+
+    #advice-brain.animate {
+      animation: brainJourney 5s ease-in-out forwards;  /* 5s = slow and satisfying */
+    }
+
+
+    /* ══════════════════════════════════════════════════
+       MOBILE BREAKPOINT — 400px
+    ══════════════════════════════════════════════════ */
+    @media (max-width: 400px) {
+
+      /* on mobile the grid still centres in 10 of 12 cols
+         but the col unit is now based on 400px */
+      :root {
+        --col: calc(400px / 12);
+      }
+
+      /* ── MAIN TITLE ── */
+      .main-title-section {
+        padding-top: 40px;
+        padding-bottom: 30px;
+        overflow-x: hidden;
+      }
+      .main-title-letters {
+        gap: 2px;
+        /* scale the whole row to fit the screen */
+        transform: scale(0.38);
+        transform-origin: center top;
+        /* compensate for the scale so it doesn't take up full original height */
+        margin-bottom: -20px;
+      }
+      /* mobile — both words scale down to fit screen */
+      .title-word {
+        height: 70px;          /* ← mobile height for both words */
+        object-fit: contain;
+        object-position: bottom;
+      }
+      .title-word:nth-child(1) { width: 120px; }   /* Silly on mobile */
+      .title-word:nth-child(2) { width: 230px; }   /* decisions on mobile */
+      .title-space  { width: 30px; }
+
+      /* ── INTRO TEXT ── */
+      .intro-wrap { padding-top: 40px; }
+      .intro-body { font-size: 1.225rem; /* 19.6px */ margin-bottom: 32px; }
+      .intro-handwrite { width: 100px; margin-right: 150px; margin-top: -40px; }
+      .intro-spacer { height: 40px; }
+
+      /* ── GAME BOX ── */
+      #game-box {
+        height: 360px;
+        margin: 30px 0;
+        border-radius: 16px;
+        box-shadow: 25px 25px 0 #FBE172, 26px 26px 0 #1a1a1a;;
+      }
+      #head-img    { width: 160px; left: 10px; }
+      #window-img  { width: 140px; right: 10px; top: 30px; }
+      #trash-img   { width: 80px; right: -100px; }
+      #trash-img.visible { right: 10px; }
+      #trash-text  { font-size: 0.875rem; width: 120px; bottom: 110px; right: -200px; }
+      #trash-text.visible { right: 8px; }
+      #brain       { width: 80px; top: 30px; left: 60px; }
+      #brain-intro-text { font-size: 1rem; top: 20px; left: 20px; }
+      #raccoon-popup { top: 40px; right: 10px; width: 110px; }
+      #raccoon-popup img { width: 80px; }
+      #raccoon-popup p { font-size: 0.75rem; }
+      #success-msg p { font-size: 1rem; }
+      #brain-in-trash { width: 60px; }
+
+      /* ── QUIZ TITLE ── */
+      .quiz-spacer-top    { height: 50px; }
+      .quiz-spacer-bottom { height: 20px; }
+      .quiz-title { font-size: 1.40625rem; /* 22.5px */ }
+      .circle-scribble { padding: 10px 20px; }
+      .quiz-subtitle { width: 100%; }
+
+      /* ── QUESTION SECTIONS ── */
+      .q-wrap { padding: 1.5rem 0; }
+      .q-title { font-size: 1.125rem; /* 18px */ margin-bottom: 0.75rem; }
+
+      /* title highlight pngs — scale padding on mobile */
+      .title-highlight, .title-highlight-2, .title-highlight-3,
+      .title-highlight-4, .title-highlight-5, .title-highlight-6,
+      .title-highlight-7 { padding: 5px 12px; }
+
+      .q-prompt { font-size: 1rem; /* 16px */ gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+      .q-arrow  { font-size: 1.25rem; }
+
+      /* buttons — rectangular on mobile, not pills */
+      .opt {
+        font-size: 1rem;
+        padding: 14px 16px;
+        border-radius: 16px;
+      }
+      /* no hover states on mobile */
+      .opt:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+      .opt-1:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+      .opt-2:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+      .opt-3:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+      .opt-4:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+      .opt-5:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+      .opt-6:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+      .opt-7:hover { background: #f0eeea; border-color: #ccc; color: #1a1a1a; }
+
+      /* hide unselected buttons on mobile after a choice is made */
+      .opt.mobile-hidden {
+        display: none;
+      }
+
+      /* selected button on mobile — centered with sticker below */
+      .opt.selected {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      /* sticker on mobile — centered below the selected button only */
+      .sticker {
+        position: relative !important;
+        display: none;
+        top: auto !important; right: auto !important;
+        left: auto !important; bottom: auto !important;
+        width: 180px !important;
+        margin: 14px auto 0;
+      }
+      .opt:hover .sticker { display: none; }
+      .opt.selected .sticker { display: block; z-index: 1; }
+
+      
+
+      /* divider */
+      .q-divider { margin: 20px 0; }
+
+      /* ── LOADING SCREEN ── */
+      .loading-title { font-size: 1.125rem; margin-bottom: 30px; }
+      .sticker-parade { gap: 16px; }
+      .parade-sticker { width: 50px; }
+
+      /* ── RESULTS — stacked single column ── */
+      .results-title { font-size: 1.40625rem; }
+      .results-subtitle { font-size: 1rem; margin-bottom: 30px; }
+
+      .result-main-card {
+        flex-direction: column;   /* stack image on top of text */
+        padding: 24px;
+        gap: 20px;
+        box-shadow: 8px 8px 0 #FBE172;
+      }
+      .result-main-sticker { width: 100%; max-width: 260px; align-self: center; }
+      .result-descriptor { font-size: 1rem; }
+      .result-name-png { width: 200px; }
+      .result-description { font-size: 1rem; max-width: 100%; }
+
+      .trait-grid { grid-template-columns: 1fr; } /* single column */
+      .trait-card { padding: 20px; box-shadow: 4px 4px 0 #1a1a1a; }
+      .trait-heading-png { font-size: 1rem; }
+      .trait-card ul, .trait-card p { font-size: 1rem; }
+
+      /* ── FINAL ADVICE ── */
+      .advice-title { font-size: 1.40625rem; }
+      .circle-scribble-advice { padding: 10px 20px; }
+      .advice-text { font-size: 1rem; }
+
+      #advice-box {
+        height: 280px;
+        box-shadow: 8px 8px 0 #FBE172;
+        border-radius: 16px;
+      }
+      #advice-head  { width: 130px; left: 10px; }
+      #advice-trash { width: 70px; right: 20px; }
+      #advice-brain { width: 60px; right: 40px; bottom: 10px; opacity: 0; }
+      @keyframes brainJourneyMobile {
+        0%   { right: 40px;  bottom: 10px; opacity: 0; transform: rotate(0deg) scale(0.8); }
+        8%   { right: 40px;  bottom: 10px; opacity: 1; transform: rotate(-5deg) scale(1); }
+        22%  { right: 80px;  bottom: 80px; transform: rotate(-12deg) scale(1.05); }
+        34%  { right: 130px; bottom: 10px; transform: rotate(6deg) scale(1); }
+        46%  { right: 170px; bottom: 100px; transform: rotate(-8deg) scale(1.08); }
+        58%  { right: 210px; bottom: 10px; transform: rotate(4deg) scale(1); }
+        72%  { right: 240px; bottom: 50px; transform: rotate(-4deg) scale(1.03); }
+        100% { right: 255px; bottom: 30px; opacity: 1; transform: rotate(0deg) scale(1); }
+      }
+      #advice-brain.animate { animation: brainJourneyMobile 5s ease-in-out forwards; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ══ MAIN TITLE ══ -->
+  <div class="main-title-section">
+    <div class="main-title-letters">
+      <!-- "Silly" — 5 of 12 columns -->
+      <div class="title-col">
+        <img class="title-word" src="main-title-silly.png" alt="Silly" />
+      </div>
+      <!-- "decisions" — 5 of 12 columns -->
+      <div class="title-col">
+        <img class="title-word" src="main-title-decisions.png" alt="decisions" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INTRO TEXT ══ -->
+  <div class="grid-wrap intro-wrap">
+    <p class="intro-body">a personality quiz built entirely around unnecessary choices, strange instincts and mildly entertaining confusion.</p>
+    <p class="intro-body">Here,<br/>nothing is measured,<br/>nothing is correct,<br/><strong>nothing is taken <span class="squiggle">too seriously.</span></strong></p>
+    <img class="intro-handwrite" src="but-we-judge.png" alt="But we judge" />
+  </div>
+
+  <div class="intro-spacer"></div>
+
+  <!-- ══ GAME BOX ══ -->
+  <div class="grid-wrap">
+    <div id="game-box">
+      <img id="head-img" src="head.png" alt="" />
+      <img id="window-img" src="window-frame.png" alt="" />
+      <img id="trash-img" src="trash.png" alt="" />
+      <div id="raccoon-popup"><img src="raccoon.png" alt="" /><p>eww, take that thing back</p></div>
+      <div id="trash-text">Yes, into the trash literally.</div>
+      <div id="brain-intro-text">Logic is not required.<br/>Please throw your brain away.</div>
+      <img id="brain" src="brain.png" alt="brain" />
+      <div id="success-msg">
+        <img id="brain-in-trash" src="brain.png" alt="" />
+        <p>good job! you can now proceed ↓</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-spacer-top"></div>
+
+  <!-- ══ QUIZ TITLE ══ -->
+  <div class="grid-wrap quiz-title-wrap">
+    <h2 class="quiz-title"><span class="circle-scribble">personality quiz</span></h2>
+    <img class="quiz-subtitle" src="quiz-subtitle.png" alt="7 questions. 0 correct answers." />
+  </div>
+
+  <div class="quiz-spacer-bottom"></div>
+
+  <!-- ══ QUESTION 1 ══ -->
+  <div class="grid-wrap q-wrap" data-audio="audio-1.mp3" data-fact="fact-1.png" data-fact-num="1">
+    <h2 class="q-title"><span class="title-highlight">emotional identity</span></h2>
+    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>choose your emotional support potato.</span></div>
+    <div class="options" role="listbox">
+      <button class="opt opt-1" role="option" onclick="pick(this)">Clumpy mashed potato with leadership qualities<img class="sticker sticker-1a" src="sticker-1a.png" alt="" /></button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">aggressively over-seasoned curly fry<img class="sticker sticker-1b" src="sticker-1b.png" alt="" /></button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">wet potato in a ziplock bag<img class="sticker sticker-1c" src="sticker-1c.png" alt="" /></button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">baked potato radiating wisdom<img class="sticker sticker-1d" src="sticker-1d.png" alt="" /></button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">a sad potato<img class="sticker sticker-1e" src="sticker-1e.png" alt="" /></button>
+    </div>
+  </div>
+  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
+
+  <!-- ══ QUESTION 2 ══ -->
+  <div class="grid-wrap q-wrap" data-audio="audio-2.mp3" data-fact="fact-2.png" data-fact-num="2">
+    <h2 class="q-title"><span class="title-highlight-2">survival instinct</span></h2>
+    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>which object would absolutely defeat you in combat?</span></div>
+    <div class="options" role="listbox">
+      <button class="opt opt-2" role="option" onclick="pick(this)">a folding chair<img class="sticker sticker-2a" src="sticker-2a.png" alt="" /></button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">microwave from 2007<img class="sticker sticker-2b" src="sticker-2b.png" alt="" /></button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">a dumpster raccoon<img class="sticker sticker-2c" src="sticker-2c.png" alt="" /></button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">traffic cone with ambition<img class="sticker sticker-2d" src="sticker-2d.png" alt="" /></button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">shopping cart with one broken wheel<img class="sticker sticker-2e" src="sticker-2e.png" alt="" /></button>
+    </div>
+  </div>
+  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
+
+  <!-- ══ QUESTION 3 ══ -->
+  <div class="grid-wrap q-wrap" data-audio="audio-3.mp3" data-fact="fact-3.png" data-fact-num="3">
+    <h2 class="q-title"><span class="title-highlight-3">life philosophy</span></h2>
+    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>Pick a T-shirt reference</span></div>
+    <div class="options" role="listbox">
+      <button class="opt opt-3" role="option" onclick="pick(this)">maybe Later (but probably not)<img class="sticker sticker-3a" src="sticker-3a.png" alt="" /></button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">entering my villain arc era<img class="sticker sticker-3b" src="sticker-3b.png" alt="" /></button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">confidence is stored in the knees<img class="sticker sticker-3c" src="sticker-3c.png" alt="" /></button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">I hate myself<img class="sticker sticker-3d" src="sticker-3d.png" alt="" /></button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">i forgot the question<img class="sticker sticker-3e" src="sticker-3e.png" alt="" /></button>
+    </div>
+  </div>
+  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
+
+  <!-- ══ QUESTION 4 ══ -->
+  <div class="grid-wrap q-wrap" data-audio="audio-4.mp3" data-fact="fact-4.png" data-fact-num="4">
+    <h2 class="q-title"><span class="title-highlight-4">Coping mechanism</span></h2>
+    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>Pick a coping mechanism</span></div>
+    <div class="options" role="listbox">
+      <button class="opt opt-4" role="option" onclick="pick(this)">staring dramatically out windows<img class="sticker sticker-4a" src="sticker-4a.png" alt="" /></button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">think about the past<img class="sticker sticker-4b" src="sticker-4b.png" alt="" /></button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">sleep the whole day<img class="sticker sticker-4c" src="sticker-4c.png" alt="" /></button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">opening the fridge repeatedly<img class="sticker sticker-4d" src="sticker-4d.png" alt="" /></button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">becoming nocturnal<img class="sticker sticker-4e" src="sticker-4e.png" alt="" /></button>
+    </div>
+  </div>
+  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
+
+  <!-- ══ QUESTION 5 ══ -->
+  <div class="grid-wrap q-wrap" data-audio="audio-5.mp3" data-fact="fact-5.png" data-fact-num="5">
+    <h2 class="q-title"><span class="title-highlight-5">Social energy</span></h2>
+    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>Which creature reflects your inner energy?</span></div>
+    <div class="options" role="listbox">
+      <button class="opt opt-5" role="option" onclick="pick(this)">emotionally intelligent pigeon<img class="sticker sticker-5a" src="sticker-5a.png" alt="" /></button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">suspicious raccoon<img class="sticker sticker-5b" src="sticker-5b.png" alt="" /></button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">overworked seagull<img class="sticker sticker-5c" src="sticker-5c.png" alt="" /></button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">tiny dragon with attitude<img class="sticker sticker-5d" src="sticker-5d.png" alt="" /></button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">medieval frog<img class="sticker sticker-5e" src="sticker-5e.png" alt="" /></button>
+    </div>
+  </div>
+  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
+
+  <!-- ══ QUESTION 6 ══ -->
+  <div class="grid-wrap q-wrap" data-audio="audio-6.mp3" data-fact="fact-6.png" data-fact-num="6">
+    <h2 class="q-title"><span class="title-highlight-6">Current brain status</span></h2>
+    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>describe the current condition of your brain</span></div>
+    <div class="options" role="listbox">
+      <button class="opt opt-6" role="option" onclick="pick(this)">buffering emotionally<img class="sticker sticker-6a" src="sticker-6a.png" alt="" /></button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">powered entirely by soup<img class="sticker sticker-6b" src="sticker-6b.png" alt="" /></button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">lightly microwaved<img class="sticker sticker-6c" src="sticker-6c.png" alt="" /></button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">running on cartoon logic<img class="sticker sticker-6d" src="sticker-6d.png" alt="" /></button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">i see stars everywhere<img class="sticker sticker-6e" src="sticker-6e.png" alt="" /></button>
+    </div>
+  </div>
+  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
+
+  <!-- ══ QUESTION 7 ══ -->
+  <div class="grid-wrap q-wrap" id="last-question" data-audio="audio-7.mp3" data-fact="fact-7.png" data-fact-num="7">
+    <h2 class="q-title"><span class="title-highlight-7">Final destiny</span></h2>
+    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>what will you do next?</span></div>
+    <div class="options" role="listbox">
+      <button class="opt opt-7" role="option" onclick="pick(this)">blink aggressively<img class="sticker sticker-7a" src="sticker-7a.png" alt="" /></button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">avoid responsibilities artistically<img class="sticker sticker-7b" src="sticker-7b.png" alt="" /></button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">become a local legend<img class="sticker sticker-7c" src="sticker-7c.png" alt="" /></button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">stare at wall professionally<img class="sticker sticker-7d" src="sticker-7d.png" alt="" /></button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">go outside and touch grass<img class="sticker sticker-7e" src="sticker-7e.png" alt="" /></button>
+    </div>
+  </div>
+
+  <!-- ══ LOADING SCREEN ══ -->
+  <div id="loading-screen">
+    <p class="loading-title">analysing your silly personality...</p>
+    <div class="sticker-parade">
+      <img class="parade-sticker" src="sticker-1c.png" alt="" />
+      <img class="parade-sticker" src="sticker-2e.png" alt="" />
+      <img class="parade-sticker" src="sticker-3c.png" alt="" />
+      <img class="parade-sticker" src="sticker-4d.png" alt="" />
+      <img class="parade-sticker" src="sticker-5b.png" alt="" />
+      <img class="parade-sticker" src="sticker-6b.png" alt="" />
+      <img class="parade-sticker" src="sticker-7c.png" alt="" />
+    </div>
+    <div class="loading-bar-wrap"><div class="loading-bar-fill" id="loading-bar"></div></div>
+    <p class="loading-label">please hold. our experts are judging.</p>
+  </div>
+
+  <!-- ══ RESULTS ══ -->
+  <div id="results-section">
+    <div class="grid-wrap">
+      <div class="results-title-wrap"><h2 class="results-title"><span class="circle-scribble">results</span></h2></div>
+      <p class="results-subtitle">our experts have analysed your silly personality</p>
+      <div class="result-main-card">
+        <div class="result-main-left">
+          <p class="result-descriptor">soup-powered</p>
+          <!-- swap h2 for img when racoon-handwritten.png is ready -->
+          <img class="result-name-png" src="racoon-handwritten.png" alt="Racoon" />
+          <div class="result-underline"></div>
+          <p class="result-description">someone oddly confident but deeply held together<br/>by random systems and fridge light.</p>
+        </div>
+        <img class="result-main-sticker" src="result-sticker.png" alt="soup-powered racoon" />
+      </div>
+      <div class="trait-grid">
+        <div class="trait-card">
+          <span class="trait-heading-png core">core traits</span>
+          <ul>
+            <li>trusts instincts that arrive while staring into the fridge</li>
+            <li>forms emotional bonds with objects that should not have emotional significance</li>
+            <li>enters situations with no plan and leaves with accidental authority</li>
+            <li>highly motivated by soup, local gossip, and small opportunities for dramatic exits</li>
+            <li>carries suspicious confidence despite absolutely no evidence</li>
+            <li>likely to become known in a 3-mile radius for something unclear but memorable</li>
+          </ul>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div class="trait-card">
+            <span class="trait-heading-png secret">secret strength</span>
+            <p>you can enter a room, say something confusing, and leave people thinking about it for days.</p>
+          </div>
+          <div class="trait-card">
+            <span class="trait-heading-png weak">weakness</span>
+            <p>you are one free sample away from changing your entire life plan.<br/>dont give up</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FINAL ADVICE ══ -->
+  <div id="final-advice">
+    <div class="grid-wrap">
+      <div class="advice-title-wrap"><h2 class="advice-title"><span class="circle-scribble-advice">final advice</span></h2></div>
+      <p class="advice-text">take your brain back.<br/>but maybe leave a small part of it near the fridge.<br/>not every good decision needs to make sense.</p>
+      <div id="advice-box">
+        <img id="advice-head"  src="head.png"  alt="" />
+        <img id="advice-trash" src="trash.png" alt="" />
+        <img id="advice-brain" src="brain.png" alt="" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── AUDIO ── */
+    const audioCache = {};
+
+    /* preload all 7 audio files */
+    const audioSrcs = ['audio-1.mp3','audio-2.mp3','audio-3.mp3','audio-4.mp3','audio-5.mp3','audio-6.mp3','audio-7.mp3'];
+    audioSrcs.forEach(function(src) {
+      audioCache[src] = new Audio(src);
+    });
+
+    /* audio-1.mp3 stops after 7 seconds — all others play to full length */
+    const audioLimits = {
+      'audio-1.mp3': 4000,  /* ← change 4000 to adjust (milliseconds) */
+      'audio-5.mp3': 4000   /* ← question 5 audio stops at 4 seconds */
+    };
+
+    function playQuestionAudio(wrap) {
+      const src = wrap.dataset.audio;
+      if (!src) return;
+      const a = audioCache[src];
+      a.currentTime = 0;
+      a.play();
+      /* if this clip has a time limit, stop it after that many ms */
+      if (audioLimits[src]) {
+        setTimeout(function() {
+          a.pause();
+          a.currentTime = 0;
+        }, audioLimits[src]);
+      }
+    }
+
+    /* facts removed */
+
+    /* ── PICK ── */
+    const isMobileView = window.matchMedia('(max-width: 400px)').matches;
+
+    function pick(el) {
+      const parentOptions = el.closest('.options');
+      const wrap = el.closest('.q-wrap');
+
+      /* deselect all and remove mobile-hidden from siblings */
+      parentOptions.querySelectorAll('.opt').forEach(function(o) {
+        o.classList.remove('selected');
+        o.classList.remove('mobile-hidden');
+      });
+
+      el.classList.add('selected');
+
+      /* on mobile — hide all other buttons in this question */
+      if (isMobileView) {
+        parentOptions.querySelectorAll('.opt').forEach(function(o) {
+          if (o !== el) o.classList.add('mobile-hidden');
+        });
+      }
+
+      playQuestionAudio(wrap);
+      if (wrap && wrap.id === 'last-question') setTimeout(launchLoading, 800);
+    }
+
+    /* ── LOADING ── */
+    function launchLoading() {
+      const screen = document.getElementById('loading-screen');
+      screen.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.querySelectorAll('.parade-sticker').forEach(function(s, i) {
+        setTimeout(function() { s.classList.add('pop'); }, 300 + i * 350);
+      });
+      setTimeout(function() { document.getElementById('loading-bar').classList.add('go'); }, 200);
+      setTimeout(showResults, 4500);
+    }
+
+    /* ── SHOW RESULTS ── */
+    function showResults() {
+      document.getElementById('loading-screen').classList.remove('active');
+      document.getElementById('results-section').classList.add('visible');
+      document.getElementById('final-advice').style.display = 'block';
+      setTimeout(function() { document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' }); }, 100);
+      /* brain animation now triggers when advice box scrolls into view */
+    }
+
+    /* ── SCROLL ANIMATION — squiggle + handwrite ── */
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.squiggle, .intro-handwrite').forEach(function(el) { observer.observe(el); });
+
+    /* ── BRAIN BOUNCE — triggers when advice box scrolls into view ── */
+    const brainObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          /* small delay so user has a moment to see the box before brain moves */
+          setTimeout(function() {
+            document.getElementById('advice-brain').classList.add('animate');
+          }, 600);
+          brainObserver.unobserve(entry.target); /* only trigger once */
+        }
+      });
+    }, { threshold: 0.4 }); /* 40% of box must be visible before triggering */
+
+    const adviceBox = document.getElementById('advice-box');
+    if (adviceBox) brainObserver.observe(adviceBox);
+
+    /* ── GAME BOX PHYSICS ── */
+    (function() {
+      const box = document.getElementById('game-box');
+      const brain = document.getElementById('brain');
+      const trash = document.getElementById('trash-img');
+      const trashTxt = document.getElementById('trash-text');
+      const raccoon = document.getElementById('raccoon-popup');
+      const success = document.getElementById('success-msg');
+      let x = 160, y = 60, vx = 0, vy = 0;
+      let dragging = false, lastX, lastY, gameOver = false;
+      const GRAVITY = 0.5, BOUNCE = 0.55, FRICTION = 0.92;
+      const isMobile = window.matchMedia('(max-width: 400px)').matches;
+      if (isMobile) { x = 60; y = 30; }
+
+      setTimeout(function() { trash.classList.add('visible'); trashTxt.classList.add('visible'); }, 3000);
+
+      /* support both mouse and touch */
+      function getXY(e) {
+        if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      function startDrag(e) {
+        if (gameOver) return;
+        dragging = true;
+        const pos = getXY(e);
+        lastX = pos.x; lastY = pos.y;
+        vx = 0; vy = 0;
+        e.preventDefault();
+      }
+      function moveDrag(e) {
+        if (!dragging) return;
+        const pos = getXY(e);
+        const rect = box.getBoundingClientRect();
+        const dx = pos.x - lastX, dy = pos.y - lastY;
+        vx = dx; vy = dy; x += dx; y += dy;
+        x = Math.max(0, Math.min(x, rect.width - brain.offsetWidth));
+        y = Math.max(0, Math.min(y, rect.height - brain.offsetHeight));
+        brain.style.left = x + 'px'; brain.style.top = y + 'px';
+        lastX = pos.x; lastY = pos.y;
+        checkWindow(rect);
+      }
+      function endDrag() { if (!dragging) return; dragging = false; }
+
+      brain.addEventListener('mousedown',  startDrag);
+      brain.addEventListener('touchstart', startDrag, { passive: false });
+      document.addEventListener('mousemove',  moveDrag);
+      document.addEventListener('touchmove',  moveDrag, { passive: false });
+      document.addEventListener('mouseup',  endDrag);
+      document.addEventListener('touchend', endDrag);
+
+      function loop() {
+        if (!dragging && !gameOver) {
+          const rect = box.getBoundingClientRect();
+          const maxX = rect.width - brain.offsetWidth, maxY = rect.height - brain.offsetHeight;
+          vy += GRAVITY; x += vx; y += vy; vx *= FRICTION;
+          if (x <= 0)    { x = 0;    vx =  Math.abs(vx) * BOUNCE; }
+          if (x >= maxX) { x = maxX; vx = -Math.abs(vx) * BOUNCE; }
+          if (y >= maxY) { y = maxY; vy = -Math.abs(vy) * BOUNCE; vx *= FRICTION; checkTrash(rect); }
+          if (y <= 0)    { y = 0;    vy =  Math.abs(vy) * BOUNCE; }
+          brain.style.left = x + 'px'; brain.style.top = y + 'px';
+        }
+        requestAnimationFrame(loop);
+      }
+      loop();
+
+      function checkWindow(rect) {
+        const wr = document.getElementById('window-img').getBoundingClientRect();
+        const br = brain.getBoundingClientRect();
+        const near = !(br.right < wr.left-60 || br.left > wr.right+60 || br.bottom < wr.top-60 || br.top > wr.bottom+60);
+        raccoon.classList.toggle('visible', near);
+      }
+      function checkTrash(rect) {
+        const tr = trash.getBoundingClientRect(), br = brain.getBoundingClientRect();
+        if (br.left < tr.right && br.right > tr.left && br.bottom >= tr.top && trash.classList.contains('visible')) {
+          gameOver = true;
+          setTimeout(function() {
+            brain.style.display = 'none';
+            document.getElementById('head-img').style.display         = 'none';
+            document.getElementById('window-img').style.display       = 'none';
+            document.getElementById('brain-intro-text').style.display = 'none';
+            trash.style.display = 'none'; trashTxt.style.display = 'none'; raccoon.style.display = 'none';
+            success.style.display = 'block';
+          }, 2000);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
