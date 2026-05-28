@@ -975,8 +975,8 @@ function renderCard(post, isOwn, idx, showJournal, context){
   var textEl='<p class="bw-post-text">'+escHtml(post.text)+'</p>';
   var saved=loadSaved();
   var isSaved=saved.some(function(p){return p.id===post.id});
-  var inJournal=showJournal&&loadJournal().some(function(e){return e.id===post.id});
-  var journalBtn=showJournal
+  var inJournal=showJournal&&!isOwn&&loadJournal().some(function(e){return e.id===post.id});
+  var journalBtn=(showJournal&&!isOwn)
     ?'<button class="bw-post-journal-btn'+(inJournal?' bw-in-journal':'')+'" data-id="'+post.id+'" aria-label="Add to journal">'+(inJournal?'in journal':'+ journal')+'</button>'
     :'';
   var deleteBtn=isOwn
@@ -1111,8 +1111,9 @@ function renderLightboxCard(){
   var saveBtn=document.getElementById('bw-lb-save');
   saveBtn.className='bw-lb-btn bw-lb-btn--save'+(isSaved?' bw-bookmarked':'');
   saveBtn.textContent=isSaved?'★ saved':'☆ save';
-  var inJournal=loadJournal().some(function(e){return e.id===post.id});
+  var inJournal=!isOwn&&loadJournal().some(function(e){return e.id===post.id});
   var journalBtn=document.getElementById('bw-lb-journal');
+  journalBtn.style.display=isOwn?'none':'';
   journalBtn.className='bw-lb-btn bw-lb-btn--journal'+(inJournal?' bw-in-journal':'');
   journalBtn.textContent=inJournal?'✓ in journal':'+ journal';
   var deleteBtn=document.getElementById('bw-lb-delete');

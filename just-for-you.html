@@ -2984,7 +2984,7 @@ document.getElementById('jfy-share-btn').addEventListener('click', function(){
     var postId = 'jfy_' + Date.now();
     var posts = [];
     try { posts = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e){}
-    posts.unshift({ id: postId, text: '', time: Date.now(), media: { url: dataUrl } });
+    posts.unshift({ id: postId, text: '', time: Date.now(), media: { url: dataUrl }, own: true });
     localStorage.setItem(STORE_KEY, JSON.stringify(posts));
     showJfyToast('Shared to Between Us ↗', {
       undoLabel: 'remove',
