@@ -3080,177 +3080,166 @@ function showJfyToast(msg, opts){
 }
 
 // ── Notebook capture ──────────────────────────────────────────────────────────
-// Composites the full notebook area to a single off-screen canvas and returns
+// Composites the active canvas area to a single off-screen canvas and returns
 // a JPEG data-URL via callback(dataUrl).
+// Positions are read from style.left/top (CSS px relative to nbLayer) rather
+// than getBoundingClientRect so they are viewport-scroll-independent.
 function captureNotebook(quality, callback){
   quality = quality || 0.92;
-  var nb = document.querySelector('.jfy-notebook');
-  if(!nb){ callback && callback(null); return; }
-  // Use nbLayer's rect so the captured image matches the actual canvas area.
-  // On desktop/tablet nbLayer is the right half; on mobile it fills the full notebook.
-  var rect = nbLayer.getBoundingClientRect();
-  var w = Math.round(rect.width), h = Math.round(rect.height);
-  var out = document.createElement('canvas');
-  out.width = w; out.height = h;
+  if(!nbLayer){ callback && callback(null); return; }
+
+  var dpr  = window.devicePixelRatio || 1;
+  var cssW = nbLayer.offsetWidth;
+  var cssH = nbLayer.offsetHeight;
+
+  var out  = document.createElement('canvas');
+  out.width  = Math.round(cssW * dpr);
+  out.height = Math.round(cssH * dpr);
   var octx = out.getContext('2d');
-  // White background
-  octx.fillStyle = '#fff';
-  octx.fillRect(0, 0, w, h);
+  octx.scale(dpr, dpr);   // draw in CSS-px coords; output is HiDPI
 
-  // Helper: draw an element's rendered pixels onto out-canvas using its
-  // bounding rect relative to the notebook rect.
-  function blitElement(el){
-    var er = el.getBoundingClientRect();
-    var ox = er.left - rect.left, oy = er.top - rect.top;
-    octx.drawImage(el, 0, 0, el.width, el.height, ox, oy, er.width, er.height);
-  }
+  // Notebook background colour
+  octx.fillStyle = '#f8f4ed';
+  octx.fillRect(0, 0, cssW, cssH);
 
-  // 1. Placed papers (canvas elements), bottom-up z-order (DOM order)
-  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
-    blitElement(pc);
-  });
+  // ── Helper: read position of an absolutely-placed child of nbLayer ─────────
+  function pos(el){ return { x: parseFloat(el.style.left)||0, y: parseFloat(el.style.top)||0 }; }
 
-  // 2. Washi tape — redraw from data-washi + current drag position
-  //    (more reliable than blitElement for absolute-positioned canvases)
-  nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(wc){
-    var data; try{ data=JSON.parse(wc.dataset.washi||'{}'); }catch(e){ return; }
-    if(!data.col) return;
-    var bb = _washiBbox(data.x1, data.y1, data.x2, data.y2, data.w);
-    if(!bb) return;
-    var dragLeft = parseFloat(wc.style.left)||0;
-    var dragTop  = parseFloat(wc.style.top)||0;
-    var dx = dragLeft - bb.minX, dy = dragTop - bb.minY;
-    renderWashiOnCtx(octx,
-      data.x1+dx, data.y1+dy,
-      data.x2+dx, data.y2+dy,
-      data.col, data.w||washibWidth, 0, 0);
-  });
-
-  // 2b. Main doodle canvas
-  blitElement(canvas);
-
-  // 3. Polaroids (img inside .jfy-polaroid)
-  nbLayer.querySelectorAll('.jfy-polaroid').forEach(function(pol){
-    var er = pol.getBoundingClientRect();
-    var ox = er.left - rect.left, oy = er.top - rect.top;
-    // Use html2canvas-style approach: just draw the img child
-    var img = pol.querySelector('img');
-    if(img){
-      var ir = img.getBoundingClientRect();
-      octx.fillStyle = '#fff';
-      octx.fillRect(ox, oy, er.width, er.height);
-      octx.drawImage(img, ir.left - rect.left, ir.top - rect.top, ir.width, ir.height);
-    }
-  });
-
-  // 4. Stickers (text nodes)
-  nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
-    var er = node.getBoundingClientRect();
-    var ox = er.left - rect.left, oy = er.top - rect.top;
-    octx.font = (er.height * 0.8) + 'px serif';
-    octx.textBaseline = 'middle';
-    octx.fillText(node.textContent, ox, oy + er.height / 2);
-  });
-
-  // 5. Text boxes (contentEditable divs, not textareas)
-  nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
-    var er = wrap.getBoundingClientRect();
-    var ox = er.left - rect.left, oy = er.top - rect.top;
-    var txt = wrap.querySelector('.jfy-text-node');
-    if(!txt) return;
-    var cs = window.getComputedStyle(txt);
-    var fontSize = parseFloat(cs.fontSize) || 15;
-    var fontWeight = cs.fontWeight || 'normal';
-    var fontFamily = cs.fontFamily || 'sans-serif';
-    octx.font = fontWeight + ' ' + fontSize + 'px ' + fontFamily;
-    octx.fillStyle = txt.style.color || cs.color || '#333';
-    octx.textBaseline = 'top';
-    var lineH = parseFloat(cs.lineHeight) || fontSize * 1.4;
-    var maxW = er.width - 8;
-    var curY = oy + 4;
-    txt.innerText.split('\n').forEach(function(para){
-      if(!para){ curY += lineH; return; }
-      var words = para.split(' ');
-      var line = '';
+  // ── Helper: draw word-wrapped text ────────────────────────────────────────
+  function drawWrapped(text, x, y, maxW, lineH){
+    text.split('\n').forEach(function(para){
+      if(!para){ y += lineH; return; }
+      var words = para.split(' '), line = '';
       words.forEach(function(word){
         var test = line ? line + ' ' + word : word;
         if(octx.measureText(test).width > maxW && line){
-          octx.fillText(line, ox + 4, curY);
-          curY += lineH;
-          line = word;
-        } else {
-          line = test;
-        }
+          octx.fillText(line, x, y); y += lineH; line = word;
+        } else { line = test; }
       });
-      if(line){ octx.fillText(line, ox + 4, curY); curY += lineH; }
+      if(line){ octx.fillText(line, x, y); y += lineH; }
     });
+    return y;
+  }
+
+  // ── Helper: draw a rounded rect ──────────────────────────────────────────
+  function roundRect(x, y, w, h, r){
+    octx.beginPath();
+    octx.moveTo(x+r, y);
+    octx.lineTo(x+w-r, y); octx.quadraticCurveTo(x+w, y,   x+w, y+r);
+    octx.lineTo(x+w, y+h-r); octx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    octx.lineTo(x+r, y+h); octx.quadraticCurveTo(x,   y+h, x,   y+h-r);
+    octx.lineTo(x, y+r); octx.quadraticCurveTo(x,   y,   x+r, y);
+    octx.closePath();
+  }
+
+  // 1. Placed papers (canvas elements)
+  nbLayer.querySelectorAll('.jfy-placed-paper').forEach(function(pc){
+    var p = pos(pc);
+    octx.drawImage(pc, 0, 0, pc.width, pc.height, p.x, p.y, pc.offsetWidth, pc.offsetHeight);
   });
 
-  // 6. Saved between-us post cards
+  // 2. Washi tape — redraw from stored data + drag offset
+  nbLayer.querySelectorAll('.jfy-placed-washi').forEach(function(wc){
+    var data; try{ data = JSON.parse(wc.dataset.washi||'{}'); }catch(e){ return; }
+    if(!data.col) return;
+    var bb = _washiBbox(data.x1, data.y1, data.x2, data.y2, data.w);
+    if(!bb) return;
+    var dragLeft = parseFloat(wc.style.left)||0, dragTop = parseFloat(wc.style.top)||0;
+    var dx = dragLeft - bb.minX, dy = dragTop - bb.minY;
+    renderWashiOnCtx(octx, data.x1+dx, data.y1+dy, data.x2+dx, data.y2+dy,
+                     data.col, data.w||washibWidth, 0, 0);
+  });
+
+  // 3. Main doodle canvas — fills nbLayer exactly (left:0, top:0)
+  octx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, cssW, cssH);
+
+  // 4. Polaroids
+  nbLayer.querySelectorAll('.jfy-polaroid').forEach(function(pol){
+    var p = pos(pol);
+    var pw = pol.offsetWidth, ph = pol.offsetHeight;
+    // White polaroid body
+    octx.fillStyle = '#fff';
+    octx.fillRect(p.x, p.y, pw, ph);
+    // Photo image (positioned relative to the polaroid via DOM layout)
+    var img = pol.querySelector('img');
+    if(img && img.complete && img.naturalWidth){
+      var imgArea = pol.querySelector('.ph-img-area');
+      var areaTop = imgArea ? imgArea.offsetTop : 8;
+      var areaH   = imgArea ? imgArea.offsetHeight : 110;
+      octx.drawImage(img, p.x + 8, p.y + areaTop, pw - 16, areaH);
+    }
+    // Caption text
+    var cap = pol.querySelector('.ph-caption');
+    if(cap && cap.value){
+      octx.font = '11px sans-serif';
+      octx.fillStyle = '#aaa';
+      octx.textBaseline = 'middle';
+      octx.fillText(cap.value, p.x + pw/2 - octx.measureText(cap.value).width/2, p.y + ph - 15);
+    }
+  });
+
+  // 5. Stickers
+  nbLayer.querySelectorAll('.jfy-sticker-node').forEach(function(node){
+    var p = pos(node);
+    var h = node.offsetHeight;
+    octx.font = (h * 0.8) + 'px serif';
+    octx.textBaseline = 'middle';
+    octx.fillText(node.textContent, p.x, p.y + h / 2);
+  });
+
+  // 6. Text boxes
+  nbLayer.querySelectorAll('.jfy-text-node-wrap').forEach(function(wrap){
+    var p = pos(wrap);
+    var txt = wrap.querySelector('.jfy-text-node');
+    if(!txt) return;
+    var cs = window.getComputedStyle(txt);
+    var fontSize   = parseFloat(cs.fontSize)   || 15;
+    var fontWeight = cs.fontWeight              || 'normal';
+    var fontFamily = cs.fontFamily              || 'sans-serif';
+    octx.font      = fontWeight + ' ' + fontSize + 'px ' + fontFamily;
+    octx.fillStyle = txt.style.color || cs.color || '#333';
+    octx.textBaseline = 'top';
+    var lineH = parseFloat(cs.lineHeight) || fontSize * 1.4;
+    drawWrapped(txt.innerText, p.x + 4, p.y + 4, wrap.offsetWidth - 8, lineH);
+  });
+
+  // 7. Saved between-us post cards
   nbLayer.querySelectorAll('.jfy-bw-card').forEach(function(card){
-    var er = card.getBoundingClientRect();
-    var ox = er.left - rect.left, oy = er.top - rect.top;
+    var p   = pos(card);
+    var cw  = card.offsetWidth, ch = card.offsetHeight;
     var pad = 12, r = 14;
-    // rounded rect fill
+    var isBlank = card.classList.contains('jfy-bw-card--blank');
     octx.save();
-    octx.beginPath();
-    octx.moveTo(ox + r, oy);
-    octx.lineTo(ox + er.width - r, oy);
-    octx.quadraticCurveTo(ox + er.width, oy, ox + er.width, oy + r);
-    octx.lineTo(ox + er.width, oy + er.height - r);
-    octx.quadraticCurveTo(ox + er.width, oy + er.height, ox + er.width - r, oy + er.height);
-    octx.lineTo(ox + r, oy + er.height);
-    octx.quadraticCurveTo(ox, oy + er.height, ox, oy + er.height - r);
-    octx.lineTo(ox, oy + r);
-    octx.quadraticCurveTo(ox, oy, ox + r, oy);
-    octx.closePath();
-    octx.fillStyle = card.classList.contains('jfy-bw-card--blank') ? '#f5f2ee' : '#fdf8f0';
+    roundRect(p.x, p.y, cw, ch, r);
+    octx.fillStyle = isBlank ? '#f5f2ee' : '#fdf8f0';
     octx.fill();
-    octx.strokeStyle = card.classList.contains('jfy-bw-card--blank') ? '#d4cfc9' : '#7dd6c8';
-    octx.lineWidth = 3;
-    octx.stroke();
+    octx.strokeStyle = isBlank ? '#d4cfc9' : '#7dd6c8';
+    octx.lineWidth = 3; octx.stroke();
     octx.restore();
-    if(card.classList.contains('jfy-bw-card--blank')){
+    if(isBlank){
       octx.font = 'italic 11px sans-serif';
       octx.fillStyle = '#b0a89e';
       octx.textBaseline = 'middle';
-      octx.fillText('post removed', ox + pad, oy + er.height / 2);
+      octx.fillText('post removed', p.x + pad, p.y + ch/2);
       return;
     }
-    // teal accent bar
     octx.fillStyle = '#7dd6c8';
-    octx.fillRect(ox + pad, oy + pad, 28, 3);
-    var contentY = oy + pad + 11;
-    // image or text
+    octx.fillRect(p.x + pad, p.y + pad, 28, 3);
     var img = card.querySelector('img');
     if(img && img.complete && img.naturalWidth){
-      var iw = er.width - pad * 2, ih = Math.min(iw * 0.75, er.height - contentY + oy - pad);
+      var iw = cw - pad*2, ih = Math.min(iw * 0.75, ch - pad*2 - 11);
       octx.save();
-      octx.beginPath();
-      octx.rect(ox + pad, contentY, iw, ih);
+      roundRect(p.x + pad, p.y + pad + 11, iw, ih, 4);
       octx.clip();
-      octx.drawImage(img, ox + pad, contentY, iw, ih);
+      octx.drawImage(img, p.x + pad, p.y + pad + 11, iw, ih);
       octx.restore();
     } else {
-      var p = card.querySelector('p');
-      var textContent = p ? p.textContent : card.textContent;
+      var cp = card.querySelector('p');
+      var txt2 = cp ? cp.textContent : card.textContent;
       octx.font = '11.5px Nunito, sans-serif';
       octx.fillStyle = '#2a1f14';
       octx.textBaseline = 'top';
-      var maxW2 = er.width - pad * 2;
-      var lineH2 = 17;
-      var curY2 = contentY;
-      textContent.split('\n').forEach(function(para){
-        var words = para.split(' ');
-        var line = '';
-        words.forEach(function(word){
-          var test = line ? line + ' ' + word : word;
-          if(octx.measureText(test).width > maxW2 && line){
-            octx.fillText(line, ox + pad, curY2); curY2 += lineH2; line = word;
-          } else { line = test; }
-        });
-        if(line){ octx.fillText(line, ox + pad, curY2); curY2 += lineH2; }
-      });
+      drawWrapped(txt2, p.x + pad, p.y + pad + 11, cw - pad*2, 17);
     }
   });
 
