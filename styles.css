@@ -15,6 +15,7 @@ img{display:block;max-width:100%}
   --white:#fff;
   --font-logo:please-vf,serif;
   --font-body:"Instrument Sans",sans-serif;
+  --footer-accent:#fdd306;
   --hh:64px;
   --gutter:120px;
   --col-gap:20px;
@@ -494,11 +495,20 @@ img{display:block;max-width:100%}
   #teal-scrib{display:block !important;width:38vw;top:-7vw;right:0;left:auto}
   #green-underlines{display:none !important}
   #site-footer .footer-desktop{display:none}
-  .footer-mobile{display:block;padding:28px 20px 0}
+  #site-footer{padding:0}
+  .footer-mobile{display:block;padding:20px calc((100% - 110px) / 12) 0}
   .footer-mobile .fm-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
   .footer-mobile .fm-back-top{font-size:13px;text-decoration:underline;cursor:pointer;color:#000;background:none;border:none;font-family:var(--font-body);padding:0}
-  .footer-mobile .fm-links{display:flex;flex-direction:column;gap:4px;text-align:right}
+  .footer-mobile .fm-links{display:flex;flex-direction:column;gap:4px;text-align:right;align-items:flex-end}
   .footer-mobile .fm-links a{font-size:15px;font-weight:500;color:#000}
+  .footer-mobile .fm-nav-btn{font-size:15px;font-weight:500;color:#000;cursor:pointer;background:none;border:none;font-family:var(--font-body);padding:0;display:block;margin-left:auto;text-align:right;transition:transform .2s ease}
+  .footer-mobile .fm-nav-btn[aria-expanded="true"]{transform:translateY(-3px)}
+  .footer-mobile .fm-nav-panel{overflow:hidden;max-height:0;transition:max-height .28s ease;background:var(--footer-accent,#fdd306);border-radius:6px;text-align:right;width:100%}
+  .footer-mobile .fm-nav-panel.is-open{max-height:120px}
+  .footer-mobile .fm-nav-panel a{display:block;font-size:13px;color:#000;padding:3px 10px;font-family:var(--font-body);font-weight:400;text-decoration:underline}
+  .footer-mobile .fm-nav-panel a:first-child{padding-top:8px}
+  .footer-mobile .fm-nav-panel a:last-child{padding-bottom:8px}
+  .footer-mobile .fm-nav-link{font-size:15px;font-weight:500;color:#000;font-family:var(--font-body)}
   .footer-mobile .fm-bottom{display:flex;align-items:flex-end;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(0,0,0,.12);margin-top:12px}
   .footer-mobile .fm-tagline{font-size:13px;line-height:1.5;color:#000}
   .footer-mobile .fm-logo{display:flex;align-items:flex-end}
