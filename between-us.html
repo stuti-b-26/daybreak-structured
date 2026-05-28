@@ -10,8 +10,6 @@
 <title>Between Us — daybreak</title>
 <link rel="stylesheet" href="styles.css">
 <style>
-:root{--footer-accent:#FF6FAA}
-.dropdown-link.active{color:#FF6FAA;font-weight:700}
 /* ── BETWEEN US PAGE ── */
 body{background:#EEE0CC}
 #page-main{background:#EEE0CC;font-family:'Nunito',sans-serif}
@@ -95,7 +93,7 @@ body{background:#EEE0CC}
 }
 .bw-post-card:hover{transform:translate(-2px,-2px)}
 /* beige scrim so black text is legible over any tile */
-.bw-post-card::before{content:'';position:absolute;inset:0;background:rgba(232,220,196,.82);pointer-events:none;z-index:1}
+.bw-post-card::before{content:'';position:absolute;inset:0;background:rgba(232,220,196,.52);pointer-events:none;z-index:1}
 .bw-post-card::after{display:none}
 .bw-post-card>*:not(.bw-post-tile){position:relative;z-index:2}
 .bw-post-tag{font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.12);color:#1a140a;width:fit-content;flex-shrink:0;border:1px solid rgba(0,0,0,.18)}
@@ -140,7 +138,7 @@ body{background:#EEE0CC}
 .bw-empty{font-family:'Nunito',sans-serif;font-size:16px;color:rgba(0,0,0,.4);font-style:italic;padding:32px 0}
 
 /* ── INSPIRED ZONE (flower vines + write section) ── */
-.bw-inspired-zone{position:relative;margin-top:-55px;z-index:4;overflow-x:clip}
+.bw-inspired-zone{position:relative;margin-top:-55px;z-index:1;overflow-x:clip}
 .bw-write-bg{position:absolute;top:0;bottom:-160px;left:50%;transform:translateX(-50%);width:110vw;pointer-events:none;z-index:0}
 .bw-write-bg img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
 .bw-bushes{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120%;pointer-events:none;z-index:0;line-height:0}
@@ -158,18 +156,16 @@ body{background:#EEE0CC}
 .bw-textarea{width:100%;min-height:160px;border:2px solid rgba(0,0,0,.2);border-radius:12px;outline:none;font-family:'Nunito',sans-serif;font-size:17px;color:#000;resize:none;overflow-y:hidden;background:rgba(255,255,255,.5);line-height:1.55;display:block;padding:16px;transition:border-color .2s}
 .bw-textarea::placeholder{color:rgba(0,0,0,.35)}
 .bw-textarea:focus{border-color:rgba(0,0,0,.5)}
-.bw-write-footer{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:16px;position:relative;z-index:100;isolation:isolate}
+.bw-write-footer{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:16px}
 .bw-char-count{font-family:'Nunito',sans-serif;font-size:13px;color:rgba(0,0,0,.45);font-weight:600}
 .bw-char-count.bw-char-low{color:#ff8a65}
-.bw-write-actions{display:flex;gap:12px;position:relative;z-index:10}
-.bw-btn{font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;padding:11px 24px;border-radius:999px;border:2.5px solid #000;cursor:pointer;transition:background .15s,color .15s,box-shadow .08s,transform .08s;box-shadow:3px 3px 0 0 rgba(0,0,0,.2);position:relative;z-index:200;pointer-events:auto}
+.bw-write-actions{display:flex;gap:12px}
+.bw-btn{font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;padding:11px 24px;border-radius:999px;border:2.5px solid #000;cursor:pointer;transition:background .15s,color .15s,box-shadow .08s,transform .08s;box-shadow:3px 3px 0 0 rgba(0,0,0,.2)}
 .bw-btn:active{box-shadow:1px 1px 0 0 rgba(0,0,0,.1);transform:scale(.95)}
-.bw-btn--anon{background:#000;color:#EEE0CC}
-.bw-btn--anon:hover{background:#222}
-.bw-btn--share{background:transparent;color:#000}
-.bw-btn--share:hover{background:rgba(0,0,0,.08)}
-.bw-btn--save{background:transparent;color:#888;border-color:#aaa}
-.bw-btn--save:hover{background:rgba(0,0,0,.05)}
+.bw-btn--save{background:transparent;color:#000}
+.bw-btn--save:hover{background:rgba(0,0,0,.08)}
+.bw-btn--share{background:#000;color:#EEE0CC}
+.bw-btn--share:hover{background:#222}
 .bw-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#000;color:#fff;font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;padding:12px 24px;border-radius:999px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:9999;white-space:nowrap}
 .bw-toast.bw-toast--show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -459,9 +455,8 @@ body{background:#EEE0CC}
         <div class="bw-write-footer">
           <span class="bw-char-count" id="bw-char-count">280</span>
           <div class="bw-write-actions">
-            <button class="bw-btn bw-btn--anon" onclick="bwShareAnon()">share anonymously</button>
-            <button class="bw-btn bw-btn--share" onclick="bwShare()">share</button>
-            <button class="bw-btn bw-btn--save" onclick="bwSaveIt()">save it</button>
+            <button class="bw-btn bw-btn--save" id="bw-save-btn">save it</button>
+            <button class="bw-btn bw-btn--share" id="bw-share-btn">share anonymously</button>
           </div>
         </div>
       </div>
@@ -494,6 +489,8 @@ body{background:#EEE0CC}
   </section>
 
 </main>
+
+<div class="bw-toast" id="bw-toast"></div>
 
 <div class="bw-toast" id="bw-toast"></div>
 
@@ -601,7 +598,7 @@ body{background:#EEE0CC}
       <div>
         <p class="fm-tagline">made it to the bottom?<br>that earned you another break :-)</p>
         <a href="#" class="fm-logo" style="margin-top:12px;display:flex" aria-label="Daybreak home">
-          <svg class="footer-logo-svg footer-logo-svg--mobile" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#FF6FAA" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#FF6FAA" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
+          <svg class="footer-logo-svg footer-logo-svg--mobile" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg>
         </a>
       </div>
     </div>
@@ -702,7 +699,6 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
     var sun=btn.closest('.nav-item')&&btn.closest('.nav-item').querySelector('.nav-sun');
     if(sun)sun.classList.add('visible');
   });
-  document.querySelectorAll('.dropdown-link[href="between-us.html"]').forEach(function(l){l.classList.add('active');});
 })();
 
 /* 3. MOBILE MENU */
@@ -939,12 +935,7 @@ function loadJournal(){
 function saveJournal(entries){try{localStorage.setItem(STORE_JOURNAL,JSON.stringify(entries))}catch(e){}}
 
 function loadPosts(){
-  try{
-    var d=localStorage.getItem(STORE_KEY);
-    var p=d?JSON.parse(d):[];
-    var userPosts=p.filter(function(x){return x.own===true||x.anon===true});
-    return userPosts.concat(SEED_POSTS);
-  }
+  try{var d=localStorage.getItem(STORE_KEY);return d?JSON.parse(d):SEED_POSTS.slice()}
   catch(e){return SEED_POSTS.slice()}
 }
 function savePosts(posts){try{localStorage.setItem(STORE_KEY,JSON.stringify(posts))}catch(e){}}
@@ -986,9 +977,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
 
   var tileSrc='moss-tile-'+(fc+1)+'.svg';
 
-  var isAnon=post.anon===true;
-  var tagLabel=isOwn?'you':'anonymous';
-  var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(tagLabel)+'</div>';
+  var tagEl='<div class="bw-post-tag'+(isOwn?' bw-post-tag--own':'')+'">'+(isOwn?'you':'anonymous')+'</div>';
   var mediaEl='';
   if(post.media && post.media.url){
     mediaEl='<img class="bw-post-media" src="'+escHtml(post.media.url)+'" alt="">';
@@ -996,12 +985,11 @@ function renderCard(post, isOwn, idx, showJournal, context){
   var textEl='<p class="bw-post-text">'+escHtml(post.text)+'</p>';
   var saved=loadSaved();
   var isSaved=saved.some(function(p){return p.id===post.id});
-  var canDelete=isOwn||isAnon;
-  var inJournal=showJournal&&!canDelete&&loadJournal().some(function(e){return e.id===post.id});
-  var journalBtn=(showJournal&&!canDelete)
+  var inJournal=showJournal&&loadJournal().some(function(e){return e.id===post.id});
+  var journalBtn=showJournal
     ?'<button class="bw-post-journal-btn'+(inJournal?' bw-in-journal':'')+'" data-id="'+post.id+'" aria-label="Add to journal">'+(inJournal?'in journal':'+ journal')+'</button>'
     :'';
-  var deleteBtn=canDelete
+  var deleteBtn=isOwn
     ?'<button class="bw-post-delete-btn" data-id="'+post.id+'" aria-label="Delete post">remove</button>'
     :'';
   var footerEl='<div class="bw-post-footer">'+
@@ -1030,12 +1018,12 @@ function renderCard(post, isOwn, idx, showJournal, context){
     renderFeed();
   });
 
-  if(canDelete){
+  if(isOwn){
     var dBtn=card.querySelector('.bw-post-delete-btn');
     if(dBtn)dBtn.addEventListener('click',function(e){
       e.stopPropagation();
       var posts=loadPosts();
-      savePosts(posts.filter(function(x){return (x.own===true||x.anon===true)&&x.id!==post.id}));
+      savePosts(posts.filter(function(x){return x.id!==post.id}));
       var savedList=loadSaved();
       saveSaved(savedList.filter(function(x){return x.id!==post.id}));
       showToast('post deleted');
@@ -1124,8 +1112,6 @@ function renderLightboxCard(){
   var post=_lbPosts[_lbIdx];
   if(!post)return;
   var isOwn=post.own;
-  var isAnon=post.anon===true;
-  var canDelete=isOwn||isAnon;
   var saved=loadSaved();
   var isSaved=saved.some(function(p){return p.id===post.id});
 
@@ -1135,13 +1121,12 @@ function renderLightboxCard(){
   var saveBtn=document.getElementById('bw-lb-save');
   saveBtn.className='bw-lb-btn bw-lb-btn--save'+(isSaved?' bw-bookmarked':'');
   saveBtn.textContent=isSaved?'★ saved':'☆ save';
-  var inJournal=!canDelete&&loadJournal().some(function(e){return e.id===post.id});
+  var inJournal=loadJournal().some(function(e){return e.id===post.id});
   var journalBtn=document.getElementById('bw-lb-journal');
-  journalBtn.style.display=canDelete?'none':'';
   journalBtn.className='bw-lb-btn bw-lb-btn--journal'+(inJournal?' bw-in-journal':'');
   journalBtn.textContent=inJournal?'✓ in journal':'+ journal';
   var deleteBtn=document.getElementById('bw-lb-delete');
-  deleteBtn.style.display=canDelete?'':'none';
+  deleteBtn.style.display=isOwn?'':'none';
   document.getElementById('bw-lb-counter').textContent=(_lbIdx+1)+' / '+_lbPosts.length;
 
   var mediaEl=document.getElementById('bw-lb-media');
@@ -1202,9 +1187,9 @@ function initLightbox(){
 
   document.getElementById('bw-lb-delete').addEventListener('click',function(){
     var post=_lbPosts[_lbIdx];
-    if(!post.own&&!post.anon)return;
+    if(!post.own)return;
     var posts=loadPosts();
-    savePosts(posts.filter(function(x){return (x.own===true||x.anon===true)&&x.id!==post.id}));
+    savePosts(posts.filter(function(x){return x.id!==post.id}));
     var savedList=loadSaved();
     saveSaved(savedList.filter(function(x){return x.id!==post.id}));
     showToast('post deleted');
@@ -1366,34 +1351,24 @@ if(textarea&&counter){
   });
 }
 
-function _getWriteText(){return textarea?textarea.value.trim():'';}
-function _clearTextarea(){if(textarea)textarea.value='';if(counter)counter.textContent='280';}
-
-window.bwShareAnon=function(){
-  var text=_getWriteText();
-  if(!text){showToast('write something first :)');return;}
-  var post={id:'anon'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,anon:true};
-  var posts=loadPosts().filter(function(x){return x.own===true||x.anon===true});
-  posts.unshift(post);savePosts(posts);
-  _clearTextarea();renderFeed();showToast('shared anonymously!');
-};
-
-window.bwShare=function(){
-  var text=_getWriteText();
+document.getElementById('bw-save-btn')&&document.getElementById('bw-save-btn').addEventListener('click',function(){
+  var text=(textarea&&textarea.value.trim())||'';
   if(!text){showToast('write something first :)');return;}
   var post={id:'own'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,own:true};
-  var posts=loadPosts().filter(function(x){return x.own===true||x.anon===true});
-  posts.unshift(post);savePosts(posts);
-  _clearTextarea();renderFeed();showToast('shared with the community!');
-};
+  var saved=loadSaved();
+  saved.unshift(post);saveSaved(saved);
+  if(textarea)textarea.value='';if(counter)counter.textContent='280';
+  renderSaved();showToast('saved privately!');
+});
 
-window.bwSaveIt=function(){
-  var text=_getWriteText();
+document.getElementById('bw-share-btn')&&document.getElementById('bw-share-btn').addEventListener('click',function(){
+  var text=(textarea&&textarea.value.trim())||'';
   if(!text){showToast('write something first :)');return;}
-  var post={id:'sv'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:true};
-  var saved=loadSaved();saved.unshift(post);saveSaved(saved);
-  _clearTextarea();renderSaved();showToast('saved privately!');
-};
+  var post={id:'own'+Date.now(),text:text,time:Date.now(),likes:0,liked:false,saved:false,own:true};
+  var posts=loadPosts();posts.unshift(post);savePosts(posts);
+  if(textarea)textarea.value='';if(counter)counter.textContent='280';
+  renderFeed();showToast('shared with the community!');
+});
 
 initLightbox();
 renderFeed();

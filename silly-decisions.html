@@ -1,19 +1,418 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>silly decisions – daybreak</title>
+  <title>Silly Decisions — Daybreak</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://use.typekit.net/gdm5amj.css">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.typekit.net/nte5bhk.css">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="silly-decisions.css">
+
   <style>
-    /* ── Silly Decisions page-specific header/footer theme ── */
-    #site-header { background: #E2FAFF; }
-    #site-footer { background: #E2FAFF; }
+	  body {
+  background: #fdf8f0;
+}
+    .q-wrap {
+  font-family: 'DM Sans', sans-serif;
+  background: #fdf8f0;
+  padding: 3rem 0;
+}
+    .q-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 1.5rem;
+    }
+    .q-prompt {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 1.5rem;
+    }
+    .q-arrow {
+      font-size: 30px;
+      color: black;
+      letter-spacing: -4px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+	  max-width: 1100px;    /* change this number to make buttons narrower or wider */
+	  position: relative;   /* add this */
+    }
+
+    /* ── BASE BUTTON STYLE — position:relative is here, not repeated below ── */
+    .opt {
+      position: relative;
+	  overflow: visible;
+      padding: 18px 22px;
+      border: 1.5px solid #ccc;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: #1a1a1a;
+      background: #f0eeea;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: left;
+    }
+    .opt.selected {
+      font-weight: 600;
+    }
+    .opt.selected::before {
+      content: '✓  ';
+    }
+
+    /* ── TITLE HIGHLIGHT PNG BACKGROUNDS ── */
+    .title-highlight {
+      background-image: url('title-bg.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 9px 19px;
+      display: inline-block;
+    }
+    .title-highlight-2 {
+      background-image: url('title-bg-2.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 9px 19px;
+      display: inline-block;
+    }
+    .title-highlight-3 {
+      background-image: url('title-bg-3.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 9px 19px;
+      display: inline-block;
+    }
+    .title-highlight-4 {
+      background-image: url('title-bg-4.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 9px 19px;
+      display: inline-block;
+    }
+    .title-highlight-5 {
+      background-image: url('title-bg-5.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 9px 19px;
+      display: inline-block;
+    }
+    .title-highlight-6 {
+      background-image: url('title-bg-6.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 9px 19px;
+      display: inline-block;
+    }
+    .title-highlight-7 {
+      background-image: url('title-bg-7.png');
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      padding: 9px 19px;
+      display: inline-block;
+    }
+
+    /* ── PER QUESTION HOVER & SELECTED COLOURS ── */
+    .opt-1:hover,    .opt-1.selected { background: #C3F481; border-color: #8ab800; color: #1a2e00; }
+    .opt-2:hover,    .opt-2.selected { background: #FF9945; border-color: #cc6600; color: #3d1f00; }
+    .opt-3:hover,    .opt-3.selected { background: #58C6FF; border-color: #3a8fd4; color: #002d5a; }
+    .opt-4:hover,    .opt-4.selected { background: #FBE172; border-color: #706203; color: #2E2201; }
+    .opt-5:hover,    .opt-5.selected { background: #FF98D0; border-color: #741A4B; color: #741A4B; }
+    .opt-6:hover,    .opt-6.selected { background: #A7F5EC; border-color: #155B53; color: #155B53; }
+    .opt-7:hover,    .opt-7.selected { background: #D5A8FF; border-color: #2C1045; color: #2C1045; }
+
+    /* ── STICKER — hidden by default, shows on hover and selected ── */
+    .sticker {
+  display: none;
+  position: absolute;
+  top: -400px;    /* increased so the bigger sticker floats high enough */
+  right: 200px;
+  width: 600px;   /* increase this to make it bigger */
+  pointer-events: none;
+
+    }
+    .opt:hover .sticker,
+    .opt.selected .sticker {
+      display: block;
+		 z-index: 999;    /* ✅ add this line here */
+    }
+
+
+
+
+	  /* U GOT THIS SHRADDHA*/
+
+
+
+
+    /* ── INDIVIDUAL STICKER 01 ── */
+
+    .sticker-1c {
+      width: 590px;
+      top: -500px;
+      right: -90px;
+    }
+	  /* STICKER-2*/
+
+	  .sticker-2e {
+      width: 350px;
+      top: -450px;
+      right: 250px;
+	  }
+
+	  /* STICKER-3*/
+
+	.sticker-3c {
+    width: 220px;
+    top: -420px;      /* more negative — moves it up */
+    right: 50px;      /* positive number — moves it left, inside the button area */
+}
+
+	   /* STICKER-4*/
+
+	.sticker-4d {
+  width: 500px;
+  top: -500px;       /* just above the 4th button */
+  left: 370px;     /* use left instead of right to push it to the far left */
+}
+
+	  /* STICKER-5*/
+
+	.sticker-5b {
+  width: 500px;
+  top: 80px;       /* just above the 4th button */
+  left: 170px;     /* use left instead of right to push it to the far left */
+}
+
+	  /* STICKER-6*/
+
+	.sticker-6b {
+  width: 300px;
+  top: -100px;       /* just above the 4th button */
+  left: 370px;     /* use left instead of right to push it to the far left */
+}
+	   /* STICKER-7*/
+
+	.sticker-7c {
+  width: 300px;
+  top: -400px;       /* just above the 4th button */
+  left: 870px;     /* use left instead of right to push it to the far left */
+}
+
+
+
+
+	  /* ── INTRO SECTION ── */
+.intro-wrap {
+  padding: 200px 0 0 0;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.intro-body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 50px;       /* was 28px — bigger text */
+  font-weight: 400;
+  color: #1a1a1a;
+  line-height: 1.4;
+  margin-bottom: 60px;   /* more space between paragraphs */
+}
+.squiggle {
+  background-image: url('squiggle.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  padding: 8px 12px;
+  display: inline-block;
+}
+
+.intro-handwrite {
+  display: block;
+  width: 150px;
+  margin-left: auto;
+  margin-right: 600px;
+  margin-top: -70px;
+}
+
+/* gap between intro and first question */
+.intro-spacer {
+	height: 100px; }
+
+
+
+    /* ✅ NEW ANIMATION CSS starts here, outside everything else */
+    .squiggle,
+    .intro-handwrite {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 1.6s ease, transform 1.6s ease;
+    }
+
+    .squiggle.visible,
+    .intro-handwrite.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .intro-handwrite {
+      transition-delay: 0.14s;
+    }
+	  /* ── GAME BOX ── */
+#game-box {
+  position: relative;
+  width: 100%;
+  height: 700px;
+  margin: 60px 0;
+  background: #ffffff;
+  border: 2px solid #1a1a1a;
+  border-radius: 24px;
+  overflow: hidden;        /* brain cannot escape the box */
+  box-shadow: 25px 25px 0 #FBE172;
+}
+
+/* head sits bottom left */
+#head-img {
+  position: absolute;
+  bottom: 0;
+  left: 60px;
+  width: 380px;
+  pointer-events: none;
+}
+
+/* window sits top right */
+#window-img {
+  position: absolute;
+  top: 80px;
+  right: 200px;
+  width: 400px;
+  width: 320px;
+  pointer-events: none;
+}
+
+/* trash starts off screen right, slides in */
+#trash-img {
+  position: absolute;
+  bottom: 0;
+  right: 100px;           /* starts off screen */
+  width: 190px;
+  pointer-events: none;
+  transition: right 1s ease;
+}
+#trash-img.visible {
+  right: 60px;             /* slides into view */
+}
+
+/* trash prompt text */
+#trash-text {
+  position: absolute;
+  bottom: 230px;
+  right: -300px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  width: 300px;
+  transition: right 1s ease 0.3s;
+}
+#trash-text.visible {
+  right: 20px;
+}
+
+/* raccoon hidden by default */
+#raccoon-popup {
+  position: absolute;
+  top: 150px;        /* match this to where your window sits — adjust to fit inside it */
+  right: 270px;      /* match this to your window's right position */
+  text-align: center;
+  display: none;     /* hidden by default — appears instantly, no animation */
+  width: 200px;      /* constrain it to fit inside the window frame */
+}
+#raccoon-popup.visible {
+  display: block;    /* appears instantly */
+}
+#raccoon-popup img {
+  width: 160px;      /* size of raccoon inside window */
+}
+#raccoon-popup p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 6px;
+  color: #1a1a1a;
+}
+/* the draggable brain */
+#brain {
+  position: absolute;
+  width: 200px;
+  top: 60px;
+  left: 160px;             /* starts on top of the head */
+  cursor: grab;
+  user-select: none;
+  transition: none;
+}
+#brain:active { cursor: grabbing; }
+
+/* success state — hidden by default */
+#success-msg {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+#success-msg p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+#brain-in-trash {
+  width: 100px;
+}
+#brain-intro-text {
+  position: absolute;
+  top: 50px;
+  left: 70px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1.4;
+}
+	  .quiz-spacer {
+  height: 100px;
+
+}
+.quiz-title-wrap {
+  text-align: center;
+}
+.quiz-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 52px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: inline-block;
+}
+.circle-scribble {
+  background-image: url('circle-scribble.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  padding: 20px 40px;
+  display: inline-block;
+}
+	  .quiz-subtitle {
+  display: block;
+  margin: 4px auto 0;    /* centres it and controls gap above */
+  width: 700px;           /* adjust to match your PNG size */
+}
   </style>
 </head>
 <body>
@@ -70,7 +469,7 @@
       <span class="nav-sun" aria-hidden="true"></span>
       <button class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
       <div class="dropdown" id="dropdown-about" role="menu">
-        <a class="dropdown-link" href="about.html" role="menuitem">our mission</a>
+        <a class="dropdown-link" href="about.html#our-mission" role="menuitem">our mission</a>
         <a class="dropdown-link" href="about.html#our-approach" role="menuitem">our approach</a>
         <a class="dropdown-link" href="about.html#meet-the-team" role="menuitem">meet the team</a>
       </div>
@@ -101,7 +500,7 @@
       <span class="nav-sun" aria-hidden="true"></span>
       <button class="nav-btn" data-key="about" aria-haspopup="true" aria-expanded="false">about</button>
       <div class="dropdown" id="dropdown-about-t" role="menu">
-        <a class="dropdown-link" href="about.html" role="menuitem">our mission</a>
+        <a class="dropdown-link" href="about.html#our-mission" role="menuitem">our mission</a>
         <a class="dropdown-link" href="about.html#our-approach" role="menuitem">our approach</a>
         <a class="dropdown-link" href="about.html#meet-the-team" role="menuitem">meet the team</a>
       </div>
@@ -129,9 +528,9 @@
   <div class="mobile-menu-section">
     <h3 class="has-page"><a href="about.html">about</a></h3>
     <ul>
-      <li><a href="about.html">our mission</a></li>
+      <li><a href="about.html#our-mission">our mission</a></li>
       <li><a href="about.html#our-approach">our approach</a></li>
-      <li><a href="#">how it works</a></li>
+      <li><a href="about.html#our-approach">how it works</a></li>
     </ul>
   </div>
   <div class="mobile-menu-section">
@@ -145,260 +544,210 @@
   <div class="mobile-menu-section">
     <h3 class="has-page"><a href="profile.html">profile</a></h3>
     <ul>
-      <li><a href="#">my happiness</a></li>
-      <li><a href="#">gallery</a></li>
-      <li><a href="#">mood tracker</a></li>
-      <li><a href="#">journal</a></li>
+      <li><a href="profile.html#prof-happiness">my happiness</a></li>
+      <li><a href="profile.html#prof-gallery">gallery</a></li>
+      <li><a href="profile.html#prof-mood">mood tracker</a></li>
+      <li><a href="profile.html#prof-journal">journal</a></li>
     </ul>
   </div>
 </div>
 
-<button class="fab" id="fab" aria-label="How are you feeling?">
-  <canvas id="fab-canvas" width="60" height="60"></canvas>
-</button>
+<main>
+<div class="gc grid">
+<div class="col-content">
 
-<!-- MOOD POPUP -->
-<div id="mood-overlay" role="dialog" aria-modal="true" aria-label="How are you feeling?">
-  <div id="mood-popup" style="position:relative">
-    <button class="mood-popup-close" id="mood-close" aria-label="Close">close</button>
-    <p class="mood-popup-q">how are you feeling right now?</p>
-    <p class="mood-popup-sub">no need to overthink, just choose what feels closest and see what we recommend for you.</p>
-    <div class="mood-emotions" role="group" aria-label="Emotions">
-      <button class="mood-chip mood-chip--orange" data-mood="overwhelmed">overwhelmed</button>
-      <button class="mood-chip mood-chip--pink" data-mood="anxious">anxious</button>
-      <button class="mood-chip mood-chip--blue" data-mood="lonely">lonely</button>
-      <button class="mood-chip mood-chip--teal" data-mood="tired">tired</button>
-      <button class="mood-chip mood-chip--peach" data-mood="restless">restless</button>
-      <button class="mood-chip mood-chip--lavender" data-mood="unsure">unsure</button>
-      <button class="mood-chip mood-chip--green" data-mood="curious">curious</button>
-      <button class="mood-chip mood-chip--lime" data-mood="playful">playful</button>
-      <button class="mood-chip mood-chip--yellow" data-mood="hopeful">hopeful</button>
-    </div>
-    <div id="mood-suggestions">
-      <p class="mood-sug-label">suggested for you</p>
-      <div class="mood-sug-list" id="mood-sug-list"></div>
-    </div>
-  </div>
-</div>
-
-  <!-- ══ MAIN TITLE ══ -->
-  <div class="main-title-section" style="padding-top:calc(var(--hh, 64px) + 40px)">
-    <div class="main-title-letters">
-      <!-- "Silly" — 5 of 12 columns -->
-      <div class="title-col">
-        <img class="title-word" src="main-title-silly.png" alt="Silly" />
-      </div>
-      <!-- "decisions" — 5 of 12 columns -->
-      <div class="title-col">
-        <img class="title-word" src="main-title-decisions.png" alt="decisions" />
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ INTRO TEXT ══ -->
-  <div class="grid-wrap intro-wrap">
-    <p class="intro-body">a personality quiz built entirely around unnecessary choices, strange instincts and mildly entertaining confusion.</p>
-    <p class="intro-body">Here,<br/>nothing is measured,<br/>nothing is correct,<br/><strong>nothing is taken <span class="squiggle">too seriously.</span></strong></p>
+  <!-- INTRO SECTION -->
+  <div class="intro-wrap">
+    <p class="intro-body">
+      a personality quiz built entirely around unnecessary choices,
+      strange instincts and mildly entertaining confusion.
+    </p>
+    <p class="intro-body">
+      Here,<br/>
+      nothing is measured,<br/>
+      nothing is correct,<br/>
+      <strong>nothing is taken <span class="squiggle">too seriously.</span></strong>
+    </p>
     <img class="intro-handwrite" src="but-we-judge.png" alt="But we judge" />
   </div>
 
+  <!-- SPACER before game box -->
   <div class="intro-spacer"></div>
 
-  <!-- ══ GAME BOX ══ -->
-  <div class="grid-wrap">
-    <div id="game-box">
-      <img id="head-img" src="head.png" alt="" />
-      <img id="window-img" src="window-frame.png" alt="" />
-      <img id="trash-img" src="trash.png" alt="" />
-      <div id="raccoon-popup"><img src="raccoon.png" alt="" /><p>eww, take that thing back</p></div>
-      <div id="trash-text">Yes, into the trash literally.</div>
-      <div id="brain-intro-text">Logic is not required.<br/>Please throw your brain away.</div>
-      <img id="brain" src="brain.png" alt="brain" />
-      <div id="success-msg">
-        <img id="brain-in-trash" src="brain.png" alt="" />
-        <p>good job! you can now proceed ↓</p>
-      </div>
+  <!-- BRAIN DISPOSAL MINI GAME -->
+  <div id="game-box">
+    <img id="head-img" src="head.png" alt="" />
+    <img id="window-img" src="window-frame.png" alt="" />
+    <img id="trash-img" src="trash.png" alt="" />
+    <div id="raccoon-popup">
+      <img src="raccoon.png" alt="" />
+      <p>eww, take that thing back</p>
+    </div>
+    <div id="trash-text">Yes, into the trash literally.</div>
+    <div id="brain-intro-text">Logic is not required.<br/>Please throw your brain away.</div>
+    <img id="brain" src="brain.png" alt="brain" />
+    <div id="success-msg">
+      <img id="brain-in-trash" src="brain.png" alt="" />
+      <p>good job! you can now proceed ↓</p>
     </div>
   </div>
 
-  <div class="quiz-spacer-top"></div>
+  <!-- ✅ SPACER between game box and title -->
+  <div class="quiz-spacer"></div>
 
-  <!-- ══ QUIZ TITLE ══ -->
-  <div class="grid-wrap quiz-title-wrap">
-    <h2 class="quiz-title"><span class="circle-scribble">personality quiz</span></h2>
-    <img class="quiz-subtitle" src="quiz-subtitle.png" alt="7 questions. 0 correct answers." />
-  </div>
 
-  <div class="quiz-spacer-bottom"></div>
 
-  <!-- ══ QUESTION 1 ══ -->
-  <div class="grid-wrap q-wrap" data-audio="audio-1.mp3" data-fact="fact-1.png" data-fact-num="1">
+  <!-- ✅ PERSONALITY QUIZ TITLE -->
+  <div class="quiz-title-wrap">
+  <h2 class="quiz-title">
+    <span class="circle-scribble">personality quiz</span>
+  </h2>
+  <img class="quiz-subtitle" src="quiz-subtitle.png" alt="7 questions. 0 correct answers. infinite self-discovery." />
+</div>
+
+
+
+  <!-- ✅ SPACER between title and first question -->
+  <div class="quiz-spacer"></div>
+
+  <!-- QUESTION 1 -->
+  <div class="q-wrap">
     <h2 class="q-title"><span class="title-highlight">emotional identity</span></h2>
-    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>choose your emotional support potato.</span></div>
-    <div class="options" role="listbox">
-      <button class="opt opt-1" role="option" onclick="pick(this)">Clumpy mashed potato with leadership qualities<img class="sticker sticker-1a" src="sticker-1a.png" alt="" /></button>
-      <button class="opt opt-1" role="option" onclick="pick(this)">aggressively over-seasoned curly fry<img class="sticker sticker-1b" src="sticker-1b.png" alt="" /></button>
-      <button class="opt opt-1" role="option" onclick="pick(this)">wet potato in a ziplock bag<img class="sticker sticker-1c" src="sticker-1c.png" alt="" /></button>
-      <button class="opt opt-1" role="option" onclick="pick(this)">baked potato radiating wisdom<img class="sticker sticker-1d" src="sticker-1d.png" alt="" /></button>
-      <button class="opt opt-1" role="option" onclick="pick(this)">a sad potato<img class="sticker sticker-1e" src="sticker-1e.png" alt="" /></button>
+    <div class="q-prompt">
+      <span class="q-arrow">&#x21D2;</span>
+      <span>choose your emotional support potato.</span>
+    </div>
+    <div class="options" role="listbox" aria-label="Choose your emotional support potato">
+      <button class="opt opt-1" role="option" onclick="pick(this)">Clumpy mashed potato with leadership qualities
+        <img class="sticker" src="sticker-1a.png" alt="" />
+      </button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">aggressively over-seasoned curly fry
+        <img class="sticker" src="sticker-1b.png" alt="" />
+      </button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">wet potato in a ziplock bag
+        <img class="sticker sticker-1c" src="sticker-1c.png" alt="" />
+      </button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">baked potato radiating wisdom
+        <img class="sticker" src="sticker-1d.png" alt="" />
+      </button>
+      <button class="opt opt-1" role="option" onclick="pick(this)">an angry tater tot
+        <img class="sticker" src="sticker-1e.png" alt="" />
+      </button>
     </div>
   </div>
-  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
 
-  <!-- ══ QUESTION 2 ══ -->
-  <div class="grid-wrap q-wrap" data-audio="audio-2.mp3" data-fact="fact-2.png" data-fact-num="2">
+  <!-- QUESTION 2 -->
+  <div class="q-wrap">
     <h2 class="q-title"><span class="title-highlight-2">survival instinct</span></h2>
-    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>which object would absolutely defeat you in combat?</span></div>
-    <div class="options" role="listbox">
-      <button class="opt opt-2" role="option" onclick="pick(this)">a folding chair<img class="sticker sticker-2a" src="sticker-2a.png" alt="" /></button>
-      <button class="opt opt-2" role="option" onclick="pick(this)">microwave from 2007<img class="sticker sticker-2b" src="sticker-2b.png" alt="" /></button>
-      <button class="opt opt-2" role="option" onclick="pick(this)">a dumpster raccoon<img class="sticker sticker-2c" src="sticker-2c.png" alt="" /></button>
-      <button class="opt opt-2" role="option" onclick="pick(this)">traffic cone with ambition<img class="sticker sticker-2d" src="sticker-2d.png" alt="" /></button>
-      <button class="opt opt-2" role="option" onclick="pick(this)">shopping cart with one broken wheel<img class="sticker sticker-2e" src="sticker-2e.png" alt="" /></button>
+    <div class="q-prompt">
+      <span class="q-arrow">&#x21D2;</span>
+      <span>which object would absolutely defeat you in combat?</span>
+    </div>
+    <div class="options" role="listbox" aria-label="Which object would absolutely defeat you in combat">
+      <button class="opt opt-2" role="option" onclick="pick(this)">a folding chair</button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">microwave from 2007</button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">a dumpster raccoon</button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">traffic cone with ambition</button>
+      <button class="opt opt-2" role="option" onclick="pick(this)">shopping cart with one broken wheel
+        <img class="sticker sticker-2e" src="sticker-2e.png" alt="" />
+      </button>
     </div>
   </div>
-  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
 
-  <!-- ══ QUESTION 3 ══ -->
-  <div class="grid-wrap q-wrap" data-audio="audio-3.mp3" data-fact="fact-3.png" data-fact-num="3">
+  <!-- QUESTION 3 -->
+  <div class="q-wrap">
     <h2 class="q-title"><span class="title-highlight-3">life philosophy</span></h2>
-    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>Pick a T-shirt reference</span></div>
-    <div class="options" role="listbox">
-      <button class="opt opt-3" role="option" onclick="pick(this)">maybe Later (but probably not)<img class="sticker sticker-3a" src="sticker-3a.png" alt="" /></button>
-      <button class="opt opt-3" role="option" onclick="pick(this)">entering my villain arc era<img class="sticker sticker-3b" src="sticker-3b.png" alt="" /></button>
-      <button class="opt opt-3" role="option" onclick="pick(this)">confidence is stored in the knees<img class="sticker sticker-3c" src="sticker-3c.png" alt="" /></button>
-      <button class="opt opt-3" role="option" onclick="pick(this)">I hate myself<img class="sticker sticker-3d" src="sticker-3d.png" alt="" /></button>
-      <button class="opt opt-3" role="option" onclick="pick(this)">i forgot the question<img class="sticker sticker-3e" src="sticker-3e.png" alt="" /></button>
+    <div class="q-prompt">
+      <span class="q-arrow">&#x21D2;</span>
+      <span>Pick a T-shirt reference</span>
+    </div>
+    <div class="options" role="listbox" aria-label="Pick a T-shirt reference">
+      <button class="opt opt-3" role="option" onclick="pick(this)">maybe Later (but probably not)</button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">entering my villain arc era</button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">confidence is stored in the knees
+        <img class="sticker sticker-3c" src="sticker-3c.png" alt="" />
+      </button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">I hate myself</button>
+      <button class="opt opt-3" role="option" onclick="pick(this)">i forgot the question</button>
     </div>
   </div>
-  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
 
-  <!-- ══ QUESTION 4 ══ -->
-  <div class="grid-wrap q-wrap" data-audio="audio-4.mp3" data-fact="fact-4.png" data-fact-num="4">
+  <!-- QUESTION 4 -->
+  <div class="q-wrap">
     <h2 class="q-title"><span class="title-highlight-4">Coping mechanism</span></h2>
-    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>Pick a coping mechanism</span></div>
-    <div class="options" role="listbox">
-      <button class="opt opt-4" role="option" onclick="pick(this)">staring dramatically out windows<img class="sticker sticker-4a" src="sticker-4a.png" alt="" /></button>
-      <button class="opt opt-4" role="option" onclick="pick(this)">think about the past<img class="sticker sticker-4b" src="sticker-4b.png" alt="" /></button>
-      <button class="opt opt-4" role="option" onclick="pick(this)">sleep the whole day<img class="sticker sticker-4c" src="sticker-4c.png" alt="" /></button>
-      <button class="opt opt-4" role="option" onclick="pick(this)">opening the fridge repeatedly<img class="sticker sticker-4d" src="sticker-4d.png" alt="" /></button>
-      <button class="opt opt-4" role="option" onclick="pick(this)">becoming nocturnal<img class="sticker sticker-4e" src="sticker-4e.png" alt="" /></button>
+    <div class="q-prompt">
+      <span class="q-arrow">&#x21D2;</span>
+      <span>Pick a coping mechanism</span>
+    </div>
+    <div class="options" role="listbox" aria-label="Pick a coping mechanism">
+      <button class="opt opt-4" role="option" onclick="pick(this)">staring dramatically out windows</button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">reorganizing random objects</button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">pretending life is a montage</button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">opening the fridge repeatedly
+        <img class="sticker sticker-4d" src="sticker-4d.png" alt="" />
+      </button>
+      <button class="opt opt-4" role="option" onclick="pick(this)">becoming nocturnal</button>
     </div>
   </div>
-  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
 
-  <!-- ══ QUESTION 5 ══ -->
-  <div class="grid-wrap q-wrap" data-audio="audio-5.mp3" data-fact="fact-5.png" data-fact-num="5">
+  <!-- QUESTION 5 -->
+  <div class="q-wrap">
     <h2 class="q-title"><span class="title-highlight-5">Social energy</span></h2>
-    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>Which creature reflects your inner energy?</span></div>
-    <div class="options" role="listbox">
-      <button class="opt opt-5" role="option" onclick="pick(this)">emotionally intelligent pigeon<img class="sticker sticker-5a" src="sticker-5a.png" alt="" /></button>
-      <button class="opt opt-5" role="option" onclick="pick(this)">suspicious raccoon<img class="sticker sticker-5b" src="sticker-5b.png" alt="" /></button>
-      <button class="opt opt-5" role="option" onclick="pick(this)">overworked seagull<img class="sticker sticker-5c" src="sticker-5c.png" alt="" /></button>
-      <button class="opt opt-5" role="option" onclick="pick(this)">tiny dragon with attitude<img class="sticker sticker-5d" src="sticker-5d.png" alt="" /></button>
-      <button class="opt opt-5" role="option" onclick="pick(this)">medieval frog<img class="sticker sticker-5e" src="sticker-5e.png" alt="" /></button>
+    <div class="q-prompt">
+      <span class="q-arrow">&#x21D2;</span>
+      <span>Which creature reflects your inner energy?</span>
+    </div>
+    <div class="options" role="listbox" aria-label="Which creature reflects your inner energy">
+      <button class="opt opt-5" role="option" onclick="pick(this)">emotionally intelligent pigeon</button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">suspicious raccoon
+        <img class="sticker sticker-5b" src="sticker-5b.png" alt="" />
+      </button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">overworked seagull</button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">tiny dragon with attitude</button>
+      <button class="opt opt-5" role="option" onclick="pick(this)">medieval frog</button>
     </div>
   </div>
-  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
 
-  <!-- ══ QUESTION 6 ══ -->
-  <div class="grid-wrap q-wrap" data-audio="audio-6.mp3" data-fact="fact-6.png" data-fact-num="6">
+  <!-- QUESTION 6 -->
+  <div class="q-wrap">
     <h2 class="q-title"><span class="title-highlight-6">Current brain status</span></h2>
-    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>describe the current condition of your brain</span></div>
-    <div class="options" role="listbox">
-      <button class="opt opt-6" role="option" onclick="pick(this)">buffering emotionally<img class="sticker sticker-6a" src="sticker-6a.png" alt="" /></button>
-      <button class="opt opt-6" role="option" onclick="pick(this)">powered entirely by soup<img class="sticker sticker-6b" src="sticker-6b.png" alt="" /></button>
-      <button class="opt opt-6" role="option" onclick="pick(this)">lightly microwaved<img class="sticker sticker-6c" src="sticker-6c.png" alt="" /></button>
-      <button class="opt opt-6" role="option" onclick="pick(this)">running on cartoon logic<img class="sticker sticker-6d" src="sticker-6d.png" alt="" /></button>
-      <button class="opt opt-6" role="option" onclick="pick(this)">i see stars everywhere<img class="sticker sticker-6e" src="sticker-6e.png" alt="" /></button>
+    <div class="q-prompt">
+      <span class="q-arrow">&#x21D2;</span>
+      <span>describe the current condition of your brain</span>
+    </div>
+    <div class="options" role="listbox" aria-label="Describe the current condition of your brain">
+      <button class="opt opt-6" role="option" onclick="pick(this)">buffering emotionally</button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">powered entirely by soup
+        <img class="sticker sticker-6b" src="sticker-6b.png" alt="" />
+      </button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">lightly microwaved</button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">running on cartoon logic</button>
+      <button class="opt opt-6" role="option" onclick="pick(this)">i see stars everywhere</button>
     </div>
   </div>
-  <div class="grid-wrap"><img class="q-divider" src="line.png" alt="" /></div>
 
-  <!-- ══ QUESTION 7 ══ -->
-  <div class="grid-wrap q-wrap" id="last-question" data-audio="audio-7.mp3" data-fact="fact-7.png" data-fact-num="7">
+  <!-- QUESTION 7 -->
+  <div class="q-wrap">
     <h2 class="q-title"><span class="title-highlight-7">Final destiny</span></h2>
-    <div class="q-prompt"><span class="q-arrow">&#x21D2;</span><span>what will you do next?</span></div>
-    <div class="options" role="listbox">
-      <button class="opt opt-7" role="option" onclick="pick(this)">blink aggressively<img class="sticker sticker-7a" src="sticker-7a.png" alt="" /></button>
-      <button class="opt opt-7" role="option" onclick="pick(this)">avoid responsibilities artistically<img class="sticker sticker-7b" src="sticker-7b.png" alt="" /></button>
-      <button class="opt opt-7" role="option" onclick="pick(this)">become a local legend<img class="sticker sticker-7c" src="sticker-7c.png" alt="" /></button>
-      <button class="opt opt-7" role="option" onclick="pick(this)">stare at wall professionally<img class="sticker sticker-7d" src="sticker-7d.png" alt="" /></button>
-      <button class="opt opt-7" role="option" onclick="pick(this)">go outside and touch grass<img class="sticker sticker-7e" src="sticker-7e.png" alt="" /></button>
+    <div class="q-prompt">
+      <span class="q-arrow">&#x21D2;</span>
+      <span>what will you do next?</span>
+    </div>
+    <div class="options" role="listbox" aria-label="What will you do next">
+      <button class="opt opt-7" role="option" onclick="pick(this)">blink aggressively</button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">avoid responsibilities artistically</button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">become a local legend
+        <img class="sticker sticker-7c" src="sticker-7c.png" alt="" />
+      </button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">stare at wall professionally</button>
+      <button class="opt opt-7" role="option" onclick="pick(this)">go outside and touch grass</button>
     </div>
   </div>
+</div><!-- /.col-content -->
+</div><!-- /.gc.grid -->
+</main>
 
-  <!-- ══ LOADING SCREEN ══ -->
-  <div id="loading-screen">
-    <p class="loading-title">analysing your silly personality...</p>
-    <div class="sticker-parade">
-      <img class="parade-sticker" src="sticker-1c.png" alt="" />
-      <img class="parade-sticker" src="sticker-2e.png" alt="" />
-      <img class="parade-sticker" src="sticker-3c.png" alt="" />
-      <img class="parade-sticker" src="sticker-4d.png" alt="" />
-      <img class="parade-sticker" src="sticker-5b.png" alt="" />
-      <img class="parade-sticker" src="sticker-6b.png" alt="" />
-      <img class="parade-sticker" src="sticker-7c.png" alt="" />
-    </div>
-    <div class="loading-bar-wrap"><div class="loading-bar-fill" id="loading-bar"></div></div>
-    <p class="loading-label">please hold. our experts are judging.</p>
-  </div>
-
-  <!-- ══ RESULTS ══ -->
-  <div id="results-section">
-    <div class="grid-wrap">
-      <div class="results-title-wrap"><h2 class="results-title"><span class="circle-scribble">results</span></h2></div>
-      <p class="results-subtitle">our experts have analysed your silly personality</p>
-      <div class="result-main-card">
-        <div class="result-main-left">
-          <p class="result-descriptor">soup-powered</p>
-          <!-- swap h2 for img when racoon-handwritten.png is ready -->
-          <img class="result-name-png" src="racoon-handwritten.png" alt="Racoon" />
-          <div class="result-underline"></div>
-          <p class="result-description">someone oddly confident but deeply held together<br/>by random systems and fridge light.</p>
-        </div>
-        <img class="result-main-sticker" src="result-sticker.png" alt="soup-powered racoon" />
-      </div>
-      <div class="trait-grid">
-        <div class="trait-card">
-          <span class="trait-heading-png core">core traits</span>
-          <ul>
-            <li>trusts instincts that arrive while staring into the fridge</li>
-            <li>forms emotional bonds with objects that should not have emotional significance</li>
-            <li>enters situations with no plan and leaves with accidental authority</li>
-            <li>highly motivated by soup, local gossip, and small opportunities for dramatic exits</li>
-            <li>carries suspicious confidence despite absolutely no evidence</li>
-            <li>likely to become known in a 3-mile radius for something unclear but memorable</li>
-          </ul>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:20px;">
-          <div class="trait-card">
-            <span class="trait-heading-png secret">secret strength</span>
-            <p>you can enter a room, say something confusing, and leave people thinking about it for days.</p>
-          </div>
-          <div class="trait-card">
-            <span class="trait-heading-png weak">weakness</span>
-            <p>you are one free sample away from changing your entire life plan.<br/>dont give up</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ FINAL ADVICE ══ -->
-  <div id="final-advice">
-    <div class="grid-wrap">
-      <div class="advice-title-wrap"><h2 class="advice-title"><span class="circle-scribble-advice">final advice</span></h2></div>
-      <p class="advice-text">take your brain back.<br/>but maybe leave a small part of it near the fridge.<br/>not every good decision needs to make sense.</p>
-      <div id="advice-box">
-        <img id="advice-head"  src="head.png"  alt="" />
-        <img id="advice-trash" src="trash.png" alt="" />
-        <img id="advice-brain" src="brain.png" alt="" />
-      </div>
-    </div>
-  </div>
-
-  <!-- FOOTER -->
+<!-- FOOTER -->
 <footer id="site-footer">
 
   <div class="footer-desktop">
@@ -435,10 +784,10 @@
           <div class="footer-col">
             <h4>profile</h4>
             <ul>
-              <li><a href="#">my happiness</a></li>
-              <li><a href="#">gallery</a></li>
-              <li><a href="#">mood tracker</a></li>
-              <li><a href="#">journal</a></li>
+              <li><a href="profile.html">my happiness</a></li>
+              <li><a href="profile.html">gallery</a></li>
+              <li><a href="profile.html">mood tracker</a></li>
+              <li><a href="profile.html">journal</a></li>
             </ul>
           </div>
         </nav>
@@ -460,7 +809,7 @@
       <div class="footer-col"><h4>wander</h4><ul><li><a href="mess-hall.html">mess hall</a></li><li><a href="silly-decisions.html">silly decisions</a></li><li><a href="sticker-maker.html">sticker maker</a></li></ul></div>
       <div class="footer-col"><h4>seek</h4><ul><li><a href="just-for-you.html">just for you</a></li><li><a href="between-us.html">between us</a></li><li><a href="selfless-less.html">selfless-less</a></li></ul></div>
       <div class="footer-col"><h4>about</h4><ul><li><a href="about.html">our mission</a></li><li><a href="about.html#our-approach">our approach</a></li><li><a href="about.html#meet-the-team">meet the team</a></li></ul></div>
-      <div class="footer-col"><h4>profile</h4><ul><li><a href="#">my happiness</a></li><li><a href="#">gallery</a></li><li><a href="#">mood tracker</a></li><li><a href="#">journal</a></li></ul></div>
+      <div class="footer-col"><h4>profile</h4><ul><li><a href="profile.html">my happiness</a></li><li><a href="profile.html">gallery</a></li><li><a href="profile.html">mood tracker</a></li><li><a href="profile.html">journal</a></li></ul></div>
     </div>
     <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-top:20px;border-top:1px solid rgba(0,0,0,.12)">
       <a href="index.html" class="footer-logo-wrap" aria-label="Daybreak home"><svg class="footer-logo-svg" viewBox="0 0 216 144" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g><path fill="#050505" d="M129.48,78.67l6.04.26v14.23s-.03,30.78-.03,30.78l-10.82.04c-.57-3.17.63-6.39-.72-9.6-1.27,3.72-1.77,7.44-4.94,9.32-5.3,3.16-11.64.59-14.36-4.81-2.73-5.41-3.24-11.29-3.17-17.41s.35-11.36,3.17-16.92c-7.15-1.56-9.15-8.79-8.76-16.29l9.42-.13.47,5.29c.14,1.55.98,2.58,2.25,2.77,1.45.22,2.98-.48,3.36-2.16l2.32-10.32-9.17-.41-8.61-33.64,11.83-.05,6.57,30.34,5.82-30.21,10.69-.11-8.28,37.17c-.91,4.1-1.82,7.78-3.73,11.73,4.83,1.76,4.64,5.84,6.64,9.31l.43-8.84c1.23-.29,2.4-.38,3.57-.33ZM123.16,90.74c-.5-2.24-2.38-3.59-4.25-3.59-1.67,0-3.9,1.16-4.54,3.32-2.61,8.82-2.17,24.79,4.54,24.35,6.3-.41,6.17-15.45,4.25-24.08Z"/><path fill="#050505" d="M40.55,89.75c1.59,9.29,1.76,23.19-3.22,30.61-3.03,4.51-9.17,6.31-13.75,3.09-2.88-2.02-3.45-5.47-4.65-9.02-1.23,3.14-.28,6.11-.63,9.51l-11.1-.13.08-55.45,11.2-.21.44,18.99c1.56-3.41,2.27-6.1,4.58-7.67,2.59-1.77,6.03-2.14,9.03-1.03,4.63,1.72,7.19,6.45,8.02,11.32ZM28.93,91.11c-.62-2.68-2.57-4.45-4.98-4.31-2.04.12-4.15,1.55-4.71,4.07-1.35,6.16-1.28,12.85-.12,19.08.49,2.65,2.46,4.5,4.9,4.52,6.84.07,6.84-14.94,4.91-23.37Z"/><path fill="#050505" d="M82.71,115.85c4.67.34,5.72-5.87,5.57-12.2l9.98-.15c.48,11.12-3.83,21.13-15.33,21.55-6.86.25-12.76-3.56-15.07-10.31-2.77-8.14-2.8-17.41-.3-25.61,2.27-7.44,8.43-11.59,15.96-11.32,6.38.23,11.88,3.81,13.47,10.12,1.06,4.17,1.63,8.34,1.23,12.72l-21.15.06c.11,6.78.55,14.76,5.62,15.12ZM87.34,87.47c-1.19-1.92-3.9-1.96-5.84-1.77-2.88.29-4.3,2.67-4.06,5.01.3,2.87,2.64,3.95,5.52,3.82,1.96-.09,3.77-.46,4.57-2.07.62-1.25.83-3.33-.2-4.99Z"/><path fill="#050505" d="M56.85,123.75l-12.58.2.08-45.05,9.73-.03.38,11.6c1.47-1.51,1.18-3.33,1.54-4.95,1.04-4.69,4.75-7.81,9.78-7.57l-.06,11.39c-5.5.24-8.37,1.67-8.88,6.96v27.46Z"/><path fill="#050505" d="M23.68,68.97c-4.38-8.57-4.44-24.56-.63-33.08,1.99-4.45,5.81-7.48,10.72-7.18,4.74.3,7.36,3.62,8.67,8.61l.68-18.29,11.1-.12.07,55.07-9.88.17c-.5-3.11.62-6.09-.66-9.51-1.17,3.63-1.79,7.01-4.83,8.95-5.31,3.4-12.29,1.2-15.26-4.62ZM42.23,41.59c-.58-2.33-2.48-3.73-4.45-3.69s-3.89,1.32-4.54,3.61c-2.33,8.31-2.16,23.41,4.54,23.44,6.07.03,6.62-14.68,4.45-23.36Z"/><path fill="#050505" d="M82.05,74.18l-1.03-9.7c-1.09,3.5-1.65,7.24-4.56,9.14-5.51,3.59-12.22.8-14.87-4.89-4.01-8.6-4.02-23.96-.47-32.22,2.69-6.27,9.57-9.62,15.82-6.62,3.49,1.67,4.17,5.53,5.35,9.36,1.34-3.35.21-6.38.65-9.61l9.69.09.03,44.28-10.62.17ZM80.44,41.91c-.49-2.5-2.44-3.99-4.69-3.94-1.73.04-3.85,1.4-4.44,3.65-2.23,8.47-1.93,23.22,4.45,23.33s6.41-14.21,4.68-23.04Z"/></g><g><path fill="#050505" d="M170.31,111.91l3.87,12.06-12.08-.15-4.09-14-3.8-13.43c-.32-.21-1.1-.29-1.74-.01v12.18s-.03,15.39-.03,15.39l-11.22-.02v-23.59s.13-32.18.13-32.18l11.06.1.41,24.82c1.31-5.04,2.16-9.42,6.44-12,4-2.41,8.69-2.94,13.37-2.59l-.08,10.74-9.29.28,7.06,22.41Z"/><path fill="#fdd306" d="M170.31,111.91l-7.06-22.41,9.29-.28.08-10.74c-4.67-.35-9.37.18-13.37,2.59-4.28,2.58-5.13,6.96-6.44,12l-.41-24.82-11.06-.1-.13,32.18c-2.62-1.92-3.49-5.09-5.7-7.17v-14.23s-6.04-.26-6.04-.26c-3.12-18.02,6.41-36.09,22.76-43.65s36.87-2.79,48.1,11.6,11.12,34.87-.41,49.95c-7.09,9.28-18.02,14.59-29.62,15.34Z"/><path fill="#fdd306" d="M158.01,109.81l-5.54-1.26v-12.18c.64-.28,1.42-.2,1.74.01l3.8,13.43Z"/></g></svg></a>
@@ -506,201 +855,7 @@
 </footer>
 
   <script>
-    /* ── AUDIO ── */
-    const audioCache = {};
-
-    /* preload all 7 audio files */
-    const audioSrcs = ['audio-1.mp3','audio-2.mp3','audio-3.mp3','audio-4.mp3','audio-5.mp3','audio-6.mp3','audio-7.mp3'];
-    audioSrcs.forEach(function(src) {
-      audioCache[src] = new Audio(src);
-    });
-
-    /* audio-1.mp3 stops after 7 seconds — all others play to full length */
-    const audioLimits = {
-      'audio-1.mp3': 4000,  /* ← change 4000 to adjust (milliseconds) */
-      'audio-5.mp3': 4000   /* ← question 5 audio stops at 4 seconds */
-    };
-
-    function playQuestionAudio(wrap) {
-      const src = wrap.dataset.audio;
-      if (!src) return;
-      const a = audioCache[src];
-      a.currentTime = 0;
-      a.play();
-      /* if this clip has a time limit, stop it after that many ms */
-      if (audioLimits[src]) {
-        setTimeout(function() {
-          a.pause();
-          a.currentTime = 0;
-        }, audioLimits[src]);
-      }
-    }
-
-    /* facts removed */
-
-    /* ── PICK ── */
-    const isMobileView = window.matchMedia('(max-width: 400px)').matches;
-
-    function pick(el) {
-      const parentOptions = el.closest('.options');
-      const wrap = el.closest('.q-wrap');
-
-      /* deselect all and remove mobile-hidden from siblings */
-      parentOptions.querySelectorAll('.opt').forEach(function(o) {
-        o.classList.remove('selected');
-        o.classList.remove('mobile-hidden');
-      });
-
-      el.classList.add('selected');
-
-      /* on mobile — hide all other buttons in this question */
-      if (isMobileView) {
-        parentOptions.querySelectorAll('.opt').forEach(function(o) {
-          if (o !== el) o.classList.add('mobile-hidden');
-        });
-      }
-
-      playQuestionAudio(wrap);
-      if (wrap && wrap.id === 'last-question') setTimeout(launchLoading, 800);
-    }
-
-    /* ── LOADING ── */
-    function launchLoading() {
-      const screen = document.getElementById('loading-screen');
-      screen.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      document.querySelectorAll('.parade-sticker').forEach(function(s, i) {
-        setTimeout(function() { s.classList.add('pop'); }, 300 + i * 350);
-      });
-      setTimeout(function() { document.getElementById('loading-bar').classList.add('go'); }, 200);
-      setTimeout(showResults, 4500);
-    }
-
-    /* ── SHOW RESULTS ── */
-    function showResults() {
-      document.getElementById('loading-screen').classList.remove('active');
-      document.getElementById('results-section').classList.add('visible');
-      document.getElementById('final-advice').style.display = 'block';
-      setTimeout(function() { document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' }); }, 100);
-      /* brain animation now triggers when advice box scrolls into view */
-    }
-
-    /* ── SCROLL ANIMATION — squiggle + handwrite ── */
-    const observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-    }, { threshold: 0.3 });
-    document.querySelectorAll('.squiggle, .intro-handwrite').forEach(function(el) { observer.observe(el); });
-
-    /* ── BRAIN BOUNCE — triggers when advice box scrolls into view ── */
-    const brainObserver = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          /* small delay so user has a moment to see the box before brain moves */
-          setTimeout(function() {
-            document.getElementById('advice-brain').classList.add('animate');
-          }, 600);
-          brainObserver.unobserve(entry.target); /* only trigger once */
-        }
-      });
-    }, { threshold: 0.4 }); /* 40% of box must be visible before triggering */
-
-    const adviceBox = document.getElementById('advice-box');
-    if (adviceBox) brainObserver.observe(adviceBox);
-
-    /* ── GAME BOX PHYSICS ── */
-    (function() {
-      const box = document.getElementById('game-box');
-      const brain = document.getElementById('brain');
-      const trash = document.getElementById('trash-img');
-      const trashTxt = document.getElementById('trash-text');
-      const raccoon = document.getElementById('raccoon-popup');
-      const success = document.getElementById('success-msg');
-      let x = 160, y = 60, vx = 0, vy = 0;
-      let dragging = false, lastX, lastY, gameOver = false;
-      const GRAVITY = 0.5, BOUNCE = 0.55, FRICTION = 0.92;
-      const isMobile = window.matchMedia('(max-width: 400px)').matches;
-      if (isMobile) { x = 60; y = 30; }
-
-      setTimeout(function() { trash.classList.add('visible'); trashTxt.classList.add('visible'); }, 3000);
-
-      /* support both mouse and touch */
-      function getXY(e) {
-        if (e.touches) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        return { x: e.clientX, y: e.clientY };
-      }
-
-      function startDrag(e) {
-        if (gameOver) return;
-        dragging = true;
-        const pos = getXY(e);
-        lastX = pos.x; lastY = pos.y;
-        vx = 0; vy = 0;
-        e.preventDefault();
-      }
-      function moveDrag(e) {
-        if (!dragging) return;
-        const pos = getXY(e);
-        const rect = box.getBoundingClientRect();
-        const dx = pos.x - lastX, dy = pos.y - lastY;
-        vx = dx; vy = dy; x += dx; y += dy;
-        x = Math.max(0, Math.min(x, rect.width - brain.offsetWidth));
-        y = Math.max(0, Math.min(y, rect.height - brain.offsetHeight));
-        brain.style.left = x + 'px'; brain.style.top = y + 'px';
-        lastX = pos.x; lastY = pos.y;
-        checkWindow(rect);
-      }
-      function endDrag() { if (!dragging) return; dragging = false; }
-
-      brain.addEventListener('mousedown',  startDrag);
-      brain.addEventListener('touchstart', startDrag, { passive: false });
-      document.addEventListener('mousemove',  moveDrag);
-      document.addEventListener('touchmove',  moveDrag, { passive: false });
-      document.addEventListener('mouseup',  endDrag);
-      document.addEventListener('touchend', endDrag);
-
-      function loop() {
-        if (!dragging && !gameOver) {
-          const rect = box.getBoundingClientRect();
-          const maxX = rect.width - brain.offsetWidth, maxY = rect.height - brain.offsetHeight;
-          vy += GRAVITY; x += vx; y += vy; vx *= FRICTION;
-          if (x <= 0)    { x = 0;    vx =  Math.abs(vx) * BOUNCE; }
-          if (x >= maxX) { x = maxX; vx = -Math.abs(vx) * BOUNCE; }
-          if (y >= maxY) { y = maxY; vy = -Math.abs(vy) * BOUNCE; vx *= FRICTION; checkTrash(rect); }
-          if (y <= 0)    { y = 0;    vy =  Math.abs(vy) * BOUNCE; }
-          brain.style.left = x + 'px'; brain.style.top = y + 'px';
-        }
-        requestAnimationFrame(loop);
-      }
-      loop();
-
-      function checkWindow(rect) {
-        const wr = document.getElementById('window-img').getBoundingClientRect();
-        const br = brain.getBoundingClientRect();
-        const near = !(br.right < wr.left-60 || br.left > wr.right+60 || br.bottom < wr.top-60 || br.top > wr.bottom+60);
-        raccoon.classList.toggle('visible', near);
-      }
-      function checkTrash(rect) {
-        const tr = trash.getBoundingClientRect(), br = brain.getBoundingClientRect();
-        if (br.left < tr.right && br.right > tr.left && br.bottom >= tr.top && trash.classList.contains('visible')) {
-          gameOver = true;
-          setTimeout(function() {
-            brain.style.display = 'none';
-            document.getElementById('head-img').style.display         = 'none';
-            document.getElementById('window-img').style.display       = 'none';
-            document.getElementById('brain-intro-text').style.display = 'none';
-            trash.style.display = 'none'; trashTxt.style.display = 'none'; raccoon.style.display = 'none';
-            success.style.display = 'block';
-          }, 2000);
-        }
-      }
-    })();
-  </script>
-
-<script>
 'use strict';
-function easeOut(t){return 1-Math.pow(1-t,3)}
-function easeIn(t){return t*t*t}
-function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
 
 /* SUN-STRETCH HOVER */
 (function(){
@@ -716,33 +871,33 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   var ax=0,ay=0,sunR=0,ry=0,rh=0,tx=0,cx=0,rafId=null,vis=false,overP=false;
   function anchor(){var hr=header.getBoundingClientRect(),sr2=lsvg.getBoundingClientRect();var sx=sr2.width/216,sy=sr2.height/144;ax=sr2.left+170*sx-hr.left;ay=sr2.top+72*sy-hr.top;sunR=52*Math.min(sx,sy);rh=sunR*2;ry=ay-sunR;}
   function draw(rx){scl.setAttribute('cx',ax);scl.setAttribute('cy',ay);scl.setAttribute('r',sunR);scr.setAttribute('cx',rx);scr.setAttribute('cy',ay);scr.setAttribute('r',sunR);sr.setAttribute('x',ax);sr.setAttribute('y',ry);sr.setAttribute('width',Math.max(0,rx-ax));sr.setAttribute('height',rh);}
-  function tick(){cx+=(tx-cx)*.14;draw(cx);if(Math.abs(tx-cx)>.3)rafId=requestAnimationFrame(tick);else{draw(tx);rafId=null}}
-  function capX(rawX,hr){for(var i=0;i<pbtns.length;i++){var pb=pbtns[i].getBoundingClientRect();if(pb.width>0)return Math.min(rawX,pb.left-hr.left)}return rawX}
-  function show(){ss.setAttribute('opacity','1');vis=true}
-  function hide(){ss.setAttribute('opacity','0');vis=false}
-  header.addEventListener('mouseenter',function(e){anchor();var hr=header.getBoundingClientRect();cx=tx=Math.max(ax+sunR,capX(e.clientX-hr.left,hr));draw(cx);if(!overP)show()});
-  header.addEventListener('mousemove',function(e){var hr=header.getBoundingClientRect();tx=Math.max(ax+sunR,capX(e.clientX-hr.left,hr));if(!overP){if(!vis)show();if(!rafId)rafId=requestAnimationFrame(tick)}});
+  function tick(){cx+=(tx-cx)*.14;draw(cx);if(Math.abs(tx-cx)>.3)rafId=requestAnimationFrame(tick);else{draw(tx);rafId=null;}}
+  function capX(rawX,hr){for(var i=0;i<pbtns.length;i++){var pb=pbtns[i].getBoundingClientRect();if(pb.width>0)return Math.min(rawX,pb.left-hr.left);}return rawX;}
+  function show(){ss.setAttribute('opacity','1');vis=true;}
+  function hide(){ss.setAttribute('opacity','0');vis=false;}
+  header.addEventListener('mouseenter',function(e){anchor();var hr=header.getBoundingClientRect();cx=tx=Math.max(ax+sunR,capX(e.clientX-hr.left,hr));draw(cx);if(!overP)show();});
+  header.addEventListener('mousemove',function(e){var hr=header.getBoundingClientRect();tx=Math.max(ax+sunR,capX(e.clientX-hr.left,hr));if(!overP){if(!vis)show();if(!rafId)rafId=requestAnimationFrame(tick);}});
   header.addEventListener('mouseleave',hide);
-  pbtns.forEach(function(b){b.addEventListener('mouseenter',function(){overP=true;hide()});b.addEventListener('mouseleave',function(){overP=false;show();if(!rafId)rafId=requestAnimationFrame(tick)})});
-  items.forEach(function(item){var btn=item.querySelector('.nav-btn');if(!btn)return;btn.addEventListener('mouseenter',function(){btn.style.fontWeight='700'});btn.addEventListener('mouseleave',function(){btn.style.fontWeight=''})});
-  window.addEventListener('resize',function(){hide();anchor()});
+  pbtns.forEach(function(b){b.addEventListener('mouseenter',function(){overP=true;hide();});b.addEventListener('mouseleave',function(){overP=false;show();if(!rafId)rafId=requestAnimationFrame(tick);});});
+  items.forEach(function(item){var btn=item.querySelector('.nav-btn');if(!btn)return;btn.addEventListener('mouseenter',function(){btn.style.fontWeight='700';});btn.addEventListener('mouseleave',function(){btn.style.fontWeight='';});});
+  window.addEventListener('resize',function(){hide();anchor();});
 })();
 
 /* DROPDOWN NAV */
 (function(){
   var items=document.querySelectorAll('.nav-item');
   var pbtns=document.querySelectorAll('.profile-btn');
-  function hideSuns(keepActive){items.forEach(function(item){var btn=item.querySelector('.nav-btn'),sun=item.querySelector('.nav-sun');if(sun&&(!keepActive||!btn.classList.contains('active')))sun.classList.remove('visible')})}
-  function closeAll(ex){items.forEach(function(item){if(item===ex)return;var btn=item.querySelector('.nav-btn'),drop=item.querySelector('.dropdown'),sun=item.querySelector('.nav-sun');if(drop){drop.classList.remove('open');btn.setAttribute('aria-expanded','false')}if(sun)sun.classList.remove('visible')})}
+  function hideSuns(keepActive){items.forEach(function(item){var btn=item.querySelector('.nav-btn'),sun=item.querySelector('.nav-sun');if(sun&&(!keepActive||!btn.classList.contains('active')))sun.classList.remove('visible');});}
+  function closeAll(ex){items.forEach(function(item){if(item===ex)return;var btn=item.querySelector('.nav-btn'),drop=item.querySelector('.dropdown'),sun=item.querySelector('.nav-sun');if(drop){drop.classList.remove('open');btn.setAttribute('aria-expanded','false');}if(sun)sun.classList.remove('visible');});}
   items.forEach(function(item){
     var btn=item.querySelector('.nav-btn'),drop=item.querySelector('.dropdown');
     if(!btn||!drop)return;
     var sun=item.querySelector('.nav-sun');
-    btn.addEventListener('click',function(e){e.stopPropagation();var open=drop.classList.contains('open');closeAll(item);drop.classList.toggle('open',!open);btn.setAttribute('aria-expanded',String(!open));if(sun)sun.classList.toggle('visible',!open)});
-    drop.querySelectorAll('.dropdown-link').forEach(function(link){link.addEventListener('click',function(){document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.toggle('active',b.dataset.key===btn.dataset.key)});drop.querySelectorAll('.dropdown-link').forEach(function(l){l.classList.remove('active')});link.classList.add('active');drop.classList.remove('open');btn.setAttribute('aria-expanded','false');pbtns.forEach(function(pb){pb.classList.remove('active')})})});
+    btn.addEventListener('click',function(e){e.stopPropagation();var open=drop.classList.contains('open');closeAll(item);drop.classList.toggle('open',!open);btn.setAttribute('aria-expanded',String(!open));if(sun)sun.classList.toggle('visible',!open);});
+    drop.querySelectorAll('.dropdown-link').forEach(function(link){link.addEventListener('click',function(){document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.toggle('active',b.dataset.key===btn.dataset.key);});drop.querySelectorAll('.dropdown-link').forEach(function(l){l.classList.remove('active');});link.classList.add('active');drop.classList.remove('open');btn.setAttribute('aria-expanded','false');pbtns.forEach(function(pb){pb.classList.remove('active');});});});
   });
-  pbtns.forEach(function(btn){btn.addEventListener('click',function(){var isA=btn.classList.contains('active');document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});pbtns.forEach(function(pb){pb.classList.remove('active')});hideSuns(false);closeAll(null);if(!isA)pbtns.forEach(function(pb){pb.classList.add('active')})})});
-  document.addEventListener('click',function(){items.forEach(function(item){var drop=item.querySelector('.dropdown'),btn=item.querySelector('.nav-btn');if(drop&&drop.classList.contains('open')){drop.classList.remove('open');btn.setAttribute('aria-expanded','false')}});hideSuns(true)});
+  pbtns.forEach(function(btn){btn.addEventListener('click',function(){var isA=btn.classList.contains('active');document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});pbtns.forEach(function(pb){pb.classList.remove('active');});hideSuns(false);closeAll(null);if(!isA)pbtns.forEach(function(pb){pb.classList.add('active');});});});
+  document.addEventListener('click',function(){items.forEach(function(item){var drop=item.querySelector('.dropdown'),btn=item.querySelector('.nav-btn');if(drop&&drop.classList.contains('open')){drop.classList.remove('open');btn.setAttribute('aria-expanded','false');}});hideSuns(true);});
 })();
 
 /* MOBILE MENU */
@@ -750,60 +905,181 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
   var t=document.getElementById('mobile-menu-toggle');
   var p=document.getElementById('mobile-menu-panel');
   if(!t||!p)return;
-  var open=function(){p.classList.add('open');t.classList.add('open');t.setAttribute('aria-expanded','true')};
-  var close=function(){p.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false')};
-  t.addEventListener('click',function(e){e.stopPropagation();p.classList.contains('open')?close():open()});
-  p.querySelectorAll('a').forEach(function(l){l.addEventListener('click',close)});
-  document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==t)close()});
-})();
-
-/* FAB LAVA LAMP */
-(function(){
-  var canvas=document.getElementById('fab-canvas');
-  if(!canvas)return;
-  var ctx=canvas.getContext('2d');
-  var S=120;canvas.width=canvas.height=S;
-  var CX=S/2,CY=S/2,CR=S/2-1;
-  var DUR={0:2200,1:900,2:4200,3:1800,4:1600};
-  var phase=0,phaseT=0,last=null;
-  function blobs(ph,t){switch(ph){case 0:{var e=easeIO(t),bY=CY+10,aY=bY-e*18;return [{x:CX,y:aY,r:20-e*4},{x:CX,y:bY,r:20-e*3}]}case 1:{var e=easeOut(t);return [{x:CX+Math.sin(t*Math.PI)*3,y:CY-8-e*20,r:14+e*4},{x:CX-Math.sin(t*Math.PI)*2,y:CY+10+e*4,r:16+e*3}]}case 2:{var a=t*Math.PI*2,r2=16,rb=14+Math.sin(t*Math.PI*4)*2;return [{x:CX+Math.cos(a)*r2,y:CY-2+Math.sin(a)*r2*.7,r:rb},{x:CX+Math.cos(a+Math.PI)*r2,y:CY-2+Math.sin(a+Math.PI)*r2*.7,r:rb}]}case 3:{var e=easeIO(t),r2=16*(1-e),rb=14+(1-e)*4;return [{x:CX+Math.cos(0)*r2,y:CY-2+Math.sin(0)*r2*.7,r:rb},{x:CX+Math.cos(Math.PI)*r2,y:CY-2+Math.sin(Math.PI)*r2*.7,r:rb}]}case 4:{var p=Math.sin(t*Math.PI)*3,r=20+p,y=CY+2-Math.sin(t*Math.PI)*4;return [{x:CX,y:y,r:r},{x:CX,y:y,r:r}]}}}
-  function field(px,py,bs){var f=0;for(var i=0;i<bs.length;i++){var d2=(px-bs[i].x)*(px-bs[i].x)+(py-bs[i].y)*(py-bs[i].y)||.0001;f+=bs[i].r*bs[i].r/d2}return f}
-  var img=ctx.createImageData(S,S);var buf=img.data;
-  function render(bs){var THRESH=phase===1?1.05:1.0;for(var y=0;y<S;y++)for(var x=0;x<S;x++){var i=(y*S+x)*4,dx=x-CX,dy=y-CY;if(dx*dx+dy*dy>CR*CR){buf[i]=buf[i+1]=buf[i+2]=buf[i+3]=0;continue}if(field(x,y,bs)>=THRESH){buf[i]=255;buf[i+1]=212;buf[i+2]=0;buf[i+3]=255}else{buf[i]=buf[i+1]=buf[i+2]=0;buf[i+3]=255}}ctx.putImageData(img,0,0);}
-  function animate(ts){if(!last)last=ts;var dt=ts-last;last=ts;phaseT+=dt/DUR[phase];if(phaseT>=1){phaseT=0;phase=(phase+1)%5}render(blobs(phase,phaseT));requestAnimationFrame(animate)}
-  requestAnimationFrame(animate);
+  var open=function(){p.classList.add('open');t.classList.add('open');t.setAttribute('aria-expanded','true');};
+  var close=function(){p.classList.remove('open');t.classList.remove('open');t.setAttribute('aria-expanded','false');};
+  t.addEventListener('click',function(e){e.stopPropagation();p.classList.contains('open')?close():open();});
+  p.querySelectorAll('a').forEach(function(l){l.addEventListener('click',close);});
+  document.addEventListener('click',function(e){if(!p.contains(e.target)&&e.target!==t)close();});
 })();
 
 /* SCROLL TO TOP */
-function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 
-/* MOOD POPUP */
-(function(){
-  var PAGES={'mess-hall':{name:'mess hall',href:'mess-hall.html',color:'#a8f0bc',desc:'small, funny, creative activities designed to put a smile on your face — no rules, no skill required.'},'silly-decisions':{name:'silly decisions',href:'silly-decisions.html',color:'#f5a04a',desc:'use exaggerated, silly choices to temporarily disconnect from reality and stop taking yourself too seriously.'},'sticker-maker':{name:'sticker maker',href:'sticker-maker.html',color:'#e8a8f0',desc:'layer a doodle, emoji, or phrase onto your moment — picking one should feel like choosing a mood.'},'between-us':{name:'between us',href:'between-us.html',color:'#7de8f5',desc:'share a short story about a pocket of happiness in your life, or a moment you\'re still hoping to reach.'},'just-for-you':{name:'just for you',href:'just-for-you.html',color:'#ffd400',desc:'a personal, protected space to create your own world with what you want to keep, build, and design.'},'selfless-less':{name:'selfless less',href:'selfless-less.html',color:'#c4b8f5',desc:'explore how people-pleasing habits quietly distance you from your own happiness.'}};
-  var MAP={overwhelmed:['mess-hall','silly-decisions','sticker-maker'],anxious:['mess-hall','selfless-less','sticker-maker'],lonely:['between-us','just-for-you','mess-hall'],tired:['mess-hall','sticker-maker','just-for-you'],restless:['silly-decisions','mess-hall','between-us'],unsure:['selfless-less','just-for-you','between-us'],curious:['between-us','just-for-you','silly-decisions'],playful:['silly-decisions','sticker-maker','mess-hall'],hopeful:['just-for-you','between-us','sticker-maker']};
-  var fab=document.getElementById('fab');var overlay=document.getElementById('mood-overlay');var closeBtn=document.getElementById('mood-close');var sugPanel=document.getElementById('mood-suggestions');var sugList=document.getElementById('mood-sug-list');
-  function openPopup(){overlay.classList.add('open')}
-  function closePopup(){overlay.classList.remove('open');sugPanel.classList.remove('show');sugList.innerHTML='';document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('selected')})}
-  fab.addEventListener('click',function(e){e.stopPropagation();overlay.classList.contains('open')?closePopup():openPopup()});
-  closeBtn.addEventListener('click',closePopup);
-  overlay.addEventListener('click',function(e){if(e.target===overlay)closePopup()});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closePopup()});
-  document.querySelectorAll('.mood-chip').forEach(function(chip){chip.addEventListener('click',function(){document.querySelectorAll('.mood-chip').forEach(function(c){c.classList.remove('selected')});chip.classList.add('selected');var mood=chip.dataset.mood;var pages=MAP[mood]||[];sugList.innerHTML='';pages.forEach(function(key){var p=PAGES[key];if(!p)return;var a=document.createElement('a');a.className='mood-sug-item';a.href=p.href;a.innerHTML='<span class="mood-sug-dot" style="background:'+p.color+'"></span><span class="mood-sug-name">'+p.name+'</span><p class="mood-sug-desc">'+p.desc+'</p>';a.addEventListener('click',function(){try{var entries=JSON.parse(localStorage.getItem('daybreak_moods')||'[]');entries.push({mood:mood,ts:Date.now()});localStorage.setItem('daybreak_moods',JSON.stringify(entries));}catch(e){}});sugList.appendChild(a);});sugPanel.classList.add('show');})});
-})();
-
-/* FOOTER MOBILE NAV TOGGLES */
-(function(){
-  document.querySelectorAll('.fm-nav-btn').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var target=document.getElementById(btn.dataset.target);
-      if(!target)return;
-      var open=target.classList.contains('open');
-      document.querySelectorAll('.fm-nav-panel').forEach(function(p){p.classList.remove('open')});
-      document.querySelectorAll('.fm-nav-btn').forEach(function(b){b.setAttribute('aria-expanded','false')});
-      if(!open){target.classList.add('open');btn.setAttribute('aria-expanded','true')}
-    });
+  </script>
+  <script>
+    function pick(el) {
+      const parentOptions = el.closest('.options');
+      parentOptions.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+	  /* watches for elements to enter the screen */
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
   });
+}, { threshold: 0.3 });  /* 0.3 means 30% of the element must be visible before it triggers */
+
+/* tell the observer to watch these two elements */
+document.querySelectorAll('.squiggle, .intro-handwrite').forEach(function(el) {
+  observer.observe(el);
+});
+
+	  (function() {
+
+  const box      = document.getElementById('game-box');
+  const brain    = document.getElementById('brain');
+  const trash    = document.getElementById('trash-img');
+  const trashTxt = document.getElementById('trash-text');
+  const raccoon  = document.getElementById('raccoon-popup');
+  const success  = document.getElementById('success-msg');
+
+  /* physics state */
+  let x = 160, y = 60;         /* brain position */
+  let vx = 0, vy = 0;          /* velocity */
+  let dragging = false;
+  let lastX, lastY;
+  let gameOver = false;
+
+  const GRAVITY    = 0.5;
+  const BOUNCE     = 0.55;      /* how bouncy — 0 = no bounce, 1 = full bounce */
+  const FRICTION   = 0.92;      /* slows horizontal movement */
+
+  /* show trash after 3 seconds */
+  setTimeout(function() {
+    trash.classList.add('visible');
+    trashTxt.classList.add('visible');
+  }, 3000);
+
+  /* drag start */
+  brain.addEventListener('mousedown', function(e) {
+    if (gameOver) return;
+    dragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    vx = 0; vy = 0;
+    e.preventDefault();
+  });
+
+  /* drag move */
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+
+    const rect = box.getBoundingClientRect();
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+
+    vx = dx;
+    vy = dy;
+
+    x += dx;
+    y += dy;
+
+    /* keep brain inside the box */
+    x = Math.max(0, Math.min(x, rect.width  - brain.offsetWidth));
+    y = Math.max(0, Math.min(y, rect.height - brain.offsetHeight));
+
+    brain.style.left = x + 'px';
+    brain.style.top  = y + 'px';
+
+    lastX = e.clientX;
+    lastY = e.clientY;
+
+    checkWindow(rect);
+  });
+
+  /* drag end — release with velocity */
+  document.addEventListener('mouseup', function() {
+    if (!dragging) return;
+    dragging = false;
+  });
+
+  /* physics loop */
+  function loop() {
+    if (!dragging && !gameOver) {
+      const rect = box.getBoundingClientRect();
+      const maxX = rect.width  - brain.offsetWidth;
+      const maxY = rect.height - brain.offsetHeight;
+
+      vy += GRAVITY;           /* apply gravity */
+      x  += vx;
+      y  += vy;
+      vx *= FRICTION;
+
+      /* bounce off walls */
+      if (x <= 0)    { x = 0;    vx = Math.abs(vx) * BOUNCE; }
+      if (x >= maxX) { x = maxX; vx = -Math.abs(vx) * BOUNCE; }
+
+      /* bounce off floor */
+      if (y >= maxY) {
+        y  = maxY;
+        vy = -Math.abs(vy) * BOUNCE;
+        vx *= FRICTION;
+
+        /* check if landed in trash */
+        checkTrash(rect);
+      }
+
+      /* bounce off ceiling */
+      if (y <= 0) { y = 0; vy = Math.abs(vy) * BOUNCE; }
+
+      brain.style.left = x + 'px';
+      brain.style.top  = y + 'px';
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  /* check if brain is near the window — show raccoon */
+  function checkWindow(rect) {
+    const windowEl = document.getElementById('window-img');
+    const wr = windowEl.getBoundingClientRect();
+    const br = brain.getBoundingClientRect();
+    const near = !(br.right < wr.left - 60 || br.left > wr.right + 60 ||
+                   br.bottom < wr.top - 60 || br.top > wr.bottom + 60);
+    if (near) {
+      raccoon.classList.add('visible');
+    } else {
+      raccoon.classList.remove('visible');
+    }
+  }
+
+  /* check if brain dropped into trash */
+  function checkTrash(rect) {
+    const trashEl = trash;
+    const tr = trashEl.getBoundingClientRect();
+    const br = brain.getBoundingClientRect();
+    const inTrash = br.left < tr.right && br.right > tr.left && br.bottom >= tr.top;
+
+    if (inTrash && trash.classList.contains('visible')) {
+      gameOver = true;
+      /* hide everything except success message */
+      brain.style.display = 'none';
+      document.getElementById('head-img').style.display    = 'none';
+      document.getElementById('window-img').style.display  = 'none';
+	      document.getElementById('brain-intro-text').style.display = 'none';  /* ✅ ADD THIS LINE HERE */
+
+      trash.style.display     = 'none';
+      trashTxt.style.display  = 'none';
+      raccoon.style.display   = 'none';
+      success.style.display   = 'block';
+    }
+  }
+
 })();
-</script>
+  </script>
+
+<script src="footer.js"></script>
 </body>
 </html>
