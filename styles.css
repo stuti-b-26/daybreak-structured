@@ -426,15 +426,15 @@ img{display:block;max-width:100%}
   #top-bubble-mob{display:block;order:15;width:32vw;height:auto;align-self:flex-start;margin-left:41vw;margin-top:-8vw;margin-bottom:-10vw;position:relative;pointer-events:none;z-index:1}
   #silly-mess-mob{display:block;order:25;width:22vw;height:auto;align-self:flex-end;margin-right:4vw;margin-top:-50vw;margin-bottom:40vw;position:relative;pointer-events:none;z-index:1}
   #mess-self-mob{display:block;order:35;width:31vw;height:auto;align-self:flex-start;margin-left:4vw;margin-top:-15vw;position:relative;pointer-events:none;z-index:1}
-  #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:11}
+  #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;margin-top:-20vw;position:relative;pointer-events:none;z-index:11}
   /* Divider — float-label overlaps the SVG so its text lands on the circle center (~54% down the SVG) */
-  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin-top:-55vw !important;margin-bottom:0 !important;position:relative;z-index:12}
+  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin-top:-38vw !important;margin-bottom:0 !important;position:relative;z-index:12}
   #you-end-mob{display:block;order:82;width:32vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:1}
   /* All cards overlap and sit above connector SVGs */
   .card--mess-hall{order:30;margin-top:-55vw !important}
   #yellow-scribble{display:none !important}
   .card--selfless{order:40;margin-top:-69vw !important}
-  .card--shh{order:60;margin-top:-220px !important}
+  .card--shh{order:60;margin-top:-80px !important}
   #between-to-sticker{display:none !important}
   .card--sticker-maker{order:70;margin-top:-220px !important}
   .card--just-for-you{order:80;margin-top:-80px !important}
