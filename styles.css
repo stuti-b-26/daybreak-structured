@@ -431,7 +431,7 @@ img{display:block;max-width:100%}
   .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin-top:-55vw !important;margin-bottom:0 !important;position:relative;z-index:2}
   #you-end-mob{display:block;order:82;width:32vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:1}
   /* All cards overlap and sit above connector SVGs */
-  .card--mess-hall{order:30;margin-top:-46vw !important}
+  .card--mess-hall{order:30;margin-top:-55vw !important}
   #yellow-scribble{display:none !important}
   .card--selfless{order:40;margin-top:-69vw !important}
   .card--shh{order:60;margin-top:-220px !important}
