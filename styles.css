@@ -397,7 +397,7 @@ img{display:block;max-width:100%}
   #teal-scrib{width:40vw}
 
   /* Mission — pull up so you-to-end line meets green circle center */
-  #mission{margin-top:-38vw}
+  #mission{margin-top:-46vw}
   #green-circle{width:22vw}
 
   #site-footer .footer-desktop{display:none}
@@ -433,7 +433,7 @@ img{display:block;max-width:100%}
   #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;margin-top:-35vw;position:relative;pointer-events:none;z-index:11}
   /* Divider — float-label overlaps the SVG so its text lands on the circle center (~54% down the SVG) */
   .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin-top:-60vw !important;margin-bottom:20vw !important;position:relative;z-index:12}
-  #you-end-mob{display:block;order:82;width:42vw;height:auto;align-self:flex-start;margin-left:8vw;margin-top:-15vw;position:relative;pointer-events:none;z-index:1}
+  #you-end-mob{display:block;order:82;width:42vw;height:auto;align-self:flex-start;margin-left:15vw;margin-top:-22vw;position:relative;pointer-events:none;z-index:1}
   /* All cards overlap and sit above connector SVGs */
   .card--mess-hall{order:30;margin-top:-55vw !important}
   #yellow-scribble{display:none !important}
