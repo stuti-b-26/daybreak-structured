@@ -573,10 +573,25 @@ body{background:#EEE0CC}
     <div class="fm-top">
       <button class="fm-back-top" onclick="scrollToTop()">back to top</button>
       <div class="fm-links">
-        <a href="mess-hall.html">wander</a>
-        <a href="between-us.html">seek</a>
-        <a href="about.html">about</a>
-        <a href="#">profile</a>
+        <button class="fm-nav-btn" data-target="fm-wander" aria-expanded="false">wander</button>
+        <div class="fm-nav-panel" id="fm-wander">
+          <a href="mess-hall.html">mess hall</a>
+          <a href="silly-decisions.html">silly decisions</a>
+          <a href="sticker-maker.html">sticker maker</a>
+        </div>
+        <button class="fm-nav-btn" data-target="fm-seek" aria-expanded="false">seek</button>
+        <div class="fm-nav-panel" id="fm-seek">
+          <a href="just-for-you.html">just for you</a>
+          <a href="between-us.html">between us</a>
+          <a href="selfless-less.html">selfless-less</a>
+        </div>
+        <button class="fm-nav-btn" data-target="fm-about" aria-expanded="false">about</button>
+        <div class="fm-nav-panel" id="fm-about">
+          <a href="about.html">our mission</a>
+          <a href="about.html#our-approach">our approach</a>
+          <a href="about.html#meet-the-team">meet the team</a>
+        </div>
+        <a href="profile.html" class="fm-nav-link">profile</a>
       </div>
     </div>
     <div class="fm-bottom">
@@ -1426,5 +1441,6 @@ initGalleryDrag();
   });
 })();
 </script>
+<script src="footer.js"></script>
 </body>
 </html>
