@@ -430,7 +430,7 @@ img{display:block;max-width:100%}
   /* Group 2 — all overlap each other */
   .card--shh{order:60}
   #between-to-sticker{display:none !important}
-  .card--sticker-maker{order:70;margin-top:40px !important}
+  .card--sticker-maker{order:70;margin-top:-8vw !important}
   .card--just-for-you{order:80;margin-top:-80px !important}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
