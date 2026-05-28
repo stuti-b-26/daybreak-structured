@@ -650,7 +650,8 @@ body.jfy-scissors-active .jfy-scissors {
     padding: 16px;
   }
   #jfy-notebook-left-page img {
-    max-width: 88%; max-height: 78%;
+    width: 88%; height: auto;
+    max-height: 78%;
     border-radius: 6px;
     box-shadow: 0 3px 16px rgba(0,0,0,0.14);
     object-fit: contain;
@@ -3085,7 +3086,9 @@ function captureNotebook(quality, callback){
   quality = quality || 0.92;
   var nb = document.querySelector('.jfy-notebook');
   if(!nb){ callback && callback(null); return; }
-  var rect = nb.getBoundingClientRect();
+  // Use nbLayer's rect so the captured image matches the actual canvas area.
+  // On desktop/tablet nbLayer is the right half; on mobile it fills the full notebook.
+  var rect = nbLayer.getBoundingClientRect();
   var w = Math.round(rect.width), h = Math.round(rect.height);
   var out = document.createElement('canvas');
   out.width = w; out.height = h;
@@ -3810,7 +3813,7 @@ window._jfyNotebook = {
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 18px;
     box-shadow: none;
     flex: 1;
