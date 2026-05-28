@@ -143,6 +143,8 @@ img{display:block;max-width:100%}
 #teal-bw-us{position:absolute;top:1860px;left:-2%;width:clamp(320px,55%,620px);height:auto;pointer-events:none;z-index:0}
 #you-to-end{position:absolute;top:2930px;left:1%;width:clamp(350px,50%,600px);height:auto;pointer-events:none;z-index:1}
 #top-bubble-mob,#silly-mess-mob,#mess-self-mob,#middle-break-mob,#you-end-mob,#bw-us-mob,#just-for-you-mob{display:none}
+#bw-us-mob-wrap{display:none}
+.bw-us-mob-btn{display:none}
 #green-circle{display:block;margin:0 auto 16px;width:128px;height:auto}
 #green-scribble{position:absolute;top:2520px;right:0;width:clamp(260px,36%,420px);height:auto;pointer-events:none;z-index:1}
 .sticker-card-deco{display:none;position:absolute;height:auto;pointer-events:none;z-index:0}
@@ -435,7 +437,9 @@ img{display:block;max-width:100%}
   #yellow-scribble{display:none !important}
   .card--selfless{order:40;margin-top:-69vw !important}
   .card--shh{display:none !important}
-  #bw-us-mob{display:block;order:60;width:90vw;height:auto;align-self:center;margin-top:-20px;position:relative;z-index:10}
+  #bw-us-mob-wrap{display:flex;order:60;width:78vw;align-self:center;margin-top:-20px;position:relative;z-index:10;flex-direction:column;align-items:center}
+  #bw-us-mob{display:block;width:100%;height:auto;position:relative}
+  .bw-us-mob-btn{display:block !important;position:absolute;bottom:12%;left:50%;transform:translateX(-50%) rotate(4deg) !important;font-size:clamp(14px,4vw,19px) !important;padding:5vw 7vw !important;white-space:nowrap}
   #between-to-sticker{display:none !important}
   .card--sticker-maker{order:70;margin-top:-20px !important}
   .card--just-for-you{display:none !important}
