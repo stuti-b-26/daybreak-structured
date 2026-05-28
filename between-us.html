@@ -923,7 +923,7 @@ function loadPosts(){
   try{
     var d=localStorage.getItem(STORE_KEY);
     var p=d?JSON.parse(d):[];
-    var userPosts=p.filter(function(x){return x.id&&x.id.indexOf('own')===0});
+    var userPosts=p.filter(function(x){return x.own===true});
     return userPosts.concat(SEED_POSTS);
   }
   catch(e){return SEED_POSTS.slice()}
@@ -1013,7 +1013,7 @@ function renderCard(post, isOwn, idx, showJournal, context){
     if(dBtn)dBtn.addEventListener('click',function(e){
       e.stopPropagation();
       var posts=loadPosts();
-      savePosts(posts.filter(function(x){return x.id!==post.id}));
+      savePosts(posts.filter(function(x){return x.own===true&&x.id!==post.id}));
       var savedList=loadSaved();
       saveSaved(savedList.filter(function(x){return x.id!==post.id}));
       showToast('post deleted');
@@ -1180,7 +1180,7 @@ function initLightbox(){
     var post=_lbPosts[_lbIdx];
     if(!post.own)return;
     var posts=loadPosts();
-    savePosts(posts.filter(function(x){return x.id!==post.id}));
+    savePosts(posts.filter(function(x){return x.own===true&&x.id!==post.id}));
     var savedList=loadSaved();
     saveSaved(savedList.filter(function(x){return x.id!==post.id}));
     showToast('post deleted');
