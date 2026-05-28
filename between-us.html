@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles.css">
 <style>
 :root{--footer-accent:#FF6FAA}
+.dropdown-link.active{color:#FF6FAA;font-weight:700}
 /* ── BETWEEN US PAGE ── */
 body{background:#EEE0CC}
 #page-main{background:#EEE0CC;font-family:'Nunito',sans-serif}
@@ -701,6 +702,7 @@ function easeIO(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
     var sun=btn.closest('.nav-item')&&btn.closest('.nav-item').querySelector('.nav-sun');
     if(sun)sun.classList.add('visible');
   });
+  document.querySelectorAll('.dropdown-link[href="between-us.html"]').forEach(function(l){l.classList.add('active');});
 })();
 
 /* 3. MOBILE MENU */
