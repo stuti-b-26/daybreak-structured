@@ -142,7 +142,7 @@ img{display:block;max-width:100%}
 #break-bubble-middle{position:absolute;top:1480px;left:calc(55% - 200px);width:clamp(320px,40%,520px);height:auto;pointer-events:none;z-index:0;overflow:visible}
 #teal-bw-us{position:absolute;top:1860px;left:-2%;width:clamp(320px,55%,620px);height:auto;pointer-events:none;z-index:0}
 #you-to-end{position:absolute;top:2930px;left:1%;width:clamp(350px,50%,600px);height:auto;pointer-events:none;z-index:1}
-#top-bubble-mob,#silly-mess-mob,#mess-self-mob,#middle-break-mob,#you-end-mob{display:none}
+#top-bubble-mob,#silly-mess-mob,#mess-self-mob,#middle-break-mob,#you-end-mob,#bw-us-mob,#just-for-you-mob{display:none}
 #green-circle{display:block;margin:0 auto 16px;width:128px;height:auto}
 #green-scribble{position:absolute;top:2520px;right:0;width:clamp(260px,36%,420px);height:auto;pointer-events:none;z-index:1}
 .sticker-card-deco{display:none;position:absolute;height:auto;pointer-events:none;z-index:0}
@@ -434,10 +434,12 @@ img{display:block;max-width:100%}
   .card--mess-hall{order:30;margin-top:-55vw !important}
   #yellow-scribble{display:none !important}
   .card--selfless{order:40;margin-top:-69vw !important}
-  .card--shh{order:60;margin-top:-80px !important}
+  .card--shh{display:none !important}
+  #bw-us-mob{display:block;order:60;width:90vw;height:auto;align-self:center;margin-top:-20px;position:relative;z-index:10}
   #between-to-sticker{display:none !important}
-  .card--sticker-maker{order:70;margin-top:-220px !important}
-  .card--just-for-you{order:80;margin-top:-80px !important}
+  .card--sticker-maker{order:70;margin-top:-20px !important}
+  .card--just-for-you{display:none !important}
+  #just-for-you-mob{display:block;order:80;width:90vw;height:auto;align-self:center;margin-top:-20px;position:relative;z-index:10}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:none !important}
