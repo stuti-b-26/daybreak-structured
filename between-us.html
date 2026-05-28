@@ -920,7 +920,7 @@ function loadJournal(){
 function saveJournal(entries){try{localStorage.setItem(STORE_JOURNAL,JSON.stringify(entries))}catch(e){}}
 
 function loadPosts(){
-  try{var d=localStorage.getItem(STORE_KEY);return d?JSON.parse(d):SEED_POSTS.slice()}
+  try{var d=localStorage.getItem(STORE_KEY);var p=d?JSON.parse(d):null;return(p&&p.length)?p:SEED_POSTS.slice()}
   catch(e){return SEED_POSTS.slice()}
 }
 function savePosts(posts){try{localStorage.setItem(STORE_KEY,JSON.stringify(posts))}catch(e){}}
