@@ -397,41 +397,41 @@
     <div class="prof-carousel-wrap">
       <button class="carousel-arrow carousel-arrow--prev" id="carousel-prev" aria-label="Previous photos">&#8592;</button>
       <div class="prof-carousel" id="prof-carousel" role="list" aria-label="Your photos">
-        <div class="polaroid" role="listitem" data-emoji="🌿" data-c1="#ffd400" data-c2="#f5a04a" data-caption="jun 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#ffd400;--c2:#f5a04a">🌿</div>
-          <p class="polaroid-caption">jun 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-just-for-you-01.jpg" data-caption="just for you">
+          <img class="polaroid-img" src="gallery-just-for-you-01.jpg" alt="just for you">
+          <p class="polaroid-caption">just for you</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="☀️" data-c1="#5dde60" data-c2="#7de8f5" data-caption="jun 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#5dde60;--c2:#7de8f5">☀️</div>
-          <p class="polaroid-caption">jun 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-silly-decisions-01.png" data-caption="silly decisions">
+          <img class="polaroid-img" src="gallery-silly-decisions-01.png" alt="silly decisions">
+          <p class="polaroid-caption">silly decisions</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="🌸" data-c1="#e8a8f0" data-c2="#c3a8f5" data-caption="may 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#e8a8f0;--c2:#c3a8f5">🌸</div>
-          <p class="polaroid-caption">may 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-just-for-you-02.jpg" data-caption="just for you">
+          <img class="polaroid-img" src="gallery-just-for-you-02.jpg" alt="just for you">
+          <p class="polaroid-caption">just for you</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="🎈" data-c1="#7de8f5" data-c2="#5dde60" data-caption="may 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#7de8f5;--c2:#5dde60">🎈</div>
-          <p class="polaroid-caption">may 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-silly-decisions-02.png" data-caption="silly decisions">
+          <img class="polaroid-img" src="gallery-silly-decisions-02.png" alt="silly decisions">
+          <p class="polaroid-caption">silly decisions</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="🍊" data-c1="#f5a04a" data-c2="#ffd400" data-caption="apr 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#f5a04a;--c2:#ffd400">🍊</div>
-          <p class="polaroid-caption">apr 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-sticker-maker-01.png" data-caption="sticker maker">
+          <img class="polaroid-img" src="gallery-sticker-maker-01.png" alt="sticker maker">
+          <p class="polaroid-caption">sticker maker</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="🦋" data-c1="#c3a8f5" data-c2="#e8a8f0" data-caption="apr 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#c3a8f5;--c2:#e8a8f0">🦋</div>
-          <p class="polaroid-caption">apr 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-silly-decisions-03.png" data-caption="silly decisions">
+          <img class="polaroid-img" src="gallery-silly-decisions-03.png" alt="silly decisions">
+          <p class="polaroid-caption">silly decisions</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="🌻" data-c1="#5dde60" data-c2="#ffd400" data-caption="mar 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#5dde60;--c2:#ffd400">🌻</div>
-          <p class="polaroid-caption">mar 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-just-for-you-03.jpg" data-caption="just for you">
+          <img class="polaroid-img" src="gallery-just-for-you-03.jpg" alt="just for you">
+          <p class="polaroid-caption">just for you</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="🌊" data-c1="#7de8f5" data-c2="#c3a8f5" data-caption="mar 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#7de8f5;--c2:#c3a8f5">🌊</div>
-          <p class="polaroid-caption">mar 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-silly-decisions-04.png" data-caption="silly decisions">
+          <img class="polaroid-img" src="gallery-silly-decisions-04.png" alt="silly decisions">
+          <p class="polaroid-caption">silly decisions</p>
         </div>
-        <div class="polaroid" role="listitem" data-emoji="⭐" data-c1="#ffd400" data-c2="#5dde60" data-caption="feb 2025">
-          <div class="polaroid-img-placeholder" style="--c1:#ffd400;--c2:#5dde60">⭐</div>
-          <p class="polaroid-caption">feb 2025</p>
+        <div class="polaroid" role="listitem" data-src="gallery-silly-decisions-05.png" data-caption="silly decisions">
+          <img class="polaroid-img" src="gallery-silly-decisions-05.png" alt="silly decisions">
+          <p class="polaroid-caption">silly decisions</p>
         </div>
       </div>
       <button class="carousel-arrow carousel-arrow--next" id="carousel-next" aria-label="Next photos">&#8594;</button>
@@ -762,15 +762,17 @@
   c.querySelectorAll('.polaroid').forEach(function(pol){
     pol.addEventListener('click',function(e){
       if(didDrag)return; /* suppress click after drag */
-      var emoji=pol.dataset.emoji||'📷';
-      var c1=pol.dataset.c1||'#ffd400';
-      var c2=pol.dataset.c2||'#f5a04a';
+      var src=pol.dataset.src||'';
       var caption=pol.dataset.caption||'';
-      /* get frame color from computed style */
       var fc=getComputedStyle(pol).backgroundColor;
       lbFrame.style.setProperty('--lb-frame',fc);
-      lbPlaceholder.style.background='linear-gradient(145deg,'+c1+','+c2+')';
-      lbPlaceholder.textContent=emoji;
+      if(src){
+        lbPlaceholder.style.background='';
+        lbPlaceholder.innerHTML='<img src="'+src+'" alt="'+caption+'" style="width:100%;aspect-ratio:4/5;object-fit:cover;display:block;">';
+      }else{
+        lbPlaceholder.style.background='linear-gradient(145deg,#ffd400,#f5a04a)';
+        lbPlaceholder.textContent='📷';
+      }
       lbCaption.textContent=caption;
       lb.classList.add('open');
       document.body.style.overflow='hidden';
