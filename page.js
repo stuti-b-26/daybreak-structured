@@ -364,7 +364,43 @@ document.getElementById('clearDrawBtn').addEventListener('click',()=>{
   saveDState();dctx.clearRect(0,0,dc.width,dc.height);
   liveDrawings=[];if(lActive)lctx.clearRect(0,0,lW,lH);
 });
-document.getElementById('saveDrawBtn').addEventListener('click',()=>toast('Drawing saved. Framing it now.'));
+document.getElementById('saveDrawBtn').addEventListener('click',()=>{
+  const pixels=dctx.getImageData(0,0,dc.width,dc.height).data;
+  const hasContent=Array.prototype.some.call(pixels,(v,i)=>i%4===3&&v>10);
+  if(!hasContent){toast('nothing to save yet!');return;}
+  const url=dc.toDataURL('image/png');
+  let saved=[];
+  try{saved=JSON.parse(localStorage.getItem('mh_gallery')||'[]');}catch(e){}
+  saved.unshift({url,time:Date.now()});
+  if(saved.length>50)saved=saved.slice(0,50);
+  try{localStorage.setItem('mh_gallery',JSON.stringify(saved));}catch(e){}
+  renderDrawingGallery();
+  toast('Drawing saved. Framing it now.');
+});
+
+function renderDrawingGallery(){
+  const panel=document.getElementById('drawGalleryPanel');
+  const grid=document.getElementById('drawGalleryGrid');
+  const count=document.getElementById('drawGalleryCount');
+  if(!panel||!grid)return;
+  let saved=[];
+  try{saved=JSON.parse(localStorage.getItem('mh_gallery')||'[]');}catch(e){}
+  if(!saved.length){panel.style.display='none';return;}
+  panel.style.display='block';
+  if(count)count.textContent=saved.length;
+  grid.innerHTML='';
+  saved.slice(0,8).forEach(entry=>{
+    const img=document.createElement('img');
+    img.src=entry.url;img.className='dg-thumb';img.alt='saved drawing';
+    grid.appendChild(img);
+  });
+  if(saved.length>8){
+    const more=document.createElement('a');
+    more.href='profile.html#prof-gallery';more.className='dg-more';
+    more.textContent=`+${saved.length-8} more`;
+    grid.appendChild(more);
+  }
+}
 
 /* ============================================
    LIVE DRAWINGS
@@ -603,5 +639,5 @@ function fitCardText() {
 /* ============================================
    INIT
    ============================================ */
-setTimeout(()=>{ resizeDraw(); }, 100);
+setTimeout(()=>{ resizeDraw(); renderDrawingGallery(); }, 100);
 window.addEventListener('resize',()=>{ resizeDraw(); if(bActive)resizeBall(); if(lActive)resizeLive(); alignInspiration(); fitCardText(); });
