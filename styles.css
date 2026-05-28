@@ -142,6 +142,7 @@ img{display:block;max-width:100%}
 #break-bubble-middle{position:absolute;top:1480px;left:calc(55% - 200px);width:clamp(320px,40%,520px);height:auto;pointer-events:none;z-index:0;overflow:visible}
 #teal-bw-us{position:absolute;top:1860px;left:-2%;width:clamp(320px,55%,620px);height:auto;pointer-events:none;z-index:0}
 #you-to-end{position:absolute;top:2930px;left:1%;width:clamp(350px,50%,600px);height:auto;pointer-events:none;z-index:1}
+#top-bubble-mob,#silly-mess-mob,#mess-self-mob,#middle-break-mob,#you-end-mob{display:none}
 #green-circle{display:block;margin:0 auto 16px;width:128px;height:auto}
 #green-scribble{position:absolute;top:2520px;right:0;width:clamp(260px,36%,420px);height:auto;pointer-events:none;z-index:1}
 .sticker-card-deco{display:none;position:absolute;height:auto;pointer-events:none;z-index:0}
@@ -425,13 +426,24 @@ img{display:block;max-width:100%}
   .card--mess-hall{order:30;margin-top:-20vw !important}
   #yellow-scribble{display:none !important}
   .card--selfless{order:40;margin-top:-20vw !important}
-  /* Divider — large centered space with SVG circle around text */
-  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin:60px 0 !important}
+  /* ── Mobile connector SVGs ── */
+  /* top-bubble-mob: bubble circles "break." in float-label, line flows down to silly decisions */
+  #top-bubble-mob{display:block;order:15;width:43vw;height:auto;align-self:center;margin-top:-8vw;position:relative;pointer-events:none;z-index:5}
+  /* silly-mess-mob: right side, from silly decisions button sweeping down to mess hall */
+  #silly-mess-mob{display:block;order:25;width:22vw;height:auto;align-self:flex-end;margin-top:-10vw;position:relative;pointer-events:none;z-index:3}
+  /* mess-self-mob: left side, from mess hall down to selfless-less */
+  #mess-self-mob{display:block;order:35;width:31vw;height:auto;align-self:flex-start;margin-left:4%;margin-top:-8vw;position:relative;pointer-events:none;z-index:2}
+  /* middle-break-mob: circle sits around "everyone needs a break" text; float-label overlays circle center */
+  #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:2}
+  /* Divider — float-label overlaps the SVG so its text lands on the circle center (~54% down the SVG) */
+  .float-label--everyone{order:50;align-self:center !important;text-align:center;width:100%;margin-top:-55vw !important;margin-bottom:0 !important;position:relative;z-index:3}
   /* Group 2 — all overlap each other */
   .card--shh{order:60}
   #between-to-sticker{display:none !important}
   .card--sticker-maker{order:70;margin-top:-8vw !important}
   .card--just-for-you{order:80;margin-top:-80px !important}
+  /* you-end-mob: starts under just-for-you, endpoint centered above mission statement */
+  #you-end-mob{display:block;order:82;width:32vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:1}
   /* Trailing connectors — sticker-to-you hidden on mobile (too tall), you-to-end absolute at bottom */
   #sticker-to-you{display:none}
   #you-to-end{display:none !important}
@@ -439,7 +451,7 @@ img{display:block;max-width:100%}
   #teal-bw-us{display:none !important}
   #green-scribble{display:none !important}
 
-  /* ── Absolutely positioned connectors — hidden on mobile ── */
+  /* ── Desktop/tablet connector SVGs — hidden on mobile ── */
   #break-intro-top{display:none !important}
   #silly-to-mess{display:none !important}
   #mess-btn-to-self{display:none !important}
