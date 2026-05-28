@@ -1,5 +1,5 @@
 /* ============================================
-   MESS HALL — mess-hall.css
+   MESS HALL — style.css
    Background: #fefff4
    Primary:    Adobe Typekit (acumin-pro-condensed)
    Secondary:  Montserrat
@@ -29,6 +29,13 @@
 }
 @media (min-width: 834px)  { :root { --g: 15px; } }
 @media (min-width: 1440px) { :root { --g: 20px; } }
+
+/* RESET */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html  { scroll-behavior: smooth; }
+body  { background: var(--bg); color: var(--black); font-family: var(--f2); overflow-x: hidden; }
+img   { display: block; }
+button { cursor: pointer; font-family: var(--f1); }
 
 /* 1-column margin = (viewport - 11 gaps) / 12 */
 .pad  { padding: 40px calc((100% - 11 * var(--g)) / 12); }
@@ -644,7 +651,6 @@
   text-decoration: underline;
   color: #888;
   padding: 0;
-  cursor: pointer;
 }
 .draw__save-btn { width: calc(240 * var(--s)); margin-bottom: 28px; }
 
@@ -765,6 +771,8 @@
 
 /* ============================================
    STOP-MOTION / POP-ART IDLE ANIMATIONS
+   Each keyframe uses step-end so properties
+   snap instantly — no interpolation.
    ============================================ */
 
 @keyframes snap-wriggle {
