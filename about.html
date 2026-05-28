@@ -371,6 +371,43 @@
   .cta-deco-top-img,.cta-deco-bot-img{display:none}
   .team-green-center,.team-teal-head,.team-pink-deco,.team-hatch-deco{display:none}
   .team-cards-illus{display:none}
+
+  /* ── SHOW MOBILE SVGS ── */
+  .cta-deco-mob-img{display:block;max-width:100%;height:auto;pointer-events:none}
+  .sub-heading-deco-mob{display:inline-block}
+  .approach-deco--mob-svg{
+    display:block;
+    width:clamp(70px,24vw,99px);
+    left:0;top:auto;bottom:0;
+    transform:none;
+  }
+
+  /* individual CTA mob sizing */
+  .cta-deco-mob-img[src="mess%20top%20mob.svg"]     {width:clamp(60px,28vw,90px)}
+  .cta-deco-mob-img[src="silly%20top%20mob.svg"]    {width:clamp(30px,12vw,45px)}
+  .cta-deco-mob-img[src="silly%20bot%20mob.svg"]    {width:clamp(50px,22vw,80px)}
+  .cta-deco-mob-img[src="stick%20top%20mob.svg"]    {width:clamp(80px,32vw,123px)}
+  .cta-deco-mob-img[src="sticker%20bot%20mob.svg"]  {width:clamp(60px,26vw,100px)}
+  .cta-deco-mob-img[src="bw%20top%20mob.svg"]       {width:clamp(100px,46vw,160px)}
+  .cta-deco-mob-img[src="bw%20bot%20mob.svg"]       {width:clamp(110px,48vw,176px)}
+  .cta-deco-mob-img[src="jfw%20top%20mob.svg"]      {width:clamp(30px,13vw,50px)}
+  .cta-deco-mob-img[src="jfw%20bot%20mob.svg"]      {width:clamp(80px,34vw,132px)}
+  .cta-deco-mob-img[src="self%20top%20mob.svg"]     {width:clamp(36px,14vw,55px)}
+
+  /* team mobile SVGs */
+  .team-mob-top{
+    display:block;
+    width:min(90vw,360px);
+    margin:0 auto 8px;
+  }
+  .team-mob-bot{
+    display:block;
+    width:clamp(120px,50vw,193px);
+  }
+  .team-mob-hatch{
+    display:block;
+    width:clamp(80px,30vw,114px);
+  }
 }
 
 /* ── ABOUT CTA ── */
@@ -857,8 +894,13 @@
     <div class="gc">
       <div class="grid">
         <div class="team-footer-area">
+          <img class="team-mob-top" src="team%20top%20mob.svg" alt="" aria-hidden="true">
           <img class="team-green-dot" src="green%20circle.svg" alt="" aria-hidden="true">
           <p class="team-footer-text">we left some of our happiness here for you to find</p>
+          <div style="display:flex;gap:16px;align-items:flex-end">
+            <img class="team-mob-hatch" src="mob%20hatch.svg" alt="" aria-hidden="true">
+            <img class="team-mob-bot" src="team%20bot%20mob.svg" alt="" aria-hidden="true">
+          </div>
         </div>
       </div>
     </div>
