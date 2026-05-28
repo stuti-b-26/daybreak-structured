@@ -423,7 +423,7 @@ img{display:block;max-width:100%}
   .card--silly-decisions{order:20}
   #orange-shape{order:25;display:block;position:relative !important;width:12vw;height:auto;align-self:flex-end;margin-right:6%;margin-top:-5vw;z-index:5}
   /* ── Mobile connector SVGs — layer under cards (z-index:1) ── */
-  #top-bubble-mob{display:block;order:15;width:32vw;height:auto;align-self:flex-start;margin-left:48vw;margin-top:-8vw;margin-bottom:-10vw;position:relative;pointer-events:none;z-index:1}
+  #top-bubble-mob{display:block;order:15;width:32vw;height:auto;align-self:flex-start;margin-left:38vw;margin-top:-8vw;margin-bottom:-10vw;position:relative;pointer-events:none;z-index:1}
   #silly-mess-mob{display:block;order:25;width:22vw;height:auto;align-self:flex-end;margin-top:-10vw;position:relative;pointer-events:none;z-index:1}
   #mess-self-mob{display:block;order:35;width:31vw;height:auto;align-self:flex-start;margin-left:4%;margin-top:-8vw;position:relative;pointer-events:none;z-index:1}
   #middle-break-mob{display:block;order:49;width:96vw;height:auto;align-self:center;position:relative;pointer-events:none;z-index:1}
