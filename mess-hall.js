@@ -17,11 +17,6 @@ const TOPICS = [
   { name:'breaking news',title:'"breaking news"',       t:"Breaking: Local {job title} refuses to stop {verb}ing despite {number} warnings from the {adjective} {authority}. Witnesses describe the scene as {adjective 2}. The {job title} had only this to say: {quote}.", f:[{l:'job title',k:'job title'},{l:'a verb',k:'verb'},{l:'a number',k:'number'},{l:'an adjective',k:'adjective'},{l:'an authority',k:'authority'},{l:'another adjective',k:'adjective 2'},{l:'a quote',k:'quote'}] }
 ];
 
-const CARD_SVGS = [
-  'hm-deco-text-container-01.svg',
-  'hm-deco-text-container-02.svg',
-  'hm-deco-text-container-03.svg'
-];
 const EXAMPLES = [
   { topic:'fantasy',  title:'"the chosen one"',    text:'The <strong>soggy</strong> wizard pointed at me and said I was destined to <strong>moonwalk</strong> across the entire kingdom of <strong>Cincinnati</strong>. My only weapon was a <strong>butterknife</strong>. The dragon took one look at me and <strong>sneezed</strong> immediately. Legend.' },
   { topic:'vacation', title:'"family trip"',        text:'We arrived in <strong>a Denny\'s parking lot</strong> with nothing but a <strong>spatula</strong> and a dream. The locals spoke entirely in <strong>honks</strong>. On day two we accidentally joined a <strong>moist</strong> parade. We have not been allowed back since.' },
@@ -92,9 +87,7 @@ function buildForm() {
     wrap.className = 'adlibs__input-wrap';
 
     const bg = document.createElement('img');
-    bg.src = i % 2 === 0
-      ? 'hm-deco-text-field-container-01.svg'
-      : 'hm-deco-text-field-container-02.svg';
+    bg.src = 'hm-deco-text-field-container-01.svg';
     bg.alt = ''; bg.setAttribute('aria-hidden','true');
 
     const inp = document.createElement('input');
@@ -134,12 +127,10 @@ const cardsEl = document.getElementById('storyCards');
 EXAMPLES.forEach((e, i) => {
   const card = document.createElement('div');
   card.className = 'adlibs__card';
-  const bg = document.createElement('img');
-  bg.src = CARD_SVGS[i]; bg.className = 'adlibs__card-bg'; bg.alt = ''; bg.setAttribute('aria-hidden','true');
   const inner = document.createElement('div');
   inner.className = 'adlibs__card-inner';
   inner.innerHTML = `<div class="adlibs__card-topic">${e.topic}</div><div class="adlibs__card-title">${e.title}</div><div class="adlibs__card-text">${e.text}</div>`;
-  card.appendChild(bg); card.appendChild(inner);
+  card.appendChild(inner);
   cardsEl.appendChild(card);
 });
 
@@ -148,12 +139,10 @@ const commEl = document.getElementById('communityCards');
 COMM_CARDS.forEach((c, i) => {
   const card = document.createElement('div');
   card.className = 'community-card';
-  const bg = document.createElement('img');
-  bg.src = CARD_SVGS[i]; bg.className = 'cc-bg'; bg.alt = ''; bg.setAttribute('aria-hidden','true');
   const inner = document.createElement('div');
   inner.className = 'cc-inner';
   inner.innerHTML = `<p class="cc-text">${c.text}</p><p class="cc-author">${c.author}</p>`;
-  card.appendChild(bg); card.appendChild(inner);
+  card.appendChild(inner);
   commEl.appendChild(card);
 });
 
@@ -480,9 +469,8 @@ document.getElementById('gravSelect').addEventListener('change',e=>bGrav=parseFl
 const pc=document.getElementById('partyCanvas');
 const pctx=pc.getContext('2d');
 let partyOn=false,pAngle=0,pStrobe=0,pDir=1,pAF=null;
-const discoBallImg=new Image();discoBallImg.src='hm-deco-disco-ball.svg';
 function resizeParty(){pc.width=window.innerWidth;pc.height=window.innerHeight;}
-function partyLoop(){if(!partyOn){pc.style.display='none';return;}pctx.clearRect(0,0,pc.width,pc.height);pStrobe+=pDir*.015;if(pStrobe>1){pStrobe=1;pDir=-1;}if(pStrobe<0){pStrobe=0;pDir=1;}pctx.fillStyle=`hsla(${(pAngle*1.5)%360},80%,60%,${pStrobe*.1})`;pctx.fillRect(0,0,pc.width,pc.height);const cx=pc.width/2,cy=80,r=50;pAngle+=.7;for(let i=0;i<20;i++){const a=(i/20)*Math.PI*2+pAngle*.015,bh=(i/20*360+pAngle*2)%360;pctx.beginPath();pctx.moveTo(cx,cy);pctx.lineTo(cx+Math.cos(a)*1200,cy+Math.sin(a)*1800);pctx.strokeStyle=`hsla(${bh},90%,65%,${.05+pStrobe*.04})`;pctx.lineWidth=10;pctx.stroke();}pctx.save();pctx.translate(cx,cy);pctx.rotate(pAngle*.015);pctx.drawImage(discoBallImg,-r,-r,r*2,r*2);pctx.restore();pAF=requestAnimationFrame(partyLoop);}
+function partyLoop(){if(!partyOn){pc.style.display='none';return;}pctx.clearRect(0,0,pc.width,pc.height);pStrobe+=pDir*.015;if(pStrobe>1){pStrobe=1;pDir=-1;}if(pStrobe<0){pStrobe=0;pDir=1;}pctx.fillStyle=`hsla(${(pAngle*1.5)%360},80%,60%,${pStrobe*.1})`;pctx.fillRect(0,0,pc.width,pc.height);const cx=pc.width/2,cy=80;pAngle+=.7;for(let i=0;i<20;i++){const a=(i/20)*Math.PI*2+pAngle*.015,bh=(i/20*360+pAngle*2)%360;pctx.beginPath();pctx.moveTo(cx,cy);pctx.lineTo(cx+Math.cos(a)*1200,cy+Math.sin(a)*1800);pctx.strokeStyle=`hsla(${bh},90%,65%,${.05+pStrobe*.04})`;pctx.lineWidth=10;pctx.stroke();}pAF=requestAnimationFrame(partyLoop);}
 function setParty(on){partyOn=on;if(on){pc.style.display='block';resizeParty();partyLoop();}else{pc.style.display='none';if(pAF)cancelAnimationFrame(pAF);}document.getElementById('partyBtn').setAttribute('aria-pressed',on);document.getElementById('partyBtnText').textContent=on?'party on :)':'party off :(';}
 document.getElementById('partyBtn').addEventListener('click',()=>setParty(!partyOn));
 window.addEventListener('resize',()=>{if(partyOn)resizeParty();});
