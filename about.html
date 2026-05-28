@@ -305,6 +305,74 @@
   .team-footer-area{padding:56px 0 72px}
 }
 
+/* ── APPROACH DECORATIVE SVGS ── */
+.approach-deco-abs{position:absolute;pointer-events:none;z-index:0}
+.approach-deco--green-svg{right:-20px;top:50%;transform:translateY(-38%);width:clamp(180px,22vw,360px)}
+.approach-deco--yellow-svg{left:-20px;bottom:60px;width:clamp(160px,20vw,330px)}
+.approach-deco--mob-svg{display:none}
+
+/* wander / seek sub-heading deco */
+.approach-sub-hd{position:relative}
+.sub-heading-deco{
+  position:absolute;right:0;top:-8px;
+  width:clamp(60px,7vw,110px);pointer-events:none;
+}
+.sub-heading-deco-mob{display:none;width:36px;vertical-align:middle;margin-left:8px}
+
+/* CTA deco wrappers */
+.cta-deco-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cta-deco-top-img,.cta-deco-bot-img{display:block;max-width:100%;pointer-events:none}
+.cta-deco-mob-img{display:none}
+
+/* ── TEAM DECORATIVE SVGS ── */
+.team-green-center{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:clamp(440px,56vw,720px);
+  pointer-events:none;z-index:0;
+}
+.team-teal-head{
+  position:absolute;top:-50px;left:50%;
+  transform:translateX(-50%);
+  width:clamp(360px,52vw,562px);
+  pointer-events:none;z-index:2;
+}
+.team-pink-deco{
+  position:absolute;
+  left:calc(50% - clamp(290px,36vw,420px));
+  top:50%;transform:translateY(-60%);
+  width:clamp(100px,12vw,180px);
+  pointer-events:none;z-index:2;
+}
+.team-hatch-deco{
+  position:absolute;
+  right:calc(50% - clamp(290px,36vw,420px));
+  top:50%;transform:translateY(-40%);
+  width:clamp(160px,26vw,380px);
+  pointer-events:none;z-index:2;
+}
+.team-cards-illus{
+  display:flex;justify-content:center;padding:0 clamp(16px,4vw,60px) 0;
+}
+.team-cards-illus img{width:100%;max-width:860px;pointer-events:none}
+
+.team-mob-top,.team-mob-bot,.team-mob-hatch{display:none}
+
+@media(max-width:1023px) and (min-width:768px){
+  .approach-deco--green-svg{width:220px;right:0}
+  .approach-deco--yellow-svg{width:190px;left:0}
+  .team-teal-head{width:78vw}
+  .team-pink-deco{width:110px}
+  .team-hatch-deco{width:200px}
+}
+
+@media(max-width:767px){
+  .approach-deco--green-svg,.approach-deco--yellow-svg{display:none}
+  .cta-deco-top-img,.cta-deco-bot-img{display:none}
+  .team-green-center,.team-teal-head,.team-pink-deco,.team-hatch-deco{display:none}
+  .team-cards-illus{display:none}
+}
+
 /* ── ABOUT CTA ── */
 #about-cta{background:#000;position:relative;padding:120px 0;overflow:visible}
 @media(max-width:767px){#about-cta{padding:80px 0}}
@@ -531,6 +599,9 @@
 
   <!-- OUR APPROACH -->
   <section id="our-approach" aria-labelledby="approach-heading">
+    <img class="approach-deco-abs approach-deco--green-svg" src="approach green.svg" alt="" aria-hidden="true">
+    <img class="approach-deco-abs approach-deco--yellow-svg" src="approach yellow.svg" alt="" aria-hidden="true">
+    <img class="approach-deco-abs approach-deco--mob-svg" src="approach mob.svg" alt="" aria-hidden="true">
     <div class="gc">
       <div class="grid">
         <p class="approach-label" id="approach-heading">our approach</p>
@@ -542,7 +613,9 @@
             <div class="approach-pill-wrap">
               <span class="approach-pill approach-pill--green" aria-hidden="true"></span>
               <span class="approach-sub-title">wander</span>
+              <img class="sub-heading-deco-mob" src="wander mob.svg" alt="" aria-hidden="true">
             </div>
+            <img class="sub-heading-deco" src="wander green.svg" alt="" aria-hidden="true">
             <p class="approach-sub-intro">explore through fun and playful activities. wander pages contain small interactions that allow you to bring a little more joy into your day.</p>
           </div>
 
@@ -553,7 +626,12 @@
               <p class="approach-page-desc">explore a feast of small, funny, tactile, and creative activities designed so that something here puts a smile on your face, no matter where you're starting from. no rules, no wrong answers, no skill required. just play.</p>
             </div>
             <div class="approach-page-cta">
-              <a href="mess-hall.html" class="approach-cta-btn approach-cta-rect approach-cta--pink" style="transform:rotate(-2deg)">start the madness</a>
+              <div class="cta-deco-wrap">
+                <img class="cta-deco-top-img" src="mess top button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="mess top mob.svg" alt="" aria-hidden="true">
+                <a href="mess-hall.html" class="approach-cta-btn approach-cta-rect approach-cta--pink" style="transform:rotate(-2deg)">start the madness</a>
+                <img class="cta-deco-bot-img" src="mess bot button.svg" alt="" aria-hidden="true">
+              </div>
             </div>
           </div>
 
@@ -564,7 +642,13 @@
               <p class="approach-page-desc">at its core, the page celebrates the idea that happiness can come from not taking yourself too seriously. using exaggerated and silly choices to temporarily disconnect from reality. encourages users to engage without the pressure of making the "right" decision.</p>
             </div>
             <div class="approach-page-cta">
-              <a href="silly-decisions.html" class="approach-cta-btn approach-cta-circle approach-cta--green">make Silly Decisions</a>
+              <div class="cta-deco-wrap">
+                <img class="cta-deco-top-img" src="silly top button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="silly top mob.svg" alt="" aria-hidden="true">
+                <a href="silly-decisions.html" class="approach-cta-btn approach-cta-circle approach-cta--green">make Silly Decisions</a>
+                <img class="cta-deco-bot-img" src="silly bot button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="silly bot mob.svg" alt="" aria-hidden="true">
+              </div>
             </div>
           </div>
 
@@ -575,7 +659,12 @@
               <p class="approach-page-desc">this is the fun part where the user gets to layer in personality with a little emoji, a doodle or a phrase. the stickers here are designed by the creator of the site, so every option already has a consistent look and feel. picking one should feel like choosing a mood, not making a decision.</p>
             </div>
             <div class="approach-page-cta">
-              <a href="sticker-maker.html" class="approach-cta-btn approach-cta-pill approach-cta--blue" style="transform:rotate(2deg)">upload any photo</a>
+              <div class="cta-deco-wrap">
+                <img class="cta-deco-mob-img" src="stick top mob.svg" alt="" aria-hidden="true">
+                <a href="sticker-maker.html" class="approach-cta-btn approach-cta-pill approach-cta--blue" style="transform:rotate(2deg)">upload any photo</a>
+                <img class="cta-deco-bot-img" src="sticker bot button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="sticker bot mob.svg" alt="" aria-hidden="true">
+              </div>
             </div>
           </div>
         </div><!-- /wander -->
@@ -586,7 +675,9 @@
             <div class="approach-pill-wrap">
               <span class="approach-pill approach-pill--orange" aria-hidden="true"></span>
               <span class="approach-sub-title">seek</span>
+              <img class="sub-heading-deco-mob" src="seek mob.svg" alt="" aria-hidden="true">
             </div>
+            <img class="sub-heading-deco" src="seek orange.svg" alt="" aria-hidden="true">
             <p class="approach-sub-intro">connect with others, yourself, and learn more about the journey to happiness. seek pages are spaces to reconnect, reset, and guide you back to where you want to be with intentional interactions.</p>
           </div>
 
@@ -597,7 +688,13 @@
               <p class="approach-page-desc">between us invites users to share short stories that capture little pockets of happiness in their lives, or moments they're still hoping to reach. each post becomes a tiny snapshot of a lived experience, shaped by the voice and identity the user chooses to share with.</p>
             </div>
             <div class="approach-page-cta">
-              <a href="between-us.html" class="approach-cta-btn approach-cta-rect approach-cta--yellow" style="transform:rotate(3deg)">confess to the screen</a>
+              <div class="cta-deco-wrap">
+                <img class="cta-deco-top-img" src="bw top button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="bw top mob.svg" alt="" aria-hidden="true">
+                <a href="between-us.html" class="approach-cta-btn approach-cta-rect approach-cta--yellow" style="transform:rotate(3deg)">confess to the screen</a>
+                <img class="cta-deco-bot-img" src="bw bot button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="bw bot mob.svg" alt="" aria-hidden="true">
+              </div>
             </div>
           </div>
 
@@ -608,7 +705,13 @@
               <p class="approach-page-desc">holding on is where the human experiences settle into something personal, protected, and intentionally kept. it is a place where the user can create their own world by choosing what they want to keep, create, and design.</p>
             </div>
             <div class="approach-page-cta">
-              <a href="just-for-you.html" class="approach-cta-btn approach-cta-circle approach-cta--purple">design your world</a>
+              <div class="cta-deco-wrap">
+                <img class="cta-deco-top-img" src="jfy top button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="jfw top mob.svg" alt="" aria-hidden="true">
+                <a href="just-for-you.html" class="approach-cta-btn approach-cta-circle approach-cta--purple">design your world</a>
+                <img class="cta-deco-bot-img" src="jfy bot button.svg" alt="" aria-hidden="true">
+                <img class="cta-deco-mob-img" src="jfw bot mob.svg" alt="" aria-hidden="true">
+              </div>
             </div>
           </div>
 
@@ -619,7 +722,11 @@
               <p class="approach-page-desc">this page explores how people pleasing habits can quietly distance us from our own happiness. instead of presenting "happiness" as a big concept, the experience focuses on a small, relatable shift by recognizing when we say "i'm fine" when we're not.</p>
             </div>
             <div class="approach-page-cta">
-              <a href="selfless-less.html" class="approach-cta-btn approach-cta-pill approach-cta--orange">learn to be a little selfless less</a>
+              <div class="cta-deco-wrap">
+                <img class="cta-deco-mob-img" src="self top mob.svg" alt="" aria-hidden="true">
+                <a href="selfless-less.html" class="approach-cta-btn approach-cta-pill approach-cta--orange">learn to be a little selfless less</a>
+                <img class="cta-deco-bot-img" src="self bot button.svg" alt="" aria-hidden="true">
+              </div>
             </div>
           </div>
         </div><!-- /seek -->
@@ -641,6 +748,10 @@
     <!-- sticky card deck scroll stage -->
     <div class="team-scroll-stage" id="team-stage">
       <div class="team-sticky">
+        <img class="team-green-center" src="team green center.svg" alt="" aria-hidden="true">
+        <img class="team-teal-head" src="teal head.svg" alt="" aria-hidden="true">
+        <img class="team-pink-deco" src="pink head.svg" alt="" aria-hidden="true">
+        <img class="team-hatch-deco" src="team hatch.svg" alt="" aria-hidden="true">
         <div class="team-deck" id="team-deck">
 
           <!-- card 1: Shraddha — orange, wanderer (peels 1st) -->
@@ -747,12 +858,22 @@
       </div><!-- /team-sticky -->
     </div><!-- /team-stage -->
 
+    <!-- illustrated cards (desktop/tablet) -->
+    <div class="team-cards-illus" aria-hidden="true">
+      <img src="team cards.svg" alt="">
+    </div>
+
     <!-- footer tagline -->
     <div class="gc">
       <div class="grid">
         <div class="team-footer-area">
+          <img class="team-mob-top" src="team top mob.svg" alt="" aria-hidden="true">
           <div class="team-green-dot" aria-hidden="true"></div>
           <p class="team-footer-text">we left some of our happiness here for you to find</p>
+          <div style="display:flex;gap:16px;align-items:flex-end">
+            <img class="team-mob-hatch" src="mob hatch.svg" alt="" aria-hidden="true">
+            <img class="team-mob-bot" src="team bot mob.svg" alt="" aria-hidden="true">
+          </div>
         </div>
       </div>
     </div>
