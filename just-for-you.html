@@ -447,6 +447,68 @@ body.jfy-scissors-active .jfy-scissors {
 }
 .jfy-sticker-node:hover { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
 
+/* ── Between-us saved post card (journal embed) ── */
+.jfy-bw-card {
+  position: absolute;
+  width: 172px;
+  min-height: 80px;
+  background: #fdf8f0;
+  border: 3px solid #7dd6c8;
+  border-radius: 14px;
+  padding: 12px 12px 10px;
+  cursor: move;
+  user-select: none;
+  z-index: 15;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.10);
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  font-size: 11.5px;
+  color: #2a1f14;
+  line-height: 1.55;
+}
+.jfy-bw-card-bar {
+  display: block; width: 28px; height: 3px;
+  background: #7dd6c8; border-radius: 2px; margin-bottom: 8px;
+}
+.jfy-bw-card p { margin: 0; }
+.jfy-bw-card img { width: 100%; border-radius: 7px; display: block; }
+.jfy-bw-card--blank {
+  border-color: #d4cfc9; background: #f5f2ee;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 80px; font-style: italic; color: #b0a89e; font-size: 11px;
+}
+/* ── Saved-post picker overlay ── */
+#jfy-bw-picker {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.38);
+  display: none; align-items: center; justify-content: center; z-index: 9000;
+}
+#jfy-bw-picker-inner {
+  background: #fdf8f0; border-radius: 18px; padding: 24px 22px 20px;
+  width: min(420px, 90vw); max-height: 72vh; display: flex; flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18); position: relative;
+}
+#jfy-bw-picker-inner h3 {
+  font-family: 'Rammetto One', cursive; font-size: 18px; margin: 0 0 4px; color: #1a140a;
+}
+#jfy-bw-picker-inner p.jfy-bw-pick-desc {
+  font-family: 'Nunito', sans-serif; font-size: 12px; color: #888; margin: 0 0 14px;
+}
+#jfy-bw-picker-close {
+  position: absolute; top: 12px; right: 14px; background: none; border: none;
+  font-size: 20px; cursor: pointer; line-height: 1; color: #888; padding: 4px;
+}
+#jfy-bw-picker-list {
+  overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px;
+}
+.jfy-bw-pick-item {
+  background: #fff; border: 2px solid #7dd6c8; border-radius: 10px;
+  padding: 10px 12px; cursor: pointer; font-family: 'Nunito', sans-serif;
+  font-size: 12.5px; color: #2a1f14; line-height: 1.5; transition: background 0.12s;
+}
+.jfy-bw-pick-item:hover { background: #e8f9f7; }
+.jfy-bw-pick-item img { width: 100%; border-radius: 6px; display: block; max-height: 120px; object-fit: cover; }
+.jfy-bw-pick-empty { font-family: 'Nunito', sans-serif; font-size: 13px; color: #aaa; text-align: center; padding: 24px 0; font-style: italic; }
+
 /* ── ABOVE ── */
 /* Washi tape: top-left, partially off-screen */
 .jfy-washi {
@@ -1085,6 +1147,7 @@ body.jfy-scissors-active .jfy-scissors {
   <div class="jfy-mode-btns">
     <button class="jfy-mode-btn" id="jfy-pen-write-btn">write</button>
     <button class="jfy-mode-btn" id="jfy-pen-doodle-btn">doodle</button>
+    <button class="jfy-mode-btn" id="jfy-pen-saved-btn">saved posts</button>
   </div>
   <div id="jfy-pen-colors" class="jfy-color-swatches" style="display:none;margin-bottom:10px"></div>
   <div class="jfy-pen-size-row" id="jfy-pen-size-row" style="display:none">
@@ -1130,6 +1193,16 @@ body.jfy-scissors-active .jfy-scissors {
 <button class="fab" id="fab-btn" aria-label="Surprise me">
   <canvas id="fab-canvas" width="60" height="60"></canvas>
 </button>
+
+<!-- BETWEEN-US SAVED POST PICKER -->
+<div id="jfy-bw-picker" role="dialog" aria-modal="true" aria-label="Pick a saved post">
+  <div id="jfy-bw-picker-inner">
+    <button id="jfy-bw-picker-close" aria-label="Close">×</button>
+    <h3>saved posts</h3>
+    <p class="jfy-bw-pick-desc">pick one to add to your journal entry. you can drag it around after placing.</p>
+    <div id="jfy-bw-picker-list"></div>
+  </div>
+</div>
 
 <!-- MOOD POPUP -->
 <div id="mood-overlay" role="dialog" aria-modal="true" aria-label="How are you feeling?">
@@ -1818,7 +1891,7 @@ function getPaperAt(clientX, clientY){
 // Returns the topmost placed notebook element at a point (any type)
 function getPlacedAt(clientX, clientY){
   var els = document.elementsFromPoint(clientX, clientY);
-  var selectors = ['.jfy-placed-paper','.jfy-text-node-wrap','.jfy-polaroid','.jfy-sticker-node','.jfy-placed-washi'];
+  var selectors = ['.jfy-placed-paper','.jfy-text-node-wrap','.jfy-polaroid','.jfy-sticker-node','.jfy-placed-washi','.jfy-bw-card'];
   for(var i=0;i<els.length;i++){
     for(var s=0;s<selectors.length;s++){
       var found = els[i].classList && els[i].classList.contains(selectors[s].slice(1))
@@ -1934,7 +2007,8 @@ nbLayer.addEventListener('click', function(e){
      e.target.closest('.jfy-polaroid') ||
      e.target.closest('.jfy-sticker-node') ||
      e.target.closest('.jfy-placed-paper') ||
-     e.target.closest('.jfy-placed-washi')) return;
+     e.target.closest('.jfy-placed-washi') ||
+     e.target.closest('.jfy-bw-card')) return;
   if(S.tool==='write')         placeTextBox(e);
   else if(S.tool==='frames')   placePolaroid(e);
   else if(S.tool==='stickers') placeSticker(e);
@@ -2666,7 +2740,112 @@ function restoreSnapshot(snap){
   });
   // Migrate legacy washi drawCmds → draggable DOM elements
   legacyWashi.forEach(function(cmd){ placeWashiElement(cmd); });
+  // Re-resolve saved-post cards (look up current bw_saved state)
+  resolveAllSavedPostCards();
 }
+
+/* ── Between-us saved post embeds ── */
+var BW_SAVED_KEY = 'bw_saved';
+function loadBwSaved(){
+  try{ return JSON.parse(localStorage.getItem(BW_SAVED_KEY)||'[]'); }
+  catch(e){ return []; }
+}
+
+function resolveSavedPostCard(card){
+  var postId = card.dataset.postId;
+  var saved = loadBwSaved();
+  var post = saved.find(function(p){ return p.id === postId; });
+  card.innerHTML = '';
+  if(!post){
+    card.classList.add('jfy-bw-card--blank');
+    card.textContent = 'post removed';
+    return;
+  }
+  card.classList.remove('jfy-bw-card--blank');
+  var bar = document.createElement('span');
+  bar.className = 'jfy-bw-card-bar';
+  card.appendChild(bar);
+  if(post.media && post.media.url){
+    var img = document.createElement('img');
+    img.src = post.media.url;
+    card.appendChild(img);
+  } else {
+    var p = document.createElement('p');
+    p.textContent = post.text;
+    card.appendChild(p);
+  }
+}
+
+function resolveAllSavedPostCards(){
+  nbLayer.querySelectorAll('.jfy-bw-card').forEach(function(card){
+    resolveSavedPostCard(card);
+    makeDraggable(card, card);
+  });
+}
+
+function placeSavedPostCard(postId){
+  var nr = nbLayer.getBoundingClientRect();
+  var x = nr.width / 2 - 86;
+  var y = nr.height / 3 - 40;
+  var card = document.createElement('div');
+  card.className = 'jfy-bw-card';
+  card.dataset.postId = postId;
+  card.style.left = Math.max(0, x) + 'px';
+  card.style.top  = Math.max(0, y) + 'px';
+  resolveSavedPostCard(card);
+  makeDraggable(card, card);
+  nbLayer.appendChild(card);
+}
+
+function openBwPicker(){
+  var saved = loadBwSaved();
+  var list = document.getElementById('jfy-bw-picker-list');
+  list.innerHTML = '';
+  if(!saved.length){
+    var empty = document.createElement('p');
+    empty.className = 'jfy-bw-pick-empty';
+    empty.textContent = 'no saved posts yet — save some in between us!';
+    list.appendChild(empty);
+  } else {
+    saved.forEach(function(post){
+      var item = document.createElement('div');
+      item.className = 'jfy-bw-pick-item';
+      if(post.media && post.media.url){
+        var img = document.createElement('img');
+        img.src = post.media.url;
+        item.appendChild(img);
+      } else {
+        item.textContent = post.text;
+      }
+      item.addEventListener('click', function(){
+        document.getElementById('jfy-bw-picker').style.display = 'none';
+        placeSavedPostCard(post.id);
+        pushHistory();
+      });
+      list.appendChild(item);
+    });
+  }
+  document.getElementById('jfy-bw-picker').style.display = 'flex';
+}
+
+document.getElementById('jfy-bw-picker-close').addEventListener('click', function(){
+  document.getElementById('jfy-bw-picker').style.display = 'none';
+});
+document.getElementById('jfy-bw-picker').addEventListener('click', function(e){
+  if(e.target === this) this.style.display = 'none';
+});
+
+var penSavedBtn = document.getElementById('jfy-pen-saved-btn');
+if(penSavedBtn) penSavedBtn.addEventListener('click', function(){
+  this.classList.add('active');
+  document.getElementById('jfy-pen-write-btn').classList.remove('active');
+  document.getElementById('jfy-pen-doodle-btn').classList.remove('active');
+  document.getElementById('jfy-pen-colors').style.display = 'none';
+  document.getElementById('jfy-pen-size-row').style.display = 'none';
+  document.getElementById('jfy-pen-hint').style.display = 'none';
+  setTool(null);
+  openBwPicker();
+});
 
 function pushHistory(){
   // Drop any redo entries
