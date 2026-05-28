@@ -1769,29 +1769,28 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   window.addEventListener('load',update);
 })();
 
-/* ── SVG PATH DRAW-ON ANIMATION ── */
+/* ── SVG PATH DRAW-ON ANIMATION (scroll-driven, bidirectional) ── */
 (function(){
   'use strict';
   var ids = ['mess-btn-to-self','silly-to-mess','between-to-sticker','break-bubble-middle','break-intro-top','sticker-to-you','you-to-end','top-bubble-mob','silly-mess-mob','mess-self-mob','middle-break-mob','you-end-mob'];
-  var items     = [];
-  var drawIndex = 0;
-  var pathIndex = 0;
-  var animating = false;
-  var pathStart = null;
-  var raf       = null;
-  var PATH_MS   = 500; // ms per path
+  var items = [];
+  var raf   = null;
+  var PX_PER_PATH = 320; // scroll px to complete one path
+  var TRIGGER_VH  = 0.75; // fraction of viewport height at which animation starts
 
   function init(){
     if(raf){ cancelAnimationFrame(raf); raf = null; }
-    items = []; drawIndex = 0; pathIndex = 0; animating = false; pathStart = null;
+    items = [];
     var scrollY = window.scrollY;
+    var vh = window.innerHeight;
     ids.forEach(function(id){
       var svg = document.getElementById(id);
       if(!svg) return;
       if(getComputedStyle(svg).display === 'none') return;
       var rect   = svg.getBoundingClientRect();
       var svgTop = scrollY + rect.top;
-      var pathData = [];
+      var cursor = svgTop - vh * TRIGGER_VH; // scroll position that starts this SVG
+      var paths  = [];
       svg.querySelectorAll('path,line,polyline,circle,ellipse').forEach(function(p){
         var len;
         try{ len = p.getTotalLength(); }catch(e){ return; }
@@ -1799,62 +1798,35 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
         p.style.strokeDasharray  = len;
         p.style.strokeDashoffset = len;
         p.style.transition = 'none';
-        var pr   = p.getBoundingClientRect();
-        var topY = scrollY + pr.top;
-        pathData.push({path:p, length:len, topY:topY});
+        var start = cursor;
+        var end   = cursor + PX_PER_PATH;
+        paths.push({path:p, length:len, start:start, end:end});
+        cursor = end;
       });
-      if(!pathData.length) return;
-      pathData.sort(function(a,b){ return a.topY - b.topY; });
-      items.push({svg:svg, paths:pathData, svgTop:svgTop});
+      if(!paths.length) return;
+      items.push({svg:svg, paths:paths});
     });
-    items.sort(function(a,b){ return a.svgTop - b.svgTop; });
-    // Instantly complete any SVGs already scrolled past
-    while(drawIndex < items.length){
-      var r = items[drawIndex].svg.getBoundingClientRect();
-      if(r.bottom < 0){
-        items[drawIndex].paths.forEach(function(pd){ pd.path.style.strokeDashoffset = 0; });
-        drawIndex++;
-      } else { break; }
-    }
-    checkTrigger();
+    render();
   }
 
-  function checkTrigger(){
-    if(animating) return;
-    if(drawIndex >= items.length) return;
-    var rect = items[drawIndex].svg.getBoundingClientRect();
-    var vh   = window.innerHeight;
-    if(rect.top <= vh * 0.5){ startDrawing(); }
+  function render(){
+    var scrollY = window.scrollY;
+    items.forEach(function(item){
+      if(getComputedStyle(item.svg).display === 'none') return;
+      item.paths.forEach(function(pd){
+        var progress = (scrollY - pd.start) / (pd.end - pd.start);
+        progress = Math.max(0, Math.min(1, progress));
+        pd.path.style.strokeDashoffset = pd.length * (1 - progress);
+      });
+    });
+    raf = null;
   }
 
-  function startDrawing(){
-    if(animating) return;
-    animating = true; pathStart = null;
-    raf = requestAnimationFrame(drawStep);
+  function onScroll(){
+    if(!raf) raf = requestAnimationFrame(render);
   }
 
-  function drawStep(ts){
-    if(drawIndex >= items.length){ animating = false; return; }
-    var item = items[drawIndex];
-    if(pathIndex >= item.paths.length){
-      drawIndex++; pathIndex = 0; animating = false; pathStart = null;
-      checkTrigger(); return;
-    }
-    var pd = item.paths[pathIndex];
-    if(!pathStart) pathStart = ts;
-    var elapsed  = ts - pathStart;
-    var progress = Math.min(1, elapsed / PATH_MS);
-    pd.path.style.strokeDashoffset = pd.length * (1 - progress);
-    if(progress < 1){
-      raf = requestAnimationFrame(drawStep);
-    } else {
-      pd.path.style.strokeDashoffset = 0;
-      pathIndex++; pathStart = null;
-      raf = requestAnimationFrame(drawStep);
-    }
-  }
-
-  window.addEventListener('scroll', checkTrigger, {passive:true});
+  window.addEventListener('scroll', onScroll, {passive:true});
   window.addEventListener('resize', init);
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', init);
