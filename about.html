@@ -155,7 +155,7 @@
 }
 
 /* sticky scroll stage */
-.team-scroll-stage{position:relative;height:380vh;margin-top:16px;overflow:hidden}
+.team-scroll-stage{position:relative;height:380vh;margin-top:16px}
 .team-sticky{
   position:sticky;top:var(--hh);
   height:calc(100vh - var(--hh));
@@ -328,29 +328,30 @@
 
 /* ── TEAM DECORATIVE SVGS ── */
 .team-green-center{
-  position:absolute;left:0;top:50%;
-  transform:translateY(-50%);
-  width:100vw;
-  pointer-events:none;z-index:-1;
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:clamp(440px,56vw,720px);
+  pointer-events:none;z-index:0;
 }
 .team-teal-head{
-  position:absolute;top:-50px;left:0;
-  width:100vw;
-  pointer-events:none;z-index:-1;
+  position:absolute;top:-50px;left:50%;
+  transform:translateX(-50%);
+  width:clamp(360px,52vw,562px);
+  pointer-events:none;z-index:0;
 }
 .team-pink-deco{
   position:absolute;
-  left:0;top:50%;
-  transform:translateY(-60%);
-  width:100vw;
-  pointer-events:none;z-index:-1;
+  left:calc(50% - clamp(290px,36vw,420px));
+  top:50%;transform:translateY(-60%);
+  width:clamp(100px,12vw,180px);
+  pointer-events:none;z-index:0;
 }
 .team-hatch-deco{
   position:absolute;
-  left:0;top:50%;
-  transform:translateY(-40%);
-  width:100vw;
-  pointer-events:none;z-index:-1;
+  right:calc(50% - clamp(290px,36vw,420px));
+  top:50%;transform:translateY(-40%);
+  width:clamp(160px,26vw,380px);
+  pointer-events:none;z-index:0;
 }
 .team-cards-illus{
   display:flex;justify-content:center;padding:0 clamp(16px,4vw,60px) 0;
@@ -362,7 +363,9 @@
 @media(max-width:1023px) and (min-width:768px){
   .approach-deco--green-svg{width:220px;right:0}
   .approach-deco--yellow-svg{width:190px;left:0}
-  .team-teal-head,.team-pink-deco,.team-hatch-deco{width:100vw}
+  .team-teal-head{width:78vw}
+  .team-pink-deco{width:110px}
+  .team-hatch-deco{width:200px}
 }
 
 @media(max-width:767px){
@@ -745,11 +748,11 @@
 
     <!-- sticky card deck scroll stage -->
     <div class="team-scroll-stage" id="team-stage">
+      <img class="team-green-center" src="team%20green%20center.svg" alt="" aria-hidden="true">
+      <img class="team-teal-head" src="teal%20head.svg" alt="" aria-hidden="true">
+      <img class="team-pink-deco" src="pink%20head.svg" alt="" aria-hidden="true">
+      <img class="team-hatch-deco" src="team%20hatch.svg" alt="" aria-hidden="true">
       <div class="team-sticky">
-        <img class="team-green-center" src="team%20green%20center.svg" alt="" aria-hidden="true">
-        <img class="team-teal-head" src="teal%20head.svg" alt="" aria-hidden="true">
-        <img class="team-pink-deco" src="pink%20head.svg" alt="" aria-hidden="true">
-        <img class="team-hatch-deco" src="team%20hatch.svg" alt="" aria-hidden="true">
         <div class="team-deck" id="team-deck">
 
           <!-- card 1: Shraddha — orange, wanderer (peels 1st) -->
