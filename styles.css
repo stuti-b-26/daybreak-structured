@@ -408,6 +408,8 @@ img{display:block;max-width:100%}
   .footer-tablet{display:block;padding:40px 32px 0}
   .footer-tablet .ft-nav{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:28px}
   .fab{bottom:24px;right:24px}
+  /* Mission starts when only 1/8 of cards stage height remains (303.33vw × 1/8 ≈ 38vw) */
+  #mission{margin-top:-38vw}
 }
 
 /* ── MOBILE <768px ── */
