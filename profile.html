@@ -147,7 +147,7 @@
   </div>
 </div>
 
-<button class="fab" id="fab-btn" aria-label="Surprise me">
+<button class="fab" id="fab-btn" aria-label="How are you feeling?">
   <canvas id="fab-canvas" width="60" height="60"></canvas>
 </button>
 
@@ -304,6 +304,33 @@
 .journal-deco--tr{top:40px;right:clamp(20px,6vw,80px);width:clamp(60px,8vw,120px)}
 .journal-deco--bl{bottom:40px;left:clamp(20px,5vw,60px);width:clamp(50px,7vw,100px)}
 
+/* ── JOURNAL STRIP ──────────────────────────────────────── */
+.journal-strip-wrap{position:relative;margin-top:clamp(24px,3vw,40px)}
+.journal-strip{display:flex;gap:clamp(16px,2vw,28px);padding:clamp(24px,4vw,52px) clamp(16px,4vw,56px) clamp(28px,4vw,52px);overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;cursor:grab;scroll-behavior:smooth;align-items:flex-start}
+.journal-strip::-webkit-scrollbar{height:4px}
+.journal-strip::-webkit-scrollbar-track{background:rgba(0,0,0,.06);border-radius:999px}
+.journal-strip::-webkit-scrollbar-thumb{background:rgba(0,0,0,.2);border-radius:999px}
+.journal-strip.is-dragging{cursor:grabbing;user-select:none;scroll-behavior:auto}
+
+/* Journal polaroid card */
+.jcard{flex:0 0 auto;background:var(--jcard-color,#5dde60);padding:clamp(8px,.9vw,12px) clamp(8px,.9vw,12px) clamp(30px,3.8vw,48px);border-radius:3px;box-shadow:6px 12px 28px rgba(0,0,0,.18);scroll-snap-align:start;cursor:pointer;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease;will-change:transform}
+.jcard:hover{transform:rotate(0deg) scale(1.08) translateY(-10px)!important;box-shadow:14px 22px 44px rgba(0,0,0,.28)!important;z-index:5;position:relative}
+.jcard-img{width:clamp(200px,26vw,340px);height:clamp(150px,17vw,220px);overflow:hidden;background:rgba(255,255,255,.3);display:block}
+.jcard-img img{width:100%;height:100%;object-fit:cover;display:block}
+.jcard-caption{font-family:var(--font-body);font-size:clamp(10px,.85vw,12px);color:rgba(0,0,0,.5);text-align:center;margin-top:8px}
+
+/* Journal strip arrows (dark, on white bg) */
+.journal-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:clamp(36px,3.5vw,50px);height:clamp(36px,3.5vw,50px);border-radius:50%;background:#fff;border:2.5px solid #000;box-shadow:4px 4px 0 0 #000;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.4vw,20px);transition:box-shadow .08s,transform .08s;color:#000;flex-shrink:0}
+.journal-arrow:hover{box-shadow:6px 6px 0 0 #000;transform:translateY(calc(-50% - 2px))}
+.journal-arrow:active{box-shadow:1px 1px 0 0 #000;transform:translateY(calc(-50% + 1px)) scale(.95)}
+.journal-arrow--prev{left:clamp(8px,1.5vw,20px)}
+.journal-arrow--next{right:clamp(8px,1.5vw,20px)}
+
+@media(max-width:767px){
+  .journal-arrow{width:32px;height:32px;font-size:13px}
+  .jcard-img{width:clamp(180px,56vw,260px);height:clamp(130px,40vw,180px)}
+}
+
 /* ── MY HAPPINESS ──────────────────────────────────────────── */
 #prof-happiness{padding:clamp(60px,8vw,120px) 0;background:#F7F4EF;position:relative;overflow:hidden}
 .happiness-desc{font-family:var(--font-body);font-size:clamp(13px,1.2vw,16px);color:rgba(0,0,0,.55);margin:0 0 clamp(24px,3vw,40px);max-width:480px}
@@ -377,6 +404,69 @@
 .prof-reveal.is-visible{opacity:1;transform:translateY(0)}
 .prof-bounce{opacity:0;transform:scale(.7);transition:opacity .45s cubic-bezier(.34,1.56,.64,1),transform .45s cubic-bezier(.34,1.56,.64,1)}
 .prof-bounce.is-visible{opacity:1;transform:scale(1)}
+
+/* ── GALLERY VIEW ALL ──────────────────────────────────── */
+.gallery-view-all-btn{font-family:var(--font-body);font-size:15px;font-weight:700;color:#000;background:#fff;border:2.5px solid #fff;border-radius:999px;padding:10px 26px;box-shadow:4px 4px 0 0 rgba(255,255,255,.4);cursor:pointer;transition:box-shadow .08s ease,transform .08s ease;display:inline-flex;align-items:center;gap:8px;margin-top:clamp(16px,2vw,24px);margin-bottom:clamp(20px,3vw,36px)}
+.gallery-view-all-btn:hover{box-shadow:6px 6px 0 0 rgba(255,255,255,.55);transform:translateY(-1px)}
+.gallery-view-all-btn:active{box-shadow:1px 1px 0 0 rgba(255,255,255,.3);transform:scale(.96)}
+.vab-arrow{display:inline-block;font-size:11px;line-height:1;transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.gallery-view-all-btn.open .vab-arrow{transform:rotate(180deg)}
+
+/* Expanded panel */
+.gallery-expanded{overflow:hidden;max-height:0;transition:max-height .55s cubic-bezier(.22,1,.36,1);background:#000}
+
+/* Tabs */
+.gallery-tabs{display:flex;flex-wrap:wrap;border-bottom:1.5px solid rgba(255,255,255,.18);padding-top:clamp(20px,3vw,36px);margin-bottom:clamp(20px,2.5vw,32px)}
+.gallery-tab-btn{font-family:var(--font-body);font-size:clamp(12px,1.1vw,14px);font-weight:600;color:rgba(255,255,255,.38);background:none;border:none;border-bottom:2.5px solid transparent;padding:8px clamp(12px,1.5vw,20px) 12px;cursor:pointer;transition:color .15s,border-color .15s;margin-bottom:-1.5px;white-space:nowrap}
+.gallery-tab-btn:hover{color:rgba(255,255,255,.75)}
+.gallery-tab-btn.active{color:#fff;border-bottom-color:var(--yellow,#ffd400)}
+
+/* Tab panels */
+.gallery-tab-panel{display:none}
+.gallery-tab-panel.active{display:block}
+
+/* Collage + add button row */
+.gallery-collage-row{display:flex;align-items:center;gap:clamp(12px,1.5vw,20px);padding-bottom:clamp(32px,4vw,52px)}
+.gallery-collage{display:flex;gap:clamp(8px,1vw,12px);flex:1;overflow-x:auto;align-items:stretch;min-height:clamp(160px,18vw,240px);padding-bottom:6px}
+.gallery-collage::-webkit-scrollbar{height:3px}
+.gallery-collage::-webkit-scrollbar-track{background:rgba(255,255,255,.06);border-radius:999px}
+.gallery-collage::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:999px}
+
+/* Collage frame */
+.gallery-frame{position:relative;flex:0 0 auto;height:clamp(160px,18vw,240px);border-radius:8px;overflow:hidden;border:1.5px solid rgba(255,255,255,.1);transition:box-shadow .12s}
+.gallery-frame img{height:100%;width:auto;display:block;object-fit:cover}
+
+/* Empty state */
+.gallery-empty-state{font-family:var(--font-body);font-size:clamp(13px,1.2vw,15px);color:rgba(255,255,255,.28);padding:clamp(24px,3vw,40px) 0;align-self:center}
+
+/* + Add button */
+.gallery-add-btn{flex-shrink:0;width:clamp(48px,5vw,60px);height:clamp(48px,5vw,60px);border-radius:50%;background:var(--yellow,#ffd400);border:2.5px solid rgba(255,255,255,.5);box-shadow:4px 4px 0 0 rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:clamp(22px,2.5vw,28px);font-weight:700;color:#000;text-decoration:none;line-height:1;transition:box-shadow .08s,transform .08s}
+.gallery-add-btn:hover{box-shadow:6px 6px 0 0 rgba(255,255,255,.5);transform:translateY(-2px)}
+.gallery-add-btn:active{box-shadow:1px 1px 0 0 rgba(255,255,255,.2);transform:scale(.95)}
+
+/* Gallery select mode */
+.gallery-select-bar{display:flex;align-items:center;gap:10px;justify-content:flex-end;padding-bottom:clamp(8px,1vw,12px)}
+.gallery-select-toggle{font-family:var(--font-body);font-size:13px;font-weight:600;background:none;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.5);border-radius:999px;padding:5px 14px;cursor:pointer;transition:color .12s,border-color .12s}
+.gallery-select-toggle:hover{color:#fff;border-color:rgba(255,255,255,.7)}
+.gallery-select-toggle.selecting{color:#fff;border-color:#fff}
+.gallery-select-count{font-family:var(--font-body);font-size:13px;color:rgba(255,255,255,.45)}
+.gallery-delete-btn{font-family:var(--font-body);font-size:13px;font-weight:700;background:#ff4d4d;border:none;color:#fff;border-radius:999px;padding:5px 16px;cursor:pointer;transition:background .12s,transform .08s}
+.gallery-delete-btn:hover{background:#ff2020}
+.gallery-delete-btn:active{transform:scale(.96)}
+.gallery-frame.selectable{cursor:pointer}
+.gallery-frame.selectable:hover{box-shadow:0 0 0 2px rgba(255,255,255,.4)}
+.gallery-frame.selected{box-shadow:0 0 0 3px var(--yellow,#ffd400),0 0 0 5.5px rgba(0,0,0,.25)}
+.gallery-sel-check{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--yellow,#ffd400);border:2px solid #fff;display:none;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#000;z-index:2;pointer-events:none}
+.gallery-frame.selected .gallery-sel-check{display:flex}
+
+/* lightbox with real image */
+.lb-placeholder.has-img{aspect-ratio:auto;background:none!important;font-size:0;padding:0;display:block}
+.lb-placeholder.has-img img{max-width:100%;max-height:72vh;width:auto;height:auto;display:block;margin:0 auto}
+
+@media(max-width:767px){
+  .gallery-tab-btn{padding:8px 10px 12px;font-size:11px}
+  .gallery-add-btn{width:44px;height:44px;font-size:20px}
+}
 </style>
 
 <!-- MAIN CONTENT -->
@@ -447,6 +537,83 @@
             <path d="M50 115 Q58 98 48 84 Q40 72 52 62" stroke="#5dde60" stroke-width="2.5" stroke-linecap="round" fill="none" opacity=".5"/>
           </svg>
           <p class="prof-gallery-sub">looks like it's been going pretty good!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW ALL BUTTON -->
+    <div style="text-align:center">
+      <button class="gallery-view-all-btn" id="gallery-view-all-btn" aria-expanded="false">
+        <span class="vab-label">view all</span>
+        <span class="vab-arrow" aria-hidden="true">▾</span>
+      </button>
+    </div>
+
+    <!-- EXPANDED GALLERY PANEL -->
+    <div class="gallery-expanded" id="gallery-expanded" aria-hidden="true">
+      <div class="gc">
+        <div class="grid">
+          <div class="col-content">
+
+            <div class="gallery-tabs" role="tablist" aria-label="Saved gallery sections">
+              <button class="gallery-tab-btn active" role="tab" aria-selected="true" aria-controls="tab-mess-hall" data-tab="mess-hall">mess hall</button>
+              <button class="gallery-tab-btn" role="tab" aria-selected="false" aria-controls="tab-just-for-you" data-tab="just-for-you">just for you</button>
+              <button class="gallery-tab-btn" role="tab" aria-selected="false" aria-controls="tab-silly-decisions" data-tab="silly-decisions">silly decisions</button>
+              <button class="gallery-tab-btn" role="tab" aria-selected="false" aria-controls="tab-sticker-maker" data-tab="sticker-maker">sticker maker</button>
+            </div>
+
+            <div class="gallery-tab-panels">
+
+              <div class="gallery-tab-panel active" id="tab-mess-hall" role="tabpanel">
+                <div class="gallery-select-bar">
+                  <span class="gallery-select-count" id="select-count-mess-hall"></span>
+                  <button class="gallery-delete-btn" id="delete-btn-mess-hall" style="display:none">delete</button>
+                  <button class="gallery-select-toggle" id="select-toggle-mess-hall">select</button>
+                </div>
+                <div class="gallery-collage-row">
+                  <div class="gallery-collage" id="collage-mess-hall"></div>
+                  <a href="mess-hall.html" class="gallery-add-btn" aria-label="Go to mess hall">+</a>
+                </div>
+              </div>
+
+              <div class="gallery-tab-panel" id="tab-just-for-you" role="tabpanel">
+                <div class="gallery-select-bar">
+                  <span class="gallery-select-count" id="select-count-just-for-you"></span>
+                  <button class="gallery-delete-btn" id="delete-btn-just-for-you" style="display:none">delete</button>
+                  <button class="gallery-select-toggle" id="select-toggle-just-for-you">select</button>
+                </div>
+                <div class="gallery-collage-row">
+                  <div class="gallery-collage" id="collage-just-for-you"></div>
+                  <a href="just-for-you.html" class="gallery-add-btn" aria-label="Go to just for you">+</a>
+                </div>
+              </div>
+
+              <div class="gallery-tab-panel" id="tab-silly-decisions" role="tabpanel">
+                <div class="gallery-select-bar">
+                  <span class="gallery-select-count" id="select-count-silly-decisions"></span>
+                  <button class="gallery-delete-btn" id="delete-btn-silly-decisions" style="display:none">delete</button>
+                  <button class="gallery-select-toggle" id="select-toggle-silly-decisions">select</button>
+                </div>
+                <div class="gallery-collage-row">
+                  <div class="gallery-collage" id="collage-silly-decisions"></div>
+                  <a href="silly-decisions.html" class="gallery-add-btn" aria-label="Go to silly decisions">+</a>
+                </div>
+              </div>
+
+              <div class="gallery-tab-panel" id="tab-sticker-maker" role="tabpanel">
+                <div class="gallery-select-bar">
+                  <span class="gallery-select-count" id="select-count-sticker-maker"></span>
+                  <button class="gallery-delete-btn" id="delete-btn-sticker-maker" style="display:none">delete</button>
+                  <button class="gallery-select-toggle" id="select-toggle-sticker-maker">select</button>
+                </div>
+                <div class="gallery-collage-row">
+                  <div class="gallery-collage" id="collage-sticker-maker"></div>
+                  <a href="sticker-maker.html" class="gallery-add-btn" aria-label="Go to sticker maker">+</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -588,14 +755,24 @@
             <p class="prof-sublabel">little love letters you wrote to yourself.</p>
           </div>
 
-          <div class="journal-empty prof-reveal" id="journal-empty-state">
+        </div>
+      </div>
+    </div>
+
+    <!-- journal horizontal strip -->
+    <div class="journal-strip-wrap" id="journal-strip-wrap" style="display:none">
+      <button class="journal-arrow journal-arrow--prev" id="journal-prev" aria-label="Previous entries">&#8592;</button>
+      <div class="journal-strip" id="journal-strip" role="list" aria-label="Your journal entries"></div>
+      <button class="journal-arrow journal-arrow--next" id="journal-next" aria-label="Next entries">&#8594;</button>
+    </div>
+
+    <div class="gc">
+      <div class="grid">
+        <div class="col-content">
+          <div class="journal-empty" id="journal-empty-state">
             <p>you haven't made any journal entries yet.</p>
             <a href="just-for-you.html" class="journal-cta-btn">write some now in just for you!</a>
           </div>
-
-          <div class="journal-entries-grid" id="journal-entries-grid" style="display:none">
-          </div>
-
         </div>
       </div>
     </div>
@@ -759,25 +936,38 @@
   var lbCaption=document.getElementById('lb-caption');
   var lbClose=document.getElementById('lb-close');
 
-  c.querySelectorAll('.polaroid').forEach(function(pol){
-    pol.addEventListener('click',function(e){
-      if(didDrag)return; /* suppress click after drag */
-      var emoji=pol.dataset.emoji||'📷';
-      var c1=pol.dataset.c1||'#ffd400';
-      var c2=pol.dataset.c2||'#f5a04a';
-      var caption=pol.dataset.caption||'';
-      /* get frame color from computed style */
-      var fc=getComputedStyle(pol).backgroundColor;
-      lbFrame.style.setProperty('--lb-frame',fc);
+  c.addEventListener('click',function(e){
+    if(didDrag)return;
+    var pol=e.target.closest('.polaroid');
+    if(!pol)return;
+    var imgSrc=pol.dataset.imgSrc||'';
+    var emoji=pol.dataset.emoji||'📷';
+    var c1=pol.dataset.c1||'#ffd400';
+    var c2=pol.dataset.c2||'#f5a04a';
+    var caption=pol.dataset.caption||'';
+    var fc=getComputedStyle(pol).backgroundColor;
+    lbFrame.style.setProperty('--lb-frame',fc);
+    if(imgSrc){
+      lbPlaceholder.classList.add('has-img');
+      lbPlaceholder.innerHTML='<img src="'+imgSrc+'" alt="">';
+    }else{
+      lbPlaceholder.classList.remove('has-img');
+      lbPlaceholder.innerHTML='';
       lbPlaceholder.style.background='linear-gradient(145deg,'+c1+','+c2+')';
       lbPlaceholder.textContent=emoji;
-      lbCaption.textContent=caption;
-      lb.classList.add('open');
-      document.body.style.overflow='hidden';
-    });
+    }
+    lbCaption.textContent=caption;
+    lb.classList.add('open');
+    document.body.style.overflow='hidden';
   });
 
-  function closeLb(){lb.classList.remove('open');document.body.style.overflow='';}
+  function closeLb(){
+    lb.classList.remove('open');
+    document.body.style.overflow='';
+    lbPlaceholder.classList.remove('has-img');
+    lbPlaceholder.innerHTML='';
+    lbPlaceholder.style.background='';
+  }
   if(lbClose)lbClose.addEventListener('click',closeLb);
   if(lb)lb.addEventListener('click',function(e){if(e.target===lb)closeLb();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb();});
@@ -924,6 +1114,436 @@
   });
 })();
 
+/* ── GALLERY: image discovery → collages + carousel ───────── */
+(function(){
+  var TABS_CFG=[
+    {key:'mess-hall',      href:'mess-hall.html',      label:'mess hall',      color:'#5dde60'},
+    {key:'just-for-you',   href:'just-for-you.html',   label:'just for you',   color:'#7de8f5'},
+    {key:'silly-decisions',href:'silly-decisions.html', label:'silly decisions',color:'#ffd400'},
+    {key:'sticker-maker',  href:'sticker-maker.html',  label:'sticker maker',  color:'#e8a8f0'}
+  ];
+  var MAX=20; /* probe indices 01–20 per tab */
+  var allFound=[]; /* [{tab,href,label,src}] */
+  var totalSlots=TABS_CFG.length*MAX;
+  var resolvedSlots=0;
+
+  /* probe one index: try .jpg first, then .png */
+  function probeSlot(cfg,idx){
+    var n=idx<10?'0'+idx:''+idx;
+    var base='gallery-'+cfg.key+'-'+n;
+    var jp=new Image();
+    jp.onload=function(){
+      allFound.push({tab:cfg.key,href:cfg.href,label:cfg.label,src:base+'.jpg'});
+      done();
+    };
+    jp.onerror=function(){
+      var pp=new Image();
+      pp.onload=function(){
+        allFound.push({tab:cfg.key,href:cfg.href,label:cfg.label,src:base+'.png'});
+        done();
+      };
+      pp.onerror=done;
+      pp.src=base+'.png';
+    };
+    jp.src=base+'.jpg';
+  }
+
+  function done(){if(++resolvedSlots===totalSlots)onAllDiscovered();}
+
+  /* kick off all probes */
+  TABS_CFG.forEach(function(cfg){
+    for(var i=1;i<=MAX;i++)probeSlot(cfg,i);
+  });
+
+  /* Fisher-Yates */
+  function shuffle(a){
+    for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+    return a;
+  }
+
+  /* greedy: place from largest group ≠ last tab; fallback if only one tab remains */
+  function noAdjacentTab(imgs){
+    var groups={};
+    imgs.forEach(function(img){(groups[img.tab]=groups[img.tab]||[]).push(img);});
+    Object.keys(groups).forEach(function(t){shuffle(groups[t]);});
+    var result=[],lastTab=null;
+    function bySize(){
+      return Object.keys(groups).filter(function(t){return groups[t].length>0;})
+        .sort(function(a,b){return groups[b].length-groups[a].length;});
+    }
+    for(;;){
+      var keys=bySize();
+      if(!keys.length)break;
+      var pick=null;
+      for(var i=0;i<keys.length;i++){if(keys[i]!==lastTab){pick=keys[i];break;}}
+      if(!pick)pick=keys[0]; /* unavoidable adjacency */
+      var img=groups[pick].shift();
+      result.push(img);lastTab=pick;
+    }
+    return result;
+  }
+
+  function onAllDiscovered(){
+    /* build set of user-hidden srcs */
+    var hiddenSet={};
+    try{JSON.parse(localStorage.getItem('gallery_hidden')||'[]').forEach(function(s){hiddenSet[s]=true;});}catch(e){}
+    /* filter static files */
+    allFound=allFound.filter(function(img){return !hiddenSet[img.src];});
+    /* inject localStorage mess-hall artworks (skip hidden) */
+    var lsEntries=[];
+    try{lsEntries=JSON.parse(localStorage.getItem('mh_gallery')||'[]');}catch(e){}
+    lsEntries.forEach(function(e){
+      if(e&&e.url&&!hiddenSet[e.url])allFound.push({tab:'mess-hall',href:'mess-hall.html',label:'mess hall',src:e.url,_time:e.time||0,_ls:true});
+    });
+    populateCollages();
+    populateCarousel();
+    initViewAll();
+    initSelectMode();
+  }
+
+  /* ── COLLAGES ─────────────────────────────────────────── */
+  function populateCollages(){
+    var byTab={};
+    allFound.forEach(function(img){(byTab[img.tab]=byTab[img.tab]||[]).push(img);});
+    Object.keys(byTab).forEach(function(t){
+      byTab[t].sort(function(a,b){
+        if(a._ls&&!b._ls)return -1;
+        if(!a._ls&&b._ls)return 1;
+        if(a._ls&&b._ls)return (b._time||0)-(a._time||0);
+        return a.src<b.src?-1:1;
+      });
+    });
+    TABS_CFG.forEach(function(cfg){
+      var el=document.getElementById('collage-'+cfg.key);
+      if(!el)return;
+      el.innerHTML='';
+      var imgs=byTab[cfg.key]||[];
+      if(!imgs.length){
+        var empty=document.createElement('p');
+        empty.className='gallery-empty-state';
+        empty.textContent='nothing saved here yet.';
+        el.appendChild(empty);
+      }else{
+        imgs.forEach(function(img){
+          var frame=document.createElement('div');
+          frame.className='gallery-frame';
+          frame.dataset.imgSrc=img.src;
+          frame.dataset.imgLabel=cfg.label;
+          frame.dataset.imgColor=cfg.color||'#5dde60';
+          if(img._ls){frame.dataset.imgLs='1';frame.style.background='#ffffff';}
+          if(img._time)frame.dataset.imgTime=img._time;
+          var chk=document.createElement('span');
+          chk.className='gallery-sel-check';chk.textContent='✓';
+          frame.appendChild(chk);
+          var im=document.createElement('img');
+          im.src=img.src;im.alt='';
+          if(img._ls){im.style.objectFit='contain';im.style.width='100%';}
+          frame.appendChild(im);el.appendChild(frame);
+        });
+      }
+    });
+  }
+
+  /* ── CAROUSEL ─────────────────────────────────────────── */
+  var FRAME_COLS=['#5dde60','#7de8f5','#ffd400','#e8a8f0','#5dde60','#7de8f5'];
+  var ROTS=[-4,3,-2,4.5,-3.5,2,-4,3,-2,4,-3,2.5];
+
+  function populateCarousel(){
+    var c=document.getElementById('prof-carousel');
+    if(!c||!allFound.length)return;
+    var arranged=noAdjacentTab(allFound.slice());
+    c.innerHTML='';
+    arranged.forEach(function(img,i){
+      var pol=document.createElement('div');
+      pol.className='polaroid';
+      pol.setAttribute('role','listitem');
+      pol.dataset.imgSrc=img.src;
+      pol.dataset.tab=img.tab;
+      pol.dataset.caption=img.label;
+      var col=FRAME_COLS[i%FRAME_COLS.length];
+      var rot=ROTS[i%ROTS.length];
+      pol.style.cssText='--frame-color:'+col+';transform:rotate('+rot+'deg)';
+      var im=document.createElement('img');
+      im.className='polaroid-img';im.src=img.src;im.alt='';
+      if(img._ls){im.style.objectFit='contain';im.style.background='#ffffff';}
+      var cap=document.createElement('p');
+      cap.className='polaroid-caption';cap.textContent=img.label;
+      pol.appendChild(im);pol.appendChild(cap);
+      c.appendChild(pol);
+    });
+  }
+
+  /* ── COLLAGE LIGHTBOX ────────────────────────────────── */
+  function openLb(src,caption,frameColor){
+    var lb=document.getElementById('gallery-lightbox');
+    var lbFrame=document.getElementById('lb-frame');
+    var lbPlaceholder=document.getElementById('lb-placeholder');
+    var lbCaption=document.getElementById('lb-caption');
+    if(!lb||!src)return;
+    lbFrame.style.setProperty('--lb-frame',frameColor||'#5dde60');
+    lbPlaceholder.classList.add('has-img');
+    lbPlaceholder.innerHTML='<img src="'+src+'" alt="">';
+    lbCaption.textContent=caption||'';
+    lb.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  /* ── SELECT / DELETE ─────────────────────────────────── */
+  function initSelectMode(){
+    TABS_CFG.forEach(function(cfg){
+      var toggleBtn=document.getElementById('select-toggle-'+cfg.key);
+      var deleteBtn=document.getElementById('delete-btn-'+cfg.key);
+      var countEl=document.getElementById('select-count-'+cfg.key);
+      var colEl=document.getElementById('collage-'+cfg.key);
+      if(!toggleBtn||!deleteBtn||!colEl)return;
+
+      var selecting=false;
+
+      function selectedFrames(){return colEl.querySelectorAll('.gallery-frame.selected');}
+
+      function syncDeleteBar(){
+        var n=selectedFrames().length;
+        if(countEl)countEl.textContent=n>0?n+' selected':'';
+        deleteBtn.style.display=n>0?'':'none';
+      }
+
+      function enterSelect(){
+        selecting=true;
+        toggleBtn.textContent='done';
+        toggleBtn.classList.add('selecting');
+        colEl.querySelectorAll('.gallery-frame').forEach(function(f){f.classList.add('selectable');});
+      }
+
+      function exitSelect(){
+        selecting=false;
+        toggleBtn.textContent='select';
+        toggleBtn.classList.remove('selecting');
+        colEl.querySelectorAll('.gallery-frame').forEach(function(f){f.classList.remove('selectable','selected');});
+        deleteBtn.style.display='none';
+        if(countEl)countEl.textContent='';
+      }
+
+      toggleBtn.addEventListener('click',function(){selecting?exitSelect():enterSelect();});
+
+      colEl.addEventListener('click',function(e){
+        var frame=e.target.closest('.gallery-frame');
+        if(!frame)return;
+        if(selecting){
+          frame.classList.toggle('selected');
+          syncDeleteBar();
+        }else{
+          openLb(frame.dataset.imgSrc,frame.dataset.imgLabel||cfg.label,frame.dataset.imgColor||cfg.color||'#5dde60');
+        }
+      });
+
+      deleteBtn.addEventListener('click',function(){
+        var frames=selectedFrames();
+        if(!frames.length)return;
+        var lsUrls=[],staticSrcs=[];
+        frames.forEach(function(f){
+          if(f.dataset.imgLs==='1')lsUrls.push(f.dataset.imgSrc);
+          else staticSrcs.push(f.dataset.imgSrc);
+        });
+
+        /* remove ls artworks from mh_gallery */
+        if(lsUrls.length){
+          var lsSet={};lsUrls.forEach(function(u){lsSet[u]=true;});
+          var saved=[];
+          try{saved=JSON.parse(localStorage.getItem('mh_gallery')||'[]');}catch(e){}
+          saved=saved.filter(function(e){return!lsSet[e.url];});
+          try{localStorage.setItem('mh_gallery',JSON.stringify(saved));}catch(e){}
+          allFound=allFound.filter(function(img){return!lsSet[img.src];});
+        }
+
+        /* add static srcs to gallery_hidden blocklist */
+        if(staticSrcs.length){
+          var hidden=[];
+          try{hidden=JSON.parse(localStorage.getItem('gallery_hidden')||'[]');}catch(e){}
+          staticSrcs.forEach(function(s){if(hidden.indexOf(s)===-1)hidden.push(s);});
+          try{localStorage.setItem('gallery_hidden',JSON.stringify(hidden));}catch(e){}
+          var hideSet={};staticSrcs.forEach(function(s){hideSet[s]=true;});
+          allFound=allFound.filter(function(img){return!hideSet[img.src];});
+        }
+
+        /* remove frames from DOM */
+        frames.forEach(function(f){f.remove();});
+
+        /* show empty state if collage is now empty */
+        if(!colEl.querySelector('.gallery-frame')){
+          var empty=document.createElement('p');
+          empty.className='gallery-empty-state';
+          empty.textContent='nothing saved here yet.';
+          colEl.appendChild(empty);
+          exitSelect();
+        }else{
+          syncDeleteBar();
+        }
+
+        /* refresh carousel + expand panel height */
+        populateCarousel();
+        var panel=document.getElementById('gallery-expanded');
+        if(isOpen&&panel)panel.style.maxHeight=panel.scrollHeight+'px';
+      });
+    });
+  }
+
+  /* ── VIEW ALL ─────────────────────────────────────────── */
+  var isOpen=false;
+  function initViewAll(){
+    var btn=document.getElementById('gallery-view-all-btn');
+    var panel=document.getElementById('gallery-expanded');
+    if(!btn||!panel)return;
+
+    /* tab switching */
+    var tabBtns=panel.querySelectorAll('.gallery-tab-btn');
+    var tabPanels=panel.querySelectorAll('.gallery-tab-panel');
+    tabBtns.forEach(function(tb){
+      tb.addEventListener('click',function(){
+        tabBtns.forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});
+        tabPanels.forEach(function(p){p.classList.remove('active');});
+        tb.classList.add('active');tb.setAttribute('aria-selected','true');
+        var target=document.getElementById('tab-'+tb.dataset.tab);
+        if(target)target.classList.add('active');
+        if(isOpen)panel.style.maxHeight=panel.scrollHeight+'px';
+      });
+    });
+
+    /* expand / collapse */
+    btn.addEventListener('click',function(){
+      isOpen=!isOpen;
+      btn.classList.toggle('open',isOpen);
+      btn.setAttribute('aria-expanded',String(isOpen));
+      btn.querySelector('.vab-label').textContent=isOpen?'show less':'view all';
+      panel.setAttribute('aria-hidden',String(!isOpen));
+      panel.style.maxHeight=isOpen?panel.scrollHeight+'px':'0';
+    });
+  }
+})();
+
+/* ── JOURNAL STRIP ──────────────────────────────────────────── */
+(function(){
+  var STORE='jfy_journal';
+  var MONTHS=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  var FRAME_COLS=['#5dde60','#7de8f5','#ffd400','#e8a8f0','#5dde60','#7de8f5','#ffd400'];
+  var ROTS=[-3,2.5,-1.5,3.5,-2.5,2,-3.5,3,-2,3];
+
+  var stripWrap=document.getElementById('journal-strip-wrap');
+  var strip=document.getElementById('journal-strip');
+  var emptyEl=document.getElementById('journal-empty-state');
+  if(!strip)return;
+
+  function fmtDate(ts){
+    var d=new Date(ts);
+    return MONTHS[d.getMonth()]+' '+d.getFullYear();
+  }
+
+  var cardIdx=0;
+  function makeCard(src,caption){
+    var col=FRAME_COLS[cardIdx%FRAME_COLS.length];
+    var rot=ROTS[cardIdx%ROTS.length];
+    cardIdx++;
+    var card=document.createElement('div');
+    card.className='jcard';
+    card.setAttribute('role','listitem');
+    card.style.cssText='--jcard-color:'+col+';transform:rotate('+rot+'deg)';
+    var wrap=document.createElement('div');
+    wrap.className='jcard-img';
+    var im=document.createElement('img');
+    im.src=src;im.alt='';
+    wrap.appendChild(im);
+    card.appendChild(wrap);
+    if(caption){
+      var cap=document.createElement('p');
+      cap.className='jcard-caption';
+      cap.textContent=caption;
+      card.appendChild(cap);
+    }
+    strip.appendChild(card);
+  }
+
+  /* load journal entries from localStorage (sync) */
+  var entries=[];
+  try{entries=JSON.parse(localStorage.getItem(STORE)||'[]');}catch(e){}
+
+  /* probe gallery-just-for-you-* images (async, then render) */
+  var galleryFound=[];
+  var MAX_G=20,gLeft=MAX_G;
+
+  function gDone(){
+    if(--gLeft>0)return;
+    galleryFound.sort(function(a,b){return a<b?-1:1;});
+    render();
+  }
+
+  for(var gi=1;gi<=MAX_G;gi++){
+    (function(idx){
+      var n=idx<10?'0'+idx:''+idx;
+      var base='gallery-just-for-you-'+n;
+      var jp=new Image();
+      jp.onload=function(){galleryFound.push(base+'.jpg');gDone();};
+      jp.onerror=function(){
+        var pp=new Image();
+        pp.onload=function(){galleryFound.push(base+'.png');gDone();};
+        pp.onerror=gDone;
+        pp.src=base+'.png';
+      };
+      jp.src=base+'.jpg';
+    })(gi);
+  }
+
+  function render(){
+    /* journal entries newest-first */
+    entries.forEach(function(e){
+      if(e.media&&e.media.url){
+        var ts=e.time||e.addedAt||0;
+        makeCard(e.media.url,ts?fmtDate(ts):'');
+      }
+    });
+    /* gallery images for just-for-you */
+    galleryFound.forEach(function(src){
+      makeCard(src,'just for you');
+    });
+
+    var hasContent=cardIdx>0;
+    if(emptyEl)emptyEl.style.display=hasContent?'none':'';
+    if(stripWrap)stripWrap.style.display=hasContent?'':'none';
+    if(!hasContent)return;
+
+    /* drag */
+    var down=false,sx=0,sl=0,didDrag=false;
+    strip.addEventListener('mousedown',function(e){
+      down=true;didDrag=false;sx=e.pageX;sl=strip.scrollLeft;
+      strip.classList.add('is-dragging');strip.style.scrollBehavior='auto';
+    });
+    window.addEventListener('mouseup',function(){
+      if(!down)return;down=false;
+      strip.classList.remove('is-dragging');strip.style.scrollBehavior='smooth';
+    });
+    window.addEventListener('mousemove',function(e){
+      if(!down)return;e.preventDefault();
+      var dx=e.pageX-sx;
+      if(Math.abs(dx)>5)didDrag=true;
+      strip.scrollLeft=sl-dx;
+    });
+
+    /* arrows */
+    var prev=document.getElementById('journal-prev');
+    var next=document.getElementById('journal-next');
+    function step(){
+      var c=strip.querySelector('.jcard');if(!c)return 280;
+      return c.offsetWidth+(parseFloat(getComputedStyle(strip).columnGap)||24);
+    }
+    function adv(dir){
+      strip.style.scrollBehavior='smooth';
+      var max=strip.scrollWidth-strip.clientWidth;
+      if(dir>0&&strip.scrollLeft>=max-4)strip.scrollLeft=0;
+      else strip.scrollLeft+=dir*step();
+    }
+    if(prev)prev.addEventListener('click',function(){adv(-1);});
+    if(next)next.addEventListener('click',function(){adv(1);});
+  }
+})();
+
 </script>
 
 <!-- FOOTER -->
@@ -1000,25 +1620,10 @@
     <div class="fm-top">
       <button class="fm-back-top" onclick="scrollToTop()">back to top</button>
       <div class="fm-links">
-        <button class="fm-nav-btn" data-target="fm-wander" aria-expanded="false">wander</button>
-        <div class="fm-nav-panel" id="fm-wander">
-          <a href="mess-hall.html">mess hall</a>
-          <a href="silly-decisions.html">silly decisions</a>
-          <a href="sticker-maker.html">sticker maker</a>
-        </div>
-        <button class="fm-nav-btn" data-target="fm-seek" aria-expanded="false">seek</button>
-        <div class="fm-nav-panel" id="fm-seek">
-          <a href="just-for-you.html">just for you</a>
-          <a href="between-us.html">between us</a>
-          <a href="selfless-less.html">selfless-less</a>
-        </div>
-        <button class="fm-nav-btn" data-target="fm-about" aria-expanded="false">about</button>
-        <div class="fm-nav-panel" id="fm-about">
-          <a href="about.html">our mission</a>
-          <a href="about.html#our-approach">our approach</a>
-          <a href="about.html#meet-the-team">meet the team</a>
-        </div>
-        <a href="profile.html" class="fm-nav-link">profile</a>
+        <a href="mess-hall.html">wander</a>
+        <a href="between-us.html">seek</a>
+        <a href="about.html">about</a>
+        <a href="#">profile</a>
       </div>
     </div>
     <div class="fm-bottom">
@@ -1032,11 +1637,6 @@
   </div>
 
 </footer>
-
-
-<button class="fab" id="fab-btn" aria-label="Surprise me">
-  <canvas id="fab-canvas" width="60" height="60"></canvas>
-</button>
 
 <script>
 'use strict';
@@ -1289,6 +1889,5 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
   });
 })();
 </script>
-<script src="footer.js"></script>
 </body>
 </html>
